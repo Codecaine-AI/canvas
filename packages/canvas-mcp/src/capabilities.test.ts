@@ -8,11 +8,21 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 
-import { VISUAL_PATTERNS, getCanvasAuthoringGuidance } from "@codecaine-ai/canvas/authoring";
+import {
+  VISUAL_PATTERNS,
+  canvasGuidanceSources,
+  canvasGuidanceTopics,
+  getCanvasAuthoringGuidance,
+  type VisualPattern,
+} from "@codecaine-ai/canvas/authoring";
 import { CANVAS_COLORS } from "@codecaine-ai/canvas/schema";
 
 import { NAME_TARGET_WORDS } from "../../canvas/src/board/text-rules";
-import { catalogCounts } from "../../canvas/src/authoring/vocabulary";
+import { canvasConventions } from "../../canvas/src/authoring/conventions";
+import { DESIGN_TOPICS } from "../../canvas/src/authoring/design";
+import { formatStateGrammar } from "../../canvas/src/authoring/state-grammar";
+import { formatStyleGuide } from "../../canvas/src/authoring/style-guide/format";
+import { catalogCounts, colorPalette, visualVocabulary } from "../../canvas/src/authoring/vocabulary";
 import { CRAFT_TARGETS } from "../../canvas/src/authoring/style-guide/craft-targets";
 import { AGENT_GRID } from "../../canvas/src/session/tools/grid";
 import pkg from "../package.json";
@@ -146,6 +156,63 @@ describe("manifest contract", () => {
     expect(survivors).toEqual([]);
     expect(JSON.stringify(manifest)).toBe(before);
     expect(JSON.stringify(await guidanceManifest())).toBe(before);
+  });
+});
+
+describe("reference topics", () => {
+  const workspace = mkdtempSync(join(tmpdir(), "canvas-reference-topics-"));
+  afterAll(() => rmSync(workspace, { recursive: true, force: true }));
+  const served = async (service: ReturnType<typeof createCanvasService>, topic: string) =>
+    textOf(await service.call("canvas_guidance", { topic }));
+  const snapshotOf = async (service: ReturnType<typeof createCanvasService>) =>
+    JSON.parse(textOf(await service.call("canvas_capabilities", {}))).guidance_snapshot as string;
+  /** The topic's served form: its title, a blank line, then its text. */
+  const page = (title: string, text: string) => `# ${title}\n\n${text}`;
+  /** Every non-blank line of `text`, without its indent. */
+  const linesOf = (text: string) => text.split("\n").map((line) => line.trim()).filter((line) => line !== "");
+
+  test("each topic beside workflow and rules serves the current render of the module that owns it", async () => {
+    const service = createCanvasService({ workspace });
+    const fresh = canvasGuidanceTopics(canvasGuidanceSources());
+    const references = fresh.filter((topic) => topic.id !== "workflow" && topic.id !== "rules");
+    expect(references.map((topic) => topic.id)).toEqual([
+      "operating_context", "state_grammar", "aesthetic", "visual_patterns",
+      "diagram_design", "visual_vocabulary", "color_palette", "canvas_conventions",
+    ]);
+    for (const topic of references) {
+      expect(topic.text.trim()).not.toBe("");
+      expect(await served(service, topic.id)).toBe(page(topic.title, topic.text));
+    }
+
+    // Each topic reads its own module, so no two topics trade text.
+    const design = DESIGN_TOPICS.find((topic) => topic.id === "diagram_design")!;
+    expect(await served(service, "state_grammar")).toBe(page("State Grammar", formatStateGrammar()));
+    expect(await served(service, "aesthetic")).toBe(page("Aesthetic", formatStyleGuide()));
+    expect(await served(service, "diagram_design")).toBe(page(design.title, design.text));
+    expect(await served(service, "visual_vocabulary")).toBe(page(visualVocabulary().title, visualVocabulary().text));
+    expect(await served(service, "color_palette")).toBe(page(colorPalette().title, colorPalette().text));
+    expect(await served(service, "canvas_conventions")).toBe(page(canvasConventions().title, canvasConventions().text));
+    const context = linesOf(await served(service, "operating_context"));
+    expect([...linesOf(formatStateGrammar()), ...linesOf(formatStyleGuide())].filter((line) => !context.includes(line))).toEqual([]);
+    const patterns = await served(service, "visual_patterns");
+    expect(VISUAL_PATTERNS.filter((pattern) => !patterns.includes(pattern.name) || !patterns.includes(pattern.ascii)).map((pattern) => pattern.id)).toEqual([]);
+  });
+
+  test("a changed source changes the served topic and the guidance snapshot of a new server process", async () => {
+    const before = createCanvasService({ workspace });
+    const text = await served(before, "visual_patterns");
+    const snapshot = await snapshotOf(before);
+    const patterns = VISUAL_PATTERNS as VisualPattern[];
+    patterns.push({ ...patterns[0]!, id: "reference-probe", name: "Reference Probe" });
+    try {
+      const after = createCanvasService({ workspace });
+      const changed = await served(after, "visual_patterns");
+      expect(changed).not.toBe(text);
+      expect(changed).toContain("Reference Probe");
+      expect(await snapshotOf(after)).not.toBe(snapshot);
+    } finally {
+      patterns.pop();
+    }
   });
 });
 
