@@ -29,7 +29,7 @@ export const SECTION_AUTO_GROW_FIT = { padding: 40, titleClearance: 40 } as cons
  * already keeps this much air is left alone, so a drawer's 20px-padded frames
  * do not move on the first edit; a frame that does not grows to the full fit.
  */
-const GROW_TRIGGER: SectionFitPadding = { padding: 20, titleClearance: 20 };
+export const GROW_TRIGGER = { padding: 20, titleClearance: 20 } as const satisfies SectionFitPadding;
 
 const GRID = 20;
 

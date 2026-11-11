@@ -18,9 +18,9 @@ export {
 export {
   applyOperationToDraft,
   describePatchOperation,
-  resolveFitSection,
   resolveSizeLike,
 } from "./apply-ops";
+export { resolveFitSection } from "./section-fit";
 
 export {
   boardDiffBlock,

@@ -17,15 +17,13 @@ import {
   type InteractiveCanvasDocument,
   type InteractiveCanvasObject,
 } from "../state/schema";
-import { sectionDescendantIds, sectionFitGeometry } from "../state/geometry";
-import { reconcileSectionMembership } from "../state/section-membership";
+import { sectionDescendantIds } from "../state/geometry";
 import { SECTION_AUTO_GROW_FIT } from "../state/section-grow";
 import { clearsAsUndefined } from "../state/actions/agent-patch";
 import { nextId } from "../state/actions/helpers";
 import { mergeObjectPatch, withoutDetail } from "../state/actions/objects";
 
 import type { AgentPatchOperation } from "./protocol";
-import { snapRectOutward } from "./tools/grid";
 
 /** Describe an internal patch operation for human-readable summaries. */
 export function describePatchOperation(operation: CanvasAgentPatchOperation): string {
@@ -306,9 +304,10 @@ export function applyOperationToDraft(
 }
 
 /**
- * The air a fitted frame keeps around its children on the agent path. Both
- * numbers are multiples of the agent grid, so a frame fitted around 20-grid
- * children lands on the 20 grid.
+ * The least air a fitted frame keeps around what its children paint on the
+ * agent path (section-fit.ts adds more when a stored box or an inner wire
+ * needs it). Both numbers are multiples of the agent grid, so a frame fitted
+ * around 20-grid children lands on the 20 grid.
  *
  * The two numbers are not the same kind of air: `padding` is the body air on
  * the left/right/bottom, and `titleClearance` is the extra band above the first
@@ -318,37 +317,6 @@ export function applyOperationToDraft(
  * interactive one.
  */
 export const SECTION_FIT_PADDING = SECTION_AUTO_GROW_FIT;
-
-/**
- * Resolve fit_section against the draft: membership is derived from geometry,
- * so the frame's children are read off a reconciled copy, and the fit lands
- * as an ordinary geometry update on that one section — no ancestor is
- * touched. Returns a note when there is nothing to fit.
- *
- * The fitted rect is snapped OUTWARD to the agent grid: an identity when the
- * children are on grid (the normal case), and a grow-only correction when they
- * are not (a frame closed around boxes a human drew by hand), so the snap can
- * never bite into the very children the fit was measured around.
- */
-export function resolveFitSection(
-  document: InteractiveCanvasDocument,
-  sectionId: string,
-): { internal: AgentPatchOperation } | { note: string } {
-  const section = document.objects.find((object) => object.id === sectionId);
-  if (!section || section.type !== "section") {
-    return { note: `skipped — no section "${sectionId}" on the board` };
-  }
-  const fitted = sectionFitGeometry(
-    reconcileSectionMembership(document),
-    sectionId,
-    SECTION_FIT_PADDING,
-  );
-  const geometry = fitted ? snapRectOutward(fitted) : null;
-  if (!geometry) {
-    return { note: "skipped — the section is empty, and a frame with no children has nothing to fit around; size it with resize instead" };
-  }
-  return { internal: { type: "updateObject", objectId: sectionId, patch: { geometry } } };
-}
 
 /**
  * `resize(..., like: id)` — the size of the object being matched.

@@ -28,10 +28,8 @@ import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../../../theme/canvas-st
 
 import type { AgentPatchOperation } from "../../protocol";
 
-import {
-  applyOperationToDraft,
-  resolveFitSection,
-} from "../../apply-ops";
+import { applyOperationToDraft } from "../../apply-ops";
+import { resolveFitSection } from "../../section-fit";
 import { entityKindOf } from "../../perception/op-surface";
 import type {
   ConnectionPatch,
@@ -184,9 +182,9 @@ export interface OpContext {
     notes?: readonly string[],
   ): OpOutcome;
   /**
-   * Fit a section to its children; a childless frame is a no-op. The one
-   * mutator that owns its own summary, because it owns its own no-op: the
-   * geometry it writes is resolved from the draft rather than supplied.
+   * Fit a section to its children and even its rows; a childless frame is a
+   * no-op. The one mutator that owns its own summary, because it owns its own
+   * no-op: the geometry it writes is resolved from the draft rather than supplied.
    */
   fitSection(id: string): OpOutcome;
   /**
@@ -447,15 +445,30 @@ export function createOpContext(
     },
 
     fitSection(id) {
-      const resolved = resolveFitSection(draft, id);
+      const resolved = resolveFitSection(draft, id, canvasStyle);
       if ("note" in resolved) {
         return { status: "noop", note: resolved.note };
       }
-      const applied = applyOperationToDraft(draft, resolved.internal);
+      let document = draft;
+      for (const { id: objectId, geometry } of resolved.moves) {
+        document = applyOperationToDraft(document, {
+          type: "updateObject",
+          objectId,
+          patch: { geometry },
+        }).document;
+      }
+      const frame = resolved.moves.at(-1)!.geometry;
+      const rows = resolved.evened.map((row) => ` · evened ${row.join(", ")}`).join("");
       return {
         status: "applied",
-        draft: applied.document,
-        summary: `fit_section ${id}`,
+        draft: document,
+        summary: `fit_section ${id} → frame ${frame.x},${frame.y} ${frame.width}×${frame.height}${rows}`,
+        ...(resolved.uneven.length > 0
+          ? {
+              notes: resolved.uneven.map(({ row, why }) =>
+                `row ${row.join(", ")} keeps uneven gaps: ${why}. Lay the section out again with arrange_section, or move the nodes.`),
+            }
+          : {}),
       };
     },
 

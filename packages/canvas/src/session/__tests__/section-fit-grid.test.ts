@@ -1,16 +1,18 @@
 /**
- * fit_section on the 20 grid (gesture-surface S2.4), plus the `resize` `like`
- * size lookup. The agent fit pads by grid multiples and snaps the fitted rect
- * outward, so a frame closed around on-grid children lands on the grid and a
- * frame closed around hand-drawn ones only ever gains air.
+ * fit_section (gesture-surface S2.4), plus the `resize` `like` size lookup.
+ * The fit closes a frame around what its children paint with the same air on
+ * both sides, evens the gaps of a row, and never stretches a box or the frame.
  */
 import { describe, expect, test } from "bun:test";
 
+import { paintedRects } from "../../connectors/label-placement";
 import type { CanvasGeometry, InteractiveCanvasObject } from "../../state/schema";
 
-import { resolveFitSection, resolveSizeLike } from "../apply-ops";
+import { resolveSizeLike } from "../apply-ops";
+import { resolveFitSection } from "../section-fit";
 import { AGENT_GRID, snapRectOutward } from "../tools/grid";
-import { box, makeDocument } from "./synthetic";
+import { makeTestSession, runOp } from "./helpers";
+import { box, connect, makeDocument } from "./synthetic";
 
 function frame(id: string, x: number, y: number, width: number, height: number) {
   return { ...box(id, x, y, width, height, "section"), text: id } as InteractiveCanvasObject;
@@ -21,14 +23,26 @@ function fittedGeometry(
   sectionId: string,
 ): CanvasGeometry {
   const resolved = resolveFitSection(makeDocument(objects), sectionId);
-  expect(resolved).not.toHaveProperty("note");
-  if (!("internal" in resolved)) throw new Error("expected a fit patch");
-  const operation = resolved.internal;
-  if (operation.type !== "updateObject") throw new Error("expected an updateObject patch");
-  return operation.patch.geometry as CanvasGeometry;
+  if ("note" in resolved) throw new Error(`expected a fit, got: ${resolved.note}`);
+  return resolved.moves.at(-1)!.geometry;
 }
 
-describe("fit_section pads on the agent grid", () => {
+/** A node inside "frame". */
+function node(id: string, x: number, y = 200): InteractiveCanvasObject {
+  return { ...box(id, x, y, 160, 80), parentId: "frame" };
+}
+
+/** Run fit_section on "frame" and read the board back. */
+function fit(objects: InteractiveCanvasObject[], connections = [] as ReturnType<typeof connect>[]) {
+  const session = makeTestSession(makeDocument([frame("frame", 0, 0, 1400, 700), ...objects], connections), ["frame"]);
+  const result = runOp(session, "fit_section", { id: "frame" });
+  expect(result.isError).toBeUndefined();
+  const geometry = (id: string) => session.draft.objects.find((object) => object.id === id)!.geometry;
+  const gap = (left: string, right: string) => geometry(right).x - (geometry(left).x + geometry(left).width);
+  return { session, text: result.text, geometry, gap };
+}
+
+describe("fit_section pads its frame", () => {
   test("a frame fitted around 20-grid children is all multiples of 20", () => {
     const geometry = fittedGeometry(
       [
@@ -61,23 +75,19 @@ describe("fit_section pads on the agent grid", () => {
     expect(300 - geometry.y).toBe(80);
   });
 
-  test("children drawn off grid still yield an on-grid frame that contains them", () => {
-    const children = [
-      box("kid-a", 203, 207, 301, 63),
-      box("kid-b", 517, 141, 97, 219),
-    ];
-    const geometry = fittedGeometry([frame("frame", 0, 0, 1000, 600), ...children], "frame");
+  test("children drawn off the grid get the same air on both sides", () => {
+    const geometry = fittedGeometry(
+      [frame("frame", 0, 0, 1000, 600), box("kid-a", 203, 207, 301, 63), box("kid-b", 517, 141, 97, 219)],
+      "frame",
+    );
 
-    for (const value of [geometry.x, geometry.y, geometry.width, geometry.height]) {
-      expect(value % AGENT_GRID).toBe(0);
-    }
-    for (const child of children) {
-      expect(child.geometry.x - geometry.x).toBeGreaterThanOrEqual(AGENT_GRID);
-      expect(child.geometry.y - geometry.y).toBeGreaterThanOrEqual(AGENT_GRID);
-      expect(geometry.x + geometry.width - (child.geometry.x + child.geometry.width))
-        .toBeGreaterThanOrEqual(AGENT_GRID);
-      expect(geometry.y + geometry.height - (child.geometry.y + child.geometry.height))
-        .toBeGreaterThanOrEqual(AGENT_GRID);
+    const left = 203 - geometry.x;
+    const right = geometry.x + geometry.width - (517 + 97);
+    const top = 141 - geometry.y - 40;
+    const bottom = geometry.y + geometry.height - (141 + 219);
+    for (const air of [left, right, top, bottom]) {
+      expect(air).toBeGreaterThanOrEqual(40);
+      expect(air).toBeLessThan(44);
     }
   });
 
@@ -88,6 +98,90 @@ describe("fit_section pads on the agent grid", () => {
 
     const missing = resolveFitSection(makeDocument([box("plain", 0, 0)]), "plain");
     expect((missing as { note: string }).note).toContain("no section");
+  });
+});
+
+describe("fit_section centres what the frame holds", () => {
+  test("two icons sit with equal air left and right, and above and below", () => {
+    const icon = (id: string, x: number): InteractiveCanvasObject =>
+      ({ id, type: "icon", icon: "agent", text: id, parentId: "frame", geometry: { x, y: 220, width: 300, height: 120 } });
+    const { session, geometry } = fit([icon("greptile", 120), icon("coderabbit", 520)]);
+
+    const painted = session.draft.objects.filter((object) => object.type === "icon")
+      .flatMap((object) => paintedRects(object));
+    const edge = (pick: (rect: (typeof painted)[number]) => number, most: typeof Math.max) => most(...painted.map(pick));
+    const box = geometry("frame");
+    const left = edge((rect) => rect.x, Math.min) - box.x;
+    const right = box.x + box.width - edge((rect) => rect.x + rect.width, Math.max);
+    const top = edge((rect) => rect.y, Math.min) - box.y - 40;
+    const bottom = box.y + box.height - edge((rect) => rect.y + rect.height, Math.max);
+    expect(Math.abs(left - right)).toBeLessThanOrEqual(4);
+    expect(Math.abs(top - bottom)).toBeLessThanOrEqual(4);
+  });
+
+  test("a wire that loops around the boxes stays inside the frame", () => {
+    const top: [number, number] = [0.5, 0];
+    const loop = {
+      id: "back",
+      from: { objectId: "b", position: top },
+      to: { objectId: "a", position: top },
+      waypoints: [[880, 100], [280, 100]] as [number, number][],
+    };
+    const { geometry } = fit([node("a", 200), node("b", 800)], [loop]);
+
+    // The loop runs 100px above the boxes. Without it the frame top sits at 120.
+    expect(geometry("frame").y).toBeLessThanOrEqual(60);
+  });
+});
+
+describe("fit_section evens a row", () => {
+  test("a row of three gets equal gaps between its end nodes, and a second fit changes nothing", () => {
+    const { session, text, geometry, gap } = fit([node("a", 200), node("b", 380), node("c", 720)]);
+
+    expect(text).toContain("evened a, b, c");
+    expect(geometry("a").x).toBe(200);
+    expect(geometry("c").x).toBe(720);
+    expect(gap("a", "b")).toBe(100);
+    expect(gap("b", "c")).toBe(100);
+    expect(geometry("b").width).toBe(160);
+    expect(runOp(session, "fit_section", { id: "frame" }).text).toContain("NO-OP");
+  });
+
+  test("a gap a labelled wire crosses keeps the room its label needs", () => {
+    const wire = { ...connect("w", "a", "b"), label: "returns the parsed findings list" };
+    const { gap } = fit([node("a", 400), node("b", 760), node("c", 940)], [wire]);
+
+    // Unlabelled, the 200px gap would shrink to the average, 110px.
+    expect(gap("a", "b")).toBeGreaterThanOrEqual(200);
+    expect(Math.abs(gap("a", "b") - gap("b", "c"))).toBeLessThanOrEqual(8);
+  });
+
+  test("a node under a moved node keeps its centre line", () => {
+    const { geometry } = fit([node("a", 200), node("b", 380), node("c", 720), node("under-b", 380, 400)]);
+
+    expect(geometry("b").x).toBe(460);
+    expect(geometry("under-b").x).toBe(460);
+  });
+
+  test("a row stays as it is, with the reason, when evening it would spoil the row under it", () => {
+    const nodes = [
+      node("a", 200), node("b", 380), node("c", 720),
+      node("d", 120, 400), node("e", 380, 400), node("f", 640, 400),
+    ];
+    const { text, geometry } = fit(nodes);
+
+    expect(text).toContain("row a, b, c keeps uneven gaps: another row would get less even");
+    for (const kept of nodes) expect(geometry(kept.id)).toEqual(kept.geometry);
+  });
+
+  test("a note and a locked box are not spread", () => {
+    const note = { ...box("note", 380, 200, 160, 80, "sticky"), parentId: "frame" };
+    const locked = { ...node("locked", 560), locked: "position" as const };
+    const { text, geometry } = fit([node("a", 200), note, locked, node("c", 1000)]);
+
+    expect(text).not.toContain("evened");
+    expect(geometry("note").x).toBe(380);
+    expect(geometry("locked").x).toBe(560);
   });
 });
 
