@@ -30,6 +30,10 @@ const LAYOUT_RULES: readonly string[] = [
   "A section keeps the size of its content. Never stretch a section or a node to fill a row.",
   "Center a section on the node or section it connects to.",
   "After you move, add or delete a node in a section, call `fit_section`. It centers the children and evens each row.",
+  "The engine straightens a wire less than 40px off axis and names the move. Never move that box back. Offset 40px or more to keep an elbow.",
+  "Never pin wire ends to place or spread arrowheads. The board centers and merges them.",
+  "Move a wire label by hand only when you must. A label you pin joins no column.",
+  "Make the call each near-miss names, then call `canvas_check` again.",
 ];
 
 export function canvasRules(): AuthoringTopic {
@@ -56,7 +60,6 @@ export function canvasRules(): AuthoringTopic {
       "## Text",
       "",
       `- A name is ${NAME_TARGET_WORDS} words or fewer.`,
-      "- A node shows its name only. Put extra context in a sticky note next to it.",
       "- A section has a title only.",
       "- A node draws no text beyond its name. Put a fact a reader needs (a size, a tool name) in the name, a wire label or a sticky.",
       "- Put each sticky beside the node it explains.",
