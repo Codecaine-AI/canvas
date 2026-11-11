@@ -113,6 +113,7 @@ const lines = (rect: Rect, axis: Axis) => axis === "x"
 const area = (rect: Rect) => rect.width * rect.height;
 const onGrid = (value: number) => Math.abs(value) % AGENT_GRID < 0.01;
 const vertical = (side: Side) => side === "left" || side === "right";
+const along = (axis: Axis, delta: number) => ({ dx: axis === "x" ? delta : 0, dy: axis === "y" ? delta : 0 });
 
 /** A fix as the drawer types it: `move a by dy 20`, `arrange a, b align center_v`. */
 export function fixText(steps: readonly GuideFix[]): string {
@@ -213,11 +214,15 @@ export function findBoardGuides(
     if (!parent || isPageSection(parent.object) || childrenOf.get(parent.object.id)!.length !== 1) return box;
     return carrier(parent);
   };
+  /** The boxes `box` is wired to and shares a center line with on `axis`: a move along it bends those wires. */
+  const wireLines = (box: Box, axis: Axis, except?: Box) =>
+    partnersOf(box).filter((peer) => peer !== except && sharesLine(box, peer, axis, "center"));
+  const onWireLine = (box: Box, axis: Axis) => wireLines(box, axis).length > 0;
   /** How many lines `box` already shares on `axis`, which a move along it breaks. */
   const linesHeld = (box: Box, axis: Axis, except: Box): number => {
     const moved = carrier(box);
     return peersOf(moved).filter((peer) => peer !== except && sharesLine(moved, peer, axis)).length
-      + partnersOf(box).filter((peer) => peer !== except && sharesLine(box, peer, axis, "center")).length;
+      + wireLines(box, axis, except).length;
   };
   /** Of two boxes one snap apart, the one to move: it breaks fewer lines, carries fewer wires, or is the smaller. */
   const moverOf = (a: Box, b: Box, axis: Axis): Box => {
@@ -228,15 +233,26 @@ export function findBoardGuides(
     }
     return b;
   };
+  /** `move` lands a box's corner on the grid, on both axes: true when a move by `by` lands where it says. */
+  const lands = (box: Box, by: { dx: number; dy: number }) =>
+    onGrid(box.object.geometry.x + by.dx) && onGrid(box.object.geometry.y + by.dy);
+  /**
+   * The call that puts `a` and `b` on one `line`. `arrange` lines up the
+   * stored boxes it is given: the carriers, when each box sits the same way in
+   * its own, and the two boxes when it does not.
+   */
+  const arrangeFix = (a: Box, b: Box, axis: Axis, line: number): GuideFix => {
+    const inset = (box: Box) => lines(box.rect, axis)[line]! - lines(carrier(box).object.geometry, axis)[line]!;
+    const ids = Math.abs(inset(a) - inset(b)) <= ON_LINE_PX ? [carrier(a), carrier(b)] : [a, b];
+    return { tool: "arrange", args: { ids: ids.map((box) => box.object.id), align: ALIGN_EDGES[axis][line] } };
+  };
   /** The call that moves `box` by `delta` on `axis`, onto the `line` it shares with `other`. */
   const moveFix = (box: Box, other: Box, axis: Axis, delta: number, line: number): GuideFix => {
     const moved = carrier(box);
-    const corner = axis === "x" ? moved.object.geometry.x : moved.object.geometry.y;
-    // `move` lands on the grid. A snap off the grid takes `arrange`, which puts both boxes on one line.
-    if (onGrid(delta) && onGrid(corner)) {
-      return { tool: "move", args: { id: moved.object.id, by: { dx: axis === "x" ? delta : 0, dy: axis === "y" ? delta : 0 } } };
-    }
-    return { tool: "arrange", args: { ids: [moved.object.id, carrier(other).object.id], align: ALIGN_EDGES[axis][line] } };
+    // A move that would land off the line takes `arrange`, which puts both boxes on one line.
+    return lands(moved, along(axis, delta))
+      ? { tool: "move", args: { id: moved.object.id, by: along(axis, delta) } }
+      : arrangeFix(box, other, axis, line);
   };
 
   const nearMisses: NearMiss[] = [];
@@ -326,24 +342,33 @@ export function findBoardGuides(
         continue;
       }
       const other = peers.find((peer) => Math.abs(edge(peer) - snap.guide.position) < 0.01)!;
-      // Each pair is named once per edge, and the smaller frame gives way.
+      // Each pair is named once per edge.
       const pair = `${side}:${[box.object.id, other.object.id].sort().join("|")}`;
       if (raggedPairs.has(pair)) continue;
       raggedPairs.add(pair);
-      const [mover, target] = area(box.rect) <= area(other.rect) ? [box, other] : [other, box];
-      const move = mover === box ? snap.delta : -snap.delta;
       const far = side === "right" || side === "bottom";
-      const { width, height } = mover.object.geometry;
+      const dimension = vertical(side) ? "width" : "height";
       // `resize` holds the top-left corner, so a far edge resizes and a near edge moves, then resizes back.
-      const grow = far ? move : -move;
-      const resize: GuideFix = { tool: "resize", args: { id: mover.object.id, ...(vertical(side) ? { width: width + grow } : { height: height + grow }) } };
-      const shift: GuideFix = { tool: "move", args: { id: mover.object.id, by: { dx: axis === "x" ? move : 0, dy: axis === "y" ? move : 0 } } };
+      // Both calls land on the grid: a frame whose edge they cannot put on the line is not the one to change.
+      const fixOf = (mover: Box, move: number): GuideFix[] | null => {
+        const size = mover.object.geometry[dimension] + (far ? move : -move);
+        if (!onGrid(size) || (!far && !lands(mover, along(axis, move)))) return null;
+        const resize: GuideFix = { tool: "resize", args: { id: mover.object.id, [dimension]: size } };
+        return far ? [resize] : [{ tool: "move", args: { id: mover.object.id, by: along(axis, move) } }, resize];
+      };
+      // The smaller frame gives way, when the tools can move its edge.
+      const change = (area(box.rect) <= area(other.rect) ? [box, other] : [other, box])
+        .map((mover) => ({ mover, move: mover === box ? snap.delta : -snap.delta }))
+        .map(({ mover, move }) => ({ mover, move, fix: fixOf(mover, move) }))
+        .find(({ fix }) => fix !== null);
+      if (!change?.fix) continue;
+      const target = change.mover === box ? other : box;
       nearMisses.push({
         kind: "ragged-edge",
-        at: [mover.object.id, target.object.id],
-        offBy: Math.abs(move),
-        message: `${mover.object.id}'s ${side} edge is ${px(move)} off ${target.object.id}'s`,
-        fix: far ? [resize] : [shift, resize],
+        at: [change.mover.object.id, target.object.id],
+        offBy: Math.abs(change.move),
+        message: `${change.mover.object.id}'s ${side} edge is ${px(change.move)} off ${target.object.id}'s`,
+        fix: change.fix,
         guides: [segmentOf({ ...snap.guide, position: edge(target) })],
       });
     }
@@ -387,10 +412,11 @@ export function findBoardGuides(
       if (gapRuns.has(run)) continue;
       const gaps = [near(box.rect) - far(before.rect), near(after.rect) - far(box.rect)] as const;
       // One box moves: the middle one by half the difference, or an end by all of it. `move` lands on the grid,
-      // so the box and its step must sit on it. Of those that do, the one that breaks the fewest lines moves.
+      // so the step must end on it, and a straight wire is worth more than an equal gap, so it must bend none.
+      // Of the steps left, the one that breaks the fewest lines moves.
       const steps: [Box, number][] = [[box, delta], [after, gaps[0] - gaps[1]], [before, gaps[0] - gaps[1]]];
       const step = steps
-        .filter(([member, by]) => onGrid(by) && onGrid(lines(member.object.geometry, axis)[0]!))
+        .filter(([member, by]) => lands(member, along(axis, by)) && !onWireLine(member, axis))
         .map(([member, by]) => ({ member, by, breaks: linesHeld(member, axis, member) }))
         .sort((p, q) => p.breaks - q.breaks)[0];
       if (!step) continue;
@@ -400,7 +426,7 @@ export function findBoardGuides(
         at: [step.member.object.id, ...ids.filter((id) => id !== step.member.object.id)],
         offBy: Math.abs(delta),
         message: `${ids[1]} sits ${px(gaps[0])} from ${ids[0]} and ${px(gaps[1])} from ${ids[2]}`,
-        fix: [{ tool: "move", args: { id: step.member.object.id, by: { dx: axis === "x" ? step.by : 0, dy: axis === "y" ? step.by : 0 } } }],
+        fix: [{ tool: "move", args: { id: step.member.object.id, by: along(axis, step.by) } }],
         guides: snap.guides,
       });
     }
@@ -429,7 +455,7 @@ export function findBoardGuides(
       at: [...ids, section.object.id],
       offBy: Math.abs(snap.delta),
       message: `${ids.join(", ")} ${ids.length === 1 ? "sits" : "sit"} ${px(snap.delta)} ${snap.delta > 0 ? "left" : "right"} of ${section.object.id}'s center`,
-      fix: ids.map((id) => ({ tool: "move", args: { id, by: { dx, dy: 0 } } })),
+      fix: ids.map((id) => ({ tool: "move", args: { id, by: along("x", dx) } })),
       guides: [segmentOf(snap.guide)],
     });
   }
@@ -453,7 +479,7 @@ export function findBoardGuides(
     const fix: GuideFix[] = pinned.length > 0
       ? pinned.map((wire) => ({ tool: "route", args: { id: wire.id, reset: true } }))
       : port.straight && !isFrame(partner)
-        ? [{ tool: "arrange", args: { ids: [carrier(partner).object.id, carrier(port.box).object.id], align: ALIGN_EDGES[axis][1] } }]
+        ? [arrangeFix(partner, port.box, axis, 1)]
         : [];
     if (fix.length === 0) continue;
     heads.add(key);

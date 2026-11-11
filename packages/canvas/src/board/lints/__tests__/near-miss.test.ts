@@ -46,7 +46,7 @@ const BOARDS: { name: string; document: InteractiveCanvasDocument; finding: stri
   {
     name: "two siblings with no wire, tops 10px apart",
     document: makeDocument([page(), node("a", 200, 200), node("b", 800, 210)]),
-    finding: "b is 10px off a's top edge (arrange b, a align top)",
+    finding: "b is 10px off a's top edge (move b by dy -10)",
   },
   {
     name: "a section's far edge short of its sibling's",
@@ -78,6 +78,30 @@ const BOARDS: { name: string; document: InteractiveCanvasDocument; finding: stri
     document: makeDocument([page(), node("a", 200, 200), node("b", 800, 600)],
       [{ ...connect("w", "a", "b"), to: { objectId: "b", anchor: "top", position: [0.45, 0] } }]),
     finding: "w's arrowhead is 14px off the center of b's top side (route w reset)",
+  },
+  // Boxes a hand put off the agent's grid: `move` and `resize` land on it, so the call named must still reach the line.
+  {
+    name: "a row whose last box sits off the grid, with gaps of 120 and 128",
+    document: makeDocument([page(), node("a", 200, 200), node("b", 600, 200), node("c", 1008, 200)]),
+    finding: "b sits 120px from a and 128px from c (move c by dx -8)",
+  },
+  {
+    name: "a box off the grid on the other axis, which a move would shift both ways",
+    document: makeDocument([page(), node("a", 200, 200), node("b", 220, 608), node("c", 800, 608)]),
+    finding: "b is 20px off a's left edge (arrange b, a align left)",
+  },
+  {
+    name: "a section's far edge off the grid, which only its own resize reaches",
+    document: makeDocument([page(), frame("top", 100, 100, 1000, 300), frame("low", 100, 460, 1008, 300)]),
+    finding: "low's right edge is 8px off top's (resize low width 1000)",
+  },
+  {
+    name: "two boxes that sit differently in their own frames, which lining up the frames leaves apart",
+    document: makeDocument([
+      page(), frame("left", 100, 100, 400, 200), frame("right", 700, 100, 400, 200),
+      { ...node("a", 160, 140), parentId: "left" }, { ...node("b", 760, 152), parentId: "right" },
+    ], [connect("w", "a", "b")]),
+    finding: "b is 12px off a's center line, so w bends (arrange b, a align center_v)",
   },
 ];
 
@@ -130,6 +154,10 @@ describe("near-miss: the smart guides at canvas_check", () => {
       [{ ...connect("w", "a", "b"), to: { objectId: "b", anchor: "top" as const, position: [at, 0] as [number, number] } }]);
     expect(found(pinned(0.5))).toEqual([]);
     expect(found(pinned(0.25))).toEqual([]);
+    // Gaps of 112 and 100, where the one move that evens them would bend the top box's straight wire.
+    const column = [page(), node("a", 200, 208), node("b", 200, 420), node("c", 200, 620), node("root", 800, 208)];
+    expect(found(makeDocument(column))).toEqual(["b sits 112px from a and 100px from c (move a by dy 12)"]);
+    expect(found(makeDocument(column, [connect("w", "root", "a")]))).toEqual([]);
   });
 
   test("several wires into one port are one arrowhead, named once", () => {
