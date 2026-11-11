@@ -7,7 +7,8 @@ import { Type, type Static, type TSchema } from "@mariozechner/pi-ai";
 import type { InteractiveCanvasDocument } from "../../../state/schema";
 import { reconcileConnectionWaypoints } from "../../../state/actions/waypoints";
 import { reconcileSectionMembership } from "../../../state/section-membership";
-import { fittedNoteParents, growSectionsToChildren, heldMoves, reconcileHolding, sectionOverflow } from "../../../state/section-grow";
+import { fittedNoteParents, growSectionsToChildren, heldMoves, reconcileHolding, sectionOverflow, type LabelRoom } from "../../../state/section-grow";
+import { labelledGapPx } from "../../../connectors/label-placement";
 
 import { formatNumberedRoute } from "../../../board/edge-route";
 import { formatDiagnostics } from "../../../board/lints/run";
@@ -172,10 +173,13 @@ export function runOperation<TFields extends OperationFields>(
   // edge, but an edit that pushes any child further past that frame is refused.
   // A note whose text fit grew it keeps its frame, which grows to hold it.
   const held = new Map([...fittedNoteParents(before, outcome.draft), ...(outcome.held ?? [])]);
-  const grow = growSectionsToChildren(reconcileHolding(outcome.draft, held), held, { makeRoom: true });
+  // A push leaves the room the label chips in its gutter need.
+  const labelRoom: LabelRoom = (document, a, b, axis) => labelledGapPx(document, a, b, axis, ctx.canvasStyle);
+  const room = { makeRoom: true, labelRoom };
+  const grow = growSectionsToChildren(reconcileHolding(outcome.draft, held), held, room);
   const reconciledBefore = reconcileSectionMembership(before);
   const stuck = new Set(
-    growSectionsToChildren(reconciledBefore, undefined, { makeRoom: true }).blocked.map((entry) => entry.section),
+    growSectionsToChildren(reconciledBefore, undefined, room).blocked.map((entry) => entry.section),
   );
   const worsens = (section: string) => {
     const was = sectionOverflow(reconciledBefore, section);
