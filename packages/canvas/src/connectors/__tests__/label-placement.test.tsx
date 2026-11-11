@@ -258,6 +258,80 @@ describe("placeConnectionLabels keep-out", () => {
   });
 });
 
+describe("placeConnectionLabels tags in line", () => {
+  it("lines up the chips of side-by-side runs in one column", () => {
+    // Three level runs 100px apart with their middles at x = 300, 400 and 350.
+    const document = doc(
+      [box("a", 0, 0), box("b", 500, 0), box("c", 0, 100), box("d", 700, 100), box("e", 0, 200), box("f", 600, 200)],
+      [
+        wire("ab", "a", "b", "first"),
+        wire("cd", "a", "b", "second", { from: { objectId: "c", anchor: "right" }, to: { objectId: "d", anchor: "left" } }),
+        wire("ef", "a", "b", "third", { from: { objectId: "e", anchor: "right" }, to: { objectId: "f", anchor: "left" } }),
+      ],
+    );
+    const placed = placeConnectionLabels(document);
+    expect([placed.get("ab")!.y, placed.get("cd")!.y, placed.get("ef")!.y]).toEqual([30, 130, 230]);
+    expect(placed.get("cd")!.x).toBe(placed.get("ab")!.x);
+    expect(placed.get("ef")!.x).toBe(placed.get("ab")!.x);
+    expect(blockedLabelIds(document)).toEqual([]);
+  });
+
+  it("leaves a pinned chip out of the column", () => {
+    const document = doc(
+      [box("a", 0, 0), box("b", 500, 0), box("c", 0, 100), box("d", 700, 100)],
+      [
+        wire("ab", "a", "b", "first", { labelPosition: { along: 0.25 } }),
+        wire("cd", "a", "b", "second", { from: { objectId: "c", anchor: "right" }, to: { objectId: "d", anchor: "left" } }),
+      ],
+    );
+    const placed = placeConnectionLabels(document);
+    expect(placed.get("ab")).toEqual({ x: 200, y: 30 });
+    expect(placed.get("cd")).toEqual({ x: 400, y: 130 });
+  });
+
+  it("carries the chip of a wire that leaves a section in the white space, with line on both sides", () => {
+    // The gap between the frames is x 300..400; the wire's middle, x = 580, is inside the second frame.
+    const document = doc(
+      [section("s", -40, -80, 340, 200), section("t", 400, -80, 640, 200), box("a", 180, 0), box("b", 880, 0)],
+      [wire("ab", "a", "b", "ok")],
+    );
+    const point = placeConnectionLabels(document).get("ab")!;
+    const { width } = connectionLabelChipMetrics("ok");
+    expect(point.y).toBe(30);
+    expect(point.x - width / 2).toBeGreaterThanOrEqual(300 + 16);
+    expect(point.x + width / 2).toBeLessThanOrEqual(400 - 16);
+  });
+
+  // a's right side to c's top: across to x = 450, then down. The middle of the wire is the corner.
+  const elbow = (labelPosition?: InteractiveCanvasConnection["labelPosition"]) =>
+    doc([A, box("c", 400, 380)], [wire("ac", "a", "c", "request", { to: { objectId: "c", anchor: "top" }, labelPosition })]);
+  const CORNER = { x: 450, y: 30 };
+  /** Whether the "request" chip on `point` sits on one straight run of the elbow, 12px or more from its corner. */
+  function onOneRun(point: { x: number; y: number }): boolean {
+    const { width, height } = connectionLabelChipMetrics("request");
+    const across = point.y === CORNER.y && point.x + width / 2 <= CORNER.x - 12;
+    const down = point.x === CORNER.x && point.y - height / 2 >= CORNER.y + 12;
+    return across || down;
+  }
+
+  it("moves a chip off a bend onto a straight run, clear of the corner", () => {
+    const document = elbow();
+    const points = routedConnectionIn(document, document.connections[0]!, document.objects[0]!, document.objects[1]!).points!;
+    expect(points).toContainEqual(CORNER);
+    expect(onOneRun(placeConnectionLabels(document).get("ac")!)).toBe(true);
+    expect(blockedLabelIds(document)).toEqual([]);
+  });
+
+  it("moves a pin on a bend to the nearest straight run and keeps a pin beside its wire", () => {
+    // The two runs are the same length, so a pin at 0.5 is on the corner.
+    const moved = placeConnectionLabels(elbow({ along: 0.5 })).get("ac")!;
+    expect(onOneRun(moved)).toBe(true);
+    expect(Math.hypot(moved.x - CORNER.x, moved.y - CORNER.y)).toBeLessThan(30);
+    const beside = placeConnectionLabels(elbow({ along: 0.5, offset: 40 })).get("ac")!;
+    expect(Math.hypot(beside.x - CORNER.x, beside.y - CORNER.y)).toBeCloseTo(40, 5);
+  });
+});
+
 describe("placed label parity", () => {
   it("stage chip, static SVG chip, painted bounds and chipFor share one center", () => {
     const document = doc([A, B, UNDER_MIDDLE], [wire("ab", "a", "b", "request")]);
