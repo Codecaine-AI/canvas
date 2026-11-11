@@ -68,8 +68,8 @@ function roundToWriteGrid(value: number): number {
  * box, an icon's tile and caption), or more when a stored box would otherwise
  * come closer than the auto-grow trigger, which would grow the frame on one
  * side and undo the balance. `wires` (the routes between the section's own
- * boxes) keep the same distance, so a wire that loops around
- * the boxes stays inside the frame. Left and right take the larger need, and
+ * boxes) keep the same distance, so a wire that loops around the boxes stays
+ * inside the frame. Left and right take the larger need, and
  * so do top (under the title band) and bottom, so the content is centred. The
  * edges land on the write grid: the equal air is the gesture, so the frame
  * follows children that sit off the agent grid.
@@ -136,10 +136,10 @@ function rowsOf(nodes: readonly Box[]): Box[][] {
  * A node is a shape or an icon with no lock: notes and child sections stay.
  * A row is spread between its two end nodes, which hold their place. A gap a
  * labelled wire crosses never gets narrower than its label needs (or than it
- * is now, when that is less): the row then grows from its centre. Nodes that share a centre
- * line (a column) move together, so a wire that runs straight down a column
- * stays straight. The longest row goes first, and a row whose columns an
- * earlier row placed follows it.
+ * is now, when that is less): the row then grows from its centre. Nodes that
+ * share a centre line (a column) move together, so a wire that runs straight
+ * down a column stays straight. The longest row goes first, and a row that
+ * shares a column with a row placed before it is left as it is.
  *
  * A row is left as it is when evening it would make another row less even,
  * put a box on a neighbour it did not touch before, or `refuse` names a
