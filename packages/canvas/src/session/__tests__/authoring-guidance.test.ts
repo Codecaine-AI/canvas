@@ -12,8 +12,8 @@ function topicText(id: string): string {
   return topic!.text;
 }
 
-/** An entry bullet is the name and its preferred color, nothing else on the line. */
-const ENTRY = new RegExp(`^\\s*- (\\S+) \\((?:${CANVAS_COLORS.join("|")})\\)$`, "gm");
+/** An entry bullet opens with the name and its preferred color, then its meaning on the same line. */
+const ENTRY = new RegExp(`^\\s*- (\\S+) \\((?:${CANVAS_COLORS.join("|")})\\): `, "gm");
 
 /** The catalog's groups in order: the group name, any lead text, and the entry names under it. */
 function catalogGroups(vocabulary: string) {
@@ -44,7 +44,7 @@ describe("shared Canvas authoring guidance", () => {
       const after = getCanvasAuthoringGuidance();
       expect(after.snapshotId).not.toBe(before.snapshotId);
       const catalog = after.topics.find(topic => topic.id === "visual_vocabulary")!.text;
-      expect(catalog).toContain(`- ${entry.name} (${entry.color})`);
+      expect(catalog).toContain(`- ${entry.name} (${entry.color}): `);
     } finally {
       (entry as { color: string }).color = original;
     }
@@ -105,5 +105,54 @@ describe("shared Canvas authoring guidance", () => {
     const palette = topicText("color_palette");
     expect(palette).toContain(CANVAS_COLORS.join(", "));
     for (const theme of CANVAS_THEME_IDS) expect(palette, theme).toContain(theme);
+  });
+
+  test("the color rules ban a node on its own section color and gray in gray, with no category exemption or gray-first order", () => {
+    const rules = topicText("rules");
+    expect(rules).toContain("Never put a node or a sticky on a section of its own color.");
+    expect(rules).toContain("Never nest a gray section directly in a gray section.");
+    expect(rules).toContain("Gray is for a section with no role hue, never the default.");
+    const palette = topicText("color_palette");
+    expect(palette).toContain("A section never takes the color of a node or a sticky it holds, even when all its nodes share one hue");
+    for (const topic of getCanvasAuthoringGuidance().topics) {
+      expect(topic.text, topic.id).not.toMatch(/category section|gray first|may share its region's hue/i);
+    }
+  });
+
+  test("a named product takes its brand icon from find_icon, and a step takes a specific shape", () => {
+    expect(topicText("rules")).toContain("uses its brand icon. Find it with `find_icon` and a `query`");
+    expect(topicText("rules")).toContain("A plain `rectangle` is only a payload or a message.");
+    expect(topicText("visual_vocabulary")).toContain("find_icon searches every brand by name");
+    expect(topicText("diagram_design")).toContain("use the brand icon find_icon returns");
+  });
+
+  test("facts go in a name, a wire label or a sticky beside the node, and a wire label names its cargo", () => {
+    const rules = topicText("rules");
+    expect(rules).toContain("Put a fact a reader needs (a size, a tool name) in the name, a wire label or a sticky.");
+    expect(rules).toContain("Put each sticky beside the node it explains.");
+    expect(rules).toContain("A wire label says what the wire carries. It never repeats a node or section name.");
+  });
+
+  test("a full board makes room with arrange flow, and no empty band outgrows a section", () => {
+    for (const id of ["rules", "diagram_design"]) {
+      const text = topicText(id);
+      expect(text, id).toContain('`flow: {axis: "x" or "y", gap}`');
+      expect(text, id).toContain("Leave no empty column or band larger than a section.");
+    }
+  });
+
+  test("the state grammar keys only blocks the MCP tools print", () => {
+    const grammar = topicText("state_grammar");
+    for (const tag of ["<recent_ops>", "<diff>", "<views>", "<recent_conversation>", "<state>", "finalize"]) {
+      expect(grammar, tag).not.toContain(tag);
+    }
+  });
+
+  // The served guidance at canvas main 6e7cedf was 71,076 bytes. Growth had no
+  // score effect in the stage B meta-analysis, so a new rule must replace text.
+  test("the served guidance stays within its size at 6e7cedf", () => {
+    const bytes = getCanvasAuthoringGuidance().topics
+      .reduce((sum, topic) => sum + Buffer.byteLength(`# ${topic.title}\n\n${topic.text}`), 0);
+    expect(bytes).toBeLessThanOrEqual(71_076);
   });
 });

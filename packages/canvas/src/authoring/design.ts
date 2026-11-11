@@ -2,7 +2,7 @@ import { NAME_TARGET_WORDS, NOTE_MAX_WORDS } from "../board/text-rules";
 import { JUDGE_PNG_MAX_EDGE } from "../render/judge-size";
 import { creationDefaultFor } from "../session/tools/creation-defaults";
 import { CRAFT_TARGETS } from "./style-guide/craft-targets";
-import { renderVisualPatterns } from "./visual-patterns";
+import { VISUAL_PATTERNS } from "./visual-patterns";
 
 /** A creation default's size as `W×H`. */
 function defaultSize(kind: "shape" | "icon"): string {
@@ -29,16 +29,14 @@ export const DESIGN_TOPICS: readonly AuthoringTopic[] = [
         | --- | --- |
         | 5 equal boxes with labels | Each concept has a shape that mirrors its behavior |
         | Card grid layout | Visual structure matches conceptual structure |
-        | Icons decorating text | Shapes that ARE the meaning |
+        | A plain rectangle for every node | A brand icon for each named product, a glyph for each role, a specific shape for each step |
         | Same container for everything | Distinct visual vocabulary per concept |
         | Everything in a diagram node | Short names, Markdown stickies for prose, and selective section containers |
     </bad_vs_good>
 </multi_zoom_architecture>
 
 <visual_pattern_library>
-    Choose the arrangement that expresses the relationship. The sketches are conceptual, not coordinates. Repeat a pattern for repeated meaning.
-
-${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
+    Choose the arrangement that expresses the relationship, and repeat a pattern for repeated meaning. Topic \`visual_patterns\` sketches each one: ${VISUAL_PATTERNS.map(pattern => pattern.name).join(", ")}.
 </visual_pattern_library>
 
 <text_and_evidence>
@@ -52,15 +50,15 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
         | --- | --- |
         | name \`Postgres database that stores user sessions\` | name \`Postgres\`, and a sticky about the sessions it stores |
 
-        Give a section a header icon when a glyph fits what it holds: a generic glyph for its role, such as \`database\`, or a brand logo for a technology the source names, such as \`brand-postgres\`. Leave it off when none fits.
+        Give a section a header icon when a glyph fits what it holds: a generic glyph for its role, such as \`database\`, or the brand icon \`find_icon\` returns for a product the source names, such as \`brand-postgres\`. Leave it off when none fits.
     </names>
 
     <wire_labels>
-        Label a wire only for a condition, a branch, or a payload the source names. A plain next-step wire has no label.
+        Label a wire only for a condition, a branch, or a payload the source names. The label says what the wire carries, such as \`order id\` or \`on timeout\`, and never repeats a node or section name. A plain next-step wire has no label.
     </wire_labels>
 
     <cover_every_requirement>
-        A reader looks for each requirement on a node or a wire. A fact only in a note, the board description, or a section title counts as missing.
+        A reader looks for each component on a node and each behavior on a wire. A node draws only its name, so a fact a reader needs (a size, a tool name) goes in the name, a wire label or a sticky beside the node. A fact only in the board description or a section title counts as missing.
 
         - Before you place anything, list every component, every field or measure, and every behavior with its trigger in the source.
         - Give each component a node.
@@ -70,7 +68,7 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
     </cover_every_requirement>
 
     <evidence>
-        Show what things look like, not only what they are called: real event names, a sample payload, a code snippet. Put code and payloads on a sticky beside their subject, at most two or three stickies per board. Take every concrete value from the source. Never invent an example, path, score, endpoint, or status code.
+        Show what things look like, not only what they are called: real event names, a sample payload, a code snippet. Put code and payloads on a sticky beside their subject, at most three such stickies per board. Take every concrete value from the source. Never invent an example, path, score, endpoint, or status code.
     </evidence>
 
     <purposeful_containers>
@@ -85,13 +83,15 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
         - Lay 4 or more sections out in 2 or 3 rows that grow down, never in one long row.
         - Size each section to its content. A section with three nodes is small, not a full-width band.
         - To fit, move sections closer or stack a long row into 2 rows. Never shrink a node or cut a label.
+        - When a section must grow or the board gets full, make room before you add: \`arrange\` the sections in reading order with \`flow: {axis: "x" or "y", gap}\`, then call tighten_wires again.
+        - Leave no empty column or band larger than a section.
     </board_size>
 
     <build_order>
         Every move after the board is wired is rework. Write the plan first: the sections in rows, the nodes in each section as rows, the color key, and every wire.
 
         1. place_section for each section, with its title, icon, and color in one call. Leave wide room between sections. Step 4 closes it.
-        2. place_shape for each node inside its section, with its name and color in one call. Keep the default size: ${defaultSize("shape")} for a shape, ${defaultSize("icon")} for an icon. clone a finished node for each peer of the same role.
+        2. place_shape for each node inside its section, with its name, type and color in one call. For a named product, use the brand icon find_icon returns. Keep the default size: ${defaultSize("shape")} for a shape, ${defaultSize("icon")} for an icon. clone a finished node for each peer of the same role.
         3. arrange_section for each section, with its node ids as rows. It sets the gaps (${CRAFT_TARGETS.nodeGapRow} across a row, ${CRAFT_TARGETS.nodeGapColumn} down a column) and fits the frame, so you write no coordinates.
         4. arrange each row of sections with space and gap ${CRAFT_TARGETS.sectionGutterSideBySide}, then arrange the same row with align top.
         5. connect every wire, then call tighten_wires once.

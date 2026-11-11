@@ -1,7 +1,7 @@
 import { OBJECT_PREFERENCES, type ObjectPreference } from "../objects/registry";
 import { ICON_GLYPH_CATEGORIES, resolveIconGlyph } from "../objects/shapes/icon/icon-glyphs";
 import { CANVAS_COLORS } from "../state/schema/colors";
-import { CANVAS_STYLE_FILENAME, CANVAS_THEME_IDS } from "../theme/canvas-style";
+import { CANVAS_THEME_IDS } from "../theme/canvas-style";
 import { TOUCH_GUTTER } from "../board/section-colors";
 import { BRAND_GLYPH_PREFIX, isBrandGlyph, isGlyphName } from "../session/tools/glyph-names";
 import type { AuthoringTopic } from "./design";
@@ -11,8 +11,8 @@ const xml = (value: string) => value.replaceAll("&", "&amp;")
 
 const indent = (text: string) => text.split("\n").map(line => line ? `    ${line}` : line).join("\n");
 
-/** Heads the brand logos: when a logo is right, and when the generic glyph is. */
-const BRAND_RULE = `Brand logos (${BRAND_GLYPH_PREFIX}*) are filled product logos. Use one only for the exact product the diagram names, and the generic glyph for the role: PostgreSQL gets ${BRAND_GLYPH_PREFIX}postgres, and an unnamed database gets database. The roster has no AWS or OpenAI logos.`;
+/** Heads the brand logos: when a logo is right, where to find more, and when the generic glyph is. */
+const BRAND_RULE = `Brand icons (${BRAND_GLYPH_PREFIX}*) are product logos. A node that names a real product or provider uses its brand icon, and find_icon searches every brand by name. An unnamed role gets the generic glyph: PostgreSQL gets ${BRAND_GLYPH_PREFIX}postgres, and an unnamed database gets database.`;
 
 interface CatalogGroup {
   readonly name: string;
@@ -52,11 +52,10 @@ export function catalogCounts(): { kinds: number; groups: number } {
   return { kinds: groups.reduce((sum, group) => sum + group.entries.length, 0), groups: groups.length };
 }
 
+/** One line per entry: name, preferred color, meaning, then its uses. */
 function formatCatalogGroup({ name, lead, entries }: CatalogGroup): string {
-  const bullets = entries.map(entry => `- ${xml(entry.name)} (${xml(entry.color)})
-    - Meaning: ${xml(entry.meaning)}
-    - Use when:
-${entry.scenarios.map(scenario => `        - ${xml(scenario)}`).join("\n")}`).join("\n\n");
+  const bullets = entries.map(entry =>
+    `- ${xml(entry.name)} (${xml(entry.color)}): ${xml(entry.meaning)}. Use when: ${entry.scenarios.map(xml).join("; ")}.`).join("\n");
   return `<group name="${xml(name)}">\n${indent(lead ? `${xml(lead)}\n\n${bullets}` : bullets)}\n</group>`;
 }
 
@@ -66,33 +65,14 @@ export function visualVocabulary(): AuthoringTopic {
     id: "visual_vocabulary",
     title: "Visual Vocabulary",
     text: `<entity_kinds>
-    <sections>
-        A section is a titled frame that groups related content. Sections can contain objects and other sections.
-
-        The header shows an optional icon and the title.
-    </sections>
-
-    <objects>
-        Shapes and glyphs represent diagram nodes. Their type communicates what they represent.
-
-        Shape labels render inside the shape. Glyph labels render below the glyph. A node shows its name only; put extra context in a sticky note next to it.
-    </objects>
-
-    <stickies>
-        A sticky holds Markdown text for supporting explanations and concrete examples.
-    </stickies>
-
-    <connections>
-        A connection is a routed wire between two objects. Its label describes their relationship.
-
-        Connections can attach to shapes, glyphs, stickies, and sections.
-    </connections>
+    - A section is a titled frame that groups related content. It holds objects and other sections, and its header shows an optional icon and the title.
+    - A shape or a glyph is a diagram node, and its type says what it is. A shape's name renders inside it, and a glyph's name below it.
+    - A sticky holds Markdown text: an explanation or a concrete example beside its subject.
+    - A connection is a routed wire between two objects, stickies or sections.
 </entity_kinds>
 
 <object_catalog>
-    Choose shape based on what it represents.
-
-    Each bullet gives the supported name and preferred color, followed by its meaning and use cases. The shapes come first, then the glyphs by category, then the brand logos. A glyph name is an icon object's type, and any glyph can also be a section's header icon.
+    Choose the type by what the node is. Each line gives the name, its preferred color, its meaning and its uses. The shapes come first, then the glyphs by category, then the brand icons. A glyph name is an icon object's type, and any glyph can also be a section's header icon.
 
 ${indent(catalogGroups().map(formatCatalogGroup).join("\n\n"))}
 </object_catalog>`,
@@ -109,16 +89,16 @@ export function colorPalette(): AuthoringTopic {
     Color encodes kind, not decoration. Give each kind of thing one hue, such as one for every data store and another for every agent.
 
     - Before you place nodes, write the board's color key: three to five roles, one hue each.
-    - Sections show where each group starts and ends. A nested section never shares its parent's color. Two sibling sections closer than one gutter (${TOUCH_GUTTER}px) never share a color. Siblings with whitespace between them can share one, so sections with one role keep one color.
-    - A category section holds nodes of one hue, such as every agent node. It can take that hue, so the frame names the category. A section that holds nodes of several hues never takes one of them.
-    - Keep other section colors off the key's hues: gray first, then at most three cool hues (blue, violet, green, teal) on one board. Category sections count toward the three, and keep their hue past it. Keep orange, yellow, pink and red for emphasis you choose.
-    - A node takes its role's hue, whatever its icon. Use the preferred color a catalog entry lists only when its role has no hue in the key, so two nodes with different roles never share a hue by accident.
-    - Red means failure, reject, or error, and nothing else.
-    - When a viewer cannot guess the key from the names, put it on the board as a short note, one line per hue. A key that is only in the board description is invisible.
+    - Give the sections hues too, and vary them across the board. Use gray only for a section with no role hue. A board of gray frames reads as one flat template.
+    - A section never takes the color of a node or a sticky it holds, even when all its nodes share one hue: a blue node sits in a violet or gray section, never a blue one. A sticky is yellow by default, so a section that holds one is not yellow.
+    - A nested section never shares its parent's color, and a gray section never sits directly in a gray section. Two sibling sections closer than one gutter (${TOUCH_GUTTER}px) never share a color.
+    - A node takes its role's hue, whatever its icon. Use the preferred color a catalog entry lists only when its role has no hue in the key.
+    - Red means failure, reject, or error, and nothing else. Keep orange, yellow and pink for emphasis you choose.
+    - When a viewer cannot guess the key from the names, put it on the board as a short note, one line per hue.
 </color_meaning>
 
 <theme>
-    The visual theme (${CANVAS_THEME_IDS.join(", ")}) is a workspace setting a person picks in Studio, stored in canvases/${CANVAS_STYLE_FILENAME}. It decides how each roster color renders. Never change the theme, and never design for a single theme: the same board renders in every theme.
+    The workspace theme (${CANVAS_THEME_IDS.join(", ")}) decides how each color renders. Never change it, and never design for one theme: the same board renders in every theme.
 </theme>`,
   };
 }
