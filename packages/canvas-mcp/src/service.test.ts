@@ -284,8 +284,15 @@ describe("canvas service", () => {
       space: { axis: "horizontal", gap: 80 },
     });
     expect(textOf(spaced)).toContain("APPLIED · arrange space horizontal gap 80");
-    const neither = await service.call("arrange", { ids: ["row-a", "row-b"], align: null, space: null });
-    expect(textOf(neither)).toContain("send exactly one of align or space");
+    const neither = await service.call("arrange", { ids: ["row-a", "row-b"], align: null, space: null, flow: null });
+    expect(textOf(neither)).toContain("send exactly one of align, space or flow");
+    const flowed = await service.call("arrange", {
+      ids: ["row-a", "row-b"],
+      align: null,
+      space: null,
+      flow: { axis: "x", gap: 80 },
+    });
+    expect(textOf(flowed)).toContain("NO-OP · arrange x — the boxes already sit in flow with a 80 gap");
 
     const reset = await service.call("route", { id: "row-edge", points: null, shift: null, reset: true });
     expect(textOf(reset)).toContain("NO-OP · route row-edge — this edge is already on the auto-router");
@@ -346,7 +353,11 @@ describe("canvas service", () => {
     },
     {
       tool: "arrange",
-      wrong: [{ ids: ["mode-a", "mode-b"], align: "top", space: 0 }, { ids: ["mode-a", "mode-b"], align: "", space: { axis: "horizontal", gap: 40 } }],
+      wrong: [
+        { ids: ["mode-a", "mode-b"], align: "top", space: 0 },
+        { ids: ["mode-a", "mode-b"], align: "", space: { axis: "horizontal", gap: 40 } },
+        { ids: ["mode-a", "mode-b"], align: "top", flow: 0 },
+      ],
       absent: { ids: ["mode-a", "mode-b"], align: "top", space: null },
       applied: "APPLIED · arrange align top",
     },

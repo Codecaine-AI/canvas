@@ -82,6 +82,7 @@ import {
   snapRectOutward,
   snapSize,
 } from "../grid";
+import { ArrangeFlow, flowErrors, flowRun, type ArrangeFlowParams } from "./flow";
 import type { OpContext, OpOutcome } from "./op-context";
 import { defineOperationTool } from "./operation-tool";
 import {
@@ -605,26 +606,32 @@ const ArrangeSpace = Type.Object(
 export const arrange = defineOperationTool({
   name: "arrange",
   description:
-    "Arrange a row or column of boxes. Send exactly one of align or space; a null one counts as absent. align puts the boxes on one shared edge or centerline: it is the cross-axis mode and never changes spacing along the flow. space re-pitches them in place so the clear gap between neighbours is exactly gap: in positional order along the axis the first box holds and every later one slides, the run grows or shrinks to suit, and the cross axis is untouched. space opens a corridor between boxes in one call. Sections arrange by their own frame and carry their contents; edges are not targets, they re-route themselves. A child of a listed section travels with its frame and is not an independent target; at least two independent targets must remain.",
+    "Arrange a row or column of boxes, or reflow a full board. Send exactly one of align, space or flow; a null one counts as absent. align puts the boxes on one shared edge or centerline: it is the cross-axis mode and never changes spacing along the flow. space re-pitches them in place so the clear gap between neighbours is exactly gap: in positional order along the axis the first box holds and every later one slides, the run grows or shrinks to suit, and the cross axis is untouched. space opens a corridor between boxes in one call. flow lays sibling sections and free nodes out again when a board or a section has filled up: it keeps the rows (axis x) or columns (axis y) the boxes sit in and their reading order, sets every gutter between them to one gap, packs the empty space out, and the wires route again. flow takes boxes that share one parent and every sibling the block reaches. Sections arrange by their own frame and carry their contents; edges are not targets, they re-route themselves. A child of a listed section travels with its frame and is not an independent target; at least two independent targets must remain.",
   fields: {
     ids: ArrangeIds,
     align: nullableEnum(ALIGN_EDGES, ALIGN_EDGE_DESCRIPTION),
     space: nullable(ArrangeSpace, "Re-pitch the run along this axis to this clear gap."),
+    flow: nullable(ArrangeFlow, "Lay the boxes out again in reading order along this axis, one even gap apart."),
   },
   validate: (ctx, p) => {
     const errors = requireIndependentRoots(ctx, p.ids, "arrange");
-    if ((p.align == null) === (p.space == null)) {
+    const modes = [p.align, p.space, p.flow].filter((mode) => mode != null).length;
+    if (modes !== 1) {
       errors.push(
-        p.align == null
-          ? "send exactly one of align or space — align puts the boxes on one shared edge, space sets one clear gap between them."
-          : "send exactly one of align or space, not both.",
+        modes === 0
+          ? "send exactly one of align, space or flow — align puts the boxes on one shared edge, space sets one clear gap along a run, flow lays the boxes out again in reading order."
+          : "send exactly one of align, space or flow, not several.",
       );
     }
+    if (errors.length === 0 && p.flow != null) errors.push(...flowErrors(ctx, p.ids, p.flow as ArrangeFlowParams));
     return errors;
   },
-  apply: (ctx, p) => p.align != null
-    ? alignRow(ctx, p.ids, p.align as CanvasAlignEdge)
-    : spaceRun(ctx, p.ids, p.space as { axis: "horizontal" | "vertical"; gap: number }),
+  apply: (ctx, p) => {
+    if (p.flow != null) return flowRun(ctx, p.ids, p.flow as ArrangeFlowParams);
+    return p.align != null
+      ? alignRow(ctx, p.ids, p.align as CanvasAlignEdge)
+      : spaceRun(ctx, p.ids, p.space as { axis: "horizontal" | "vertical"; gap: number });
+  },
 });
 
 // ---------------------------------------------------------------------------
