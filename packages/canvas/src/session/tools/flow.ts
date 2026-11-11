@@ -16,9 +16,13 @@
  *   into lines again, and so on down. Along axis "x" the top cut is into rows
  *   that read left to right; along axis "y" into columns that read top to
  *   bottom.
- * - Every cut is then set to exactly one gap. Reading order is the order the
- *   boxes sit in. Across a line a box keeps its offset, so two neighbours that
- *   were level stay level and the wire between them stays straight.
+ * - Every cut is then set to one gap, or to the room its label chips need
+ *   when that is more (labelledGapPx: the longest chip of the labelled wires
+ *   that join the two sides, plus clear line before and after it). Ford:
+ *   "making sure that there is enough space for the, like, tags". Reading
+ *   order is the order the boxes sit in. Across a line a box keeps its
+ *   offset, so two neighbours that were level stay level and the wire between
+ *   them stays straight.
  * - A group that no gutter cuts (boxes that overlap, or a pinwheel) is packed
  *   in reading order instead: each box takes the earliest free corner on the
  *   line, one gap clear of the boxes before it.
@@ -28,14 +32,18 @@
  * result; the commit path drops the waypoints of every wire whose ends moved
  * apart, so those wires route again.
  */
+import { labelledGapPx } from "../../connectors/label-placement";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
-import { moveRootIds, translateWithDescendants } from "../../state/geometry";
+import { moveClosureIds, moveRootIds, translateWithDescendants } from "../../state/geometry";
+import type { CanvasStyle } from "../../theme/canvas-style";
 import { AGENT_GRID } from "./grid";
 
 export interface FlowOptions {
   axis: "x" | "y";
   /** Clear space between neighbouring boxes, along and across the axis. */
   gap: number;
+  /** The style the label chips are measured in. The default style when omitted. */
+  canvasStyle?: CanvasStyle;
 }
 
 export interface FlowResult {
@@ -43,6 +51,8 @@ export interface FlowResult {
   /** The boxes in reading order, one array per line: a row for axis "x", a column for axis "y". */
   lines: string[][];
   movedIds: string[];
+  /** How many gutters are wider than the gap, for the label chips they carry. */
+  widened: number;
 }
 
 /** A box in flow coordinates: `u` runs along the axis, `v` across it. */
@@ -125,7 +135,8 @@ function crowds(a: Box, b: Box, gap: number): boolean {
 
 /**
  * Lay `node` out with its corner at (u, v) and write each box's corner into
- * `out`. Returns the room the node takes.
+ * `out`. Returns the room the node takes. `gutter` is the clear space a run
+ * leaves between two neighbouring parts.
  */
 function place(
   node: Slice,
@@ -133,6 +144,7 @@ function place(
   v: number,
   boxes: readonly Box[],
   gap: number,
+  gutter: (before: Slice, after: Slice, along: Along) => number,
   out: Box[],
 ): { du: number; dv: number } {
   if (node.kind === "box") {
@@ -171,28 +183,31 @@ function place(
     const taken = bounds(placed);
     return { du: taken.u + taken.du - u, dv: taken.v + taken.dv - v };
   }
-  // A run: the parts in sequence along its direction, one gap apart. Across
+  // A run: the parts in sequence along its direction, one gutter apart. Across
   // it each part keeps the offset it has now, so level neighbours stay level.
   const across = other(node.along);
   const frames = node.parts.map((part) => bounds(leaves(part).map((index) => boxes[index]!)));
   const edge = Math.min(...frames.map((frame) => start(frame, across)));
-  let cursor = node.along === "u" ? u : v;
+  const origin = node.along === "u" ? u : v;
+  let cursor = origin;
+  let end = origin;
   let reach = 0;
   node.parts.forEach((part, index) => {
+    if (index > 0) cursor = ceilGrid(end + gutter(node.parts[index - 1]!, part, node.along));
     const offset = roundGrid(start(frames[index]!, across) - edge);
     const size = node.along === "u"
-      ? place(part, cursor, v + offset, boxes, gap, out)
-      : place(part, u + offset, cursor, boxes, gap, out);
+      ? place(part, cursor, v + offset, boxes, gap, gutter, out)
+      : place(part, u + offset, cursor, boxes, gap, gutter, out);
     reach = Math.max(reach, offset + (node.along === "u" ? size.dv : size.du));
-    cursor = ceilGrid(cursor + (node.along === "u" ? size.du : size.dv) + gap);
+    end = cursor + (node.along === "u" ? size.du : size.dv);
   });
-  const run = cursor - gap - (node.along === "u" ? u : v);
-  return node.along === "u" ? { du: run, dv: reach } : { du: reach, dv: run };
+  return node.along === "u" ? { du: end - origin, dv: reach } : { du: reach, dv: end - origin };
 }
 
 /**
  * Lay the listed boxes (and what the listed sections hold) out in reading
- * order, every gutter one gap. The block keeps its top-left corner.
+ * order, every gutter one gap, or wider where its label chips need the room.
+ * The block keeps its top-left corner.
  * Returns null when fewer than two boxes move independently.
  */
 export function flowLayout(
@@ -209,7 +224,17 @@ export function flowLayout(
   // Lines first: rows for axis "x", columns for axis "y" (both are cuts along `v`).
   const tree = slice(boxes.map((_, index) => index), boxes, "v");
   const at: Box[] = new Array(boxes.length);
-  place(tree, floorGrid(frame.u), floorGrid(frame.v), boxes, gap, at);
+  // A gutter holds the chips of the labelled wires that join its two sides
+  // (a listed section counts with everything in it).
+  const held = rootIds.map((id) => moveClosureIds(document, [id]));
+  const side = (part: Slice) => new Set(leaves(part).flatMap((index) => [...held[index]!]));
+  let widened = 0;
+  const gutter = (before: Slice, after: Slice, along: Along): number => {
+    const need = labelledGapPx(document, side(before), side(after), (along === "u") === (axis === "x") ? "x" : "y", options.canvasStyle);
+    if (need > gap) widened += 1;
+    return Math.max(gap, need);
+  };
+  place(tree, floorGrid(frame.u), floorGrid(frame.v), boxes, gap, gutter, at);
 
   let next = document;
   const movedIds: string[] = [];
@@ -225,5 +250,5 @@ export function flowLayout(
   // The lines as they landed: boxes whose spans across the axis overlap, in order along it.
   const lines = cut(at.map((_, index) => index), at, "v").map((group) =>
     group.sort((a, b) => at[a]!.u - at[b]!.u || at[a]!.v - at[b]!.v).map((index) => rootIds[index]!));
-  return { objects: next.objects, lines, movedIds };
+  return { objects: next.objects, lines, movedIds, widened };
 }

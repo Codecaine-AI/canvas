@@ -10,6 +10,8 @@ import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../s
 
 import { createInteractiveCanvasState, reduceInteractiveCanvasState } from "../../state/actions";
 import { diffDocuments } from "../../board/doc-diff";
+import { connectionLabelChipMetrics } from "../../connectors/label-chip";
+import { AGENT_GRID } from "../tools/grid";
 import { makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
 
@@ -74,6 +76,27 @@ describe("make room", () => {
     // Both keep the 60px gutter they had, and neither moves across the direction.
     expect(geometryOf(session.draft, "b")).toEqual({ x: 560, y: 0, width: 400, height: 300 });
     expect(geometryOf(session.draft, "c")).toEqual({ x: 1020, y: 0, width: 400, height: 300 });
+    expect(sectionOverlaps(session.draft)).toEqual([]);
+  });
+
+  test("a push leaves the room the label chip of a wire across the gutter needs", () => {
+    const label = "the reply with every field the caller asked for";
+    const document = row();
+    const labelled = { ...document, connections: [...document.connections, { ...connect("kid-to-b", "kid", "b-one"), label }] };
+    const session = makeTestSession(labelled, ["a"]);
+
+    const result = runOp(session, "move", GROW_A);
+
+    expect(result.isError).toBeUndefined();
+    expect(result.text).toContain("made room for a: pushed b, c");
+    // The chip, an arrowhead, the wire ends and clear line each side of the chip: 68 on top of the chip.
+    const room = connectionLabelChipMetrics(label).width + 68;
+    expect(room).toBeGreaterThan(100);
+    const gutter = geometryOf(session.draft, "b").x - 500;
+    expect(gutter).toBeGreaterThanOrEqual(room);
+    expect(gutter).toBeLessThan(room + AGENT_GRID);
+    // b to c carries no label: it keeps the 60px gutter it had.
+    expect(geometryOf(session.draft, "c").x - geometryOf(session.draft, "b").x).toBe(460);
     expect(sectionOverlaps(session.draft)).toEqual([]);
   });
 

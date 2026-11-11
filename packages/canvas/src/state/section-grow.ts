@@ -64,12 +64,25 @@ export type MadeRoom = { section: string; pushed: string[] };
 /**
  * The gutter a push leaves between a grown section and the neighbour it moves:
  * the gutter they had, but never under MIN_GUTTER and never over KEPT_GUTTER.
- * So a wide gutter is used up first (down to the room one labelled wire
- * needs) and only then does the neighbour move, which keeps a board's rows and
- * columns lined up until a grow really runs out of room.
+ * So a wide gutter is used up first and only then does the neighbour move,
+ * which keeps a board's rows and columns lined up until a grow really runs
+ * out of room. A gutter that labelled wires cross is never left under the
+ * room their label chips need (`LabelRoom`).
  */
 const MIN_GUTTER = 40;
 const KEPT_GUTTER = 100;
+
+/**
+ * The clear space the label chips of the wires that join two sets of boxes
+ * need between them along `axis`, 0 when no labelled wire joins them. The
+ * agent path passes connectors/label-placement.ts labelledGapPx.
+ */
+export type LabelRoom = (
+  document: InteractiveCanvasDocument,
+  a: ReadonlySet<string>,
+  b: ReadonlySet<string>,
+  axis: "x" | "y",
+) => number;
 
 /**
  * Make room for a section that grew from `was`: every sibling in the way of a
@@ -85,6 +98,7 @@ function makeRoom(
   document: InteractiveCanvasDocument,
   sectionId: string,
   was: CanvasBounds,
+  labelRoom?: LabelRoom,
 ): { document: InteractiveCanvasDocument; pushed: string[] } | { pinned: string[] } {
   const byId = new Map(document.objects.map((object) => [object.id, object]));
   const section = byId.get(sectionId)!;
@@ -121,7 +135,7 @@ function makeRoom(
     const far = (rect: CanvasBounds) => (sign > 0 ? rect[axis] + rect[size] : -rect[axis]);
     const level = (a: CanvasBounds, b: CanvasBounds) =>
       Math.min(a[cross] + a[crossSize], b[cross] + b[crossSize]) > Math.max(a[cross], b[cross]);
-    const pushers = [{ rect: now, from: far(was), to: far(now) }];
+    const pushers = [{ id: sectionId, rect: now, from: far(was), to: far(now) }];
     // A sibling is only pushed by one whose middle sits before its own, so one pass in that order settles the cascade.
     const siblings = current.objects
       .filter((object) => object.id !== sectionId && (object.parentId ?? null) === parentId)
@@ -132,13 +146,14 @@ function makeRoom(
       let shift = 0;
       for (const pusher of pushers) {
         if (!level(pusher.rect, rect) || (near(rect) + far(rect)) / 2 <= pusher.from) continue;
-        const gutter = Math.min(Math.max(near(rect) - pusher.from, MIN_GUTTER), KEPT_GUTTER);
+        const room = labelRoom?.(current, moveClosureIds(current, [pusher.id]), moveClosureIds(current, [sibling.id]), axis) ?? 0;
+        const gutter = Math.max(Math.min(Math.max(near(rect) - pusher.from, MIN_GUTTER), KEPT_GUTTER), room);
         shift = Math.max(shift, pusher.to + gutter - near(rect));
       }
       if (shift <= 0) continue;
       shift = Math.ceil(shift / GRID) * GRID;
       shifts.set(sibling.id, shift);
-      pushers.push({ rect, from: far(rect), to: far(rect) + shift });
+      pushers.push({ id: sibling.id, rect, from: far(rect), to: far(rect) + shift });
     }
     if (shifts.size === 0) continue;
     const delta = new Map<string, number>();
@@ -191,11 +206,12 @@ function makeRoom(
  * made rather than blocked. Each pushed sibling keeps its parent, which then
  * grows to hold it and makes room in turn. The returned `held` is `held` plus
  * those siblings. Studio does not pass it: a person's drop moves nothing else.
+ * `labelRoom` widens the gutter a push leaves to the room its label chips need.
  */
 export function growSectionsToChildren(
   document: InteractiveCanvasDocument,
   held?: ReadonlyMap<string, string | null>,
-  options: { makeRoom?: boolean } = {},
+  options: { makeRoom?: boolean; labelRoom?: LabelRoom } = {},
 ): {
   document: InteractiveCanvasDocument;
   grown: string[];
@@ -269,7 +285,7 @@ export function growSectionsToChildren(
       reconcileHolding(grownDocument, holding).objects
         .filter((object) => parents.get(object.id) !== (object.parentId ?? null))
         .map((object) => object.id);
-    const room = options.makeRoom ? makeRoom(candidate, id, rect) : null;
+    const room = options.makeRoom ? makeRoom(candidate, id, rect, options.labelRoom) : null;
     if (room && "document" in room && room.pushed.length > 0) {
       const holding = new Map([...keep, ...room.pushed.map((pushedId) => [pushedId, parents.get(pushedId) ?? null] as const)]);
       if (capturesIn(room.document, holding).length === 0) {

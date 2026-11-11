@@ -258,6 +258,207 @@ describe("placeConnectionLabels keep-out", () => {
   });
 });
 
+describe("placeConnectionLabels tags in line", () => {
+  it("lines up the chips of side-by-side runs in one column", () => {
+    // Three level runs 100px apart with their middles at x = 300, 400 and 350.
+    const document = doc(
+      [box("a", 0, 0), box("b", 500, 0), box("c", 0, 100), box("d", 700, 100), box("e", 0, 200), box("f", 600, 200)],
+      [
+        wire("ab", "a", "b", "first"),
+        wire("cd", "a", "b", "second", { from: { objectId: "c", anchor: "right" }, to: { objectId: "d", anchor: "left" } }),
+        wire("ef", "a", "b", "third", { from: { objectId: "e", anchor: "right" }, to: { objectId: "f", anchor: "left" } }),
+      ],
+    );
+    const placed = placeConnectionLabels(document);
+    expect([placed.get("ab")!.y, placed.get("cd")!.y, placed.get("ef")!.y]).toEqual([30, 130, 230]);
+    expect(placed.get("cd")!.x).toBe(placed.get("ab")!.x);
+    expect(placed.get("ef")!.x).toBe(placed.get("ab")!.x);
+    expect(blockedLabelIds(document)).toEqual([]);
+  });
+
+  it("lines up the chips of two lanes of one bundle, 30px apart", () => {
+    // Level runs at y = 10 and y = 40 with their middles at x = 300 and x = 400. The chips are 26px high.
+    const document = doc(
+      [box("a", 0, 0, 100, 20), box("b", 500, 0, 100, 20), box("c", 0, 30, 100, 20), box("d", 700, 30, 100, 20)],
+      [
+        wire("ab", "a", "b", "first"),
+        wire("cd", "a", "b", "second", { from: { objectId: "c", anchor: "right" }, to: { objectId: "d", anchor: "left" } }),
+      ],
+    );
+    const placed = placeConnectionLabels(document);
+    expect([placed.get("ab")!.y, placed.get("cd")!.y]).toEqual([10, 40]);
+    expect(placed.get("cd")!.x).toBe(placed.get("ab")!.x);
+    expect(blockedLabelIds(document)).toEqual([]);
+  });
+
+  it("keeps a row of chips clear of the bend one of their wires makes", () => {
+    // Both wires leave the bottom of p. pq runs straight down; pr turns left at y = 182.5, then drops into r at x = 70.
+    const down = (id: string, to: string) =>
+      wire(id, "p", to, "request", { from: { objectId: "p", anchor: "bottom" }, to: { objectId: to, anchor: "top" } });
+    const document = doc(
+      [box("p", 220, 0, 280, 120), box("q", 220, 240, 280, 100), box("r", 0, 245, 140, 140)],
+      [down("pq", "q"), down("pr", "r")],
+    );
+    const placed = placeConnectionLabels(document);
+    const points = routedConnectionIn(document, document.connections[1]!, document.objects[0]!, document.objects[2]!).points!;
+    const corner = points.find((point) => point.x === 70)!;
+    const top = placed.get("pr")!.y - connectionLabelChipMetrics("request").height / 2;
+    expect(placed.get("pr")!.x).toBe(70);
+    expect(placed.get("pq")!.y).toBe(placed.get("pr")!.y);
+    expect(top - corner.y).toBeGreaterThanOrEqual(4);
+    expect(blockedLabelIds(document)).toEqual([]);
+  });
+
+  it("brings the chips of long runs to the chip of a short run", () => {
+    // The short run is x 200..500; the two long runs are x 200..2000, with their middles at x = 1100.
+    const document = doc(
+      [box("a", 0, 0), box("b", 500, 0), box("c", 0, 100), box("d", 2000, 100), box("e", 0, 200), box("f", 2000, 200)],
+      [
+        wire("ab", "a", "b", "short"),
+        wire("cd", "a", "b", "long", { from: { objectId: "c", anchor: "right" }, to: { objectId: "d", anchor: "left" } }),
+        wire("ef", "a", "b", "long", { from: { objectId: "e", anchor: "right" }, to: { objectId: "f", anchor: "left" } }),
+      ],
+    );
+    const placed = placeConnectionLabels(document);
+    const column = placed.get("ab")!.x;
+    expect([placed.get("cd")!.x, placed.get("ef")!.x]).toEqual([column, column]);
+    // Nearer the middle of the short run than its arrowhead.
+    expect(column - 350).toBeLessThan(500 - column);
+  });
+
+  it("leaves a pinned chip out of the column", () => {
+    const document = doc(
+      [box("a", 0, 0), box("b", 500, 0), box("c", 0, 100), box("d", 700, 100)],
+      [
+        wire("ab", "a", "b", "first", { labelPosition: { along: 0.25 } }),
+        wire("cd", "a", "b", "second", { from: { objectId: "c", anchor: "right" }, to: { objectId: "d", anchor: "left" } }),
+      ],
+    );
+    const placed = placeConnectionLabels(document);
+    expect(placed.get("ab")).toEqual({ x: 200, y: 30 });
+    expect(placed.get("cd")).toEqual({ x: 400, y: 130 });
+  });
+
+  it("carries the chip of a wire that leaves a section in the white space, with line on both sides", () => {
+    // The gap between the frames is x 300..400; the wire's middle, x = 580, is inside the second frame.
+    const document = doc(
+      [section("s", -40, -80, 340, 200), section("t", 400, -80, 640, 200), box("a", 180, 0), box("b", 880, 0)],
+      [wire("ab", "a", "b", "ok")],
+    );
+    const point = placeConnectionLabels(document).get("ab")!;
+    const { width } = connectionLabelChipMetrics("ok");
+    expect(point.y).toBe(30);
+    expect(point.x - width / 2).toBeGreaterThanOrEqual(300 + 16);
+    expect(point.x + width / 2).toBeLessThanOrEqual(400 - 16);
+  });
+
+  it("keeps the chip in the white space when the gap is too tight for line on both sides", () => {
+    // The same gap, x 300..400, and a chip that leaves less than 16px a side.
+    const document = doc(
+      [section("s", -40, -80, 340, 200), section("t", 400, -80, 640, 200), box("a", 180, 0), box("b", 880, 0)],
+      [wire("ab", "a", "b", "request")],
+    );
+    const point = placeConnectionLabels(document).get("ab")!;
+    const { width } = connectionLabelChipMetrics("request");
+    expect(width).toBeGreaterThan(100 - 2 * 16);
+    expect(point.x - width / 2).toBeGreaterThan(300);
+    expect(point.x + width / 2).toBeLessThan(400);
+    expect(blockedLabelIds(document)).toEqual([]);
+  });
+
+  it("lines up the chips of downward wires whose chips sit near each other, in one row", () => {
+    // Two wires down, 300 apart: further than 240, but their chips on one row leave less than 240 between them.
+    const down = (id: string, from: string, to: string) =>
+      wire(id, "a", "b", "request", { from: { objectId: from, anchor: "bottom" }, to: { objectId: to, anchor: "top" } });
+    const document = doc(
+      [box("p", 0, 0), box("q", 0, 360), box("r", 300, 0), box("s", 300, 560)],
+      [down("pq", "p", "q"), down("rs", "r", "s")],
+    );
+    const placed = placeConnectionLabels(document);
+    expect(300 - connectionLabelChipMetrics("request").width).toBeLessThan(240);
+    expect(placed.get("pq")!.y).toBe(placed.get("rs")!.y);
+    expect(blockedLabelIds(document)).toEqual([]);
+  });
+
+  it("leaves side-by-side chips in their own gaps when one line would put one inside a section", () => {
+    // Two rows 220 apart. The top wire crosses a gap at x 300..400, the bottom one a gap at x 700..800.
+    const document = doc(
+      [
+        section("s", -40, -80, 340, 200), section("t", 400, -80, 640, 200), box("a", 180, 0), box("b", 880, 0),
+        section("u", -40, 140, 740, 200), section("v", 800, 140, 240, 200), box("c", 180, 220), box("d", 880, 220),
+      ],
+      [wire("ab", "a", "b", "request"), wire("cd", "c", "d", "request")],
+    );
+    const placed = placeConnectionLabels(document);
+    const { width } = connectionLabelChipMetrics("request");
+    expect(placed.get("ab")!.x - width / 2).toBeGreaterThan(300);
+    expect(placed.get("ab")!.x + width / 2).toBeLessThan(400);
+    expect(placed.get("cd")!.x - width / 2).toBeGreaterThan(700);
+    expect(placed.get("cd")!.x + width / 2).toBeLessThan(800);
+  });
+
+  it("lines up each pair of chips in its own gap when two pairs sit side by side", () => {
+    // Four level runs. The top two cross a gap at x 400..600, the bottom two a gap at x 800..1000.
+    const row = (index: number, y: number) => [box(`a${index}`, 180, y), box(`b${index}`, 1180, y)];
+    const document = doc(
+      [
+        section("s", -40, -80, 440, 300), section("t", 600, -80, 800, 300), ...row(0, 0), ...row(1, 100),
+        section("u", -40, 240, 840, 340), section("v", 1000, 240, 400, 340), ...row(2, 320), ...row(3, 420),
+      ],
+      [0, 1, 2, 3].map((index) =>
+        wire(`e${index}`, "a", "b", index % 2 ? "longer request" : "request", {
+          from: { objectId: `a${index}`, anchor: "right" }, to: { objectId: `b${index}`, anchor: "left" },
+        })),
+    );
+    const placed = placeConnectionLabels(document);
+    expect(placed.get("e0")!.x).toBe(placed.get("e1")!.x);
+    expect(placed.get("e2")!.x).toBe(placed.get("e3")!.x);
+    expect(Math.abs(placed.get("e0")!.x - 500)).toBeLessThan(20);
+    expect(Math.abs(placed.get("e2")!.x - 900)).toBeLessThan(20);
+  });
+
+  it("lines the chips up inside the section when one of them has no place in the white space", () => {
+    // Both wires leave section s at x = 600. The top one ends 40px on, at b: no room for its chip outside s.
+    // The bottom one runs on to x = 810 and down to d, so on its own its chip sits in the white space.
+    const objects = [section("s", -40, -80, 640, 400), box("a", 0, 0), box("b", 640, 0), box("c", 0, 200), box("d", 760, 400)];
+    const top = wire("ab", "a", "b", "request");
+    const bottom = wire("cd", "a", "b", "request", { from: { objectId: "c", anchor: "right" }, to: { objectId: "d", anchor: "top" } });
+    expect(placeConnectionLabels(doc(objects, [bottom])).get("cd")!.x).toBeGreaterThan(600);
+    const placed = placeConnectionLabels(doc(objects, [top, bottom]));
+    expect(placed.get("cd")).toEqual({ x: placed.get("ab")!.x, y: 230 });
+    expect(placed.get("ab")!.x).toBeLessThan(600);
+  });
+
+  // a's right side to c's top: across to x = 450, then down. The middle of the wire is the corner.
+  const elbow = (labelPosition?: InteractiveCanvasConnection["labelPosition"]) =>
+    doc([A, box("c", 400, 380)], [wire("ac", "a", "c", "request", { to: { objectId: "c", anchor: "top" }, labelPosition })]);
+  const CORNER = { x: 450, y: 30 };
+  /** Whether the "request" chip on `point` sits on one straight run of the elbow, 12px or more from its corner. */
+  function onOneRun(point: { x: number; y: number }): boolean {
+    const { width, height } = connectionLabelChipMetrics("request");
+    const across = point.y === CORNER.y && point.x + width / 2 <= CORNER.x - 12;
+    const down = point.x === CORNER.x && point.y - height / 2 >= CORNER.y + 12;
+    return across || down;
+  }
+
+  it("moves a chip off a bend onto a straight run, clear of the corner", () => {
+    const document = elbow();
+    const points = routedConnectionIn(document, document.connections[0]!, document.objects[0]!, document.objects[1]!).points!;
+    expect(points).toContainEqual(CORNER);
+    expect(onOneRun(placeConnectionLabels(document).get("ac")!)).toBe(true);
+    expect(blockedLabelIds(document)).toEqual([]);
+  });
+
+  it("moves a pin on a bend to the nearest straight run and keeps a pin beside its wire", () => {
+    // The two runs are the same length, so a pin at 0.5 is on the corner.
+    const moved = placeConnectionLabels(elbow({ along: 0.5 })).get("ac")!;
+    expect(onOneRun(moved)).toBe(true);
+    expect(Math.hypot(moved.x - CORNER.x, moved.y - CORNER.y)).toBeLessThan(30);
+    const beside = placeConnectionLabels(elbow({ along: 0.5, offset: 40 })).get("ac")!;
+    expect(Math.hypot(beside.x - CORNER.x, beside.y - CORNER.y)).toBeCloseTo(40, 5);
+  });
+});
+
 describe("placed label parity", () => {
   it("stage chip, static SVG chip, painted bounds and chipFor share one center", () => {
     const document = doc([A, B, UNDER_MIDDLE], [wire("ab", "a", "b", "request")]);

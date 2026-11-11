@@ -4,34 +4,67 @@
  * bounds, the inline label editor, and tighten_wires through
  * board/lints/geometry.ts chipFor), so the app and the PNG agree.
  *
- * The renderer, not the drawer, keeps chips clear. For each labeled
- * connection, in document order (so two chips never both claim one spot: a
- * chip placed earlier is an obstacle to every chip after it), candidate
- * centers are sampled along the connection's own routed wire. Each candidate
- * chip is scored, in order:
+ * The renderer, not the drawer, keeps chips clear. Each chip is first placed
+ * on its own, and a chip placed earlier is an obstacle to every chip after
+ * it (so two chips never both claim one spot): the drawer's `move_label`
+ * pins, then every other chip, each in document order. Then the chips of
+ * side-by-side runs (below) move to one line. Candidate centers are sampled
+ * along the connection's own routed wire. Each candidate chip is scored, in
+ * order:
  *
  * 1. blocked: 1 when it hits anything — a box's painted face (an icon's tile
  *    and caption, else the box; its own endpoints too, except on a
  *    self-loop), a sticky, a section's title chip, a chip already placed,
- *    another wire running through it for more than EDGE_RUN_TOLERANCE_PX, a
- *    section frame edge, or the last ARROW_KEEP_OUT_PX of any wire's arrowed
- *    end (its own too);
+ *    another wire running through it for more than EDGE_RUN_TOLERANCE_PX (a
+ *    junction, a shared trunk, a crossing), a section frame edge, or the
+ *    last ARROW_KEEP_OUT_PX of any wire's arrowed end (its own too);
  * 2. covered: how much it covers (overlap area, a wire run, frame edge or
  *    arrow zone as an 8px band),
  *    so with no clear spot the least-bad one wins — a chip squeezed between
  *    its endpoints keeps bridging both rather than sliding onto one;
- * 3. near misses (clear chips only): the hit count for the chip grown
+ * 3. bend: 1 when the chip does not fit on one straight segment;
+ * 4. foreign (clear chips only): 1 when it sits inside a section that does
+ *    not hold both of its wire's ends, so a wire that leaves a section
+ *    carries its chip in the white space outside it, also when the gap is
+ *    tight (Ford: "all the tags could then be, like, in the white space or
+ *    something so that there's a consistent tag location");
+ * 5. crowded (clear chips only): 1 when a section frame edge is within
+ *    FRAME_AIR_PX of it, so a chip between two frames shows line on both
+ *    sides and reads as one gap's chip, or a corner of its own wire within
+ *    BEND_AIR_PX, so a chip moved off a bend does not stop at its rounding;
+ * 6. near misses (clear chips only): the hit count for the chip grown
  *    NEAR_MISS_PX a side, so a clear chip also keeps some air;
- * 4. bend: 1 when the chip does not fit on one straight segment;
- * 5. distance from the preferred point.
+ * 7. distance from the preferred point.
  *
  * The preferred point is `labelPointFor`: the arc-length midpoint, or the
  * drawer's `move_label` pin. The lowest score wins, so a clean board keeps
  * its middle chips (moved only off a bend onto the nearest straight run).
  *
- * Pin rule: a pinned chip with no hits stays exactly at its pin, bend or
- * not. A pinned chip that hits something moves only to a clear spot, the
- * one nearest the pin; with no clear spot it keeps its pin.
+ * Side-by-side runs. Ford: "making sure that there is enough space for the,
+ * like, tags, making sure the tags line up in line." A wire's label runs are
+ * its horizontal and vertical segments that fit its chip. Two runs sit side
+ * by side when they point the same way, leave between GROUP_CHIP_AIR_PX and
+ * GROUP_MAX_APART_PX between their chips, and one line across them holds
+ * both chips clear. A sweep across the runs chains neighbours into a
+ * group while one line still holds every chip clear; a wire with runs in two
+ * groups stays in the larger. A group's chips all take one line, clear of
+ * every chip outside the group (those do not move): the one with the fewest
+ * chips against a corner of their own wire, then the fewest foreign, then
+ * crowded, then near-miss chips, then the least total move from each wire's
+ * preferred point. A line never takes a chip out of the
+ * white space into a section its wire only passes, unless a chip of the
+ * group has no place in the white space and the line holds them all inside
+ * such sections. Last, a group left with no such line (its runs cross two
+ * white gaps) is cut into the stretches that have one. Pinned chips join no
+ * group.
+ *
+ * Pin rule: a pinned chip with no hits stays exactly at its pin, unless it
+ * lies on its wire across a bend: then it moves to the nearest clear spot on
+ * a straight run, when the wire has one. A pinned chip that hits something
+ * moves only to a clear spot, the one nearest the pin; with no clear spot it
+ * keeps its pin. A pin is not scored for a frame edge or foreign, but one
+ * that moves keeps its air: NEAR_MISS_PX to what it must not cover and
+ * BEND_AIR_PX to the corners of its wire, when it can.
  *
  * When no candidate is clear, a chip on a vertical run may also slide
  * sideways, as long as its wire stays SIDE_WIRE_INSET_PX inside its edge: a
@@ -41,6 +74,11 @@
  * When still no candidate is clear (dense boards), an unpinned chip takes the
  * least-bad one; `blockedLabelIds` counts what is left (canvas_check's
  * LAYOUT block). No lint judges chips.
+ *
+ * `labelledGapPx` is the other half: the room a gap needs for the chips of
+ * the wires that cross it, which `arrange` flow and make-room
+ * (state/section-grow.ts) size their gutters by. `arrange_section` sizes the
+ * gap between two nodes by the same LABELLED_GAP_AIR_PX.
  *
  * Results are cached per (objects array, connections array, style value,
  * measuring-backend switch): documents are immutable, so one board version is
@@ -60,7 +98,13 @@ import { iconGlyphBoxPx } from "../objects/text-slots";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
 import { onBackendChange } from "../theme/text-measure";
 import { connectionLabelChipMetrics } from "./label-chip";
-import { labelPointFor, routeConnection, routeConnectionOnBoard, type RoutedConnection } from "./routing";
+import {
+  CONNECTOR_END_GAP_PX,
+  labelPointFor,
+  routeConnection,
+  routeConnectionOnBoard,
+  type RoutedConnection,
+} from "./routing";
 
 interface Rect { x: number; y: number; width: number; height: number }
 
@@ -76,6 +120,47 @@ export const EDGE_RUN_TOLERANCE_PX = 8;
 export const ARROW_KEEP_OUT_PX = 24;
 /** How far inside a chip's edge its own wire stays when the chip slides sideways off a vertical run. */
 const SIDE_WIRE_INSET_PX = 12;
+/** The line a chip prefers to show between itself and a section frame edge. */
+const FRAME_AIR_PX = 16;
+/** The line a chip prefers to show between itself and a corner of its own wire. */
+const BEND_AIR_PX = 12;
+/** Two label runs whose chips on one line leave more than this between them are not side by side. */
+const GROUP_MAX_APART_PX = 240;
+/** The air two chips on one line across their runs keep between them: what the 26px chips of two lanes 30px apart leave. */
+const GROUP_CHIP_AIR_PX = 4;
+/** How far apart the lines a group may share are tried. */
+const GROUP_LINE_STEP_PX = 2;
+/**
+ * The gap a labelled wire needs past its chip's length: 24px of air before the
+ * chip, ARROW_KEEP_OUT_PX after it for the arrowhead, and the end gap the
+ * wire leaves at each box. 68px at the default end gap.
+ */
+export const LABELLED_GAP_AIR_PX = 24 + ARROW_KEEP_OUT_PX + 2 * CONNECTOR_END_GAP_PX;
+
+/**
+ * The clear space the gap between two sets of boxes needs along `axis` for
+ * the label chips of the wires that join them: the longest chip's length
+ * along the axis (its width along x, its height along y) plus
+ * LABELLED_GAP_AIR_PX. 0 when no labelled wire joins them.
+ */
+export function labelledGapPx(
+  document: Pick<InteractiveCanvasDocument, "connections">,
+  a: ReadonlySet<string>,
+  b: ReadonlySet<string>,
+  axis: "x" | "y",
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): number {
+  let need = 0;
+  for (const connection of document.connections) {
+    if (!connection.label?.trim()) continue;
+    const { objectId: from } = connection.from;
+    const { objectId: to } = connection.to;
+    if (!((a.has(from) && b.has(to)) || (b.has(from) && a.has(to)))) continue;
+    const chip = connectionLabelChipMetrics(connection.label, canvasStyle);
+    need = Math.max(need, (axis === "x" ? chip.width : chip.height) + LABELLED_GAP_AIR_PX);
+  }
+  return need;
+}
 
 /**
  * Where an object's box paints: its geometry, except a tile-style icon,
@@ -182,14 +267,20 @@ const BOUNDARY_EPSILON_PX = 0.01;
 const ROUTE_EPSILON_PX = 0.5;
 
 /**
- * Points along the wire, with whether the chip fits there on one straight
- * run: SAMPLE_STEP_PX apart, each segment's middle, and, for each obstacle
- * the chip's path along a segment meets, the two centers where the chip's
- * edge just clears it — so a gap narrower than the step is still found.
+ * An obstacle, how far along the wire the chip may still overlap it and stay
+ * clear (a wire's EDGE_RUN_TOLERANCE_PX), and the air the chip prefers to
+ * keep from it (a frame edge's FRAME_AIR_PX).
  */
-/** An obstacle and how far along the wire the chip may still overlap it and stay clear (a wire's EDGE_RUN_TOLERANCE_PX). */
-interface Obstacle { rect: Rect; slack: number }
+interface Obstacle { rect: Rect; slack: number; air: number }
 
+/**
+ * Points along the wire, with whether the chip fits there on one straight
+ * run: SAMPLE_STEP_PX apart, each segment's middle, the two centers where
+ * the chip just fits on the segment, and, for each obstacle the chip's path
+ * along a segment meets, the two centers where the chip's edge just clears
+ * it (and where it keeps the obstacle's air) — so a gap narrower than the
+ * step is still found.
+ */
 function candidatesAlong(points: readonly CanvasPoint[], width: number, height: number, obstacles: readonly Obstacle[]): Candidate[] {
   const out: Candidate[] = [];
   for (let i = 1; i < points.length; i += 1) {
@@ -207,6 +298,7 @@ function candidatesAlong(points: readonly CanvasPoint[], width: number, height: 
     });
     for (let d = 0; d <= length; d += SAMPLE_STEP_PX) out.push(at(d));
     out.push(at(length / 2));
+    if (length >= half * 2) out.push(at(half), at(length - half));
     // Everything the chip sweeps over moving from a to b.
     const swept: Rect = {
       x: Math.min(a.x, b.x) - width / 2,
@@ -214,7 +306,7 @@ function candidatesAlong(points: readonly CanvasPoint[], width: number, height: 
       width: Math.abs(b.x - a.x) + width,
       height: Math.abs(b.y - a.y) + height,
     };
-    for (const { rect, slack } of obstacles) {
+    for (const { rect, slack, air } of obstacles) {
       if (!intersectsInclusive(swept, rect)) continue;
       // The obstacle's extent along the segment.
       const along = [rect.x, rect.x + rect.width].flatMap((x) =>
@@ -228,6 +320,7 @@ function candidatesAlong(points: readonly CanvasPoint[], width: number, height: 
       for (const take of slack > 0 ? [slack, slack / 2] : []) {
         edges.push(lo + take - BOUNDARY_EPSILON_PX, hi - take + BOUNDARY_EPSILON_PX);
       }
+      if (air > 0) edges.push(lo - air - BOUNDARY_EPSILON_PX, hi + air + BOUNDARY_EPSILON_PX);
       for (const d of edges) {
         if (d >= 0 && d <= length) out.push(at(d));
       }
@@ -410,15 +503,15 @@ function computePlacements(
   // reads as in neither section — Ford: "for the Text Bobs on lines to make
   // it so that they aren't, like, ideally on borders and such"), and each
   // wire's arrowed ends.
-  const lines: Wire[] = [];
-  for (const object of document.objects) {
-    if (object.type !== "section") continue;
+  const sections = document.objects.filter((object) => object.type === "section");
+  const frames: Wire[] = sections.map((object) => {
     const { x, y, width, height } = object.geometry;
     const frame = [
       { x, y }, { x: x + width, y }, { x: x + width, y: y + height }, { x, y: y + height }, { x, y },
     ];
-    lines.push({ id: object.id, points: frame, bounds: boundsOf(frame) });
-  }
+    return { id: object.id, points: frame, bounds: boundsOf(frame) };
+  });
+  const arrows: Wire[] = [];
   for (const connection of document.connections) {
     const routed = routes.get(connection.id);
     if (!routed) continue;
@@ -430,93 +523,162 @@ function computePlacements(
     ];
     for (const end of ends) {
       const zone = lastRun(end, ARROW_KEEP_OUT_PX);
-      if (zone.length >= 2) lines.push({ id: connection.id, points: zone, bounds: boundsOf(zone) });
+      if (zone.length >= 2) arrows.push({ id: connection.id, points: zone, bounds: boundsOf(zone) });
     }
   }
+  const lines = [...frames, ...arrows];
 
-  const chips: Rect[] = [];
+  /** `id` and every section around it. */
+  const chainOf = (id: string): Set<string> => {
+    const chain = new Set<string>();
+    for (let at = entry.byId.get(id); at && !chain.has(at.id); at = at.parentId ? entry.byId.get(at.parentId) : undefined) {
+      chain.add(at.id);
+    }
+    return chain;
+  };
+  const labels: Label[] = [];
   for (const connection of document.connections) {
     const label = connection.label?.trim() ? connection.label : null;
     const routed = routes.get(connection.id);
     if (!label || !routed) continue;
     const { width, height } = connectionLabelChipMetrics(label, canvasStyle);
-    const selfLoop = connection.from.objectId === connection.to.objectId;
+    const to = chainOf(connection.to.objectId);
     const points = routed.points ?? [routed.start, routed.end];
-
-    const rectAt = (center: CanvasPoint, margin: number): Rect => ({
-      x: center.x - width / 2 - margin,
-      y: center.y - height / 2 - margin,
-      width: width + margin * 2,
-      height: height + margin * 2,
+    labels.push({
+      connection,
+      points,
+      corners: points.slice(1, -1).filter((at, index) => {
+        const before = points[index]!;
+        const after = points[index + 2]!;
+        return Math.abs((at.x - before.x) * (after.y - at.y) - (at.y - before.y) * (after.x - at.x)) > ROUTE_EPSILON_PX;
+      }),
+      width,
+      height,
+      selfLoop: connection.from.objectId === connection.to.objectId,
+      preferred: labelPointFor(routed, connection),
+      pinned: connection.labelPosition !== undefined,
+      home: new Set([...chainOf(connection.from.objectId)].filter((id) => to.has(id))),
     });
-    // How many things the chip grown `margin` a side touches, and how much
-    // of them it covers (overlap area; a wire's run counts as a band
-    // WIRE_BAND_PX wide).
-    const hits = (center: CanvasPoint, margin = 0): { count: number; covered: number } => {
-      const rect = rectAt(center, margin);
-      let count = 0;
-      let covered = 0;
-      for (const face of faces) {
-        if (selfLoop && face.id === connection.from.objectId) continue;
-        const area = face.rects.reduce((sum, painted) => sum + overlapArea(rect, painted), 0);
-        if (area > 0) {
-          count += 1;
-          covered += area;
-        }
+  }
+
+  const chips = new Map<Label, Rect>();
+  const rectAt = ({ width, height }: Label, center: CanvasPoint, margin = 0): Rect => ({
+    x: center.x - width / 2 - margin,
+    y: center.y - height / 2 - margin,
+    width: width + margin * 2,
+    height: height + margin * 2,
+  });
+  // How many things the chip grown `margin` a side touches, and how much
+  // of them it covers (overlap area; a wire's run counts as a band
+  // WIRE_BAND_PX wide). `others` are the chips it must keep off: every chip
+  // placed so far, unless the caller names fewer.
+  const hits = (
+    label: Label, center: CanvasPoint, margin = 0, others: Iterable<Rect> = chips.values(),
+  ): { count: number; covered: number } => {
+    const rect = rectAt(label, center, margin);
+    let count = 0;
+    let covered = 0;
+    for (const face of faces) {
+      if (label.selfLoop && face.id === label.connection.from.objectId) continue;
+      const area = face.rects.reduce((sum, painted) => sum + overlapArea(rect, painted), 0);
+      if (area > 0) {
+        count += 1;
+        covered += area;
       }
-      for (const chip of chips) {
-        const area = overlapArea(rect, chip);
-        if (area > 0) {
-          count += 1;
-          covered += area;
-        }
+    }
+    for (const chip of others) {
+      const area = overlapArea(rect, chip);
+      if (area > 0) {
+        count += 1;
+        covered += area;
       }
-      for (const wire of wires) {
-        if (wire.id === connection.id) continue;
-        const run = wireRunInRect(wire, rect);
-        if (run > EDGE_RUN_TOLERANCE_PX) {
-          count += 1;
-          covered += run * WIRE_BAND_PX;
-        }
+    }
+    for (const wire of wires) {
+      if (wire.id === label.connection.id) continue;
+      const run = wireRunInRect(wire, rect);
+      if (run > EDGE_RUN_TOLERANCE_PX) {
+        count += 1;
+        covered += run * WIRE_BAND_PX;
       }
-      for (const line of lines) {
-        const run = wireRunInRect(line, rect);
-        if (run > 0) {
-          count += 1;
-          covered += run * WIRE_BAND_PX;
-        }
+    }
+    for (const line of lines) {
+      const run = wireRunInRect(line, rect);
+      if (run > 0) {
+        count += 1;
+        covered += run * WIRE_BAND_PX;
       }
-      return { count, covered };
-    };
+    }
+    return { count, covered };
+  };
+  /** Whether a corner of the chip's own wire is in the chip or within `air` of it. */
+  const tightToCorner = (label: Label, center: CanvasPoint, air = BEND_AIR_PX): boolean => {
+    const turn = rectAt(label, center, air);
+    return label.corners.some((corner) =>
+      corner.x > turn.x && corner.x < turn.x + turn.width && corner.y > turn.y && corner.y < turn.y + turn.height);
+  };
+  /** Whether the chip is inside a section its wire only passes. */
+  const passingThrough = (label: Label, center: CanvasPoint): boolean => {
+    const rect = rectAt(label, center);
+    return sections.some((section) => !label.home.has(section.id) && intersects(rect, section.geometry));
+  };
+  /** Where a clear chip would rather not sit: inside a section its wire only passes, tight to a frame edge or a corner of its wire, short of air. */
+  const taste = (
+    label: Label, center: CanvasPoint, others?: Iterable<Rect>,
+  ): [foreign: number, crowded: number, nearMisses: number] => {
+    const aired = rectAt(label, center, FRAME_AIR_PX);
+    return [
+      passingThrough(label, center) ? 1 : 0,
+      frames.some((frame) => wireRunInRect(frame, aired) > 0) || tightToCorner(label, center) ? 1 : 0,
+      hits(label, center, NEAR_MISS_PX, others).count,
+    ];
+  };
+  const take = (label: Label, center: CanvasPoint): void => {
+    result.set(label.connection.id, center);
+    chips.set(label, rectAt(label, center));
+  };
+
+  const placeAlone = (label: Label): void => {
+    const { connection, points, width, height, preferred, pinned } = label;
     const scoreAt = (point: CanvasPoint, bend: number): Score => {
-      const { count, covered } = hits(point);
+      const { count, covered } = hits(label, point);
+      // Taste matters only once a chip is clear; a blocked chip's ties go to the preferred point.
+      // A pin that moves wants air, to the corner it moves off too, but has no say on frames and sections.
+      const [foreign, crowded, nearMisses] = count > 0
+        ? [0, 0, 0]
+        : pinned ? [0, tightToCorner(label, point) ? 1 : 0, hits(label, point, NEAR_MISS_PX).count] : taste(label, point);
       return [
         count > 0 ? 1 : 0,
         covered,
-        // Air matters only once a chip is clear; a blocked chip ties go to the preferred point.
-        count > 0 ? 0 : hits(point, NEAR_MISS_PX).count,
         bend,
+        foreign,
+        crowded,
+        nearMisses,
         Math.hypot(point.x - preferred.x, point.y - preferred.y),
       ];
     };
 
-    const preferred = labelPointFor(routed, connection);
-    const pinned = connection.labelPosition !== undefined;
     const preferredScore = scoreAt(preferred, bendAt(preferred, points, width, height));
     let best = preferred;
     let bestScore = preferredScore;
-    if (!(pinned && preferredScore[0] === 0)) {
+    // A clear pin stays, unless it lies on its wire across a bend (a pin
+    // moved off the wire is the drawer's own spot).
+    const stays = pinned && preferredScore[0] === 0 && (preferredScore[2] === 0 || !!connection.labelPosition?.offset);
+    if (!stays) {
       const obstacles: Obstacle[] = [
-        ...faces.flatMap((face) => (selfLoop && face.id === connection.from.objectId ? [] : face.rects)),
-        ...chips,
-      ].map((rect) => ({ rect, slack: 0 }));
+        ...faces.flatMap((face) => (label.selfLoop && face.id === connection.from.objectId ? [] : face.rects)),
+        ...chips.values(),
+      ].map((rect) => ({ rect, slack: 0, air: 0 }));
       for (const other of wires) {
         if (other.id === connection.id) continue;
-        for (const rect of segmentBoxes(other.points)) obstacles.push({ rect, slack: EDGE_RUN_TOLERANCE_PX });
+        for (const rect of segmentBoxes(other.points)) obstacles.push({ rect, slack: EDGE_RUN_TOLERANCE_PX, air: 0 });
       }
-      for (const line of lines) {
-        for (const rect of segmentBoxes(line.points)) obstacles.push({ rect, slack: 0 });
+      for (const frame of frames) {
+        for (const rect of segmentBoxes(frame.points)) obstacles.push({ rect, slack: 0, air: FRAME_AIR_PX });
       }
+      for (const arrow of arrows) {
+        for (const rect of segmentBoxes(arrow.points)) obstacles.push({ rect, slack: 0, air: 0 });
+      }
+      for (const corner of label.corners) obstacles.push({ rect: { ...corner, width: 0, height: 0 }, slack: 0, air: BEND_AIR_PX });
       for (const candidate of candidatesAlong(points, width, height, obstacles)) {
         const score = scoreAt(candidate.point, candidate.bend);
         if (lexLess(score, bestScore)) {
@@ -533,18 +695,171 @@ function computePlacements(
           }
         }
       }
-      // A pin moves only to a clear spot: never to leave a bend, never to a
-      // spot that is merely less bad.
+      // A pin moves only to a clear spot, never to one that is merely less bad.
       if (pinned && bestScore[0] !== 0) {
         best = preferred;
         bestScore = preferredScore;
       }
     }
     if (bestScore[0] !== 0) blocked.push(connection.id);
-    result.set(connection.id, best);
-    chips.push(rectAt(best, 0));
+    take(label, best);
+  };
+
+  // Each chip on its own first: the pins, then the rest.
+  const free = labels.filter((label) => !label.pinned);
+  for (const label of labels) {
+    if (label.pinned) placeAlone(label);
   }
-  return { points: result, blocked };
+  free.forEach(placeAlone);
+
+  // Then the side-by-side runs: one sweep across the runs of each direction.
+  const groups: Array<{ runs: Run[]; lines: Set<number> }> = [];
+  /** The lines across a run where its chip is clear of the board. */
+  const clearLines = new Map<Run, number[]>();
+  for (const horizontal of [true, false]) {
+    const runs = free.flatMap(labelRuns).filter((run) => run.horizontal === horizontal)
+      .sort((a, b) => a.at - b.at || a.lo - b.lo);
+    const open: typeof groups = [];
+    for (const run of runs) {
+      const clear: number[] = [];
+      for (let line = Math.ceil(run.lo / GROUP_LINE_STEP_PX) * GROUP_LINE_STEP_PX; line <= run.hi; line += GROUP_LINE_STEP_PX) {
+        if (hits(run.label, centerOn(run, line), 0, []).count === 0) clear.push(line);
+      }
+      clearLines.set(run, clear);
+      let join: { group: (typeof groups)[number]; lines: Set<number> } | null = null;
+      for (const group of open) {
+        const last = group.runs[group.runs.length - 1]!;
+        const between = run.at - last.at - (run.across + last.across) / 2;
+        if (between < GROUP_CHIP_AIR_PX || between > GROUP_MAX_APART_PX) continue;
+        if (group.runs.some((member) => member.label === run.label)) continue;
+        const shared = new Set(clear.filter((line) => group.lines.has(line)));
+        if (shared.size > 0 && (!join || shared.size > join.lines.size)) join = { group, lines: shared };
+      }
+      if (join) {
+        join.group.runs.push(run);
+        join.group.lines = join.lines;
+      } else {
+        open.push({ runs: [run], lines: new Set(clear) });
+      }
+    }
+    groups.push(...open);
+  }
+  // A group's chips move to one line, clear of every chip outside the group
+  // (those stay where they are). The larger group first, so a wire with runs
+  // in two stays in the larger; the smaller keeps the runs that still sit
+  // side by side without it. Twice, so a group with no line the first time
+  // gets one more try with the runs the other groups left it. Then once
+  // more, with a chain that still has no line cut into its stretches.
+  const grouped = new Set<Label>();
+  /** The best line across `runs` that holds all their chips, or null when no line does. */
+  const lineFor = (runs: Run[]): number | null => {
+    const members = new Set(runs.map((run) => run.label));
+    const others = [...chips].flatMap(([label, rect]) => (members.has(label) ? [] : [rect]));
+    // A chip in the white space stays there. One exception: when a chip of the group has no
+    // place in the white space, a line may hold them all inside sections their wires only
+    // pass. Ford asked for "a consistent tag location", so the one place for them all wins.
+    const white = runs.filter((run) => !passingThrough(run.label, result.get(run.label.connection.id)!));
+    let best: number | null = null;
+    let bestScore: number[] = [];
+    for (const line of clearLines.get(runs[0]!)!) {
+      if (runs.some((run) => !clearLines.get(run)!.includes(line) || hits(run.label, centerOn(run, line), 0, others).count > 0)) continue;
+      const inside = runs.filter((run) => passingThrough(run.label, centerOn(run, line)));
+      if (white.some((run) => inside.includes(run)) && (inside.length < runs.length || white.length === runs.length)) continue;
+      const score = [0, 0, 0, 0, 0];
+      for (const run of runs) {
+        const center = centerOn(run, line);
+        // First, the chips that sit against a corner of their own wire: a line clear of the bends wins.
+        if (tightToCorner(run.label, center, NEAR_MISS_PX)) score[0]! += 1;
+        taste(run.label, center, others).forEach((value, index) => (score[index + 1]! += value));
+        // Counted in run lengths: a chip on a short run has little room, so the chips of long runs come to it.
+        score[4]! += ((center.x - run.label.preferred.x) ** 2 + (center.y - run.label.preferred.y) ** 2) / runLength(run) ** 2;
+      }
+      if (best === null || lexLess(score, bestScore)) {
+        best = line;
+        bestScore = score;
+      }
+    }
+    return best;
+  };
+  /** A chain with no line of its own (its runs cross two white gaps), cut into the stretches that have one. */
+  const stretches = (chain: Run[]): Run[][] => {
+    if (chain.length < 3 || lineFor(chain) !== null) return [chain];
+    const cut: Run[][] = [[]];
+    for (const run of chain) {
+      const stretch = cut[cut.length - 1]!;
+      if (stretch.length === 0 || lineFor([...stretch, run]) !== null) stretch.push(run);
+      else cut.push([run]);
+    }
+    return cut;
+  };
+  const bySize = groups.filter(({ runs }) => runs.length >= 2).sort((a, b) => b.runs.length - a.runs.length);
+  for (const [turn, group] of [...bySize, ...bySize, ...bySize].entries()) {
+    const chains: Run[][] = [[]];
+    for (const run of group.runs) {
+      if (grouped.has(run.label)) continue;
+      const chain = chains[chains.length - 1]!;
+      if (chain.length > 0 && run.at - chain[chain.length - 1]!.at - (run.across + chain[chain.length - 1]!.across) / 2 > GROUP_MAX_APART_PX) chains.push([run]);
+      else chain.push(run);
+    }
+    for (const runs of turn < 2 * bySize.length ? chains : chains.flatMap(stretches)) {
+      const line = runs.length < 2 ? null : lineFor(runs);
+      if (line === null) continue;
+      for (const run of runs) {
+        grouped.add(run.label);
+        take(run.label, centerOn(run, line));
+      }
+    }
+  }
+  const moved = new Set([...grouped].map((label) => label.connection.id));
+  // Document order, whichever pass placed the chip.
+  const order = new Map(labels.map((label, index) => [label.connection.id, index]));
+  return {
+    points: new Map([...result].sort(([a], [b]) => order.get(a)! - order.get(b)!)),
+    blocked: blocked.filter((id) => !moved.has(id)).sort((a, b) => order.get(a)! - order.get(b)!),
+  };
+}
+
+/** A labelled wire as the placement reads it. */
+interface Label {
+  connection: InteractiveCanvasConnection;
+  points: CanvasPoint[];
+  /** The points where the wire turns. */
+  corners: CanvasPoint[];
+  width: number;
+  height: number;
+  selfLoop: boolean;
+  /** The arc-length midpoint, or the drawer's pin. */
+  preferred: CanvasPoint;
+  pinned: boolean;
+  /** The sections that hold both of the wire's ends. */
+  home: ReadonlySet<string>;
+}
+
+/** A straight run of a wire that fits its chip: the chip's center may sit from `lo` to `hi` along it. */
+interface Run { label: Label; horizontal: boolean; at: number; lo: number; hi: number; across: number }
+
+function labelRuns(label: Label): Run[] {
+  const runs: Run[] = [];
+  for (let i = 1; i < label.points.length; i += 1) {
+    const a = label.points[i - 1]!;
+    const b = label.points[i]!;
+    const horizontal = Math.abs(a.y - b.y) <= ROUTE_EPSILON_PX;
+    if (horizontal === (Math.abs(a.x - b.x) <= ROUTE_EPSILON_PX)) continue;
+    const half = (horizontal ? label.width : label.height) / 2;
+    const lo = Math.min(horizontal ? a.x : a.y, horizontal ? b.x : b.y) + half;
+    const hi = Math.max(horizontal ? a.x : a.y, horizontal ? b.x : b.y) - half;
+    if (hi < lo) continue;
+    runs.push({ label, horizontal, at: horizontal ? a.y : a.x, lo, hi, across: horizontal ? label.height : label.width });
+  }
+  return runs;
+}
+
+function runLength(run: Run): number {
+  return run.hi - run.lo + (run.horizontal ? run.label.width : run.label.height);
+}
+
+function centerOn(run: Run, line: number): CanvasPoint {
+  return run.horizontal ? { x: line, y: run.at } : { x: run.at, y: line };
 }
 
 /** The last `length` px of `points`, from its end back: the stretch an arrowhead paints over. */
@@ -578,7 +893,7 @@ function overlapArea(a: Rect, b: Rect): number {
   return w > 0 && h > 0 ? w * h : 0;
 }
 
-type Score = [blocked: number, covered: number, nearMisses: number, bend: number, distance: number];
+type Score = [blocked: number, covered: number, bend: number, foreign: number, crowded: number, nearMisses: number, distance: number];
 
 function lexLess(a: readonly number[], b: readonly number[]): boolean {
   for (let i = 0; i < a.length; i += 1) {

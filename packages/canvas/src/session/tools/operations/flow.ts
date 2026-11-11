@@ -2,8 +2,8 @@
  * `arrange` · flow — the gesture over flowLayout (../flow.ts).
  *
  * `arrange {ids, flow: {axis, gap?}}` lays sibling sections and free nodes out
- * in the reading order they sit in, every gutter one gap, the empty space
- * packed out. It is the one call for a board that filled up: `move` and
+ * in the reading order they sit in, every gutter one gap (wider where its
+ * label chips need the room), the empty space packed out. It is the one call for a board that filled up: `move` and
  * `arrange` `space` shift one box or one run, and a section that grew has
  * pushed its neighbours (state/section-grow.ts, makeRoom), so the gutters end
  * up every width. Flow sets them all in one edit.
@@ -43,7 +43,7 @@ export const ArrangeFlow = Type.Object(
         "The reading direction. x keeps the rows the boxes sit in and reads each left to right; y keeps the columns and reads each top to bottom.",
     }),
     gap: nullableNumber(
-      "The clear space between neighbouring boxes, along and across the axis, in board units. Omit it for the house gutter: 200 when a section is listed, 100 for free nodes.",
+      "The clear space between neighbouring boxes, along and across the axis, in board units. Omit it for the house gutter: 200 when a section is listed, 100 for free nodes. A gutter that labelled wires cross is made wider when their label chips need more.",
     ),
   },
   { additionalProperties: false },
@@ -62,7 +62,7 @@ function flowGap(document: InteractiveCanvasDocument, roots: readonly string[], 
 
 function laidOut(ctx: OpContext, ids: readonly string[], flow: ArrangeFlowParams): { gap: number; result: FlowResult | null } {
   const gap = flowGap(ctx.draft, moveRootIds(ctx.draft, ids), flow.gap);
-  return { gap, result: flowLayout(ctx.draft, ids, { axis: flow.axis, gap }) };
+  return { gap, result: flowLayout(ctx.draft, ids, { axis: flow.axis, gap, canvasStyle: ctx.canvasStyle }) };
 }
 
 /** The area two frames share, 0 when they are clear of each other. */
@@ -102,7 +102,7 @@ export function flowErrors(ctx: OpContext, ids: readonly string[], flow: Arrange
       ];
 }
 
-/** The `flow` mode: the listed siblings in reading order, every gutter one gap. */
+/** The `flow` mode: the listed siblings in reading order, every gutter one gap or the room its label chips need. */
 export function flowRun(ctx: OpContext, ids: readonly string[], flow: ArrangeFlowParams): OpOutcome {
   const { gap, result } = laidOut(ctx, ids, flow);
   if (!result || result.movedIds.length === 0) {
@@ -128,7 +128,9 @@ export function flowRun(ctx: OpContext, ids: readonly string[], flow: ArrangeFlo
   return {
     status: "applied",
     draft: document,
-    summary: `arrange flow ${flow.axis} gap ${gap} · ${flow.axis === "x" ? "rows" : "columns"} ${lines}`
+    summary: `arrange flow ${flow.axis} gap ${gap}`
+      + (result.widened > 0 ? ` (${result.widened} wider for ${result.widened === 1 ? "its label chip" : "their label chips"})` : "")
+      + ` · ${flow.axis === "x" ? "rows" : "columns"} ${lines}`
       + (carried > 0 ? ` (carrying ${carried})` : ""),
     held: new Map(moveRootIds(ctx.draft, ids).map((id) => [id, before.get(id)!.parentId ?? null])),
   };
