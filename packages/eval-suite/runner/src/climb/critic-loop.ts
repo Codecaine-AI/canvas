@@ -20,7 +20,7 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from
 import { basename, dirname, resolve } from "node:path";
 
 import {
-  SEVERITIES, critiqueBoard, critiqueSummary, loadReviewCanvas, parseCount, parseGrid, parseRounds,
+  CRITIC_FLAGS, SEVERITIES, critiqueBoard, critiqueSummary, loadReviewCanvas, parseCritic,
   type CriticOptions, type EarlierFinding, type MergedFinding, type ReviewCanvas, type Severity,
 } from "./critic.ts";
 import { drawerArgs, drawerFlags, replyOf, runDrawer, sessionIdOf, type DrawerRun } from "./drawer.ts";
@@ -304,19 +304,19 @@ export function loopSummary(record: LoopRecord): string {
 
 /**
  * `climb critic --board <path> --out <dir> [--critic-grid auto|3x2]
- * [--critic-count n] [--revise on|off] [--critic-rounds n] [--settings path]
- * [--timeout-min n]`: the critic step alone, on a board some drawer made
+ * [--critic-region-max px] [--critic-count n] [--revise on|off]
+ * [--critic-rounds n] [--settings path] [--timeout-min n]`: the critic step alone, on a board some drawer made
  * before. `--revise off` (the default) is one review of the board file.
  * `--revise on` is the whole loop on a copy in `<out>/canvases/`.
  */
 export async function runCritique(argv: string[]): Promise<void> {
-  const flags = parseFlags(argv, ["--board", "--out", "--critic-grid", "--critic-count", "--critic-rounds", "--revise", "--settings", "--timeout-min"]);
+  const flags = parseFlags(argv, ["--board", "--out", ...CRITIC_FLAGS, "--revise", "--settings", "--timeout-min"]);
   const boardFlag = flags.get("--board");
   const outFlag = flags.get("--out");
   if (!boardFlag || !outFlag) throw new Error("climb critic needs --board <canvas.json> and --out <dir>");
   const revise = flags.get("--revise") ?? "off";
   if (revise !== "on" && revise !== "off") throw new Error(`--revise must be on or off, not ${revise}`);
-  const critic = { grid: parseGrid(flags.get("--critic-grid")), count: parseCount(flags.get("--critic-count")), rounds: parseRounds(flags.get("--critic-rounds")) };
+  const critic = parseCritic(flags);
   const source = resolve(boardFlag);
   if (!existsSync(source)) throw new Error(`No board at ${source}`);
   const outDir = resolve(outFlag);

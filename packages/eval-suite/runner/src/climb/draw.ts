@@ -5,7 +5,7 @@
  * `--critic on` adds the critic loop (critic-loop.ts) after the first pass:
  * the canvas_check lints and the region critics review the board, the drawer
  * revises in the same session (`--resume`), and the review runs again, until
- * a round has no blocker and no should or `--critic-rounds` (3) are spent.
+ * a round has no blocker and no should or `--critic-rounds` (10) are spent.
  * `critic/` in the brief folder keeps each round's board, renders, findings
  * and timings.
  */
@@ -14,7 +14,7 @@ import { resolve } from "node:path";
 
 import { Semaphore } from "../semaphore.ts";
 import { loopSummary, reviewBoard, type LoopRecord } from "./critic-loop.ts";
-import { loadReviewCanvas, parseCount, parseGrid, parseRounds, type CriticOptions, type ReviewCanvas } from "./critic.ts";
+import { CRITIC_FLAGS, loadReviewCanvas, parseCritic, type CriticOptions, type ReviewCanvas } from "./critic.ts";
 import { DRAWER_EFFORT, DRAWER_MODEL, drawerArgs, drawerFlags, runDrawer, sessionIdOf } from "./drawer.ts";
 import {
   DEFAULT_CLIMB_ROOT,
@@ -130,7 +130,7 @@ async function drawOne(options: {
 }
 
 export async function runDraw(argv: string[]): Promise<void> {
-  const flags = parseFlags(argv, ["--round", "--set", "--briefs", "--climb-root", "--brief-dir", "--settings", "--timeout-min", "--critic", "--critic-grid", "--critic-count", "--critic-rounds"]);
+  const flags = parseFlags(argv, ["--round", "--set", "--briefs", "--climb-root", "--brief-dir", "--settings", "--timeout-min", "--critic", ...CRITIC_FLAGS]);
   const round = roundNumber(flags.get("--round"));
   const briefDir = flags.has("--brief-dir") ? resolve(flags.get("--brief-dir")!) : undefined;
   const sets = briefDir ? readSets(resolve(briefDir, "index.json")) : readSets();
@@ -151,7 +151,7 @@ export async function runDraw(argv: string[]): Promise<void> {
   const climbRoot = resolve(flags.get("--climb-root") ?? DEFAULT_CLIMB_ROOT);
   const criticFlag = flags.get("--critic") ?? "off";
   if (criticFlag !== "on" && criticFlag !== "off") throw new Error(`--critic must be on or off, not ${criticFlag}`);
-  const criticOptions = { grid: parseGrid(flags.get("--critic-grid")), count: parseCount(flags.get("--critic-count")), rounds: parseRounds(flags.get("--critic-rounds")) };
+  const criticOptions = parseCritic(flags);
   const critic = criticFlag === "on" ? { options: criticOptions, canvas: await loadReviewCanvas() } : undefined;
 
   const gate = new Semaphore(MAX_PARALLEL);

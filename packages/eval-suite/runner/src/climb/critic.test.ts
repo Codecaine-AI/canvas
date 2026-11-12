@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { criticPrompt, mergeFindings, parseFindings, parseGrid, parseRounds, regionGrid, type Finding } from "./critic.ts";
+import { criticPrompt, mergeFindings, parseCritic, parseFindings, parseGrid, regionGrid, type Finding } from "./critic.ts";
 import { drawerArgs, replyOf, sessionIdOf } from "./drawer.ts";
 
 const finding = (overrides: Partial<Finding>): Finding => ({
@@ -19,11 +19,29 @@ describe("climb critic regions", () => {
     expect(regions[0]!.y + regions[0]!.height).toBeGreaterThan(regions[3]!.y);
   });
 
-  test("auto picks the fewest regions that keep each one readable at 1:1", () => {
+  test("auto picks the fewest regions with a long edge of 900 px or less", () => {
     expect(regionGrid({ x: 0, y: 0, width: 900, height: 600 }, "auto")).toHaveLength(1);
-    const wide = regionGrid({ x: 0, y: 0, width: 3508, height: 1208 }, "auto");
-    expect(wide).toHaveLength(3);
-    expect(Math.max(...wide.map((region) => region.width))).toBeLessThanOrEqual(1400);
+    const camera = { x: -24, y: 256, width: 3508, height: 1208 };
+    const wide = regionGrid(camera, "auto");
+    // 5 columns of 900 px that overlap by 120 px span 3508 px, and 2 rows span 1208 px. At 1400 px the board took 3 regions.
+    expect(wide).toHaveLength(10);
+    expect(Math.max(...wide.flatMap((region) => [region.width, region.height]))).toBeLessThanOrEqual(900);
+    expect(Math.max(...wide.map((region) => region.x + region.width))).toBe(camera.x + camera.width);
+    expect(Math.max(...wide.map((region) => region.y + region.height))).toBe(camera.y + camera.height);
+  });
+
+  test("the region-max flag sets the long edge of an auto region", () => {
+    const camera = { x: 0, y: 0, width: 3508, height: 1208 };
+    const regions = (flags: Record<string, string>) => {
+      const critic = parseCritic(new Map(Object.entries(flags)));
+      return regionGrid(camera, critic.grid, critic.regionMax);
+    };
+    expect(regions({ "--critic-region-max": "1400" })).toHaveLength(3);
+    expect(regions({ "--critic-region-max": "600" })).toHaveLength(24);
+    // A cols x rows grid is the grid: the flag does not cut it finer.
+    expect(regions({ "--critic-grid": "3x2", "--critic-region-max": "600" })).toHaveLength(6);
+    expect(() => regions({ "--critic-region-max": "120" })).toThrow("--critic-region-max");
+    expect(() => regions({ "--critic-region-max": "wide" })).toThrow("--critic-region-max");
   });
 
   test("the grid flag takes auto or cols x rows", () => {
@@ -32,10 +50,11 @@ describe("climb critic regions", () => {
     expect(() => parseGrid("3by2")).toThrow("--critic-grid");
   });
 
-  test("the rounds flag is the loop's budget, 3 unless set", () => {
-    expect(parseRounds(undefined)).toBe(3);
-    expect(parseRounds("1")).toBe(1);
-    expect(() => parseRounds("0")).toThrow("--critic-rounds");
+  test("the loop runs 10 rounds and a review runs 8 critics at once, unless the flags say more or fewer", () => {
+    expect(parseCritic(new Map())).toEqual({ grid: "auto", regionMax: 900, count: 8, rounds: 10 });
+    expect(parseCritic(new Map([["--critic-rounds", "1"], ["--critic-count", "20"]]))).toMatchObject({ count: 20, rounds: 1 });
+    expect(() => parseCritic(new Map([["--critic-rounds", "0"]]))).toThrow("--critic-rounds");
+    expect(() => parseCritic(new Map([["--critic-count", "0"]]))).toThrow("--critic-count");
   });
 
   test("a critic gets the guide crop, what the lint already said and what earlier rounds settled", () => {

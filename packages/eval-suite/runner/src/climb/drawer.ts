@@ -19,7 +19,12 @@ import { CANVAS_REPO_ROOT } from "./paths.ts";
 export const DRAWER_MODEL = "claude-opus-5-5";
 export const DRAWER_EFFORT = "high";
 const MCP_SERVER = "canvas";
-const DEFAULT_TIMEOUT_MINUTES = 45;
+/**
+ * One pass: the first draw, or one revise. Each pass has its own clock, and
+ * nothing times the critic loop as a whole, so more rounds never cut a loop
+ * off. The longest pass of round 2 was a first draw of 49.5 minutes.
+ */
+const DEFAULT_TIMEOUT_MINUTES = 75;
 
 /** The session variables of the Claude Code that launched the climb, which must not leak into a drawer. */
 const PARENT_SESSION_VARIABLES = [
