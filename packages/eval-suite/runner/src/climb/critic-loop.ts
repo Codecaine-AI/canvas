@@ -27,6 +27,7 @@ import {
 } from "./critic.ts";
 import { drawerArgs, drawerFlags, replyOf, runDrawer, sessionIdOf, type DrawerRun } from "./drawer.ts";
 import { parseFlags } from "./paths.ts";
+import type { ProposedCall } from "./review-types.ts";
 import { renderBoardPng, type Lint } from "./render.ts";
 
 export const VERDICTS = ["fixed", "disagree", "declined"] as const;
@@ -48,6 +49,8 @@ export interface LoopFinding {
   fix: string;
   /** The regions whose critics reported it. */
   regions: string[];
+  /** The calls the reviewers proposed for it. A lint has none. */
+  calls: ProposedCall[];
   /** The drawer's answer after its revise pass, or null when it gave none. */
   answer: Answer | null;
 }
@@ -127,14 +130,14 @@ export function roundFindings(ledger: LoopFinding[], review: Pick<Review, "lints
   for (const lint of review.lints) {
     const fresh = {
       source: "check" as const, severity: LINT_SEVERITY[lint.severity] ?? "should", kind: lint.rule,
-      ids: lint.at, labels: [], problem: lint.message, fix: lint.suggestion ?? "", regions: [], answer: null,
+      ids: lint.at, labels: [], problem: lint.message, fix: lint.suggestion ?? "", regions: [], calls: [], answer: null,
     };
     findings.push({ id: raised.get(key(fresh)) ?? `F${next++}`, ...fresh });
   }
   for (const finding of review.findings) {
     findings.push({
       id: `F${next++}`, source: "reviewer", severity: finding.severity, kind: finding.kind,
-      ids: finding.ids, labels: finding.labels, problem: finding.problem, fix: finding.fix, regions: finding.regions, answer: null,
+      ids: finding.ids, labels: finding.labels, problem: finding.problem, fix: finding.fix, regions: finding.regions, calls: finding.calls, answer: null,
     });
   }
   // The sort is stable: a lint stays ahead of the critics' findings of its severity.

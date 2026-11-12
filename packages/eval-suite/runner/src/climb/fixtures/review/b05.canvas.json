@@ -1,0 +1,853 @@
+{
+  "schemaVersion": 1,
+  "id": "05-archon-providers-map",
+  "title": "Archon providers and the kernel",
+  "description": "How Archon calls agents, and where Ford's agent kernel would plug in.\n\n- **Top:** the Archon engine's DAG executor (dag/run-layers.ts) calls `sendQuery()` on the IAgentProvider contract, which yields a Chunk stream that ends in one result chunk (carries `tokens`). The executor reads Capabilities first, before dispatch. Stickies list the chunk types, the capability flags and ExecutionContext.\n- **Middle:** the Providers. Claude Code, Codex and Pi exist today. The agent-kernel provider (violet, dashed wires) is proposed.\n- **Bottom right:** what lives outside Archon (Ford's setup): Token Gateway, which gets the model traffic from every provider, and kernel.spawnAgent, which the kernel provider would wrap.\n- **Bottom left:** one event, two shapes. The workflow_events row the executor appends, and the trace_events envelope the kernel provider would write, joined by a proposed bridge. Pink boxes are the three fields the Archon row lacks.\n\nKey: a solid wire exists today. A dashed violet wire is proposed.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Archon providers and the kernel",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 20,
+        "y": 0,
+        "width": 2500,
+        "height": 1768
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec_engine",
+      "type": "section",
+      "text": "Archon engine · workflows/src/dag",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 160,
+        "y": 420,
+        "width": 400,
+        "height": 340
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "sec_contract",
+      "type": "section",
+      "text": "IAgentProvider contract",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 660,
+        "y": 80,
+        "width": 1380,
+        "height": 648
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "api"
+    },
+    {
+      "id": "sec_records",
+      "type": "section",
+      "text": "One event, two shapes",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 60,
+        "y": 1160,
+        "width": 1400,
+        "height": 568
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "table"
+    },
+    {
+      "id": "sec_providers",
+      "type": "section",
+      "text": "Providers",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 660,
+        "y": 820,
+        "width": 1800,
+        "height": 224
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "plug"
+    },
+    {
+      "id": "sec_ford",
+      "type": "section",
+      "text": "Outside Archon · Ford's setup",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1600,
+        "y": 1160,
+        "width": 860,
+        "height": 500
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "cloud"
+    },
+    {
+      "id": "executor",
+      "type": "icon",
+      "text": "DAG executor · run-layers.ts",
+      "color": "blue",
+      "parentId": "sec_engine",
+      "geometry": {
+        "x": 220,
+        "y": 580,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "send_query",
+      "type": "icon",
+      "text": "sendQuery()",
+      "color": "blue",
+      "parentId": "sec_contract",
+      "geometry": {
+        "x": 732,
+        "y": 580,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "api"
+    },
+    {
+      "id": "chunk_stream",
+      "type": "icon",
+      "text": "Chunk stream",
+      "color": "blue",
+      "parentId": "sec_contract",
+      "geometry": {
+        "x": 1100,
+        "y": 580,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "queue"
+    },
+    {
+      "id": "result_chunk",
+      "type": "rectangle",
+      "text": "result chunk · tokens",
+      "color": "blue",
+      "parentId": "sec_contract",
+      "geometry": {
+        "x": 1600,
+        "y": 592,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "capabilities",
+      "type": "icon",
+      "text": "Capabilities",
+      "color": "blue",
+      "parentId": "sec_contract",
+      "geometry": {
+        "x": 780,
+        "y": 160,
+        "width": 200,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "exec_context",
+      "type": "icon",
+      "text": "ExecutionContext",
+      "color": "blue",
+      "parentId": "sec_contract",
+      "geometry": {
+        "x": 1460,
+        "y": 160,
+        "width": 200,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "container"
+    },
+    {
+      "id": "p_claude",
+      "type": "icon",
+      "text": "Claude Code · claude-agent-sdk query()",
+      "color": "green",
+      "parentId": "sec_providers",
+      "geometry": {
+        "x": 1056,
+        "y": 860,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "brand-claude-code"
+    },
+    {
+      "id": "p_codex",
+      "type": "icon",
+      "text": "Codex · app-server, JSON-RPC stdio",
+      "color": "green",
+      "parentId": "sec_providers",
+      "geometry": {
+        "x": 1380,
+        "y": 860,
+        "width": 360,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "brand-codex"
+    },
+    {
+      "id": "p_pi",
+      "type": "icon",
+      "text": "Pi · pi-coding-agent, session per call",
+      "color": "green",
+      "parentId": "sec_providers",
+      "geometry": {
+        "x": 1780,
+        "y": 860,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "brand-pi"
+    },
+    {
+      "id": "p_kernel",
+      "type": "icon",
+      "text": "agent-kernel provider · proposed",
+      "color": "violet",
+      "parentId": "sec_providers",
+      "geometry": {
+        "x": 732,
+        "y": 860,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "spawn_agent",
+      "type": "icon",
+      "text": "kernel.spawnAgent",
+      "color": "orange",
+      "parentId": "sec_ford",
+      "geometry": {
+        "x": 1780,
+        "y": 1480,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "function"
+    },
+    {
+      "id": "token_gateway",
+      "type": "icon",
+      "text": "Token Gateway · 100.104.171.122:8793",
+      "color": "orange",
+      "parentId": "sec_ford",
+      "geometry": {
+        "x": 1780,
+        "y": 1260,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "wf_row",
+      "type": "icon",
+      "text": "workflow_events row",
+      "color": "blue",
+      "parentId": "sec_records",
+      "geometry": {
+        "x": 220,
+        "y": 1200,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "table"
+    },
+    {
+      "id": "trace_env",
+      "type": "icon",
+      "text": "trace_events envelope",
+      "color": "violet",
+      "parentId": "sec_records",
+      "geometry": {
+        "x": 732,
+        "y": 1200,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "table"
+    },
+    {
+      "id": "miss_container",
+      "type": "rectangle",
+      "text": "no containerId · grouping key",
+      "color": "pink",
+      "parentId": "sec_records",
+      "geometry": {
+        "x": 560,
+        "y": 1580,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "miss_parent",
+      "type": "rectangle",
+      "text": "no parentEventId · no event tree",
+      "color": "pink",
+      "parentId": "sec_records",
+      "geometry": {
+        "x": 860,
+        "y": 1580,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "miss_span",
+      "type": "rectangle",
+      "text": "no spanId · no spans",
+      "color": "pink",
+      "parentId": "sec_records",
+      "geometry": {
+        "x": 1160,
+        "y": 1580,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s_send",
+      "type": "sticky",
+      "text": "`sendQuery(prompt, cwd, resumeSessionId)` → `AsyncGenerator<MessageChunk>`\nagent-provider.ts:290",
+      "color": "yellow",
+      "parentId": "sec_contract",
+      "geometry": {
+        "x": 732,
+        "y": 420,
+        "width": 300,
+        "height": 140
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_chunks",
+      "type": "sticky",
+      "text": "**Chunks:** agent_message_chunk, agent_thought_chunk, tool_call, tool_call_update, compaction, subtask, heartbeat, then one result.\nResult carries `tokens`, not `usage`.\nevents.ts:19-223 · result.ts:57-70",
+      "color": "yellow",
+      "parentId": "sec_contract",
+      "geometry": {
+        "x": 1080,
+        "y": 380,
+        "width": 340,
+        "height": 180
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_caps",
+      "type": "sticky",
+      "text": "**Flags:** sessionResume, sessionFork, structuredOutput (enforced · best-effort · false), mcp, skills, containerExec, costReporting",
+      "color": "yellow",
+      "parentId": "sec_contract",
+      "geometry": {
+        "x": 1000,
+        "y": 160,
+        "width": 340,
+        "height": 140
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_ctx",
+      "type": "sticky",
+      "text": "`host`, or `container` with a `containerId`\nagent-provider.ts:72-80",
+      "color": "yellow",
+      "parentId": "sec_contract",
+      "geometry": {
+        "x": 1680,
+        "y": 180,
+        "width": 300,
+        "height": 100
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_kernel",
+      "type": "sticky",
+      "text": "**Kernel adds:** frozen prompt per spawn, context loaders, state sidecar, trace.db event tree\nkernel/src/index.ts:131,432 · spawnAgent at :204",
+      "color": "yellow",
+      "parentId": "sec_ford",
+      "geometry": {
+        "x": 2120,
+        "y": 1460,
+        "width": 300,
+        "height": 160
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_gateway",
+      "type": "sticky",
+      "text": "Ford's setup on services-01, not Archon code. Each harness points its model base URL here; Archon does not know about it.",
+      "color": "yellow",
+      "parentId": "sec_ford",
+      "geometry": {
+        "x": 2120,
+        "y": 1260,
+        "width": 300,
+        "height": 140
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_wf",
+      "type": "sticky",
+      "text": "**workflow_events**\nworkflow-event.ts:10-19\nid, workflow_run_id, event_type, step_index, step_name, data, created_at, event_order",
+      "color": "yellow",
+      "parentId": "sec_records",
+      "geometry": {
+        "x": 200,
+        "y": 1368,
+        "width": 340,
+        "height": 160
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_trace",
+      "type": "sticky",
+      "text": "**trace_events**\nenvelope.ts:24-46\neventId, containerId, type, source, traceLevel, eventData, agentId, runId, spanId, parentEventId, userId, timestamp",
+      "color": "yellow",
+      "parentId": "sec_records",
+      "geometry": {
+        "x": 720,
+        "y": 1360,
+        "width": 320,
+        "height": 180
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_missing",
+      "type": "sticky",
+      "text": "**The Archon row lacks these three.** A bridge must invent them or lose them.",
+      "color": "yellow",
+      "parentId": "sec_records",
+      "geometry": {
+        "x": 200,
+        "y": 1580,
+        "width": 340,
+        "height": 100
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_legend",
+      "type": "sticky",
+      "text": "**Key**\nSolid wire: exists today\nDashed violet wire: proposed\nBlue: Archon code\nGreen: existing providers\nViolet: proposed\nOrange: outside Archon\nPink: field the Archon row lacks",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 60,
+        "y": 60,
+        "width": 340,
+        "height": 220
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_impl",
+      "type": "sticky",
+      "text": "Each provider implements **IAgentProvider**. Today: Claude Code, Codex, Pi. Proposed: agent-kernel.",
+      "color": "yellow",
+      "parentId": "sec_providers",
+      "geometry": {
+        "x": 2160,
+        "y": 860,
+        "width": 280,
+        "height": 140
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e_calls",
+      "from": {
+        "objectId": "executor"
+      },
+      "to": {
+        "objectId": "send_query"
+      },
+      "label": "calls",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_yields",
+      "from": {
+        "objectId": "send_query"
+      },
+      "to": {
+        "objectId": "chunk_stream"
+      },
+      "label": "yields",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_ends",
+      "from": {
+        "objectId": "chunk_stream"
+      },
+      "to": {
+        "objectId": "result_chunk"
+      },
+      "label": "ends in",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_preflight",
+      "from": {
+        "objectId": "executor",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "capabilities",
+        "anchor": "left"
+      },
+      "label": "preflight before dispatch",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          380,
+          520
+        ],
+        [
+          620,
+          520
+        ],
+        [
+          620,
+          220
+        ]
+      ]
+    },
+    {
+      "id": "e_d_claude",
+      "from": {
+        "objectId": "send_query",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "p_claude",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_d_codex",
+      "from": {
+        "objectId": "send_query",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "p_codex",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_d_pi",
+      "from": {
+        "objectId": "send_query",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "p_pi",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_d_kernel",
+      "from": {
+        "objectId": "send_query",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "p_kernel",
+        "anchor": "top"
+      },
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e_m_claude",
+      "from": {
+        "objectId": "p_claude",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "token_gateway",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1200,
+          1080
+        ],
+        [
+          1940,
+          1080
+        ]
+      ]
+    },
+    {
+      "id": "e_m_codex",
+      "from": {
+        "objectId": "p_codex",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "token_gateway",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1560,
+          1080
+        ],
+        [
+          1940,
+          1080
+        ]
+      ]
+    },
+    {
+      "id": "e_m_pi",
+      "from": {
+        "objectId": "p_pi",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "token_gateway",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_m_kernel",
+      "from": {
+        "objectId": "p_kernel",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "token_gateway",
+        "anchor": "left"
+      },
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          880,
+          1120
+        ],
+        [
+          1520,
+          1120
+        ],
+        [
+          1520,
+          1320
+        ]
+      ]
+    },
+    {
+      "id": "e_wraps",
+      "from": {
+        "objectId": "p_kernel",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "spawn_agent",
+        "anchor": "left"
+      },
+      "label": "wraps",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          880,
+          1120
+        ],
+        [
+          1520,
+          1120
+        ],
+        [
+          1520,
+          1540
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.9
+      }
+    },
+    {
+      "id": "e_appends",
+      "from": {
+        "objectId": "executor"
+      },
+      "to": {
+        "objectId": "wf_row"
+      },
+      "label": "appends one row per event",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_writes",
+      "from": {
+        "objectId": "p_kernel"
+      },
+      "to": {
+        "objectId": "trace_env"
+      },
+      "label": "writes trace.db",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e_bridge",
+      "from": {
+        "objectId": "wf_row"
+      },
+      "to": {
+        "objectId": "trace_env"
+      },
+      "label": "bridge, proposed",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet"
+    }
+  ],
+  "annotations": []
+}

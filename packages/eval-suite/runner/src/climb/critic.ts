@@ -21,6 +21,7 @@ import { resolve } from "node:path";
 import { Semaphore } from "../semaphore.ts";
 import { CANVAS_REPO_ROOT } from "./paths.ts";
 import { loadCanvas, renderBoardPng, type CanvasFile, type CanvasModules, type Lint, type WorldRect } from "./render.ts";
+import type { ProposedCall } from "./review-types.ts";
 
 export const CRITIC_MODEL = "gpt-6.1-sol";
 export const CRITIC_EFFORT = "low";
@@ -72,7 +73,11 @@ export interface Finding {
   /** blocker: a reader misreads it, or it is broken or hidden; should: clearly off, and a tool call fixes it; nit: polish. */
   severity: Severity;
 }
-export interface MergedFinding extends Finding { regions: string[] }
+export interface MergedFinding extends Finding {
+  regions: string[];
+  /** Every distinct call the reviewers of this fault proposed, each with the reviewer that sent it. */
+  calls: ProposedCall[];
+}
 
 export interface Region extends WorldRect { id: string }
 export type GridSpec = "auto" | { cols: number; rows: number };
@@ -340,7 +345,7 @@ export function mergeFindings(byRegion: Array<{ region: string; findings: Findin
     for (const finding of findings) {
       const ids = finding.ids.filter((id) => boardIds.has(id));
       const labels = [...finding.labels, ...finding.ids.filter((id) => !boardIds.has(id))];
-      const entry: MergedFinding = { ...finding, ids, labels, regions: [region] };
+      const entry: MergedFinding = { ...finding, ids, labels, regions: [region], calls: [] };
       const group = groups.find((members) => members.every((member) => member.regions[0] !== region && sameFault(member, entry)));
       if (group) group.push(entry);
       else groups.push([entry]);

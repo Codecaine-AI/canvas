@@ -11,7 +11,7 @@ const lint = (overrides: Partial<Lint> = {}): Lint => ({
   rule: "near-miss", severity: "warning", at: ["a", "b"], message: "b is 20px off a's center line, so w bends", suggestion: "move b by dy -20", ...overrides,
 });
 const seen = (overrides: Partial<MergedFinding> = {}): MergedFinding => ({
-  kind: "routing", ids: ["w"], labels: ["ghost"], problem: "The wire bends twice.", fix: "Route it straight.", severity: "should", regions: ["r01"], ...overrides,
+  kind: "routing", ids: ["w"], labels: ["ghost"], problem: "The wire bends twice.", fix: "Route it straight.", severity: "should", regions: ["r01"], calls: [], ...overrides,
 });
 const review = (overrides: Partial<Review> = {}): Review => ({ reviewMs: 40, renderMs: 4, regions: 2, unparsed: 0, lints: [], findings: [], ...overrides });
 const ran = (reply: string, exitCode: number | null = 0) =>
