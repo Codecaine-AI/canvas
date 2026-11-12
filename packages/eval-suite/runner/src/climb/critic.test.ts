@@ -94,6 +94,31 @@ describe("climb critic findings", () => {
     });
     expect(merged[1]).toMatchObject({ kind: "colour", severity: "should", ids: ["node-c"], regions: ["r01"] });
   });
+
+  test("faults that only share an item stay separate findings, each with its own words", () => {
+    const boardIds = new Set(["wire-a", "wire-b", "wire-c"]);
+    const merged = mergeFindings([
+      { region: "r01", findings: [
+        finding({ ids: ["wire-a", "wire-b"], problem: "Wires a and b cross." }),
+        // One region's critic lists separate faults, even on the same wires.
+        finding({ ids: ["wire-a", "wire-b"], problem: "Wires a and b hide one arrowhead." }),
+      ] },
+      { region: "r02", findings: [
+        finding({ ids: ["wire-b", "wire-c"], problem: "Wires b and c share a segment." }),
+        finding({ ids: [], labels: ["Retry"], problem: "The label sits on a border." }),
+      ] },
+      { region: "r03", findings: [
+        finding({ ids: ["wire-c"], problem: "Wire c takes a detour." }),
+        finding({ ids: [], labels: ["retry"], problem: "The label touches a border." }),
+      ] },
+    ], boardIds);
+    expect(merged.map((entry) => [entry.problem, entry.ids, entry.regions])).toEqual([
+      ["Wires b and c share a segment.", ["wire-b", "wire-c"], ["r02", "r03"]],
+      ["The label sits on a border.", [], ["r02", "r03"]],
+      ["Wires a and b cross.", ["wire-a", "wire-b"], ["r01"]],
+      ["Wires a and b hide one arrowhead.", ["wire-a", "wire-b"], ["r01"]],
+    ]);
+  });
 });
 
 describe("climb drawer session", () => {

@@ -310,33 +310,38 @@ const rank = (finding: { severity: Severity }) => SEVERITIES.indexOf(finding.sev
 const normal = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
 /**
- * One list across regions. Two findings are the same fault when they share
- * a kind and an id (or, with no ids, a label): overlapping regions see the
- * same item. Ids not on the board move to labels. The merged finding keeps
- * the most severe finding's words, every id and label, and every region
- * that reported it; the list runs most severe first, then most regions.
+ * Whether two regions' findings name one fault: one kind, and the ids of one
+ * hold every id of the other (or, with no ids, they share a label). One
+ * shared id is not enough: on a dense board every wire shares an item with
+ * the next, and round 2 folded 16 routing faults of one board into a single
+ * finding that kept the words of one.
+ */
+function sameFault(a: Finding, b: Finding): boolean {
+  if (a.kind !== b.kind || (a.ids.length === 0) !== (b.ids.length === 0)) return false;
+  const within = (few: string[], many: string[]) => few.every((item) => many.includes(item));
+  if (a.ids.length > 0) return within(a.ids, b.ids) || within(b.ids, a.ids);
+  const labels = (finding: Finding) => finding.labels.length > 0 ? finding.labels.map(normal) : [`fix ${normal(finding.fix)}`];
+  return labels(a).some((label) => labels(b).includes(label));
+}
+
+/**
+ * One list across regions: a fault two overlapping regions both see reaches
+ * the drawer once (sameFault). One region's findings stay apart, because its
+ * critic listed them as separate faults. Ids not on the board move to
+ * labels. The merged finding keeps the most severe finding's words, every id
+ * and label, and every region that reported it; the list runs most severe
+ * first, then most regions.
  */
 export function mergeFindings(byRegion: Array<{ region: string; findings: Finding[] }>, boardIds: ReadonlySet<string>): MergedFinding[] {
   const groups: MergedFinding[][] = [];
-  const keyOwner = new Map<string, MergedFinding[]>();
   for (const { region, findings } of byRegion) {
     for (const finding of findings) {
       const ids = finding.ids.filter((id) => boardIds.has(id));
       const labels = [...finding.labels, ...finding.ids.filter((id) => !boardIds.has(id))];
       const entry: MergedFinding = { ...finding, ids, labels, regions: [region] };
-      const keys = ids.length > 0 ? ids.map((id) => `${finding.kind} id ${id}`) : labels.map((label) => `${finding.kind} label ${normal(label)}`);
-      if (keys.length === 0) keys.push(`${finding.kind} fix ${normal(finding.fix)}`);
-      // Join every group this finding shares a key with.
-      const hit = [...new Set(keys.map((key) => keyOwner.get(key)).filter((group): group is MergedFinding[] => group !== undefined))];
-      const group = hit[0] ?? [];
-      if (hit.length === 0) groups.push(group);
-      for (const other of hit.slice(1)) {
-        group.push(...other);
-        groups.splice(groups.indexOf(other), 1);
-        for (const [key, owner] of keyOwner) if (owner === other) keyOwner.set(key, group);
-      }
-      group.push(entry);
-      for (const key of keys) keyOwner.set(key, group);
+      const group = groups.find((members) => members.every((member) => member.regions[0] !== region) && members.some((member) => sameFault(member, entry)));
+      if (group) group.push(entry);
+      else groups.push([entry]);
     }
   }
   const unique = (items: string[]) => [...new Set(items)];
