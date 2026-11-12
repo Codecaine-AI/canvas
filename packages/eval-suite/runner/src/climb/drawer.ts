@@ -1,5 +1,5 @@
 /**
- * The drawer process: one headless Claude Code run (Opus 5.5, medium effort,
+ * The drawer process: one headless Claude Code run (Opus 5.5, high effort,
  * the canvas MCP and nothing else). `climb draw` starts one per brief
  * (draw.ts), and the critic loop resumes its session for each revise pass
  * (critic-loop.ts).
@@ -17,7 +17,7 @@ import { resolve } from "node:path";
 import { CANVAS_REPO_ROOT } from "./paths.ts";
 
 export const DRAWER_MODEL = "claude-opus-5-5";
-export const DRAWER_EFFORT = "medium";
+export const DRAWER_EFFORT = "high";
 const MCP_SERVER = "canvas";
 /**
  * One pass: the first draw, or one revise. Each pass has its own clock, and
