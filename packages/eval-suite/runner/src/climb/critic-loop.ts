@@ -200,19 +200,21 @@ const message = (error: unknown) => error instanceof Error ? error.message : Str
  * critics also read what the drawer declined and do not report it again, so
  * a later board scores lower than a fresh review would score it. An earlier
  * round wins only against that lean. A round that lost a critic's answer
- * undercounts: it cannot win, and as the last round it is kept as it stands.
+ * undercounts. As an earlier round it cannot win. As the last round it loses
+ * only to a full review that scored less than its undercount.
  */
 export function bestRound(rounds: RoundRecord[]): Kept | null {
   const last = rounds.at(-1);
   if (!last) return null;
-  const stay = (reason: string): Kept => ({ round: last.round, restored: false, reason });
-  if (last.unparsed > 0) return stay(`round ${last.round} is the last board, and its review lost ${last.unparsed} of ${last.regions} regions, so its score ${last.score} compares with no other`);
-  const best = rounds.filter((round) => round.unparsed === 0).reduce((low, round) => round.score <= low.score ? round : low);
-  if (best !== last) return { round: best.round, restored: true, reason: `round ${best.round} scored ${best.score}, and the last board (round ${last.round}) scored ${last.score}` };
-  const level = rounds.findLast((round) => round !== last && round.unparsed === 0 && round.score === last.score);
-  return stay(level
-    ? `round ${last.round} is the last board and scored ${last.score}, level with round ${level.round}: a tie keeps the later board`
-    : `round ${last.round} is the last board and scored ${last.score}, the best of the loop`);
+  const full = (round: RoundRecord) => round.unparsed === 0;
+  const orMore = full(last) ? "" : " or more";
+  const best = rounds.filter((round) => full(round) || round === last).reduce((low, round) => round.score <= low.score ? round : low);
+  if (best !== last) return { round: best.round, restored: true, reason: `round ${best.round} scored ${best.score}, and the last board (round ${last.round}) scored ${last.score}${orMore}` };
+  const level = rounds.findLast((round) => round !== last && full(round) && round.score === last.score);
+  let reason = `round ${last.round} is the last board and scored ${last.score}, the best of the loop`;
+  if (!full(last)) reason = `round ${last.round} is the last board. Its review lost ${last.unparsed} of ${last.regions} regions, so it scored ${last.score} or more, and no full review scored less than ${last.score}`;
+  else if (level) reason = `round ${last.round} is the last board and scored ${last.score}, level with round ${level.round}: a tie keeps the later board`;
+  return { round: last.round, restored: false, reason };
 }
 
 /**

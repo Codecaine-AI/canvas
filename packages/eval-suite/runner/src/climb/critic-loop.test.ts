@@ -217,16 +217,20 @@ describe("critic loop keeps its best board", () => {
     expect([better.state.board, tie.state.board, tie.state.restored]).toEqual(["revise 2", "revise 2", []]);
   });
 
-  test("a review that lost a critic's answer undercounts, so its board wins nothing and loses nothing", async () => {
+  test("a review that lost a critic's answer undercounts: early it cannot win, and last it loses only to a lower full score", async () => {
     // Round 2 lost a region and scored 1. It does not beat the last board, which scored 2.
     const early = drawing({ "first pass": 5, "revise 1": 1, "revise 2": 2 }, { "revise 1": 1 });
     expect((await reviewLoop({ budget: 2, ...early.loop })).kept).toMatchObject({ round: 3, restored: false });
-    // The last review lost a region. Its board stays, though round 2 scored lower.
-    const last = drawing({ "first pass": 5, "revise 1": 1, "revise 2": 2 }, { "revise 2": 1 });
+    // The last review lost a region and still found 2 faults. Round 2 found 3 with every region, which may be no worse.
+    const last = drawing({ "first pass": 5, "revise 1": 3, "revise 2": 2 }, { "revise 2": 1 });
     expect((await reviewLoop({ budget: 2, ...last.loop })).kept).toEqual({
-      round: 3, restored: false, reason: "round 3 is the last board, and its review lost 1 of 2 regions, so its score 2 compares with no other",
+      round: 3, restored: false, reason: "round 3 is the last board. Its review lost 1 of 2 regions, so it scored 2 or more, and no full review scored less than 2",
     });
-    expect([early.state.restored, last.state.restored]).toEqual([[], []]);
+    // The last review lost a region and still found 4 faults. Round 2 found 1 with every region: the better board.
+    const worse = drawing({ "first pass": 5, "revise 1": 1, "revise 2": 4 }, { "revise 2": 1 });
+    expect((await reviewLoop({ budget: 2, ...worse.loop })).kept)
+      .toEqual({ round: 2, restored: true, reason: "round 2 scored 1, and the last board (round 3) scored 4 or more" });
+    expect([early.state.restored, last.state.restored, worse.state.board]).toEqual([[], [], "revise 1"]);
   });
 
   test("a failed revise leaves a board the check round scores, and a better earlier board replaces it", async () => {
