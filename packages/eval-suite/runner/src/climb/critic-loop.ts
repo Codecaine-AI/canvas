@@ -9,7 +9,9 @@
  * id (F1, F2, ...) for the whole loop. The drawer revises in its own session
  * and answers each finding: fixed, disagree or declined. The loop stops at
  * the first round with no blocker and no should, or when its budget of rounds
- * is spent.
+ * is spent. A check round then reviews the board the last revise left, so
+ * every board the loop leaves has a score, and the loop keeps the board that
+ * scored best (bestRound).
  *
  * `climb draw --critic on` runs the loop after the drawer's first pass
  * (draw.ts). `climb critic --board <path> --out <dir>` runs one review of a
@@ -20,7 +22,7 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from
 import { basename, dirname, resolve } from "node:path";
 
 import {
-  SEVERITIES, critiqueBoard, critiqueSummary, loadReviewCanvas, parseCount, parseGrid, parseRounds,
+  CRITIC_FLAGS, SEVERITIES, critiqueBoard, critiqueSummary, loadReviewCanvas, parseCritic,
   type CriticOptions, type EarlierFinding, type MergedFinding, type ReviewCanvas, type Severity,
 } from "./critic.ts";
 import { drawerArgs, drawerFlags, replyOf, runDrawer, sessionIdOf, type DrawerRun } from "./drawer.ts";
@@ -63,6 +65,10 @@ export interface Review {
 
 export interface RoundRecord {
   round: number;
+  /** A check round only scores the board a revise pass left: it comes after the budget's last revise, or after a revise that failed, and has no revise. */
+  check: boolean;
+  /** 3 for each blocker and 1 for each should this round found, the lints among them. Lower is better. */
+  score: number;
   /** Wall clock of the review: lints, renders, critics and the merge. */
   reviewMs: number;
   renderMs: number;
@@ -74,7 +80,16 @@ export interface RoundRecord {
   revise: (DrawerRun & { answered: number }) | null;
 }
 
+/** The round whose board the loop left in the board file. */
+export interface Kept {
+  round: number;
+  /** True when that round is not the last: the loop put its snapshot back over the board file. */
+  restored: boolean;
+  reason: string;
+}
+
 export interface LoopRecord {
+  /** The most revise passes. A check round comes on top of it. */
   budget: number;
   rounds: RoundRecord[];
   /**
@@ -83,6 +98,8 @@ export interface LoopRecord {
    */
   stop: "clean" | "budget" | "review-only" | "failed";
   error: string | null;
+  /** Null when the loop could not choose: no drawer, or no review of the last board. */
+  kept: Kept | null;
   durationMs: number;
 }
 
@@ -90,6 +107,8 @@ const LINT_SEVERITY: Record<string, Severity> = { error: "blocker", warning: "sh
 const rank = (finding: { severity: Severity }) => SEVERITIES.indexOf(finding.severity);
 /** A finding the loop does not stop on. */
 const isOpen = (finding: { severity: Severity }) => finding.severity !== "nit";
+const SCORE_WEIGHT: Record<Severity, number> = { blocker: 3, should: 1, nit: 0 };
+const scoreOf = (findings: LoopFinding[]) => findings.reduce((sum, finding) => sum + SCORE_WEIGHT[finding.severity], 0);
 
 /**
  * One round's findings: the lints, then the critics', most severe first.
@@ -173,57 +192,97 @@ export function parseAnswers(reply: string): Map<string, Answer> {
 const message = (error: unknown) => error instanceof Error ? error.message : String(error);
 
 /**
+ * The round whose board the loop keeps, given that the last round reviewed
+ * the board as it stands: the lowest score, and on a tie the later round.
+ *
+ * The score is a sample, not a measure. The critics differ from run to run,
+ * so two reviews of one board can score a few points apart. A later round's
+ * critics also read what the drawer declined and do not report it again, so
+ * a later board scores lower than a fresh review would score it. An earlier
+ * round wins only against that lean. A round that lost a critic's answer
+ * undercounts. As an earlier round it cannot win. As the last round it loses
+ * only to a full review that scored less than its undercount.
+ */
+export function bestRound(rounds: RoundRecord[]): Kept | null {
+  const last = rounds.at(-1);
+  if (!last) return null;
+  const full = (round: RoundRecord) => round.unparsed === 0;
+  const orMore = full(last) ? "" : " or more";
+  const best = rounds.filter((round) => full(round) || round === last).reduce((low, round) => round.score <= low.score ? round : low);
+  if (best !== last) return { round: best.round, restored: true, reason: `round ${best.round} scored ${best.score}, and the last board (round ${last.round}) scored ${last.score}${orMore}` };
+  const level = rounds.findLast((round) => round !== last && full(round) && round.score === last.score);
+  let reason = `round ${last.round} is the last board and scored ${last.score}, the best of the loop`;
+  if (!full(last)) reason = `round ${last.round} is the last board. Its review lost ${last.unparsed} of ${last.regions} regions, so it scored ${last.score} or more, and no full review scored less than ${last.score}`;
+  else if (level) reason = `round ${last.round} is the last board and scored ${last.score}, level with round ${level.round}: a tie keeps the later board`;
+  return { round: last.round, restored: false, reason };
+}
+
+/**
  * The loop itself. `review` is one review of the board as it stands, given
  * the critics' findings of the earlier rounds. `revise` hands a round's
  * findings to the drawer and returns its run and its closing reply.
+ * `restore` puts back the board a round reviewed. The loop calls it when an
+ * earlier round's board scored better than the last one (bestRound).
  *
  * A round is clean when it has no blocker and no should and every critic
- * answered: a critic that timed out or failed did not approve. The last
- * round's findings still go to the drawer, as the one round did before.
+ * answered: a critic that timed out or failed did not approve. The budget's
+ * last round still goes to the drawer, and so does a round whose revise then
+ * fails. A check round reviews what that revise left, and nothing revises it.
  */
 export async function reviewLoop(options: {
   budget: number;
   review(round: number, earlier: EarlierFinding[]): Promise<Review>;
   revise?(round: number, findings: LoopFinding[]): Promise<{ run: DrawerRun; reply: string }>;
+  restore?(round: number): void;
 }): Promise<LoopRecord> {
   const started = Date.now();
   const rounds: RoundRecord[] = [];
-  const done = (stop: LoopRecord["stop"], error: string | null = null): LoopRecord =>
-    ({ budget: options.budget, rounds, stop, error, durationMs: Date.now() - started });
   const ledger = () => rounds.flatMap((record) => record.findings);
-  try {
-    for (let round = 1; round <= options.budget; round += 1) {
-      const review = await options.review(round, ledger().filter((finding) => finding.source === "reviewer").map(earlierFinding));
-      const findings = roundFindings(ledger(), review);
-      const record: RoundRecord = {
-        round, reviewMs: review.reviewMs, renderMs: review.renderMs, regions: review.regions, unparsed: review.unparsed,
-        findings, revise: null,
-      };
-      rounds.push(record);
-      if (!findings.some(isOpen)) {
-        if (review.unparsed === 0) return done("clean");
+  /** True while a revise pass may have changed the board since its last review. */
+  let unreviewed = false;
+  const loop = async (): Promise<Pick<LoopRecord, "stop" | "error">> => {
+    const done = (stop: LoopRecord["stop"], error: string | null = null) => ({ stop, error });
+    /** Why the last revise failed. The next round is then the check round. */
+    let failure: string | null = null;
+    try {
+      for (let round = 1; ; round += 1) {
+        const check = round > options.budget || failure !== null;
+        const review = await options.review(round, ledger().filter((finding) => finding.source === "reviewer").map(earlierFinding));
+        const findings = roundFindings(ledger(), review);
+        const record: RoundRecord = {
+          round, check, score: scoreOf(findings),
+          reviewMs: review.reviewMs, renderMs: review.renderMs, regions: review.regions, unparsed: review.unparsed,
+          findings, revise: null,
+        };
+        rounds.push(record);
+        unreviewed = false;
+        if (failure !== null) return done("failed", failure);
+        const open = findings.some(isOpen);
+        if (!open && review.unparsed === 0) return done("clean");
         if (!options.revise) return done("review-only");
-        continue;
+        if (check || (!open && round === options.budget)) return done("budget");
+        if (!open) continue;
+        unreviewed = true;
+        const { run, reply } = await options.revise(round, findings);
+        const answers = parseAnswers(reply);
+        for (const finding of findings) finding.answer = answers.get(finding.id) ?? null;
+        record.revise = { ...run, answered: findings.filter((finding) => finding.answer).length };
+        if (run.exitCode !== 0) failure = `round ${round}: the revise pass ${run.timedOut ? "timed out" : `exited ${run.exitCode ?? run.signal}`}`;
       }
-      if (!options.revise) return done("review-only");
-      const { run, reply } = await options.revise(round, findings);
-      const answers = parseAnswers(reply);
-      for (const finding of findings) finding.answer = answers.get(finding.id) ?? null;
-      record.revise = { ...run, answered: findings.filter((finding) => finding.answer).length };
-      if (run.exitCode !== 0) {
-        return done("failed", `round ${round}: the revise pass ${run.timedOut ? "timed out" : `exited ${run.exitCode ?? run.signal}`}`);
-      }
+    } catch (error) {
+      return done("failed", failure === null ? message(error) : `${failure}; then its check round failed: ${message(error)}`);
     }
-    return done("budget");
-  } catch (error) {
-    return done("failed", message(error));
-  }
+  };
+  const outcome = await loop();
+  const kept = options.restore && !unreviewed ? bestRound(rounds) : null;
+  if (kept?.restored) options.restore!(kept.round);
+  return { budget: options.budget, rounds, ...outcome, kept, durationMs: Date.now() - started };
 }
 
 /** The whole loop's ledger as text: each round's findings, and the drawer's answer under each. */
 export function ledgerText(record: LoopRecord): string {
   const lines = record.rounds.flatMap((round) => [
-    `## Round ${round.round}`,
+    `## Round ${round.round}${round.check ? " (check round: no revise)" : ""} · score ${round.score}`,
     ...(round.findings.length ? [] : ["No findings."]),
     ...round.findings.flatMap((finding) => [
       findingLine(finding),
@@ -231,15 +290,20 @@ export function ledgerText(record: LoopRecord): string {
     ]),
     "",
   ]);
-  return `${lines.join("\n")}Stop: ${record.stop}${record.error ? ` (${record.error})` : ""}\n`;
+  const kept = record.kept ? `Kept: round ${record.kept.round}${record.kept.restored ? ", restored" : ""}. ${sentence(record.kept.reason)}\n` : "";
+  return `${lines.join("\n")}Stop: ${record.stop}${record.error ? ` (${record.error})` : ""}\n${kept}`;
 }
 
 /**
  * The loop on one board file. Writes into `outDir`: `round-<n>/` per round
  * (board.canvas.json and overview.png: the board as that round reviewed it;
  * guides.png, regions/ and critique.json from critic.ts; and
- * revise-transcript.jsonl), after.png (the board after the last revise pass),
- * loop.json (a LoopRecord) and findings.md (the ledger as text).
+ * revise-transcript.jsonl), after.png (the board the loop kept), loop.json (a
+ * LoopRecord) and findings.md (the ledger as text).
+ *
+ * The board file ends as the kept round's board. Each revise pass has exited
+ * by then, and the canvas server saves inside a tool call, so nothing writes
+ * the file after a restore.
  */
 export async function reviewBoard(options: {
   canvas: ReviewCanvas;
@@ -285,6 +349,7 @@ export async function reviewBoard(options: {
       process.stdout.write(`${board}: revise ${round} · exit ${run.exitCode ?? run.signal}${run.timedOut ? " (timed out)" : ""} · ${Math.round(run.durationMs / 1000)} s\n`);
       return { run, reply: replyOf(transcript) };
     }),
+    restore: drawer && ((round) => copyFileSync(resolve(roundDir(round), "board.canvas.json"), boardPath)),
   });
   if (record.rounds.some((round) => round.revise)) {
     writeFileSync(resolve(outDir, "after.png"), renderBoardPng(canvas, canvas.toolkit.openCanvasFile(boardPath), undefined).png);
@@ -297,26 +362,28 @@ export async function reviewBoard(options: {
 export function loopSummary(record: LoopRecord): string {
   const last = record.rounds.at(-1);
   const count = (severity: Severity) => last?.findings.filter((finding) => finding.severity === severity).length ?? 0;
-  return `stop ${record.stop} after ${record.rounds.length} of ${record.budget} rounds`
+  const checks = record.rounds.filter((round) => round.check).length;
+  return `stop ${record.stop} after ${record.rounds.length - checks} of ${record.budget} rounds${checks ? " and a check round" : ""}`
     + ` · last round: ${SEVERITIES.map((severity) => `${count(severity)} ${severity}`).join(", ")}`
+    + `${record.kept ? ` · kept round ${record.kept.round}${record.kept.restored ? " (restored)" : ""}` : ""}`
     + ` · ${Math.round(record.durationMs / 1000)} s${record.error ? ` · ${record.error}` : ""}`;
 }
 
 /**
  * `climb critic --board <path> --out <dir> [--critic-grid auto|3x2]
- * [--critic-count n] [--revise on|off] [--critic-rounds n] [--settings path]
- * [--timeout-min n]`: the critic step alone, on a board some drawer made
+ * [--critic-region-max px] [--critic-count n] [--revise on|off]
+ * [--critic-rounds n] [--settings path] [--timeout-min n]`: the critic step alone, on a board some drawer made
  * before. `--revise off` (the default) is one review of the board file.
  * `--revise on` is the whole loop on a copy in `<out>/canvases/`.
  */
 export async function runCritique(argv: string[]): Promise<void> {
-  const flags = parseFlags(argv, ["--board", "--out", "--critic-grid", "--critic-count", "--critic-rounds", "--revise", "--settings", "--timeout-min"]);
+  const flags = parseFlags(argv, ["--board", "--out", ...CRITIC_FLAGS, "--revise", "--settings", "--timeout-min"]);
   const boardFlag = flags.get("--board");
   const outFlag = flags.get("--out");
   if (!boardFlag || !outFlag) throw new Error("climb critic needs --board <canvas.json> and --out <dir>");
   const revise = flags.get("--revise") ?? "off";
   if (revise !== "on" && revise !== "off") throw new Error(`--revise must be on or off, not ${revise}`);
-  const critic = { grid: parseGrid(flags.get("--critic-grid")), count: parseCount(flags.get("--critic-count")), rounds: parseRounds(flags.get("--critic-rounds")) };
+  const critic = parseCritic(flags);
   const source = resolve(boardFlag);
   if (!existsSync(source)) throw new Error(`No board at ${source}`);
   const outDir = resolve(outFlag);

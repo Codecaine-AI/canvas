@@ -24,14 +24,32 @@ import { loadCanvas, renderBoardPng, type CanvasFile, type CanvasModules, type L
 
 export const CRITIC_MODEL = "gpt-6.1-sol";
 export const CRITIC_EFFORT = "low";
-/** With the renders before it, one review stays under 90 s. A critic that runs out gives no answer. */
+/** One critic's time, from its own start. Rounds 1 and 2 took 24 s at most. A critic that runs out gives no answer. */
 const CRITIC_TIMEOUT_MS = 70_000;
-export const DEFAULT_ROUNDS = 3;
+/**
+ * Ford, on the 3 rounds of round 2: "we need, like, more time for it to kind
+ * of hone in on what's working and what's not", "like we should do like 10
+ * rounds or something".
+ */
+export const DEFAULT_ROUNDS = 10;
 /** The lint whose findings the guide crop tags (G1, G2, ...). */
 const NEAR_MISS_RULE = "near-miss";
-/** The long edge of an "auto" grid region, and the overlap between neighbour regions, in world px. */
-const AUTO_REGION_MAX = 1400;
+/**
+ * The long edge of an "auto" grid region, and the overlap between neighbour
+ * regions, in world px. Ford: "increase the grid breakdown we do so we get
+ * more detail".
+ */
+export const DEFAULT_REGION_MAX = 900;
 const REGION_OVERLAP = 120;
+/** A region must hold more than the overlap it shares with its neighbours. */
+const MIN_REGION_MAX = 300;
+/**
+ * The critics one review runs at once. The 900 px grid cuts a big board into
+ * 20 or more regions, and `climb draw` reviews 5 boards at a time. Rounds 1
+ * and 2 ran at most 9 critics a board, 587 in all, and none failed. 8 a board
+ * keeps a draw near that load: at most 40 Codex processes.
+ */
+export const DEFAULT_COUNT = 8;
 /** The overview outline of the critic's own region, in overview px. */
 const OUTLINE_PX = 4;
 const MAX_FINDINGS_PER_REGION = 10;
@@ -59,7 +77,7 @@ export interface MergedFinding extends Finding { regions: string[] }
 export interface Region extends WorldRect { id: string }
 export type GridSpec = "auto" | { cols: number; rows: number };
 
-export interface CriticOptions { grid: GridSpec; count: number | undefined; rounds: number }
+export interface CriticOptions { grid: GridSpec; regionMax: number; count: number; rounds: number }
 
 /** The canvas modules a review calls: loadCanvas's, and this checkout's guide overlay. */
 export interface ReviewCanvas extends CanvasModules {
@@ -83,9 +101,19 @@ export function parseGrid(value: string | undefined): GridSpec {
   return { cols, rows };
 }
 
-/** `--critic-count <n>`: how many critics run at once. Undefined runs one per region, all at once. */
-export function parseCount(value: string | undefined): number | undefined {
-  if (value === undefined) return undefined;
+/** `--critic-region-max <px>`: the long edge of an "auto" grid region. A `<cols>x<rows>` grid does not read it. */
+export function parseRegionMax(value: string | undefined): number {
+  if (value === undefined) return DEFAULT_REGION_MAX;
+  const regionMax = Number(value);
+  if (!Number.isInteger(regionMax) || regionMax < MIN_REGION_MAX) {
+    throw new Error(`--critic-region-max must be a whole number of px, ${MIN_REGION_MAX} or more (900, ...), not ${value}`);
+  }
+  return regionMax;
+}
+
+/** `--critic-count <n>`: how many critics one review runs at once. */
+export function parseCount(value: string | undefined): number {
+  if (value === undefined) return DEFAULT_COUNT;
   const count = Number(value);
   if (!Number.isInteger(count) || count < 1) throw new Error(`--critic-count must be a whole number of critics (6, ...), not ${value}`);
   return count;
@@ -95,8 +123,20 @@ export function parseCount(value: string | undefined): number | undefined {
 export function parseRounds(value: string | undefined): number {
   if (value === undefined) return DEFAULT_ROUNDS;
   const rounds = Number(value);
-  if (!Number.isInteger(rounds) || rounds < 1) throw new Error(`--critic-rounds must be a whole number of rounds (3, ...), not ${value}`);
+  if (!Number.isInteger(rounds) || rounds < 1) throw new Error(`--critic-rounds must be a whole number of rounds (10, ...), not ${value}`);
   return rounds;
+}
+
+/** The critic flags `climb draw` and `climb critic` share. */
+export const CRITIC_FLAGS = ["--critic-grid", "--critic-region-max", "--critic-count", "--critic-rounds"] as const;
+
+export function parseCritic(flags: Map<string, string>): CriticOptions {
+  return {
+    grid: parseGrid(flags.get("--critic-grid")),
+    regionMax: parseRegionMax(flags.get("--critic-region-max")),
+    count: parseCount(flags.get("--critic-count")),
+    rounds: parseRounds(flags.get("--critic-rounds")),
+  };
 }
 
 /** Equal spans of `count` along `length`, neighbours overlapping by REGION_OVERLAP. */
@@ -110,10 +150,10 @@ function spans(start: number, length: number, count: number): Array<{ start: num
 
 /**
  * Overlapping regions that cover the board camera, row by row. "auto" takes
- * the fewest regions whose long edge is at most AUTO_REGION_MAX.
+ * the fewest regions whose long edge is at most `regionMax`.
  */
-export function regionGrid(camera: WorldRect, grid: GridSpec): Region[] {
-  const fit = (length: number) => length <= AUTO_REGION_MAX ? 1 : Math.ceil((length - REGION_OVERLAP) / (AUTO_REGION_MAX - REGION_OVERLAP));
+export function regionGrid(camera: WorldRect, grid: GridSpec, regionMax = DEFAULT_REGION_MAX): Region[] {
+  const fit = (length: number) => length <= regionMax ? 1 : Math.ceil((length - REGION_OVERLAP) / (regionMax - REGION_OVERLAP));
   const { cols, rows } = grid === "auto" ? { cols: fit(camera.width), rows: fit(camera.height) } : grid;
   const regions: Region[] = [];
   for (const y of spans(camera.y, camera.height, rows)) for (const x of spans(camera.x, camera.width, cols)) {
@@ -270,33 +310,40 @@ const rank = (finding: { severity: Severity }) => SEVERITIES.indexOf(finding.sev
 const normal = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
 /**
- * One list across regions. Two findings are the same fault when they share
- * a kind and an id (or, with no ids, a label): overlapping regions see the
- * same item. Ids not on the board move to labels. The merged finding keeps
- * the most severe finding's words, every id and label, and every region
- * that reported it; the list runs most severe first, then most regions.
+ * Whether two regions' findings name one fault: one kind, and the ids of one
+ * hold every id of the other (or, with no ids, they share a label). One
+ * shared id is not enough: on a dense board every wire shares an item with
+ * the next, and round 2 folded 16 routing faults of one board into a single
+ * finding that kept the words of one.
+ */
+function sameFault(a: Finding, b: Finding): boolean {
+  if (a.kind !== b.kind || (a.ids.length === 0) !== (b.ids.length === 0)) return false;
+  const within = (few: string[], many: string[]) => few.every((item) => many.includes(item));
+  if (a.ids.length > 0) return within(a.ids, b.ids) || within(b.ids, a.ids);
+  const labels = (finding: Finding) => finding.labels.length > 0 ? finding.labels.map(normal) : [`fix ${normal(finding.fix)}`];
+  return labels(a).some((label) => labels(b).includes(label));
+}
+
+/**
+ * One list across regions: a fault two overlapping regions both see reaches
+ * the drawer once. A finding joins a group when it is the same fault as each
+ * member (sameFault), so no chain of part matches joins two faults. One
+ * region's findings stay apart, because its critic listed them as separate
+ * faults. Ids not on the board move to
+ * labels. The merged finding keeps the most severe finding's words, every id
+ * and label, and every region that reported it; the list runs most severe
+ * first, then most regions.
  */
 export function mergeFindings(byRegion: Array<{ region: string; findings: Finding[] }>, boardIds: ReadonlySet<string>): MergedFinding[] {
   const groups: MergedFinding[][] = [];
-  const keyOwner = new Map<string, MergedFinding[]>();
   for (const { region, findings } of byRegion) {
     for (const finding of findings) {
       const ids = finding.ids.filter((id) => boardIds.has(id));
       const labels = [...finding.labels, ...finding.ids.filter((id) => !boardIds.has(id))];
       const entry: MergedFinding = { ...finding, ids, labels, regions: [region] };
-      const keys = ids.length > 0 ? ids.map((id) => `${finding.kind} id ${id}`) : labels.map((label) => `${finding.kind} label ${normal(label)}`);
-      if (keys.length === 0) keys.push(`${finding.kind} fix ${normal(finding.fix)}`);
-      // Join every group this finding shares a key with.
-      const hit = [...new Set(keys.map((key) => keyOwner.get(key)).filter((group): group is MergedFinding[] => group !== undefined))];
-      const group = hit[0] ?? [];
-      if (hit.length === 0) groups.push(group);
-      for (const other of hit.slice(1)) {
-        group.push(...other);
-        groups.splice(groups.indexOf(other), 1);
-        for (const [key, owner] of keyOwner) if (owner === other) keyOwner.set(key, group);
-      }
-      group.push(entry);
-      for (const key of keys) keyOwner.set(key, group);
+      const group = groups.find((members) => members.every((member) => member.regions[0] !== region && sameFault(member, entry)));
+      if (group) group.push(entry);
+      else groups.push([entry]);
     }
   }
   const unique = (items: string[]) => [...new Set(items)];
@@ -345,6 +392,8 @@ export interface CritiqueRecord {
   model: string;
   effort: string;
   grid: { cols: number; rows: number } | "auto";
+  /** The long edge an "auto" grid held its regions to. */
+  regionMax: number;
   count: number;
   startedAt: string;
   /** Wall clock for the whole review: lints, renders, every critic and the merge. */
@@ -418,7 +467,7 @@ export async function critiqueBoard(options: {
   const overviewSvg = canvas.render.renderBoardView(board, { width: overview.size.width, canvasStyle: style }).svg;
 
   const camera = canvas.render.boardCameraAtWorldScale(board, style);
-  const jobs = regionGrid(camera, options.critic.grid).flatMap((region) => {
+  const jobs = regionGrid(camera, options.critic.grid, options.critic.regionMax).flatMap((region) => {
     const inventory = regionInventory(board, region);
     if (inventory.objects.length === 0) return [];
     const png = resolve(regionsDir, `${region.id}.png`);
@@ -445,7 +494,7 @@ export async function critiqueBoard(options: {
   });
   const renderMs = Date.now() - started;
 
-  const count = options.critic.count ?? Math.max(1, jobs.length);
+  const { count } = options.critic;
   const gate = new Semaphore(count);
   const regions = await Promise.all(jobs.map((job) => gate.run(async (): Promise<RegionRecord> => {
     const answer = resolve(regionsDir, `${job.region.id}.json`);
@@ -478,6 +527,7 @@ export async function critiqueBoard(options: {
     model: CRITIC_MODEL,
     effort: CRITIC_EFFORT,
     grid: options.critic.grid,
+    regionMax: options.critic.regionMax,
     count,
     startedAt: new Date(started).toISOString(),
     durationMs: Date.now() - started,

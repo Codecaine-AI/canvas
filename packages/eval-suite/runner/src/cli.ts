@@ -32,7 +32,7 @@ function usage(): string {
     "Usage:",
     "  bun run src/cli.ts judge --run-id <id> [--scenario <name>] [--judge-concurrency 30] [--judge-model <id>] [--judge-base-url <url>] [--judge-effort low]",
     "  bun run src/cli.ts scorecard --run-id <id> [--previous <run-id>]",
-    "  bun run src/cli.ts climb draw --round <n> [--set climb|heldOut|all] [--briefs a,b] [--timeout-min 45] [--settings <claude settings.json>]",
+    "  bun run src/cli.ts climb draw --round <n> [--set climb|heldOut|all] [--briefs a,b] [--timeout-min 75] [--settings <claude settings.json>]",
     "  bun run src/cli.ts climb render --round <n> [--lint-root <canvas checkout>]",
     "  bun run src/cli.ts climb score --round <n> --stage 1|2|3 [--climb-root <dir>] [--sets <sets.json>]",
   ].join("\n");
