@@ -119,6 +119,18 @@ describe("climb critic findings", () => {
       ["Wires a and b hide one arrowhead.", ["wire-a", "wire-b"], ["r01"]],
     ]);
   });
+
+  test("a finding that is part of two faults does not join them into one", () => {
+    const merged = mergeFindings([
+      { region: "r01", findings: [finding({ ids: ["wire-a", "wire-b"], problem: "Wires a and b cross." })] },
+      { region: "r02", findings: [finding({ ids: ["wire-b"], problem: "Wire b cuts a corner." })] },
+      { region: "r03", findings: [finding({ ids: ["wire-b", "wire-c"], problem: "Wires b and c share a segment." })] },
+    ], new Set(["wire-a", "wire-b", "wire-c"]));
+    expect(merged.map((entry) => [entry.problem, entry.ids, entry.regions])).toEqual([
+      ["Wires a and b cross.", ["wire-a", "wire-b"], ["r01", "r02"]],
+      ["Wires b and c share a segment.", ["wire-b", "wire-c"], ["r03"]],
+    ]);
+  });
 });
 
 describe("climb drawer session", () => {

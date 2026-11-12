@@ -326,8 +326,10 @@ function sameFault(a: Finding, b: Finding): boolean {
 
 /**
  * One list across regions: a fault two overlapping regions both see reaches
- * the drawer once (sameFault). One region's findings stay apart, because its
- * critic listed them as separate faults. Ids not on the board move to
+ * the drawer once. A finding joins a group when it is the same fault as each
+ * member (sameFault), so no chain of part matches joins two faults. One
+ * region's findings stay apart, because its critic listed them as separate
+ * faults. Ids not on the board move to
  * labels. The merged finding keeps the most severe finding's words, every id
  * and label, and every region that reported it; the list runs most severe
  * first, then most regions.
@@ -339,7 +341,7 @@ export function mergeFindings(byRegion: Array<{ region: string; findings: Findin
       const ids = finding.ids.filter((id) => boardIds.has(id));
       const labels = [...finding.labels, ...finding.ids.filter((id) => !boardIds.has(id))];
       const entry: MergedFinding = { ...finding, ids, labels, regions: [region] };
-      const group = groups.find((members) => members.every((member) => member.regions[0] !== region) && members.some((member) => sameFault(member, entry)));
+      const group = groups.find((members) => members.every((member) => member.regions[0] !== region && sameFault(member, entry)));
       if (group) group.push(entry);
       else groups.push([entry]);
     }
