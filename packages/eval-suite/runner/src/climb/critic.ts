@@ -40,7 +40,12 @@ import { boardTotals, loadWireModules, wireFacts, type WireFact, type WireModule
 
 export const CRITIC_MODEL = "gpt-6.1-sol";
 export const CRITIC_EFFORT = "low";
-/** One answer's time, from its own start. A reviewer that runs out gives no answer. */
+/**
+ * One answer's time, from its own start. A reviewer that runs out gives no
+ * answer. Measured with 5 boards of 10 to 14 units reviewed at once (55
+ * reviewers, 4 images each): median 27 s, slowest 53 s. A lone section takes 9
+ * to 40 s. 150 s is near 3 times the slowest.
+ */
 const CRITIC_TIMEOUT_MS = 150_000;
 /**
  * Ford, on the 3 rounds of round 2: "we need, like, more time for it to kind
@@ -53,7 +58,10 @@ const NEAR_MISS_RULE = "near-miss";
 /**
  * The reviewers one review runs at once. `climb draw` reviews 5 boards at a
  * time, so 8 a board is at most 40 Codex processes: the load of round 3,
- * where none of 3,397 tile reviews failed to start.
+ * where none of 3,397 tile reviews failed to start. With 5 boards at once the
+ * images take longer than the answers (54 to 64 s a board), so the cap moves
+ * the wall time little: 95 s at 8 a board, 114 s at 4, and no reviewer timed
+ * out at either.
  */
 export const DEFAULT_COUNT = 8;
 const MAX_FINDINGS_PER_UNIT = 10;
