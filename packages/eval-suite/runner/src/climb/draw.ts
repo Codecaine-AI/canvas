@@ -25,7 +25,8 @@ import {
   roundNumber,
 } from "./paths.ts";
 
-const MAX_PARALLEL = 5;
+/** How many briefs draw at once, unless `--parallel <n>` says otherwise. */
+const DEFAULT_PARALLEL = 5;
 
 export interface DrawRecord {
   brief: string;
@@ -130,7 +131,7 @@ async function drawOne(options: {
 }
 
 export async function runDraw(argv: string[]): Promise<void> {
-  const flags = parseFlags(argv, ["--round", "--set", "--briefs", "--climb-root", "--brief-dir", "--settings", "--timeout-min", "--critic", ...CRITIC_FLAGS]);
+  const flags = parseFlags(argv, ["--round", "--set", "--briefs", "--climb-root", "--brief-dir", "--settings", "--timeout-min", "--critic", "--parallel", ...CRITIC_FLAGS]);
   const round = roundNumber(flags.get("--round"));
   const briefDir = flags.has("--brief-dir") ? resolve(flags.get("--brief-dir")!) : undefined;
   const sets = briefDir ? readSets(resolve(briefDir, "index.json")) : readSets();
@@ -154,7 +155,9 @@ export async function runDraw(argv: string[]): Promise<void> {
   const criticOptions = parseCritic(flags);
   const critic = criticFlag === "on" ? { options: criticOptions, canvas: await loadReviewCanvas() } : undefined;
 
-  const gate = new Semaphore(MAX_PARALLEL);
+  const parallel = Number(flags.get("--parallel") ?? DEFAULT_PARALLEL);
+  if (!Number.isInteger(parallel) || parallel < 1) throw new Error(`--parallel must be a whole number of briefs (5, ...), not ${flags.get("--parallel")}`);
+  const gate = new Semaphore(parallel);
   const records = await Promise.all(briefs.map((brief) => gate.run(() =>
     drawOne({ brief, round, climbRoot, settingsPath, timeoutMs, briefDir, critic }))));
   const failed = records.filter((record) => record.exitCode !== 0 || !record.board);
