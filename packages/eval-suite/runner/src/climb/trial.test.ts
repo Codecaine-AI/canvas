@@ -37,8 +37,9 @@ describe("the trial run", () => {
     expect(advice).toHaveLength(1);
     const lines = advice[0]!.lines.join("\n");
     expect(lines).toContain(JSON.stringify(preflight.call));
-    expect(lines).toContain("e_preflight before: 874 px · 3 bends · ports top→left · label at (370, 545)");
-    expect(lines).toContain("e_preflight after:  874 px · 2 bends · ports right→left · label at (521, 391) · crosses none · through none · shared trunk e_calls 227 px");
+    expect(lines).toContain("e_preflight: length 874 px · bends 2 (was 3) · ports right→left (was top→left) · label at (521, 391) (was at (370, 545)) · crosses none · through none · shared trunk e_calls 227 px (was none)");
+    // A wire the call does not name gets only the numbers that changed.
+    expect(lines).toContain("e_calls: label at (706, 640) (was at (614, 640)) · shared trunk e_preflight 227 px (was none)");
     expect(advice[0]!.images).toEqual([resolve(outDir, "trial-F1-1.png")]);
     // Now and the trial, side by side.
     const png = readFileSync(advice[0]!.images[0]!);
@@ -98,15 +99,46 @@ describe("the trial run", () => {
     expect(advice[0]!.lines.join("\n")).toContain("conflicts after earlier calls: F2 call 1");
   });
 
-  test("a new crossing is a flag, and a call that adds the same crossing alone does not conflict", async () => {
-    const { record } = await trial([
+  test("a new crossing is a flag, alone and after an earlier call", async () => {
+    const { advice, record } = await trial([
       { id: "F1", calls: [call(LOOSE_UNIT, "route", { id: "e_bridge", points: [[620, 1260], [620, 1100], [1000, 1100], [1000, 1260]] })] },
       { id: "F2", calls: [call(BOARD_UNIT, "move", { id: "s_legend", by: { dx: 0, dy: 40 } })] },
     ]);
     const crossings = ["new crossing e_bridge × e_m_kernel", "new crossing e_bridge × e_wraps", "new crossing e_bridge × e_writes"];
     const [bridge] = record.calls;
     expect(bridge!.alone.flags.map((flag) => flag.text)).toEqual(crossings);
-    expect(bridge!.sequence).toMatchObject({ applied: true, turn: 2, conflictsWith: [] });
-    expect(bridge!.sequence!.flags.map((flag) => flag.text)).toEqual(crossings);
+    // No earlier call touches e_bridge, so the conflict names every earlier call.
+    expect(bridge!.sequence).toMatchObject({ applied: true, turn: 2, conflictsWith: ["F2 call 1"] });
+    expect(bridge!.sequence!.flags.map((flag) => flag.text)).toEqual([...crossings, "conflicts after earlier calls: F2 call 1"]);
+    expect(advice[0]!.lines.join("\n")).toContain("conflicts after earlier calls: F2 call 1, and the call raises the same flags alone");
+  });
+
+  test("every wire a call changes gets a line", async () => {
+    const { advice, record } = await trial([{ id: "F1", calls: [call(BOARD_UNIT, "move", { id: "sec_providers", by: { dx: 0, dy: 20 } })] }]);
+    const wires = record.calls[0]!.alone.wires.map((wire) => wire.id);
+    expect(wires.length).toBeGreaterThan(8);
+    for (const id of wires) expect(advice[0]!.lines.filter((line) => line.trim().startsWith(`${id}: `))).toHaveLength(1);
+    expect(advice[0]!.lines.join("\n")).toContain("e_d_kernel: length 217 px (was 197 px)");
+  });
+
+  test("a wire that slides along boxes that stay is a change", async () => {
+    const small = resolve(mkdtempSync(resolve(tmpdir(), "trial-test-")), "small.canvas.json");
+    const toolkit = canvas.toolkit as unknown as {
+      createCanvasFile(path: string, title: string): unknown;
+      callToolkitTool(file: unknown, name: string, args: Record<string, unknown>): Promise<{ isError?: boolean }>;
+    };
+    const file = toolkit.createCanvasFile(small, "small");
+    for (const [tool, args] of [
+      ["place_shape", { id: "a0", type: "rectangle", text: "a0", at: [0, 280] }],
+      ["place_shape", { id: "a1", type: "rectangle", text: "a1", at: [600, 280] }],
+      ["connect", { id: "a", from: { objectId: "a0" }, to: { objectId: "a1" } }],
+    ] as const) expect((await toolkit.callToolkitTool(file, tool, args)).isError).toBeFalsy();
+
+    const outDir = mkdtempSync(resolve(tmpdir(), "trial-test-"));
+    const slide = call(LOOSE_UNIT, "change_connection", { id: "a", patch: { from: { objectId: "a0", position: [0.9, 0.9] }, to: { objectId: "a1", position: [0.1, 0.9] } } });
+    const advice = await trialFindings({ canvas, boardPath: small, outDir, findings: [{ id: "F1", calls: [slide] }] });
+    const lines = advice[0]!.lines.join("\n");
+    expect(lines).toContain("a route before: a0 ─(s0 h y=330)→ a1");
+    expect(lines).toContain("a route after:  a0 ─(s0 h y=370)→ a1");
   });
 });

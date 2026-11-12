@@ -33,7 +33,7 @@ interface TrialToolkit {
 /** The board's numbers at one state: its lint results, and the totals canvas_check prints. */
 export interface BoardNumbers { lints: Lint[]; wireLength: number; crossings: number }
 
-/** A wire the call changed. A side is null when the call made or deleted the wire. A wire that only moved with its boxes is not a change. */
+/** A wire the call changed. A side is null when the call made or deleted the wire. A wire that kept its shape and moved with both of its end boxes is not a change. */
 export interface WireChange {
   id: string;
   /** The call's arguments name this wire. */
@@ -150,18 +150,23 @@ const crossingPairs = (state: BoardState) =>
 
 /** What changed between two states of the board, and the flags the change raises. */
 function changesOf(before: BoardState, after: BoardState, call: ReviewCall): Pick<TrialStep, "wires" | "boxes" | "flags"> {
-  const named = new Set(namedIds(call.args, before));
-  const wires = [...new Set([...before.wires.keys(), ...after.wires.keys()])].flatMap((id): WireChange[] => {
-    const [was, now] = [before.wires.get(id) ?? null, after.wires.get(id) ?? null];
-    return was && now && shapeOf(was) === shapeOf(now) ? [] : [{ id, named: named.has(id), before: was, after: now }];
-  });
-  // The wires the call names come first.
-  wires.sort((a, b) => Number(b.named) - Number(a.named));
-
   const offset = (id: string) => {
     const [was, now] = [before.boxes.get(id), after.boxes.get(id)];
     return was && now ? { dx: now.x - was.x, dy: now.y - was.y, resized: was.width !== now.width || was.height !== now.height } : null;
   };
+  /** The wire kept its shape and went where both of its end boxes went. */
+  const carried = (was: WireFact, now: WireFact) => {
+    const [dx, dy] = [now.points[0]!.x - was.points[0]!.x, now.points[0]!.y - was.points[0]!.y];
+    return shapeOf(was) === shapeOf(now) && [was.from, was.to].every((id) => offset(id)?.dx === dx && offset(id)?.dy === dy);
+  };
+  const named = new Set(namedIds(call.args, before));
+  const wires = [...new Set([...before.wires.keys(), ...after.wires.keys()])].flatMap((id): WireChange[] => {
+    const [was, now] = [before.wires.get(id) ?? null, after.wires.get(id) ?? null];
+    return was && now && carried(was, now) ? [] : [{ id, named: named.has(id), before: was, after: now }];
+  });
+  // The wires the call names come first.
+  wires.sort((a, b) => Number(b.named) - Number(a.named));
+
   /** The outermost box above `id` that moved by the same offset. */
   const carrier = (id: string): string | null => {
     const own = offset(id);
@@ -401,8 +406,7 @@ async function runTrials(options: Parameters<typeof trialFindings>[0]): Promise<
     const earlier: CallTrial[] = [];
     for (const [turn, trial] of order.entries()) {
       const ran = turn === 0 ? { step: { ...trial.alone, flags: [...trial.alone.flags], ms: 0 }, after: first!.after } : await step(sequence!, state, trial.call);
-      const alone = new Set(trial.alone.flags.map((flag) => flag.text));
-      const conflict = earlier.length > 0 && (!ran.step.applied || ran.step.flags.some((flag) => !alone.has(flag.text)));
+      const conflict = earlier.length > 0 && (!ran.step.applied || ran.step.flags.length > 0);
       const touched = new Set(touchedIds(trial, base));
       const sharing = earlier.filter((other) => touchedIds(other, base).some((id) => touched.has(id)));
       const conflictsWith = conflict ? (sharing.length > 0 ? sharing : earlier).map((other) => other.name) : [];
@@ -437,14 +441,24 @@ const count = (n: number, noun: string) => `${n} ${noun}${n === 1 ? "" : "s"}`;
 const names = (ids: string[]) => ids.length > 0 ? ids.join(", ") : "none";
 const signed = (n: number) => `${n < 0 ? "−" : "+"}${Math.abs(n)}`;
 
-function wireLine(wire: WireFact | null): string {
-  if (!wire) return "not on the board";
-  return [
-    `${wire.length} px`, count(wire.bends, "bend"), `ports ${wire.ports.from}→${wire.ports.to}`,
-    ...(wire.label ? [`label at (${wire.labelAt!.x}, ${wire.labelAt!.y})`] : []),
-    `crosses ${names(wire.crosses)}`, `through ${names(wire.through)}`,
-    `shared trunk ${names(wire.trunks.map((trunk) => `${trunk.wire} ${trunk.length} px`))}`,
-  ].join(" · ");
+/** A wire's numbers, as the lines print them. */
+const wireNumbers = (wire: WireFact): Array<[string, string]> => [
+  ["length", `${wire.length} px`],
+  ["bends", String(wire.bends)],
+  ["ports", `${wire.ports.from}→${wire.ports.to}`],
+  ["label", wire.label && wire.labelAt ? `at (${wire.labelAt.x}, ${wire.labelAt.y})` : "none"],
+  ["crosses", names(wire.crosses)],
+  ["through", names(wire.through)],
+  ["shared trunk", names(wire.trunks.map((trunk) => `${trunk.wire} ${trunk.length} px`))],
+];
+
+/** One line for a changed wire: each number that changed, with what it was. The wire the call names gets every number. */
+function wireLine({ id, named, before, after }: WireChange): string {
+  if (!after) return `${id}: deleted`;
+  if (!before) return `${id}: new wire · ${wireNumbers(after).map(([key, value]) => `${key} ${value}`).join(" · ")}`;
+  const was = new Map(wireNumbers(before));
+  const numbers = wireNumbers(after).flatMap(([key, value]) => value !== was.get(key) ? [`${key} ${value} (was ${was.get(key)})`] : named ? [`${key} ${value}`] : []);
+  return `${id}: ${numbers.length > 0 ? numbers.join(" · ") : "the route moved, the numbers did not change"}`;
 }
 
 const boxLine = (box: WorldRect | null) => box ? `x ${box.x} · y ${box.y} · ${box.width} × ${box.height}` : "not on the board";
@@ -454,8 +468,6 @@ function boardLine(numbers: BoardNumbers): string {
   return `${count(of("error"), "lint error")} · ${count(of("warning"), "lint warning")} · wire length ${numbers.wireLength} px · ${count(numbers.crossings, "crossing")}`;
 }
 
-/** At most this many changed wires get their two lines. The rest are named. */
-const WIRE_LINES_MAX = 8;
 /** The tool's reply without its echo of the arguments: the call is printed above it. */
 const toolText = (text: string) => text.split("\n\nReceived arguments:")[0]!.split("\n").map((line) => `    ${line}`);
 
@@ -476,19 +488,17 @@ function stepLines(step: TrialStep): string[] {
       ...(carried.length > 0 ? [`  ${box.id} carried ${count(carried.length, "item")} by the same offset: ${carried.join(", ")}`] : []),
     ];
   });
-  const more = step.wires.slice(WIRE_LINES_MAX).map((wire) => wire.id);
   const added = step.board.after.lints.filter((lint) => lint.severity !== "error" && !step.board.before.lints.some((had) => lintKey(had) === lintKey(lint)));
   return [
     ...geometry,
-    ...step.wires.slice(0, WIRE_LINES_MAX).flatMap((wire) => [
-      `  ${wire.id} before: ${wireLine(wire.before)}`,
-      `  ${wire.id} after:  ${wireLine(wire.after)}`,
+    ...(step.boxes.length + step.wires.length === 0 ? ["  no box or wire moved"] : []),
+    ...step.wires.flatMap((wire) => [
+      `  ${wireLine(wire)}`,
       // The route a call asked for is in the call. The route that landed is here, in the segment numbers `route` takes.
       ...(wire.named && wire.before && wire.after && wire.before.route !== wire.after.route
         ? [`  ${wire.id} route before: ${wire.before.route}`, `  ${wire.id} route after:  ${wire.after.route}`]
         : []),
     ]),
-    ...(more.length > 0 ? [`  ${count(more.length, "more wire")} changed: ${more.join(", ")}`] : []),
     `  board before: ${boardLine(step.board.before)}`,
     `  board after:  ${boardLine(step.board.after)}`,
     ...added.map((lint) => `  lint ${lint.severity} added: ${lint.rule} at ${lint.at.join(", ")}: ${lint.message}`),
@@ -511,12 +521,15 @@ function adviceOf(record: TrialRecord, finding: string, outDir: string): Finding
     }
     const turn = trial.sequence!;
     const others = turn.flags.filter((flag) => flag.kind !== "conflict").map((flag) => flag.text);
+    // The design flags every call that raises a flag after earlier calls. The earlier calls did not cause a flag the call raises alone, and the line says so.
+    const alone = new Set(trial.alone.flags.map((flag) => flag.text));
+    const same = turn.applied && others.every((flag) => alone.has(flag)) ? ", and the call raises the same flags alone" : "";
     return [
       head,
       "  applied alone on a copy of the board:",
       ...stepLines(trial.alone).map((line) => `  ${line}`),
-      `  with the other calls, turn ${turn.turn} of ${record.sequence.order.length}: ${turn.applied ? "applied" : `refused: ${turn.flags[0]!.text}`}`
-        + ` · flags: ${names(turn.applied ? others : [])}${turn.conflictsWith.length > 0 ? ` · conflicts after earlier calls: ${turn.conflictsWith.join(", ")}` : ""}`,
+      `  with the other calls, turn ${turn.turn} of ${record.sequence.order.length}: ${turn.applied ? `applied · flags: ${names(others)}` : `refused: ${turn.flags[0]!.text}`}`
+        + `${turn.conflictsWith.length > 0 ? ` · conflicts after earlier calls: ${turn.conflictsWith.join(", ")}${same}` : ""}`,
       ...(turn.applied ? [`    board after this turn: ${boardLine(turn.board.after)}`] : toolText(turn.text)),
       `  image ${trial.image}: now, then the trial. Red marks the old route, label and place, green the ones the engine gave`
         + `${trial.marks.length > 0 ? ", dashed blue the reviewer's sketch" : ""}.`,
