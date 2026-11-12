@@ -3,10 +3,12 @@ import { runCritique } from "./critic-loop.ts";
 import { runDraw } from "./draw.ts";
 import { runRender } from "./render.ts";
 import { runScore } from "./score.ts";
+import { runTrial } from "./trial.ts";
 
 export async function runClimb(argv: string[]): Promise<void> {
   const [command, ...rest] = argv;
   if (command === "draw") await runDraw(rest);
+  else if (command === "trial") await runTrial(rest);
   else if (command === "critic") await runCritique(rest);
   else if (command === "render") await runRender(rest);
   else if (command === "score") await runScore(rest);
