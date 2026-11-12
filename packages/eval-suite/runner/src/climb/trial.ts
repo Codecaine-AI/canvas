@@ -226,15 +226,15 @@ const pointsRect = (points: Array<{ x: number; y: number }>): WorldRect => {
 };
 const markRect = (mark: Mark): WorldRect => "box" in mark ? mark.box : pointsRect(mark.path.map(([x, y]) => ({ x, y })));
 
-/** The rects a wire takes up: its route, its ends and its label chip (the chip's size is an estimate from its text). */
-function wireRects(wire: WireFact, state: BoardState): WorldRect[] {
-  const half = wire.label.length * 4 + 12;
-  return [
-    pointsRect(wire.points),
-    ...[wire.from, wire.to].flatMap((id) => state.boxes.get(id) ?? []),
-    ...(wire.labelAt ? [{ x: wire.labelAt.x - half, y: wire.labelAt.y - 14, width: half * 2, height: 28 }] : []),
-  ];
+/** A wire's label chip. The engine gives the chip's centre: its size is an estimate from its text. */
+function labelRect(wire: WireFact): WorldRect[] {
+  const half = wire.label.length * 4.5 + 9;
+  return wire.label && wire.labelAt ? [{ x: wire.labelAt.x - half, y: wire.labelAt.y - 13, width: half * 2, height: 26 }] : [];
 }
+
+/** The rects a wire takes up: its route, its ends and its label chip. */
+const wireRects = (wire: WireFact, state: BoardState): WorldRect[] =>
+  [pointsRect(wire.points), ...[wire.from, wire.to].flatMap((id) => state.boxes.get(id) ?? []), ...labelRect(wire)];
 
 /** A see-through band over a route, with a ring on each bend: the wire, its dashes and its label chip stay readable under it. */
 function routeMark(points: Point[], colour: string, k: number): string {
@@ -281,23 +281,33 @@ function changeImage(canvas: ReviewCanvas, before: BoardState, after: BoardState
   const { wires, boxes } = trial.alone;
   const own = boxes.filter((box) => box.movedWith === null);
   const named = new Set(namedIds(trial.call.args, before));
+  const states = { before, after };
+  const sides = ["before", "after"] as const;
+  // A wire gets a mark for what moved: its route, its label chip, or both. A wire that only shares a new trunk or gets a new crossing has its numbers in the lines.
+  const moved = (wire: WireChange, part: "points" | "labelAt") => JSON.stringify(wire.before?.[part] ?? null) !== JSON.stringify(wire.after?.[part] ?? null);
   const changed = [
-    ...wires.flatMap((wire) => [...(wire.before ? wireRects(wire.before, before) : []), ...(wire.after ? wireRects(wire.after, after) : [])]),
-    ...own.flatMap((box) => [box.before, box.after].flatMap((rect) => rect ?? [])),
+    ...wires.flatMap((wire) => sides.flatMap((side) => {
+      const fact = wire[side];
+      return !fact ? [] : moved(wire, "points") ? wireRects(fact, states[side]) : moved(wire, "labelAt") ? labelRect(fact) : [];
+    })),
+    ...own.flatMap((box) => sides.flatMap((side) => box[side] ?? [])),
     ...trial.marks.map(markRect),
   ];
-  // A call that changed no wire and no box (a colour, a text): the items it names, or the whole board.
+  // A call that moved no wire and no box (a colour, a text): the items it names, or the whole board.
   const shown = changed.length > 0 ? changed : [...named].flatMap((id) => before.boxes.get(id) ?? (before.wires.has(id) ? wireRects(before.wires.get(id)!, before) : []));
   const frame = frameAround(shown.length > 0 ? shown : [...before.boxes.values()]);
   const { layout, scale } = layoutOf(frame);
   const k = 1 / scale;
-  const wire = wires.find((item) => named.has(item.id));
-  const box = boxes.find((item) => named.has(item.id));
-  const lead = wire ?? box ?? wires[0] ?? boxes[0];
-  const title = (side: "before" | "after") =>
-    !lead ? trial.call.tool : lead === wire || (!box && lead === wires[0]) ? wireTitle(lead.id, (lead as WireChange)[side]) : boxTitle(lead.id, (lead as BoxChange)[side]);
+  // The title bar holds the numbers of the item the call names.
+  const wire = wires.find((item) => named.has(item.id)) ?? (boxes.some((item) => named.has(item.id)) ? undefined : wires[0]);
+  const box = boxes.find((item) => named.has(item.id)) ?? own[0];
+  const title = (side: "before" | "after") => wire ? wireTitle(wire.id, wire[side]) : box ? boxTitle(box.id, box[side]) : trial.call.tool;
   const marks = (side: "before" | "after", colour: string) =>
-    wires.map((item) => item[side] ? routeMark(item[side].points, colour, k) : "").join("")
+    wires.map((item) => {
+      const fact = item[side];
+      if (!fact) return "";
+      return (moved(item, "points") ? routeMark(fact.points, colour, k) : "") + (moved(item, "labelAt") ? labelRect(fact).map((rect) => boxMark(rect, colour, k, 3)).join("") : "");
+    }).join("")
     + own.map((item) => item[side] ? boxMark(item[side], colour, k) : "").join("");
   // The old place stays on the trial panel as a thin red outline: a 20 px move is hard to see across two panels.
   const oldPlaces = own.map((item) => item.before && item.after ? boxMark(item.before, RED, k, 2) : "").join("");
@@ -495,7 +505,7 @@ function adviceOf(record: TrialRecord, finding: string, outDir: string): Finding
       `  with the other calls, turn ${turn.turn} of ${record.sequence.order.length}: ${turn.applied ? "applied" : `refused: ${turn.flags[0]!.text}`}`
         + ` · flags: ${names(turn.applied ? others : [])}${turn.conflictsWith.length > 0 ? ` · conflicts after earlier calls: ${turn.conflictsWith.join(", ")}` : ""}`,
       ...(turn.applied ? [`    board after this turn: ${boardLine(turn.board.after)}`] : toolText(turn.text)),
-      `  image ${trial.image}: now, then the trial. Red marks the old route and the old place, green the route and the place the engine gave`
+      `  image ${trial.image}: now, then the trial. Red marks the old route, label and place, green the ones the engine gave`
         + `${trial.marks.length > 0 ? ", dashed blue the reviewer's sketch" : ""}.`,
     ];
   });
