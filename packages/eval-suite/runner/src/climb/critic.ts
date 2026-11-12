@@ -406,8 +406,11 @@ const CALL_ARGS: Record<(typeof BOARD_CALL_TOOLS)[number], (call: Fields) => Rec
     const modes = [points ? { points } : null, shift ? { shift } : null, call.reset === true ? { reset: true } : null].filter((mode) => mode !== null);
     return isName(call.id) && modes.length === 1 ? { id: call.id, ...modes[0] } : null;
   },
+  // The tool drops the offset with "auto", so an offset from the middle pins the chip at 0.5.
   move_label: (call) => isName(call.id)
-    ? { id: call.id, along: isNumber(call.along) ? call.along : "auto", ...(isNumber(call.offset) ? { offset: call.offset } : {}) }
+    ? isNumber(call.offset)
+      ? { id: call.id, along: isNumber(call.along) ? call.along : 0.5, offset: call.offset }
+      : { id: call.id, along: isNumber(call.along) ? call.along : "auto" }
     : null,
   arrange_section: (call) => {
     const rows = Array.isArray(call.rows) ? call.rows.filter((row) => Array.isArray(row) && row.length > 0) : [];

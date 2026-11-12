@@ -227,7 +227,8 @@ describe("climb review answer", () => {
     expect(decode({ tool: "route", id: "w", points: null, shift: { segment: 1, to: 500 }, reset: null })).toEqual({ id: "w", shift: { segment: 1, to: 500 } });
     expect(decode({ tool: "route", id: "w", points: [], shift: null, reset: true })).toEqual({ id: "w", reset: true });
     expect(decode({ tool: "move_label", id: "w", along: 0.3, offset: null })).toEqual({ id: "w", along: 0.3 });
-    expect(decode({ tool: "move_label", id: "w", along: null, offset: 12 })).toEqual({ id: "w", along: "auto", offset: 12 });
+    expect(decode({ tool: "move_label", id: "w", along: null, offset: 12 })).toEqual({ id: "w", along: 0.5, offset: 12 });
+    expect(decode({ tool: "move_label", id: "w", along: null, offset: null })).toEqual({ id: "w", along: "auto" });
     expect(decode({ tool: "arrange_section", section: "s", rows: [["a", "b"], ["c"]] })).toEqual({ section: "s", rows: [["a", "b"], ["c"]] });
     expect(decode({ tool: "fit_section", id: "s" })).toEqual({ id: "s" });
     // Fields that do not make one call: both of to and by, none of them, 2 route modes, no size.
