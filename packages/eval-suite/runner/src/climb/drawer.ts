@@ -10,7 +10,7 @@
  * `apiKeyHelper`), the only setting bare mode reads from it that matters here.
  */
 import { spawn } from "node:child_process";
-import { createWriteStream, existsSync } from "node:fs";
+import { closeSync, existsSync, openSync } from "node:fs";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
 
@@ -111,24 +111,32 @@ export function replyOf(jsonl: string): string {
 
 export interface DrawerRun { exitCode: number | null; signal: NodeJS.Signals | null; timedOut: boolean; durationMs: number }
 
-/** One drawer process, its stdout to `transcriptPath` and its stderr appended to stderr.log. */
+/**
+ * One drawer process, its stdout to `transcriptPath` and its stderr appended to stderr.log.
+ *
+ * The child writes to the files itself. Through a pipe, a transcript can end
+ * inside a large event (a board image) and lose the closing `result` event,
+ * and with it the drawer's answers.
+ */
 export async function runDrawer(dir: string, args: string[], transcriptPath: string, timeoutMs: number): Promise<DrawerRun> {
   const started = Date.now();
-  const transcript = createWriteStream(transcriptPath);
-  const stderr = createWriteStream(resolve(dir, "stderr.log"), { flags: "a" });
-  const child = spawn("claude", args, { cwd: dir, env: drawerEnv(dir), stdio: ["ignore", "pipe", "pipe"] });
-  child.stdout.pipe(transcript);
-  child.stderr.pipe(stderr);
-  let timedOut = false;
-  const timer = setTimeout(() => {
-    timedOut = true;
-    child.kill("SIGTERM");
-  }, timeoutMs);
-  const [exitCode, signal] = await new Promise<[number | null, NodeJS.Signals | null]>((done, fail) => {
-    child.on("error", fail);
-    child.on("close", (code, sig) => done([code, sig]));
-  });
-  clearTimeout(timer);
-  await Promise.all([transcript, stderr].map((stream) => new Promise((done) => stream.end(done))));
-  return { exitCode, signal, timedOut, durationMs: Date.now() - started };
+  const transcript = openSync(transcriptPath, "w");
+  const stderr = openSync(resolve(dir, "stderr.log"), "a");
+  try {
+    const child = spawn("claude", args, { cwd: dir, env: drawerEnv(dir), stdio: ["ignore", transcript, stderr] });
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      child.kill("SIGTERM");
+    }, timeoutMs);
+    const [exitCode, signal] = await new Promise<[number | null, NodeJS.Signals | null]>((done, fail) => {
+      child.on("error", fail);
+      child.on("close", (code, sig) => done([code, sig]));
+    });
+    clearTimeout(timer);
+    return { exitCode, signal, timedOut, durationMs: Date.now() - started };
+  } finally {
+    closeSync(transcript);
+    closeSync(stderr);
+  }
 }
