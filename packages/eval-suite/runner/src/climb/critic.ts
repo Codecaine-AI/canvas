@@ -170,7 +170,8 @@ const CALL_HELP: Record<(typeof BOARD_CALL_TOOLS)[number], string> = {
   change_connection: "change_connection {id, from: {objectId, anchor}, to: {objectId, anchor}} gives a wire another side (anchor: top, right, bottom, left or center, or null for the router's choice) or another end. Set the end that stays as it is to null.",
   route: "route {id, points: [{x, y}, ...]} sets a wire's corners: the corners between its 2 ports only, in order, every leg horizontal or vertical."
     + " route {id, shift: {segment, to}} slides one numbered segment of the route (s1 is segment 1) to x or y = to."
-    + " route {id, reset: true} hands the wire back to the router. Set exactly one of points, shift and reset.",
+    + " route {id, reset: true} hands the wire back to the router. Set exactly one of points, shift and reset."
+    + " To slide one leg, use shift: the tool refuses a corner list more often.",
   move_label: "move_label {id, along, offset} pins a wire's label chip: along is 0 to 1 along the wire (null for the middle), offset pushes it sideways in px (null for none).",
   arrange_section: "arrange_section {section, rows: [[id, ...], ...]} lays a section's shapes and icons out in rows, in that order.",
   fit_section: "fit_section {id} sizes a section to its contents.",
@@ -185,6 +186,7 @@ function answerHelp(tools: readonly (typeof BOARD_CALL_TOOLS)[number][]): string
     "The call tools:",
     ...tools.map((tool) => `- ${CALL_HELP[tool]}`),
     "A finding carries one call. When a fault takes more, give the call that does most and write the rest in `fix`.",
+    "For wires that share a trunk, give the call that takes one wire off it: another side with change_connection, or its own lane with a route shift.",
     "A fault in colour, text or shape, a missing wire or an item to delete has no call: write the fix as text.",
     "`marks` is your sketch of what a call gives, in board coordinates: `path` for a wire's new route, `box` for a box's new place. Send marks only with a call. Else [].",
     "",
