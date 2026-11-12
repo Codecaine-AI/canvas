@@ -126,7 +126,7 @@ const UNITS: readonly ManifestUnit[] = [
     id: "skill.workflow.finish", kind: "step", file: SKILL, lines: [36, 38], scenario: "draw-board", destination: workflow,
     text: "3. Finish. Call `canvas_check`, read its whole-board PNG, and `look` at\n   any section whose text you cannot read in it. Fix every error\n   before you call it done.",
     anchors: [
-      "3. Finish. Call `canvas_check`, read its whole-board PNG, and `look` at any section whose text you cannot read in it",
+      "4. Finish. Call `canvas_check`, read its whole-board PNG, and `look` at any section whose text you cannot read in it",
       "Fix every error before you call the board done",
       "`canvas_check` runs every lint and returns a PNG of the whole board",
     ],

@@ -112,6 +112,43 @@ function parseChart(chart: string) {
 }
 
 describe("canvas_create and canvas_check", () => {
+  // Topics rules and diagram_design give this order for a section that holds subsections.
+  test("a section with subsections builds from the inside out, and the check finds no error", async () => {
+    const workspace = tempDir();
+    const service = await workflowService({ workspace });
+    await call(service, "canvas_create", { canvas: "nested", title: "Nested" });
+    await call(service, "resize", { id: "page-frame", width: 4000, height: 2000 });
+    await call(service, "place_section", { id: "api", text: "API Tier", at: [100, 200], color: "teal" });
+    await call(service, "place_section", { id: "plane", text: "Control Plane", at: [1000, 200], color: "blue", size: { width: 1600, height: 900 } });
+    await call(service, "place_section", { id: "sched", text: "Scheduler", at: [1040, 280], color: "violet" });
+    await call(service, "place_section", { id: "stores", text: "Stores", at: [1900, 280], color: "green" });
+    const nodes = [["client", 140, 280], ["queue", 1080, 360], ["pool", 1100, 380], ["rows", 1940, 360], ["cache", 1960, 380]] as const;
+    for (const [id, x, y] of nodes) await call(service, "place_shape", { id, type: "process", text: id, color: "orange", at: [x, y] });
+    await call(service, "arrange_section", { section: "api", rows: [["client"]] });
+    await call(service, "arrange_section", { section: "sched", rows: [["queue", "pool"]] });
+    await call(service, "arrange_section", { section: "stores", rows: [["rows"], ["cache"]] });
+    await call(service, "arrange", { ids: ["sched", "stores"], space: { axis: "horizontal", gap: 220 } });
+    await call(service, "fit_section", { id: "plane" });
+    await call(service, "arrange", { ids: ["api", "plane"], space: { axis: "horizontal", gap: 220 } });
+    await call(service, "connect", { id: "open", from: { objectId: "client" }, to: { objectId: "queue" } });
+    await call(service, "connect", { id: "write", from: { objectId: "pool" }, to: { objectId: "rows" }, label: "session row" });
+    await call(service, "fit_section", { id: "page-frame" });
+
+    const report = checked(await call(service, "canvas_check", {}));
+    expect(report.errors).toBe(0);
+    expect(report.text).not.toMatch(/same-color|gray-share|short-wire/);
+    const saved = JSON.parse(readFileSync(join(workspace, "canvases", "nested.canvas.json"), "utf8")) as {
+      objects: { id: string; parentId: string | null; geometry: { x: number; width: number } }[];
+    };
+    const parent = Object.fromEntries(saved.objects.map((object) => [object.id, object.parentId]));
+    expect(parent).toMatchObject({
+      api: "page-frame", plane: "page-frame", sched: "plane", stores: "plane",
+      client: "api", queue: "sched", pool: "sched", rows: "stores", cache: "stores",
+    });
+    const frame = (id: string) => saved.objects.find((object) => object.id === id)!.geometry;
+    expect(frame("stores").x - (frame("sched").x + frame("sched").width)).toBe(220);
+  });
+
   test("a new board goes from empty to lint-clean through the tools alone", async () => {
     const workspace = tempDir();
     const service = await workflowService({ workspace });
