@@ -135,9 +135,9 @@ describe("climb critic findings", () => {
 
 describe("climb drawer session", () => {
   test("the first pass keeps its session, a revise pass resumes it, and its closing reply is read back", () => {
-    expect(drawerArgs("/tmp/b", "draw", "/s.json")).toContain("--no-session-persistence");
-    expect(drawerArgs("/tmp/b", "draw", "/s.json", { persist: true })).not.toContain("--no-session-persistence");
-    const revise = drawerArgs("/tmp/b", "fix", "/s.json", { persist: false, resume: "abc-123" });
+    expect(drawerArgs("/tmp/b", "/s.json")).toContain("--no-session-persistence");
+    expect(drawerArgs("/tmp/b", "/s.json", { persist: true })).not.toContain("--no-session-persistence");
+    const revise = drawerArgs("/tmp/b", "/s.json", { persist: false, resume: "abc-123" });
     expect(revise[revise.indexOf("--resume") + 1]).toBe("abc-123");
     const transcript = [
       `{"type":"system","subtype":"ui_invalidate","session_id":"abc-123"}`,

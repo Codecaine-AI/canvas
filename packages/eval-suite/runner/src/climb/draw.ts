@@ -3,9 +3,10 @@
  * brief on a new board in `round-<n>/<brief>/`.
  *
  * `--critic on` adds the critic loop (critic-loop.ts) after the first pass:
- * the canvas_check lints and the region critics review the board, the drawer
+ * the canvas_check lints and the reviewers review the board, the drawer
  * revises in the same session (`--resume`), and the review runs again, until
- * a round has no blocker and no should or `--critic-rounds` (10) are spent.
+ * a round has no blocker and no should and the drawer has answered every
+ * finding it got, or `--critic-rounds` (10) are spent.
  * The board saved is the one that scored best. `critic/` in the brief folder
  * keeps each round's board, renders, findings and timings.
  */
@@ -84,8 +85,8 @@ async function drawOne(options: {
 
   const prompt = drawerPrompt(brief, readFileSync(briefPath(brief, options.briefDir), "utf8"));
   const startedAt = new Date();
-  const args = drawerArgs(dir, prompt, options.settingsPath, { persist: options.critic !== undefined });
-  const { exitCode, signal, timedOut } = await runDrawer(dir, args, resolve(dir, "transcript.jsonl"), options.timeoutMs);
+  const args = drawerArgs(dir, options.settingsPath, { persist: options.critic !== undefined });
+  const { exitCode, signal, timedOut } = await runDrawer(dir, args, [prompt], resolve(dir, "transcript.jsonl"), options.timeoutMs);
 
   // The critics and the revise passes work on the board where the drawer's canvas server keeps it.
   const created = resolve(canvasesDir, `${brief}.canvas.json`);
@@ -99,7 +100,7 @@ async function drawOne(options: {
         drawer: { dir, settingsPath: options.settingsPath, timeoutMs: options.timeoutMs, session },
       });
     } catch (error) {
-      critic = { budget: options.critic.options.rounds, rounds: [], stop: "failed", error: error instanceof Error ? error.message : String(error), kept: null, durationMs: 0 };
+      critic = { budget: options.critic.options.rounds, rounds: [], stop: "failed", error: error instanceof Error ? error.message : String(error), unanswered: [], kept: null, durationMs: 0 };
     }
     // The board stands as the loop kept it; draw.json says how the loop stopped and which round it kept.
     process.stdout.write(`${brief}: critic · ${loopSummary(critic)}\n`);

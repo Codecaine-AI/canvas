@@ -4,13 +4,17 @@
  * (draw.ts), and the critic loop resumes its session for each revise pass
  * (critic-loop.ts).
  *
+ * A pass reads its message on stdin as one `stream-json` user event, so the
+ * message can hold images beside its text: the marked crops of a trial run
+ * (trial.ts). The drawer has no tool that reads a file, and gets none.
+ *
  * The drawer must be the same in every round, so it runs in bare mode: no
  * CLAUDE.md discovery, hooks, plugins or skills, and no built-in tools. Auth
  * comes from the user settings file passed with `--settings` (its
  * `apiKeyHelper`), the only setting bare mode reads from it that matters here.
  */
 import { spawn } from "node:child_process";
-import { closeSync, existsSync, openSync } from "node:fs";
+import { closeSync, existsSync, openSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
 
@@ -57,11 +61,24 @@ function drawerEnv(dir: string): NodeJS.ProcessEnv {
   return env;
 }
 
+/** One part of what a pass tells the drawer: text, or an image it sees in line with the text (a PNG file). */
+export type DrawerPart = string | { image: string };
+
+/** The message as the drawer reads it on stdin: one `stream-json` user event, its parts in order. */
+export function drawerInput(message: DrawerPart[]): string {
+  const content = message.map((part) => typeof part === "string"
+    ? { type: "text", text: part }
+    : { type: "image", source: { type: "base64", media_type: "image/png", data: readFileSync(part.image).toString("base64") } });
+  return `${JSON.stringify({ type: "user", message: { role: "user", content } })}\n`;
+}
+
 /**
- * `session.persist` keeps the session on disk so a revise pass can resume
- * it; `session.resume` is that session's id.
+ * `session.persist` keeps the session on disk so a later pass can resume
+ * it; `session.resume` is that session's id. The transcript repeats the
+ * message the drawer read (`--replay-user-messages`), its images too, so it
+ * records both sides of the pass.
  */
-export function drawerArgs(dir: string, prompt: string, settingsPath: string, session: { persist: boolean; resume?: string } = { persist: false }): string[] {
+export function drawerArgs(dir: string, settingsPath: string, session: { persist: boolean; resume?: string } = { persist: false }): string[] {
   const mcpConfig = {
     mcpServers: {
       [MCP_SERVER]: {
@@ -72,7 +89,9 @@ export function drawerArgs(dir: string, prompt: string, settingsPath: string, se
     },
   };
   return [
-    "-p", prompt,
+    "-p",
+    "--input-format", "stream-json",
+    "--replay-user-messages",
     "--model", DRAWER_MODEL,
     "--effort", DRAWER_EFFORT,
     "--bare",
@@ -118,12 +137,15 @@ export interface DrawerRun { exitCode: number | null; signal: NodeJS.Signals | n
  * inside a large event (a board image) and lose the closing `result` event,
  * and with it the drawer's answers.
  */
-export async function runDrawer(dir: string, args: string[], transcriptPath: string, timeoutMs: number): Promise<DrawerRun> {
+export async function runDrawer(dir: string, args: string[], message: DrawerPart[], transcriptPath: string, timeoutMs: number): Promise<DrawerRun> {
   const started = Date.now();
   const transcript = openSync(transcriptPath, "w");
   const stderr = openSync(resolve(dir, "stderr.log"), "a");
   try {
-    const child = spawn("claude", args, { cwd: dir, env: drawerEnv(dir), stdio: ["ignore", transcript, stderr] });
+    const child = spawn("claude", args, { cwd: dir, env: drawerEnv(dir), stdio: ["pipe", transcript, stderr] });
+    // A drawer that dies before it reads its message closes the pipe. Its exit code reports that.
+    child.stdin!.on("error", () => {});
+    child.stdin!.end(drawerInput(message));
     let timedOut = false;
     const timer = setTimeout(() => {
       timedOut = true;
@@ -139,4 +161,23 @@ export async function runDrawer(dir: string, args: string[], transcriptPath: str
     closeSync(transcript);
     closeSync(stderr);
   }
+}
+
+/**
+ * The drawer of one critic loop. Each pass resumes the session the pass
+ * before it left and saves its own, so the loop can ask in the same session
+ * for an answer a reply left out, after the last revise too. `session` is the
+ * session that drew the board. Without one, the first pass starts one.
+ */
+export function drawerSession(
+  drawer: { dir: string; settingsPath: string; timeoutMs: number; session?: string },
+  run: typeof runDrawer = runDrawer,
+): (message: DrawerPart[], transcriptPath: string) => Promise<{ run: DrawerRun; reply: string }> {
+  let session = drawer.session;
+  return async (message, transcriptPath) => {
+    const pass = await run(drawer.dir, drawerArgs(drawer.dir, drawer.settingsPath, { persist: true, resume: session }), message, transcriptPath, drawer.timeoutMs);
+    const transcript = readFileSync(transcriptPath, "utf8");
+    session = sessionIdOf(transcript) ?? session;
+    return { run: pass, reply: replyOf(transcript) };
+  };
 }

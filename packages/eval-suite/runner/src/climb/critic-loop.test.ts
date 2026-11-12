@@ -1,11 +1,12 @@
 import { describe, expect, test } from "bun:test";
 
 import {
-  findingLine, ledgerText, loopSummary, parseAnswers, reviewLoop, revisePrompt, roundFindings,
+  findingLine, ledgerText, loopSummary, parseAnswers, reaskPrompt, reviewLoop, reviseMessage, roundFindings,
   type LoopFinding, type Review,
 } from "./critic-loop.ts";
 import type { MergedFinding } from "./critic.ts";
 import type { Lint } from "./render.ts";
+import type { ProposedCall } from "./review-types.ts";
 
 const lint = (overrides: Partial<Lint> = {}): Lint => ({
   rule: "near-miss", severity: "warning", at: ["a", "b"], message: "b is 20px off a's center line, so w bends", suggestion: "move b by dy -20", ...overrides,
@@ -17,6 +18,7 @@ const review = (overrides: Partial<Review> = {}): Review => ({ reviewMs: 40, ren
 const ran = (reply: string, exitCode: number | null = 0) =>
   ({ run: { exitCode, signal: null, timedOut: exitCode === null, durationMs: 9 }, reply });
 const answered = (findings: LoopFinding[], verdict: string) => findings.map((finding) => `${finding.id} ${verdict}`).join("\n");
+const call = (unit: string, tool: string, args: Record<string, unknown>): ProposedCall => ({ unit, call: { tool, args }, marks: [] });
 
 describe("critic loop findings", () => {
   test("a round's findings are the lints and the critics', most severe first, each with an id", () => {
@@ -71,11 +73,210 @@ describe("critic loop findings", () => {
     ]);
   });
 
-  test("the revise prompt lists the findings by id and asks for one answer line each", () => {
-    const prompt = revisePrompt("b1", roundFindings([], { lints: [lint()], findings: [] }));
+  test("the revise message lists the findings by id and asks for one answer line each", () => {
+    const message = reviseMessage("b1", roundFindings([], { lints: [lint()], findings: [] }));
+    expect(message).toHaveLength(1);
+    const prompt = message[0] as string;
     expect(prompt).toContain(`canvas_open, canvas id "b1"`);
     expect(prompt).toContain("<findings>\nF1 [should, check near-miss] b is 20px off a's center line, so w bends. Fix: move b by dy -20\n</findings>");
     expect(prompt).toContain("<id> declined: <why you left it>");
+    // With no call, no image and every earlier id answered, the message says nothing about them.
+    expect(prompt).not.toMatch(/A call is advice|section|image|Red marks|no_answer_yet/);
+  });
+
+  test("the revise message puts section moves first, and under each finding its calls as exact JSON, the trial's lines and its images", () => {
+    const findings = roundFindings([], { lints: [], findings: [
+      seen({ severity: "blocker", calls: [
+        call("sec_a", "change_connection", { id: "w", patch: { from: { objectId: "a", anchor: "right" } } }),
+        call("board", "route", { id: "w", reset: true }),
+      ] }),
+      seen({ kind: "placement", ids: ["sec_b"], labels: [], calls: [call("board", "move", { id: "sec_b", by: { dx: 200, dy: 0 } })] }),
+      seen({ kind: "placement", ids: ["n"], labels: [], calls: [call("sec_a", "move", { id: "n", by: { dx: 20, dy: 0 } })] }),
+      seen({ severity: "nit", kind: "nesting", ids: ["sec_a"], labels: [], calls: [call("board", "fit_section", { id: "sec_a" })] }),
+    ] });
+    const message = reviseMessage("b1", findings, {
+      sections: new Set(["sec_a", "sec_b"]),
+      advice: [
+        { finding: "F1", lines: ["call 1 applied: w 874 px, 3 bends, now 2 bends", "call 2 refused: w has no hand-set corner"], images: ["/t/F1-alone.png", "/t/F1-sequence.png"] },
+        { finding: "F2", lines: ["applied: sec_b landed at x 860"], images: ["/t/F2.png"] },
+      ],
+    });
+    const text = message[0] as string;
+    // The two section moves, most severe first, then the other findings, most severe first.
+    expect(text.match(/^F\d+/gm)).toEqual(["F2", "F4", "F1", "F3"]);
+    expect(text).toContain([
+      "F2 [should, placement] sec_b: The wire bends twice. Fix: Route it straight.",
+      `  call from board: {"tool":"move","args":{"id":"sec_b","by":{"dx":200,"dy":0}}}`,
+      "  applied: sec_b landed at x 860",
+      "  image: 1",
+      "F4 [nit, nesting] sec_a: The wire bends twice. Fix: Route it straight.",
+      `  call from board: {"tool":"fit_section","args":{"id":"sec_a"}}`,
+      `F1 [blocker, routing] w, "ghost": The wire bends twice. Fix: Route it straight.`,
+      `  call from sec_a: {"tool":"change_connection","args":{"id":"w","patch":{"from":{"objectId":"a","anchor":"right"}}}}`,
+      `  call from board: {"tool":"route","args":{"id":"w","reset":true}}`,
+      "  call 1 applied: w 874 px, 3 bends, now 2 bends",
+      "  call 2 refused: w has no hand-set corner",
+      "  images: 2, 3",
+      "F3 [should, placement] n: The wire bends twice. Fix: Route it straight.",
+      `  call from sec_a: {"tool":"move","args":{"id":"n","by":{"dx":20,"dy":0}}}`,
+      "</findings>",
+    ].join("\n"));
+    expect(message.slice(1)).toEqual([
+      "Image 1 · F2", { image: "/t/F2.png" }, "Image 2 · F1", { image: "/t/F1-alone.png" }, "Image 3 · F1", { image: "/t/F1-sequence.png" },
+    ]);
+    // The drawer learns what the marks mean, and that it decides.
+    expect(text).toContain("Red marks: the board as it is now. Green marks: what the canvas engine drew when the call ran on the copy. Dashed marks: a reviewer's sketch");
+    expect(text).toContain("A call is advice, not an order: apply it, do something better, or decline it with a reason.");
+    expect(text).toContain("The findings whose call moves, arranges or fits a section come first.");
+  });
+
+  test("the re-ask names the ids and asks for their answer lines only", () => {
+    const prompt = reaskPrompt(["F2", "F5"]);
+    expect(prompt).toContain("no answer line for F2, F5");
+    expect(prompt).toContain("Make no new edits");
+    expect(parseAnswers(prompt).size).toBe(0);
+  });
+});
+
+describe("critic loop trial run", () => {
+  const routed = seen({ calls: [call("sec_a", "route", { id: "w", reset: true })] });
+
+  test("after a review with open findings the trial runs the findings that carry calls, and its advice goes to the drawer", async () => {
+    const order: string[] = [];
+    const trialled: Array<Array<{ id: string; calls: ProposedCall[] }>> = [];
+    const record = await reviewLoop({
+      budget: 2,
+      review: async (round) => { order.push(`review ${round}`); return review(round === 1 ? { lints: [lint()], findings: [routed, seen({ ids: ["v"] })] } : {}); },
+      trial: async (round, findings) => {
+        order.push(`trial ${round}`);
+        trialled.push(findings);
+        return [{ finding: "F2", lines: ["applied: w 0 bends"], images: ["/t/F2.png"] }];
+      },
+      revise: async (round, findings, notes) => {
+        order.push(`revise ${round}`);
+        expect(notes).toEqual({ unanswered: [], advice: [{ finding: "F2", lines: ["applied: w 0 bends"], images: ["/t/F2.png"] }], notTrialled: null });
+        return ran(answered(findings, "fixed"));
+      },
+    });
+    expect(order).toEqual(["review 1", "trial 1", "revise 1", "review 2"]);
+    expect(trialled).toEqual([[{ id: "F2", calls: routed.calls }]]);
+    expect(record.rounds[0]!.revise!.trial).toMatchObject({ findings: 1, advised: 1, images: 1, error: null });
+    expect(record.stop).toBe("clean");
+  });
+
+  test("a trial that throws does not end the loop: the drawer gets the finding, its call and why no call was trialled", async () => {
+    const messages: string[] = [];
+    const record = await reviewLoop({
+      budget: 2,
+      review: async (round) => review(round === 1 ? { findings: [routed] } : {}),
+      trial: async () => { throw new Error("no copy of the board"); },
+      revise: async (_round, findings, notes) => {
+        messages.push(reviseMessage("b1", findings, notes)[0] as string);
+        return ran(answered(findings, "fixed"));
+      },
+    });
+    expect([record.stop, record.rounds.length, record.error]).toEqual(["clean", 2, null]);
+    expect(messages[0]).toContain(`  call from sec_a: {"tool":"route","args":{"id":"w","reset":true}}\n  not trialled: no copy of the board\n</findings>`);
+    expect(record.rounds[0]!.revise!.trial).toMatchObject({ findings: 1, advised: 0, images: 0, error: "no copy of the board" });
+  });
+
+  test("a round whose findings carry no call has no trial", async () => {
+    let trials = 0;
+    const record = await reviewLoop({
+      budget: 1,
+      review: async (round) => review(round === 1 ? { findings: [seen()] } : {}),
+      trial: async () => { trials += 1; return []; },
+      revise: async (_round, findings) => ran(answered(findings, "fixed")),
+    });
+    expect([trials, record.rounds[0]!.revise!.trial]).toEqual([0, null]);
+  });
+});
+
+describe("critic loop answer check", () => {
+  const two = { findings: [seen(), seen({ ids: ["v"] })] };
+
+  test("the runner asks once more for the ids a reply did not answer, and the second reply fills them", async () => {
+    const asked: string[][] = [];
+    const record = await reviewLoop({
+      budget: 3,
+      review: async (round) => review(round === 1 ? { lints: [lint()], ...two } : {}),
+      revise: async () => ran("I rerouted w.\nF1 fixed"),
+      reask: async (_round, ids) => { asked.push(ids); return ran("F2 declined: the bend clears a label\nF3 fixed"); },
+    });
+    expect(asked).toEqual([["F2", "F3"]]);
+    expect(record.rounds[0]!.findings.map((finding) => finding.answer?.verdict)).toEqual(["fixed", "declined", "fixed"]);
+    expect(record.rounds[0]!.revise).toMatchObject({ answered: 3, reask: { exitCode: 0, ids: ["F2", "F3"] }, unanswered: [] });
+    expect([record.stop, record.unanswered, record.rounds.length]).toEqual(["clean", [], 2]);
+  });
+
+  test("a reply that answers every id gets no second ask, and neither does a revise pass that failed", async () => {
+    let asks = 0;
+    const loop = (reply: (findings: LoopFinding[]) => ReturnType<typeof ran>) => reviewLoop({
+      budget: 1,
+      review: async () => review(two),
+      revise: async (_round, findings) => reply(findings),
+      reask: async () => { asks += 1; return ran(""); },
+    });
+    expect((await loop((findings) => ran(answered(findings, "fixed")))).rounds[0]!.revise).toMatchObject({ reask: null, unanswered: [] });
+    expect(await loop(() => ran("", 1))).toMatchObject({ stop: "failed", unanswered: ["F1", "F2"] });
+    expect(asks).toBe(0);
+  });
+
+  test("an id with no answer after the second ask goes into the next review and the next revise, and a clean round does not stop the loop", async () => {
+    const earlierSeen: string[][] = [];
+    const messages: string[] = [];
+    const record = await reviewLoop({
+      budget: 4,
+      // Round 2 finds nothing. F2 still has no answer, so round 2 goes to the drawer.
+      review: async (round, earlier) => { earlierSeen.push(earlier.map((finding) => finding.line)); return review(round === 1 ? two : {}); },
+      revise: async (round, findings, notes) => {
+        messages.push(reviseMessage("b1", findings, notes)[0] as string);
+        return ran(round === 1 ? "F1 fixed" : "F2 declined: it reads well");
+      },
+      reask: async () => ran("I made no edits."),
+    });
+    expect(earlierSeen[1]).toEqual([
+      `[routing] w, "ghost": The wire bends twice. Drawer: fixed`,
+      `[routing] v, "ghost": The wire bends twice. Drawer: no answer`,
+    ]);
+    expect(messages[0]).not.toContain("no_answer_yet");
+    expect(messages[1]).toContain("You gave no answer to the findings in <no_answer_yet>");
+    expect(messages[1]).toContain(`<findings>\n</findings>\n\n<no_answer_yet>\nF2 [should, routing] v, "ghost": The wire bends twice. Fix: Route it straight.\n</no_answer_yet>`);
+    expect(record.rounds.map((round) => [round.score, round.revise?.unanswered ?? null])).toEqual([[2, ["F2"]], [0, []], [0, null]]);
+    // The answer lands on the finding where round 1 raised it.
+    expect(record.rounds[0]!.findings[1]!.answer).toEqual({ verdict: "declined", reason: "it reads well" });
+    expect([record.stop, record.unanswered]).toEqual(["clean", []]);
+  });
+
+  test("a loop that ends with an id unanswered is incomplete, never clean", async () => {
+    let revises = 0;
+    const record = await reviewLoop({
+      budget: 2,
+      review: async (round) => review(round === 1 ? two : {}),
+      revise: async () => { revises += 1; return ran("F1 fixed"); },
+      reask: async () => ran(""),
+    });
+    // Round 2 and the check round find nothing, and F2 never gets its answer.
+    expect([record.stop, record.unanswered, record.rounds.length, revises]).toEqual(["incomplete", ["F2"], 3, 2]);
+    expect(record.rounds.map((round) => round.revise?.reask?.ids ?? null)).toEqual([["F2"], ["F2"], null]);
+    expect(ledgerText(record)).toContain(`F2 [should, routing] v, "ghost": The wire bends twice. Fix: Route it straight.\n  → no answer`);
+    expect(ledgerText(record)).toContain("Stop: incomplete\nNo answer: F2\n");
+    expect(loopSummary(record)).toContain("stop incomplete after 2 of 2 rounds and a check round · last round: 0 blocker, 0 should, 0 nit · no answer: F2");
+  });
+
+  test("a lint the drawer never answers, raised again under its id, is asked for once a round and cleared by one answer", async () => {
+    const messages: string[] = [];
+    const record = await reviewLoop({
+      budget: 3,
+      review: async (round) => review(round < 3 ? { lints: [lint()] } : {}),
+      revise: async (round, findings, notes) => {
+        messages.push(reviseMessage("b1", findings, notes)[0] as string);
+        return ran(round === 1 ? "" : "F1 fixed");
+      },
+    });
+    expect(messages[1]).not.toContain("no_answer_yet");
+    expect(record.rounds.map((round) => round.findings[0]?.answer?.verdict)).toEqual(["fixed", "fixed", undefined]);
+    expect([record.stop, record.unanswered]).toEqual(["clean", []]);
   });
 });
 
