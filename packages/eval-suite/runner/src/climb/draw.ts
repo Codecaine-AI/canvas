@@ -6,8 +6,8 @@
  * the canvas_check lints and the region critics review the board, the drawer
  * revises in the same session (`--resume`), and the review runs again, until
  * a round has no blocker and no should or `--critic-rounds` (10) are spent.
- * `critic/` in the brief folder keeps each round's board, renders, findings
- * and timings.
+ * The board saved is the one that scored best. `critic/` in the brief folder
+ * keeps each round's board, renders, findings and timings.
  */
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, rmdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -98,9 +98,9 @@ async function drawOne(options: {
         drawer: { dir, settingsPath: options.settingsPath, timeoutMs: options.timeoutMs, session },
       });
     } catch (error) {
-      critic = { budget: options.critic.options.rounds, rounds: [], stop: "failed", error: error instanceof Error ? error.message : String(error), durationMs: 0 };
+      critic = { budget: options.critic.options.rounds, rounds: [], stop: "failed", error: error instanceof Error ? error.message : String(error), kept: null, durationMs: 0 };
     }
-    // The board stands as the last pass left it; draw.json says how the loop stopped.
+    // The board stands as the loop kept it; draw.json says how the loop stopped and which round it kept.
     process.stdout.write(`${brief}: critic · ${loopSummary(critic)}\n`);
   }
 
