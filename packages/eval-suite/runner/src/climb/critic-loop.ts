@@ -49,7 +49,7 @@ export interface Answer { verdict: Verdict; reason: string }
 export interface LoopFinding {
   /** F1, F2, ...: one id for the whole loop. */
   id: string;
-  /** check: a canvas_check lint. reviewer: the region critics. */
+  /** check: a canvas_check lint. reviewer: the whole-board, section and loose-item reviewers. */
   source: "check" | "reviewer";
   severity: Severity;
   /** The lint's rule, or the reviewer's finding kind. */
@@ -58,7 +58,7 @@ export interface LoopFinding {
   labels: string[];
   problem: string;
   fix: string;
-  /** The regions whose critics reported it. */
+  /** The units (board, a section id, loose) whose reviewers reported it. */
   regions: string[];
   /** The calls the reviewers proposed for it. A lint has none. */
   calls: ProposedCall[];
@@ -446,7 +446,7 @@ export function ledgerText(record: LoopRecord): string {
 /**
  * The loop on one board file. Writes into `outDir`: `round-<n>/` per round
  * (board.canvas.json and overview.png: the board as that round reviewed it;
- * guides.png, regions/ and critique.json from critic.ts; trial/ from
+ * guides.png, units/ and critique.json from critic.ts; trial/ from
  * trial.ts; revise-transcript.jsonl; and revise-reask-transcript.jsonl when
  * the reply left an id without an answer), after.png (the board the loop
  * kept), loop.json (a LoopRecord) and findings.md (the ledger as text). A
@@ -534,8 +534,7 @@ export function loopSummary(record: LoopRecord): string {
 }
 
 /**
- * `climb critic --board <path> --out <dir> [--critic-grid auto|3x2]
- * [--critic-region-max px] [--critic-count n] [--revise on|off]
+ * `climb critic --board <path> --out <dir> [--critic-count n] [--revise on|off]
  * [--critic-rounds n] [--settings path] [--timeout-min n]`: the critic step alone, on a board some drawer made
  * before. `--revise off` (the default) is one review of the board file.
  * `--revise on` is the whole loop on a copy in `<out>/canvases/`.
