@@ -222,6 +222,17 @@ describe("critic loop answer check", () => {
     expect(asks).toBe(0);
   });
 
+  test("a second ask that throws fails the loop, and the record keeps the ids with no answer", async () => {
+    const record = await reviewLoop({
+      budget: 2,
+      review: async () => review(two),
+      revise: async () => ran("F1 fixed"),
+      reask: async () => { throw new Error("spawn claude ENOENT"); },
+    });
+    expect([record.stop, record.error, record.unanswered]).toEqual(["failed", "spawn claude ENOENT", ["F2"]]);
+    expect(record.rounds[0]!.revise).toMatchObject({ answered: 1, reask: null, unanswered: ["F2"] });
+  });
+
   test("an id with no answer after the second ask goes into the next review and the next revise, and a clean round does not stop the loop", async () => {
     const earlierSeen: string[][] = [];
     const messages: string[] = [];

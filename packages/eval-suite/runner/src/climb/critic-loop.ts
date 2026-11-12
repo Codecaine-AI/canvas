@@ -404,19 +404,17 @@ export async function reviewLoop(options: {
           const answers = parseAnswers(reply);
           for (const finding of sent) finding.answer ??= answers.get(finding.id) ?? null;
         };
+        const tally = () => ({ answered: findings.filter((finding) => finding.answer).length, unanswered: idsOf(sent.filter((finding) => !finding.answer)) });
         const { run, reply } = await options.revise(round, findings, notes);
         take(reply);
-        let reask: ReviseRecord["reask"] = null;
-        const missing = idsOf(sent.filter((finding) => !finding.answer));
-        if (missing.length > 0 && run.exitCode === 0 && options.reask) {
-          const second = await options.reask(round, missing);
+        // The record stands before the second ask, so a second ask that throws does not lose the ids.
+        const revise: ReviseRecord = record.revise = { ...run, ...tally(), trial, reask: null };
+        if (revise.unanswered.length > 0 && run.exitCode === 0 && options.reask) {
+          const ids = revise.unanswered;
+          const second = await options.reask(round, ids);
           take(second.reply);
-          reask = { ...second.run, ids: missing };
+          Object.assign(revise, tally(), { reask: { ...second.run, ids } });
         }
-        record.revise = {
-          ...run, answered: findings.filter((finding) => finding.answer).length, trial, reask,
-          unanswered: idsOf(sent.filter((finding) => !finding.answer)),
-        };
         if (run.exitCode !== 0) failure = `round ${round}: the revise pass ${run.timedOut ? "timed out" : `exited ${run.exitCode ?? run.signal}`}`;
       }
     } catch (error) {
