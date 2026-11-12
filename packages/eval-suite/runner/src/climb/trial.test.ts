@@ -56,6 +56,13 @@ describe("the trial run", () => {
     expect(advice[0]!.lines.join("\n")).toContain("asked x 1690 (+10), landed x 1700 (+20)");
   });
 
+  test("a route call reports the route that landed, in the tool's segment numbers", async () => {
+    const { advice } = await trial([{ id: "F1", calls: [call("sec_engine", "route", { id: "e_preflight", shift: { segment: 2, to: 641 } })] }]);
+    const lines = advice[0]!.lines.join("\n");
+    expect(lines).toContain("e_preflight route before: executor (s0 v x=370) ─(s1 h y=520)→ (s2 v x=620) ─(s3 h y=220)→ capabilities");
+    expect(lines).toContain("e_preflight route after:  executor (s0 v x=370) ─(s1 h y=520)→ (s2 v x=640) ─(s3 h y=220)→ capabilities");
+  });
+
   test("a call that changes nothing, and a call the tool refuses, are refused with the tool's text", async () => {
     const sketch: Mark = { style: "sketch", box: { x: 1720, y: 180, width: 300, height: 100 } };
     const { advice, record, outDir } = await trial([
@@ -89,5 +96,17 @@ describe("the trial run", () => {
     expect(loose!.sequence).toMatchObject({ applied: false, turn: 3, conflictsWith: ["F2 call 1"] });
     expect(loose!.sequence!.flags.map((flag) => flag.kind)).toEqual(["refused", "conflict"]);
     expect(advice[0]!.lines.join("\n")).toContain("conflicts after earlier calls: F2 call 1");
+  });
+
+  test("a new crossing is a flag, and a call that adds the same crossing alone does not conflict", async () => {
+    const { record } = await trial([
+      { id: "F1", calls: [call(LOOSE_UNIT, "route", { id: "e_bridge", points: [[620, 1260], [620, 1100], [1000, 1100], [1000, 1260]] })] },
+      { id: "F2", calls: [call(BOARD_UNIT, "move", { id: "s_legend", by: { dx: 0, dy: 40 } })] },
+    ]);
+    const crossings = ["new crossing e_bridge × e_m_kernel", "new crossing e_bridge × e_wraps", "new crossing e_bridge × e_writes"];
+    const [bridge] = record.calls;
+    expect(bridge!.alone.flags.map((flag) => flag.text)).toEqual(crossings);
+    expect(bridge!.sequence).toMatchObject({ applied: true, turn: 2, conflictsWith: [] });
+    expect(bridge!.sequence!.flags.map((flag) => flag.text)).toEqual(crossings);
   });
 });

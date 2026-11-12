@@ -34,7 +34,13 @@ interface TrialToolkit {
 export interface BoardNumbers { lints: Lint[]; wireLength: number; crossings: number }
 
 /** A wire the call changed. A side is null when the call made or deleted the wire. A wire that only moved with its boxes is not a change. */
-export interface WireChange { id: string; before: WireFact | null; after: WireFact | null }
+export interface WireChange {
+  id: string;
+  /** The call's arguments name this wire. */
+  named: boolean;
+  before: WireFact | null;
+  after: WireFact | null;
+}
 
 /** A box the call moved, resized, made or deleted. */
 export interface BoxChange {
@@ -144,13 +150,13 @@ const crossingPairs = (state: BoardState) =>
 
 /** What changed between two states of the board, and the flags the change raises. */
 function changesOf(before: BoardState, after: BoardState, call: ReviewCall): Pick<TrialStep, "wires" | "boxes" | "flags"> {
+  const named = new Set(namedIds(call.args, before));
   const wires = [...new Set([...before.wires.keys(), ...after.wires.keys()])].flatMap((id): WireChange[] => {
     const [was, now] = [before.wires.get(id) ?? null, after.wires.get(id) ?? null];
-    return was && now && shapeOf(was) === shapeOf(now) ? [] : [{ id, before: was, after: now }];
+    return was && now && shapeOf(was) === shapeOf(now) ? [] : [{ id, named: named.has(id), before: was, after: now }];
   });
   // The wires the call names come first.
-  const named = new Set(namedIds(call.args, before));
-  wires.sort((a, b) => Number(named.has(b.id)) - Number(named.has(a.id)));
+  wires.sort((a, b) => Number(b.named) - Number(a.named));
 
   const offset = (id: string) => {
     const [was, now] = [before.boxes.get(id), after.boxes.get(id)];
@@ -299,7 +305,7 @@ function changeImage(canvas: ReviewCanvas, before: BoardState, after: BoardState
   const { layout, scale } = layoutOf(frame);
   const k = 1 / scale;
   // The title bar holds the numbers of the item the call names.
-  const wire = wires.find((item) => named.has(item.id)) ?? (boxes.some((item) => named.has(item.id)) ? undefined : wires[0]);
+  const wire = wires.find((item) => item.named) ?? (boxes.some((item) => named.has(item.id)) ? undefined : wires[0]);
   const box = boxes.find((item) => named.has(item.id)) ?? own[0];
   const title = (side: "before" | "after") => wire ? wireTitle(wire.id, wire[side]) : box ? boxTitle(box.id, box[side]) : trial.call.tool;
   const marks = (side: "before" | "after", colour: string) =>
@@ -474,7 +480,14 @@ function stepLines(step: TrialStep): string[] {
   const added = step.board.after.lints.filter((lint) => lint.severity !== "error" && !step.board.before.lints.some((had) => lintKey(had) === lintKey(lint)));
   return [
     ...geometry,
-    ...step.wires.slice(0, WIRE_LINES_MAX).flatMap((wire) => [`  ${wire.id} before: ${wireLine(wire.before)}`, `  ${wire.id} after:  ${wireLine(wire.after)}`]),
+    ...step.wires.slice(0, WIRE_LINES_MAX).flatMap((wire) => [
+      `  ${wire.id} before: ${wireLine(wire.before)}`,
+      `  ${wire.id} after:  ${wireLine(wire.after)}`,
+      // The route a call asked for is in the call. The route that landed is here, in the segment numbers `route` takes.
+      ...(wire.named && wire.before && wire.after && wire.before.route !== wire.after.route
+        ? [`  ${wire.id} route before: ${wire.before.route}`, `  ${wire.id} route after:  ${wire.after.route}`]
+        : []),
+    ]),
     ...(more.length > 0 ? [`  ${count(more.length, "more wire")} changed: ${more.join(", ")}`] : []),
     `  board before: ${boardLine(step.board.before)}`,
     `  board after:  ${boardLine(step.board.after)}`,
