@@ -169,6 +169,29 @@ describe("climb review prompts", () => {
   };
   const prompts = () => [sectionPrompt(unit(board, "sec"), section), sectionPrompt(unit(board, "loose"), section), gapPrompt(gap), wirePrompt(wire), spacePrompt(space), choicesPrompt(choices)];
 
+  test("every reviewer reports a wire that starts on a frame, one that ends on a frame that is no subsection round exactly its group, 2 labelled wires on one entry, and a chip on a frame", () => {
+    for (const prompt of prompts()) {
+      // Round 5 cycle 3: 8 wires of h4 started on a frame, and the judges read them as wires that touch no node.
+      expect(prompt).toContain("Report a wire that starts on the frame of a section or a subsection: a wire starts on a node.");
+      // The frame of a subsection is an end only for the group it is drawn round: that took board 06 from 26 wires to 20.
+      expect(prompt).toContain("Report a wire that ends on the frame of a section or a subsection, unless the frame is a subsection drawn round exactly the group that receives the wire:"
+        + " each node in it receives it, and it holds no other node. Such a subsection is the wire's end, and it needs no node there.");
+      expect(prompt).toContain("Report 2 labelled wires that share one entry into a node, a merged trunk too: 2 wires that each have a label and end on one port with one arrowhead.");
+      expect(prompt).toContain("Report a label chip that touches the frame of a section or a subsection.");
+      expect(prompt).not.toContain("when the whole group sends or receives it");
+    }
+  });
+
+  test("a reviewer asks for no part, node or wire the brief does not name, and a reviewer with no brief reports none as missing", () => {
+    // Round 5 cycle 3: 03 F3 split a node into parts, 03 F14 added a node with no wire, and h1 F342 added a wire. The brief names none of them.
+    const read = "Never report a node as one to split into parts the brief does not name. Never report a node or a wire as missing when the brief does not name it.";
+    const unread = "You do not have the board's brief: the reviewer of the choices reads it. Never report a node or a wire as missing, and never report a node as one to split into parts.";
+    const [withBrief, ...without] = [choicesPrompt(choices), choicesPrompt({ ...choices, brief: null }), ...prompts().slice(0, -1)];
+    expect([withBrief!.includes(read), withBrief!.includes(unread)]).toEqual([true, false]);
+    expect(without.length).toBe(6);
+    for (const prompt of without) expect([prompt.includes(read), prompt.includes(unread)]).toEqual([false, true]);
+  });
+
   test("every reviewer is told to be strict, to state problems with numbers, and never to say how to fix one or propose a tool call", () => {
     for (const prompt of prompts()) {
       expect(prompt).toContain("Be strict. Report every fault you can see and measure. Do not stop at the first few.");
@@ -184,8 +207,6 @@ describe("climb review prompts", () => {
       // Round 5 cycle 2. A "missing" finding asked for wires the brief does not name (h1), and one asked the drawer to take icons off (h5).
       expect(prompt).toContain("Name the section it belongs in and the neighbour it belongs beside. Never report a node or a wire the brief does not name.");
       expect(prompt).toContain("- icon: a plain box where the kind has a shape or an icon, an icon that does not fit its meaning, or one icon repeated on unlike nodes. Never report an icon as one to remove.");
-      // "The wire ends on a section frame" took board 02 from 20 wires to 30, and "its endpoints have no node" deleted a subsection of h6.
-      expect(prompt).toContain("Never report a wire that ends on the frame of a section or a subsection when the whole group sends or receives it: the frame is its end, and it needs no node there.");
       // No field of an answer holds a fix, and no canvas tool is offered.
       expect(prompt).not.toMatch(/`fix`|`call`|- (route|move|resize|move_label|change_connection|arrange_section|fit_section) \{/);
     }

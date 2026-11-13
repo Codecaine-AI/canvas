@@ -229,7 +229,26 @@ const KIND_LINES: Record<FindingKind, string> = {
 };
 
 /** What every prompt says about an answer. */
-function answerRules(): string[] {
+/**
+ * Round 5 cycle 3: judges read a wire that starts or ends on a section frame
+ * as a wire that touches no node (h4: 8 wires started on a frame), and
+ * findings asked for parts, nodes and wires the brief does not name (03 F3,
+ * 03 F14, h1 F342).
+ */
+const FRAME_ENDS = [
+  "Report a wire that starts on the frame of a section or a subsection: a wire starts on a node.",
+  "Report a wire that ends on the frame of a section or a subsection, unless the frame is a subsection drawn round exactly the group that receives the wire: each node in it receives it, and it holds no other node."
+  + " Such a subsection is the wire's end, and it needs no node there.",
+  "Report 2 labelled wires that share one entry into a node, a merged trunk too: 2 wires that each have a label and end on one port with one arrowhead. A reader cannot tell which label the arrow belongs to.",
+  "Report a label chip that touches the frame of a section or a subsection.",
+];
+const BRIEF_NAMES = {
+  read: "Never report a node as one to split into parts the brief does not name. Never report a node or a wire as missing when the brief does not name it.",
+  unread: "You do not have the board's brief: the reviewer of the choices reads it. Never report a node or a wire as missing, and never report a node as one to split into parts.",
+};
+
+/** `brief`: whether the reviewer's prompt holds the board's brief. */
+function answerRules(brief = false): string[] {
   return [
     "Kinds:",
     ...FINDING_KINDS.map((kind) => `- ${kind}: ${KIND_LINES[kind]}`),
@@ -246,7 +265,8 @@ function answerRules(): string[] {
     "State each fault as a problem: what is wrong, where, and by how much, with the numbers you measured.",
     "Do not say how to fix it. Do not propose a tool call, a new position, a new size or a new route. The drawer decides the fix.",
     "Never report the outer edge of a section as ragged or out of line with the edge of another section.",
-    "Never report a wire that ends on the frame of a section or a subsection when the whole group sends or receives it: the frame is its end, and it needs no node there.",
+    ...FRAME_ENDS,
+    brief ? BRIEF_NAMES.read : BRIEF_NAMES.unread,
     "`marks` highlights the fault as the board is now, in board coordinates from the text below: `box` round the items or the area at fault, `path` along the stretch of wire at fault."
     + " Set the one a mark does not use to null. Give each finding 1 to 3 marks.",
     "",
@@ -466,7 +486,7 @@ export function choicesPrompt(text: ChoicesText): string {
       "- a hierarchy in the brief that the board shows flat (kind `nesting`).",
     ]),
     "",
-    ...answerRules(),
+    ...answerRules(text.brief !== null),
     ...notesBlocks(text.notes),
     ...(text.brief === null ? [] : ["", "<brief>", text.brief.trim(), "</brief>"]),
     ...block("Objects (id · type · shape · icon · colour · parent (its colour) · text):", text.objects),
