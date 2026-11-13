@@ -4,33 +4,56 @@
  * text blocks. Ford: "I think the reviewer should definitely see the whole
  * board so it gets context. I think it should be able to see each of the
  * sections cropped", "if it's given a section, it also then gets to see the
- * like, all of the arrows and so it can, like, propose different routings".
+ * like, all of the arrows".
  *
  * Every number comes from the board file and the engine's routes (wires.ts).
  * A mark is SVG in board coordinates, painted over a crop (crop.ts).
  */
 import type { WorldRect } from "./render.ts";
-import { BOARD_UNIT, LOOSE_UNIT } from "./review-types.ts";
 import type { Point, WireFact } from "./wires.ts";
 
-export interface BoardObject { id: string; type: string; text?: string; color?: string; icon?: unknown; parentId?: string | null; geometry: WorldRect }
+export interface BoardObject {
+  id: string; type: string; text?: string; color?: string; icon?: unknown; parentId?: string | null; geometry: WorldRect; style?: { shape?: string };
+}
 export interface BoardConnection { id: string; from: { objectId: string }; to: { objectId: string }; label?: string }
 export interface Board { objects: BoardObject[]; connections: BoardConnection[] }
 
+/**
+ * The 6 kinds of reviewer. section: one section. gap: the gutters between
+ * sections, at full size. wire: the wires between sections. space: where the
+ * sections sit. choices: colour, shape and icon against the brief. loose: the
+ * items in no section.
+ */
+export const REVIEWER_KINDS = ["section", "gap", "wire", "space", "choices", "loose"] as const;
+export type ReviewerKind = (typeof REVIEWER_KINDS)[number];
+
+/** The unit ids of the reviewers that have no section. A section reviewer's unit id is its section's id, a gap reviewer's is gap-1, gap-2, ... */
+export const SPACE_UNIT = "space";
+export const WIRE_UNIT = "wires";
+export const CHOICES_UNIT = "choices";
+export const LOOSE_UNIT = "loose";
+
+/** A reviewer's highlight of a fault as the board is now, in board coordinates: a box round it, or a path along the stretch of wire at fault. */
+export type Mark = { path: Array<[number, number]> } | { box: WorldRect };
+/** The frame of a mark. */
+export const markBox = (mark: Mark): WorldRect => "box" in mark ? mark.box
+  : bounds(mark.path.map(([x, y]) => ({ x, y, width: 0, height: 0 })));
+
 /** One reviewer's part of the board. */
 export interface ReviewUnit {
-  /** BOARD_UNIT, a section's id, or LOOSE_UNIT. */
+  /** SPACE_UNIT, WIRE_UNIT, CHOICES_UNIT, a section's id, gap-<n> or LOOSE_UNIT. */
   id: string;
-  /** A: the whole board. B: one section, or the loose items. */
-  stage: "A" | "B";
-  /** The section a stage B reviewer has, or null for the whole board and the loose items. */
+  kind: ReviewerKind;
+  /** The section a section reviewer has, or null. */
   section: BoardObject | null;
-  /** The objects it owns: a section's direct children (it owns the placement of a child section, not its contents), or the loose items. */
+  /** The objects it owns: a section's direct children (it owns the placement of a child section, not its contents), the loose items, or the sections for the space reviewer. */
   owned: BoardObject[];
-  /** Every object in the unit, at any depth: a wire with an end here starts or ends in the unit. */
+  /** Every object in a section or loose unit, at any depth: a wire with an end here starts or ends in the unit. */
   inside: ReadonlySet<string>;
   /** The board rect the unit's images frame. */
   rect: WorldRect;
+  /** A gap reviewer's crops. Empty for the other kinds. */
+  crops: WorldRect[];
 }
 
 const SECTION = "section";
@@ -44,12 +67,14 @@ export const grow = (rect: WorldRect, by: number): WorldRect =>
   ({ x: rect.x - by, y: rect.y - by, width: rect.width + 2 * by, height: rect.height + 2 * by });
 
 /**
- * The reviewers of a board (design 4.2). Each object belongs to the deepest
- * section that holds it. A page frame gets no reviewer: the only root
- * section, when it holds sections. Every other section gets one, and owns its
- * direct children. The items at the root and in the page frame that are not
- * sections go to one "loose items" reviewer. The whole-board reviewer comes
- * first, then the sections in board order, then the loose items.
+ * The reviewers of a board, the gap reviewers aside (gaps.ts cuts those).
+ * Each object belongs to the deepest section that holds it. A page frame gets
+ * no reviewer: the only root section, when it holds sections. Every other
+ * section gets one, and owns its direct children. The items at the root and
+ * in the page frame that are not sections go to one "loose items" reviewer.
+ * The space reviewer comes first, then the wire reviewer (when the board has
+ * a wire), the choices reviewer, the sections in board order and the loose
+ * items.
  */
 export function reviewUnits(board: Board): { pageFrame: BoardObject | null; units: ReviewUnit[] } {
   const byId = new Map(board.objects.map((object) => [object.id, object]));
@@ -62,26 +87,29 @@ export function reviewUnits(board: Board): { pageFrame: BoardObject | null; unit
 
   const below = (id: string): string[] => childrenOf(id).flatMap((child) => [child.id, ...below(child.id)]);
   const placed = board.objects.filter((object) => object.geometry);
-  const units: ReviewUnit[] = [{
-    id: BOARD_UNIT, stage: "A", section: null, owned: sections.filter((section) => section !== pageFrame),
-    inside: new Set(board.objects.map((object) => object.id)), rect: placed.length ? bounds(placed.map((object) => object.geometry)) : { x: 0, y: 0, width: 1, height: 1 },
-  }];
+  const rect = placed.length ? bounds(placed.map((object) => object.geometry)) : { x: 0, y: 0, width: 1, height: 1 };
+  const whole = { section: null, inside: new Set<string>(), rect, crops: [] };
+  const units: ReviewUnit[] = [
+    { ...whole, id: SPACE_UNIT, kind: "space", owned: sections.filter((section) => section !== pageFrame) },
+    ...(board.connections.length ? [{ ...whole, id: WIRE_UNIT, kind: "wire" as const, owned: [] }] : []),
+    { ...whole, id: CHOICES_UNIT, kind: "choices", owned: placed },
+  ];
   for (const section of sections) {
     if (section === pageFrame) continue;
-    units.push({ id: section.id, stage: "B", section, owned: childrenOf(section.id), inside: new Set([section.id, ...below(section.id)]), rect: section.geometry });
+    units.push({ id: section.id, kind: "section", section, owned: childrenOf(section.id), inside: new Set([section.id, ...below(section.id)]), rect: section.geometry, crops: [] });
   }
   const loose = placed.filter((object) => object.type !== SECTION && (parentOf(object) === null || parentOf(object) === pageFrame));
   if (loose.length) {
-    units.push({ id: LOOSE_UNIT, stage: "B", section: null, owned: loose, inside: new Set(loose.map((object) => object.id)), rect: bounds(loose.map((object) => object.geometry)) });
+    units.push({ id: LOOSE_UNIT, kind: "loose", section: null, owned: loose, inside: new Set(loose.map((object) => object.id)), rect: bounds(loose.map((object) => object.geometry)), crops: [] });
   }
   return { pageFrame, units };
 }
 
-/** The stage B unit of each object: a reviewed section is its own, any other object is its parent section's or the loose items'. */
+/** The section or loose unit of each object: a reviewed section is its own, any other object is its parent section's or the loose items'. */
 export function ownerUnits(units: ReviewUnit[]): Map<string, string> {
   const owner = new Map<string, string>();
   for (const unit of units) {
-    if (unit.stage !== "B") continue;
+    if (unit.kind !== "section" && unit.kind !== "loose") continue;
     if (unit.section) owner.set(unit.id, unit.id);
     for (const object of unit.owned) if (object.type !== SECTION) owner.set(object.id, unit.id);
   }
@@ -90,18 +118,18 @@ export function ownerUnits(units: ReviewUnit[]): Map<string, string> {
 
 /** One row of a wire sheet (design 4.3). */
 export interface WireRow {
-  /** W1, W2, ...: the tag of the wire in the unit's wire view (image 4). */
+  /** W1, W2, ...: the tag of the wire in the unit's wire view. */
   tag: string;
-  /** Stage B: inside, leaves, enters or passes through. Stage A: the 2 units the wire joins. */
+  /** A section or the loose items: inside, leaves, enters or passes through. The wire reviewer: the 2 units the wire joins. */
   kind: string;
   fact: WireFact;
 }
 
-interface Segment { a: Point; b: Point }
-const segmentsOf = (points: Point[]): Segment[] => points.slice(1).map((b, index) => ({ a: points[index]!, b }));
+export interface Segment { a: Point; b: Point }
+export const segmentsOf = (points: Point[]): Segment[] => points.slice(1).map((b, index) => ({ a: points[index]!, b }));
 
 /** Whether a straight run has a part strictly inside `rect` (Liang-Barsky). */
-function runsThrough({ a, b }: Segment, rect: WorldRect): boolean {
+export function runsThrough({ a, b }: Segment, rect: WorldRect): boolean {
   let [enter, leave] = [0, 1];
   const edges: Array<[number, number]> = [
     [a.x - b.x, a.x - (rect.x + 1)], [b.x - a.x, rect.x + rect.width - 1 - a.x],
@@ -116,7 +144,7 @@ function runsThrough({ a, b }: Segment, rect: WorldRect): boolean {
 }
 
 /**
- * A stage B unit's wire sheet: one row per wire that starts in, ends in or
+ * A section's or the loose items' wire sheet: one row per wire that starts in, ends in or
  * passes through it, in board order. A wire passes through a section when its
  * route crosses the section's box and neither end is in it. The loose items
  * have no box, so no wire passes through them.
@@ -132,15 +160,19 @@ export function wireSheet(unit: ReviewUnit, facts: WireFact[]): WireRow[] {
   return rows.map((row, index) => ({ tag: `W${index + 1}`, ...row }));
 }
 
-/** The whole-board reviewer's wire sheet: the wires whose 2 ends have different owners. */
+/**
+ * The wire reviewer's wire sheet: the wires that leave their section (their 2
+ * ends have different owners). A board where no wire does, a flat board, gives
+ * every wire.
+ */
 export function boardWireSheet(units: ReviewUnit[], facts: WireFact[]): WireRow[] {
   const owner = ownerUnits(units);
   const of = (id: string) => owner.get(id) ?? "root";
-  return facts.filter((fact) => of(fact.from) !== of(fact.to))
-    .map((fact, index) => ({ tag: `W${index + 1}`, kind: `${of(fact.from)} → ${of(fact.to)}`, fact }));
+  const leaving = facts.filter((fact) => of(fact.from) !== of(fact.to));
+  return (leaving.length ? leaving : facts).map((fact, index) => ({ tag: `W${index + 1}`, kind: `${of(fact.from)} → ${of(fact.to)}`, fact }));
 }
 
-const short = (text: string | undefined, max = 60) => {
+export const short = (text: string | undefined, max = 60) => {
   const line = (text ?? "").replace(/\s+/g, " ").trim();
   return line.length > max ? `${line.slice(0, max - 1)}…` : line;
 };
@@ -174,7 +206,7 @@ export function wiredObjects(unit: ReviewUnit, rows: WireRow[], board: Board): B
   return board.objects.filter((object) => ends.has(object.id) && !unit.inside.has(object.id));
 }
 
-/** The objects block of a stage B unit: its section, what it owns, and the outside ends of its wires. */
+/** The objects block of a section or loose unit: its section, what it owns, and the outside ends of its wires. */
 export function objectLines(unit: ReviewUnit, rows: WireRow[], board: Board): string[] {
   const outside = wiredObjects(unit, rows, board);
   return [
@@ -185,11 +217,13 @@ export function objectLines(unit: ReviewUnit, rows: WireRow[], board: Board): st
   ];
 }
 
-/** One line per reviewed section, for the whole-board reviewer. */
+/** One line per reviewed section, for the space reviewer. */
 export function sectionLines(units: ReviewUnit[]): string[] {
   return units.flatMap((unit) => unit.section ? [[
     unit.section.id, unit.section.parentId ? `in ${unit.section.parentId}` : "in board",
-    `x ${unit.rect.x}`, `y ${unit.rect.y}`, `width ${unit.rect.width}`, `height ${unit.rect.height}`, JSON.stringify(short(unit.section.text)),
+    `x ${unit.rect.x}`, `y ${unit.rect.y}`, `width ${unit.rect.width}`, `height ${unit.rect.height}`,
+    `${unit.owned.filter((object) => object.type !== SECTION).length} items`, `${unit.owned.filter((object) => object.type === SECTION).length} subsections`,
+    JSON.stringify(short(unit.section.text)),
   ].join(" · ")] : []);
 }
 
@@ -211,22 +245,15 @@ export function routesOf(lookText: string, wires: ReadonlySet<string>): string[]
   return lines.slice(start + 1, end < 0 ? undefined : end).filter((line) => wires.has(line.trim().split(/\s+/)[0]!));
 }
 
-/** What both stages are told about the tools a call runs. */
-export const TOOL_FACTS = [
-  "Every box a tool writes lands on a 20 px grid: x, y, width and height snap to a multiple of 20. A move by less than 20 px lands 20 px away or not at all, so give offsets, coordinates and sizes in multiples of 20.",
-  "`change_connection` hands the wire back to the router. A wire that is \"by hand\" on the wire sheet loses its hand-set corners.",
-  "`route` with `points` or `shift` makes the wire \"by hand\": it keeps those corners when a box moves later.",
-];
-
 // ---- Marks: SVG in board coordinates. A size in image px is divided by the crop's scale. ----
 
-const OWN = "#d92d20";
+export const OWN = "#d92d20";
 const LINKED = "#2563eb";
 const TAG = "#be123c";
 const TRUNK = "#475569";
-const FONT = `font-family="Inter, sans-serif"`;
+export const FONT = `font-family="Inter, sans-serif"`;
 
-const outline = (rect: WorldRect, colour: string, px: number, scale: number) =>
+export const outline = (rect: WorldRect, colour: string, px: number, scale: number) =>
   `<rect x="${rect.x}" y="${rect.y}" width="${rect.width}" height="${rect.height}" fill="none" stroke="${colour}" stroke-width="${px / scale}"/>`;
 
 /** Image 1: the unit's own boxes in red, the sections wired to it in blue. */
@@ -302,23 +329,22 @@ export function rulerMarks(frame: WorldRect, scale: number): string {
     + `</g>`;
 }
 
-/** The space a label chip takes around its centre, from its text length. */
-const chipRect = (centre: Point, label: string): WorldRect =>
-  ({ x: centre.x - (label.length * 4 + 14), y: centre.y - 16, width: label.length * 8 + 28, height: 32 });
+/** The label chips of a wire sheet, as the board paints them. */
+const chipsOf = (rows: WireRow[]): WorldRect[] => rows.flatMap((row) => row.fact.chip ? [row.fact.chip] : []);
 
 /** The frame of images 3 and 4: the unit, every object wired to it and the full path of every wire on its sheet, with a ring. */
 export function neighbourhoodFrame(unit: ReviewUnit, rows: WireRow[], board: Board): WorldRect {
   const points = rows.flatMap((row) => row.fact.points).map((point) => ({ x: point.x, y: point.y, width: 0, height: 0 }));
-  const chips = rows.flatMap((row) => row.fact.labelAt ? [chipRect(row.fact.labelAt, row.fact.label)] : []);
   const kept = unit.section ? [unit.rect] : unit.owned.map((object) => object.geometry);
-  return grow(bounds([...kept, ...wiredObjects(unit, rows, board).map((object) => object.geometry), ...points, ...chips]), 40);
+  return grow(bounds([...kept, ...wiredObjects(unit, rows, board).map((object) => object.geometry), ...points, ...chipsOf(rows)]), 40);
 }
 
 /**
- * Images 3 and 4: the rest of the board faded. A white veil covers `frame`,
- * with holes for the unit, the objects wired to it, and a corridor along each
- * wire of its sheet and around each label chip. The unit's section is
- * outlined in red.
+ * The rest of the board faded. A white veil covers `frame`, with holes for
+ * the unit, the objects wired to it, and a corridor along each wire of its
+ * sheet and around each label chip. The unit's section is outlined in red.
+ * The wire reviewer's unit holds no object, so its holes are the 2 ends of
+ * each wire on its sheet.
  */
 export function fadeMarks(unit: ReviewUnit, rows: WireRow[], board: Board, frame: WorldRect, scale: number): string {
   const box = (rect: WorldRect) => `<rect x="${rect.x}" y="${rect.y}" width="${rect.width}" height="${rect.height}"/>`;
@@ -326,7 +352,7 @@ export function fadeMarks(unit: ReviewUnit, rows: WireRow[], board: Board, frame
   const holes = [
     ...kept.map(box),
     ...wiredObjects(unit, rows, board).map((object) => box(grow(object.geometry, 6))),
-    ...rows.flatMap((row) => row.fact.labelAt ? [box(chipRect(row.fact.labelAt, row.fact.label))] : []),
+    ...chipsOf(rows).map((chip) => box(grow(chip, 2))),
     ...rows.map((row) => `<polyline points="${row.fact.points.map((point) => `${point.x},${point.y}`).join(" ")}" fill="none" stroke="#000000" stroke-width="32" stroke-linecap="square" stroke-linejoin="miter"/>`),
   ];
   return `<defs><mask id="review-keep" maskUnits="userSpaceOnUse" x="${frame.x}" y="${frame.y}" width="${frame.width}" height="${frame.height}">`
@@ -335,14 +361,14 @@ export function fadeMarks(unit: ReviewUnit, rows: WireRow[], board: Board, frame
     + (unit.section ? outline(unit.rect, OWN, 4, scale) : unit.owned.map((object) => outline(object.geometry, OWN, 3, scale)).join(""));
 }
 
-interface Run { axis: "h" | "v"; fixed: number; from: number; to: number }
+export interface Run { axis: "h" | "v"; fixed: number; from: number; to: number }
 /** A straight run along an axis, or null for a diagonal one. */
 function runOf({ a, b }: Segment): Run | null {
   if (a.y === b.y) return { axis: "h", fixed: a.y, from: Math.min(a.x, b.x), to: Math.max(a.x, b.x) };
   if (a.x === b.x) return { axis: "v", fixed: a.x, from: Math.min(a.y, b.y), to: Math.max(a.y, b.y) };
   return null;
 }
-const runsOf = (points: Point[]) => segmentsOf(points).flatMap((segment) => runOf(segment) ?? []);
+export const runsOf = (points: Point[]) => segmentsOf(points).flatMap((segment) => runOf(segment) ?? []);
 const overlap = (a: Run, b: Run): [number, number] | null => {
   if (a.axis !== b.axis || Math.abs(a.fixed - b.fixed) >= 1) return null;
   const [from, to] = [Math.max(a.from, b.from), Math.min(a.to, b.to)];
@@ -393,10 +419,10 @@ function trunksOf(rows: WireRow[]): Trunk[] {
   return [...byMembers.values()];
 }
 
-const touches = (a: WorldRect, b: WorldRect) => a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
+export const touches = (a: WorldRect, b: WorldRect) => a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
 
 /**
- * Image 4's marks: a tag on each wire (W1, ...), a ring on each bend, a
+ * The wire view's marks: a tag on each wire (W1, ...), a ring on each bend, a
  * square on each port, and one grey tag on each shared trunk that names its
  * wires (W5+W6+W7). A wire's tag sits beside the longest stretch that is its
  * own, clear of the tags placed before it.
@@ -405,7 +431,7 @@ export function wireMarks(rows: WireRow[], scale: number): string {
   const px = (value: number) => value / scale;
   const marks: string[] = [];
   // A tag stays off the label chips, and off the tags placed before it.
-  const placed: WorldRect[] = rows.flatMap((row) => row.fact.labelAt ? [chipRect(row.fact.labelAt, row.fact.label)] : []);
+  const placed: WorldRect[] = chipsOf(rows);
   const tag = (text: string, colour: string, run: Run | null, stretch: [number, number], middle: Point) => {
     // Inter bold at 18 px: a W is 17.5 px wide, a digit or a plus 11.5 px.
     const [width, height] = [px([...text].reduce((sum, letter) => sum + (letter === "W" ? 17.5 : 11.5), 14)), px(24)];
@@ -448,7 +474,7 @@ export function wireMarks(rows: WireRow[], scale: number): string {
 }
 
 /**
- * The section map of stage A, a whole SVG: each reviewed section as a box
+ * The section map of the space reviewer, a whole SVG: each reviewed section as a box
  * with its title and id, and a line between 2 sections that wires join, with
  * the number of wires.
  */
@@ -512,4 +538,282 @@ export function lookFrame(ids: string[], board: Board, facts: WireFact[]): World
     return (wires.get(id)?.points ?? []).map((point) => ({ x: point.x, y: point.y, width: 0, height: 0 }));
   });
   return rects.length ? grow(bounds(rects), 128) : null;
+}
+
+// ---- Measured facts: what the wire, gap, space and choices reviewers read beside their images. ----
+
+/** A wire hugs a border when it runs within BORDER_NEAR_PX of it along BORDER_RUN_MIN_PX or more. */
+export const BORDER_NEAR_PX = 24;
+export const BORDER_RUN_MIN_PX = 100;
+/** Wires that share an end and run side by side on 2 lines, this near, read as 2 lanes where one trunk would do. */
+export const LANE_NEAR_PX = 40;
+const LANE_RUN_MIN_PX = 60;
+/** A gap is tight when more than 1 wire per this many px of its width runs along it. */
+export const GAP_PX_PER_WIRE = 40;
+/** The space reviewer gets each wire longer than this. */
+export const LONG_WIRE_PX = 800;
+/** The most lines one kind of measure prints. */
+const MAX_LINES = 24;
+
+const capped = (lines: string[]) => lines.length > MAX_LINES ? [...lines.slice(0, MAX_LINES), `(and ${lines.length - MAX_LINES} more of this kind)`] : lines;
+const pointOn = (run: Run, along: number): Point => run.axis === "h" ? { x: along, y: run.fixed } : { x: run.fixed, y: along };
+const span = (rect: WorldRect) => `x ${Math.round(rect.x)} to ${Math.round(rect.x + rect.width)}, y ${Math.round(rect.y)} to ${Math.round(rect.y + rect.height)}`;
+
+type SideName = "top" | "bottom" | "left" | "right";
+const sidesOf = (rect: WorldRect): Array<Run & { name: SideName }> => [
+  { name: "top", axis: "h", fixed: rect.y, from: rect.x, to: rect.x + rect.width },
+  { name: "bottom", axis: "h", fixed: rect.y + rect.height, from: rect.x, to: rect.x + rect.width },
+  { name: "left", axis: "v", fixed: rect.x, from: rect.y, to: rect.y + rect.height },
+  { name: "right", axis: "v", fixed: rect.x + rect.width, from: rect.y, to: rect.y + rect.height },
+];
+
+/** A stretch of a wire, as a measure names it. */
+export interface Stretch { wire: string; length: number; from: Point; to: Point }
+export interface BorderRun extends Stretch { section: string; side: SideName; distance: number }
+
+/** The stretches where a wire runs along a section border. */
+export function borderRuns(facts: WireFact[], sections: BoardObject[]): BorderRun[] {
+  const found: BorderRun[] = [];
+  for (const fact of facts) for (const run of runsOf(fact.points)) for (const section of sections) for (const side of sidesOf(section.geometry)) {
+    if (side.axis !== run.axis) continue;
+    const distance = Math.abs(run.fixed - side.fixed);
+    const [from, to] = [Math.max(run.from, side.from), Math.min(run.to, side.to)];
+    if (distance > BORDER_NEAR_PX || to - from < BORDER_RUN_MIN_PX) continue;
+    found.push({ wire: fact.id, section: section.id, side: side.name, distance: Math.round(distance), length: Math.round(to - from), from: pointOn(run, from), to: pointOn(run, to) });
+  }
+  return found;
+}
+
+export interface Lane extends Stretch { other: string; distance: number; shared: { end: "source" | "target"; id: string } | null }
+
+/**
+ * The pairs of wires that run side by side on 2 lines, at most `near` px
+ * apart for `minRun` px or more: the longest such stretch of each pair.
+ * `shared` is the node both start from or both end on.
+ */
+export function closeLanes(facts: WireFact[], near: number, minRun: number): Lane[] {
+  const runs = facts.map((fact) => runsOf(fact.points));
+  const lanes: Lane[] = [];
+  for (let i = 0; i < facts.length; i += 1) for (let j = i + 1; j < facts.length; j += 1) {
+    const [a, b] = [facts[i]!, facts[j]!];
+    let best: Lane | null = null;
+    for (const first of runs[i]!) for (const second of runs[j]!) {
+      if (first.axis !== second.axis) continue;
+      const distance = Math.abs(first.fixed - second.fixed);
+      const [from, to] = [Math.max(first.from, second.from), Math.min(first.to, second.to)];
+      if (distance < 1 || distance > near || to - from < minRun || (best && best.length >= to - from)) continue;
+      const shared = a.to === b.to ? { end: "target" as const, id: a.to } : a.from === b.from ? { end: "source" as const, id: a.from } : null;
+      best = { wire: a.id, other: b.id, distance: Math.round(distance), length: Math.round(to - from), shared, from: pointOn(first, from), to: pointOn(first, to) };
+    }
+    if (best) lanes.push(best);
+  }
+  return lanes;
+}
+
+/**
+ * The stretches where a wire runs round the outside of the board: clear of
+ * every section, off the line of its own 2 ends, with objects on one side of
+ * it and nothing on the other.
+ */
+export function outerEdgeRuns(facts: WireFact[], board: Board, pageFrame: BoardObject | null): Array<Stretch & { side: SideName }> {
+  const placed = board.objects.filter((object) => object.geometry && object !== pageFrame);
+  const sections = placed.filter((object) => object.type === SECTION);
+  const byId = new Map(board.objects.map((object) => [object.id, object]));
+  const found: Array<Stretch & { side: SideName }> = [];
+  for (const fact of facts) for (const run of runsOf(fact.points)) {
+    if (run.to - run.from < BORDER_RUN_MIN_PX) continue;
+    const segment = { a: pointOn(run, run.from), b: pointOn(run, run.to) };
+    if (sections.some((section) => runsThrough(segment, section.geometry))) continue;
+    // Across the run: y for a horizontal run, x for a vertical one.
+    const across = (rect: WorldRect): [number, number] => run.axis === "h" ? [rect.y, rect.y + rect.height] : [rect.x, rect.x + rect.width];
+    const along = (rect: WorldRect): [number, number] => run.axis === "h" ? [rect.x, rect.x + rect.width] : [rect.y, rect.y + rect.height];
+    const direct = [fact.from, fact.to].some((id) => {
+      const end = byId.get(id)?.geometry;
+      return end && across(end)[0] <= run.fixed && run.fixed <= across(end)[1];
+    });
+    if (direct) continue;
+    const beside = placed.filter((object) => along(object.geometry)[0] < run.to && along(object.geometry)[1] > run.from);
+    const [before, after] = [beside.some((object) => across(object.geometry)[0] < run.fixed), beside.some((object) => across(object.geometry)[1] > run.fixed)];
+    if (before === after) continue;
+    const side: SideName = run.axis === "h" ? (before ? "bottom" : "top") : (before ? "right" : "left");
+    found.push({ wire: fact.id, side, length: Math.round(run.to - run.from), from: segment.a, to: segment.b });
+  }
+  return found;
+}
+
+/** What the measures of a wire sheet need beside its rows. */
+export interface WireContext {
+  board: Board;
+  pageFrame: BoardObject | null;
+  /** The header chip of each section that paints one (wires.ts sectionHeaders). */
+  headers: ReadonlyMap<string, WorldRect>;
+}
+
+/**
+ * What the runner measured on the wires of a sheet, one line a fact: a wire
+ * along a section border or the board's outer edge, through a section's
+ * header chip, with an end on a section frame, and 2 wires of one node in
+ * separate close lanes. A line is a fact to judge on the image, not a fault.
+ */
+export function wireMeasureLines(rows: WireRow[], context: WireContext): string[] {
+  const { board, pageFrame, headers } = context;
+  const facts = rows.map((row) => row.fact);
+  const tagOf = new Map(rows.map((row) => [row.fact.id, row.tag]));
+  const name = (id: string) => `${tagOf.get(id)} ${id}`;
+  const byId = new Map(board.objects.map((object) => [object.id, object]));
+  const sections = board.objects.filter((object) => object.type === SECTION && object.geometry);
+  const frame = (id: string) => id === pageFrame?.id ? `the board frame ${id}` : `section ${id}`;
+  const stretch = (run: Stretch) => `from ${at(run.from)} to ${at(run.to)}`;
+  return [
+    ...capped(borderRuns(facts, sections).map((run) => `${name(run.wire)} runs ${run.length} px at ${run.distance} px from the ${run.side} border of ${frame(run.section)}, ${stretch(run)}`)),
+    ...capped(outerEdgeRuns(facts, board, pageFrame).map((run) => `${name(run.wire)} runs ${run.length} px along the outer ${run.side} edge of the board, ${stretch(run)}: no object lies beyond it`)),
+    ...capped(facts.flatMap((fact) => [...headers].filter(([, header]) => segmentsOf(fact.points).some((segment) => runsThrough(segment, header)))
+      .map(([section, header]) => `${name(fact.id)} runs through the header chip of section ${section} (${span(header)})`))),
+    ...capped(facts.flatMap((fact) => ([["starts", fact.from, fact.points[0]!], ["ends", fact.to, fact.points.at(-1)!]] as const)
+      .filter(([, id]) => byId.get(id)?.type === SECTION)
+      .map(([verb, id, point]) => `${name(fact.id)} ${verb} on the frame of section ${id} at ${at(point)}, not on a node`))),
+    ...capped(closeLanes(facts, LANE_NEAR_PX, LANE_RUN_MIN_PX).filter((lane) => lane.shared)
+      .map((lane) => `${name(lane.wire)} and ${name(lane.other)} both ${lane.shared!.end === "target" ? "end on" : "start from"} ${lane.shared!.id} and run ${lane.length} px in 2 lanes ${lane.distance} px apart, ${stretch(lane)}`)),
+  ];
+}
+
+/** The gutter between 2 sections that face each other with no section between them. */
+export interface SectionGap {
+  a: string;
+  b: string;
+  side: "side by side" | "stacked";
+  /** The px between the 2 facing borders. */
+  gap: number;
+  gutter: WorldRect;
+  /** The wires that run along the gutter for 40 px or more. */
+  wires: string[];
+  /** The label chips in the gutter. */
+  chips: number;
+  /** More than 1 wire per GAP_PX_PER_WIRE px of the gap. */
+  tight: boolean;
+}
+
+const FACING_MIN_PX = 40;
+
+/** The gap between each pair of neighbour sections, in board order. A section and one it holds are not neighbours. */
+export function sectionGaps(units: ReviewUnit[], facts: WireFact[]): SectionGap[] {
+  const sections = units.filter((unit) => unit.section);
+  const holds = (outer: ReviewUnit, inner: ReviewUnit) => outer.inside.has(inner.id);
+  const gaps: SectionGap[] = [];
+  for (let i = 0; i < sections.length; i += 1) for (let j = i + 1; j < sections.length; j += 1) {
+    const [a, b] = [sections[i]!, sections[j]!];
+    if (holds(a, b) || holds(b, a)) continue;
+    const facing = (lowA: number, highA: number, lowB: number, highB: number) => [Math.max(lowA, lowB), Math.min(highA, highB)] as const;
+    const [x, y] = [facing(a.rect.x, a.rect.x + a.rect.width, b.rect.x, b.rect.x + b.rect.width), facing(a.rect.y, a.rect.y + a.rect.height, b.rect.y, b.rect.y + b.rect.height)];
+    // The sections face each other across x (side by side) or across y (stacked): they share FACING_MIN_PX on the other axis.
+    const side = y[1] - y[0] >= FACING_MIN_PX && x[0] >= x[1] ? "side by side" : x[1] - x[0] >= FACING_MIN_PX && y[0] >= y[1] ? "stacked" : null;
+    if (!side) continue;
+    const gutter = side === "side by side" ? { x: x[1], y: y[0], width: x[0] - x[1], height: y[1] - y[0] } : { x: x[0], y: y[1], width: x[1] - x[0], height: y[0] - y[1] };
+    if (sections.some((other) => other !== a && other !== b && !holds(other, a) && !holds(other, b) && touches(other.rect, gutter))) continue;
+    const gap = side === "side by side" ? gutter.width : gutter.height;
+    const wires = facts.filter((fact) => runsOf(fact.points).some((run) => {
+      if (run.axis !== (side === "side by side" ? "v" : "h")) return false;
+      const [low, high, from, to] = side === "side by side" ? [gutter.x, gutter.x + gutter.width, gutter.y, gutter.y + gutter.height] : [gutter.y, gutter.y + gutter.height, gutter.x, gutter.x + gutter.width];
+      return run.fixed > low && run.fixed < high && Math.min(run.to, to) - Math.max(run.from, from) >= 40;
+    })).map((fact) => fact.id);
+    gaps.push({
+      a: a.id, b: b.id, side, gap, gutter, wires, chips: facts.filter((fact) => fact.chip && touches(fact.chip, gutter)).length,
+      tight: wires.length > gap / GAP_PX_PER_WIRE,
+    });
+  }
+  return gaps;
+}
+
+/** The text blocks of the space reviewer. Adjacency comes first: which sections talk, and how far apart they sit. */
+export function spaceLines(units: ReviewUnit[], facts: WireFact[], board: Board): { shape: string; gaps: string[]; pairs: string[]; long: string[]; sinks: string[] } {
+  const owner = ownerUnits(units);
+  const byUnit = new Map(units.map((unit) => [unit.id, unit]));
+  const byId = new Map(board.objects.map((object) => [object.id, object]));
+  const sections = units.filter((unit) => unit.section);
+  const gaps = sectionGaps(units, facts);
+  const pairKey = (a: string, b: string) => [a, b].sort().join("\n");
+  const gapOf = new Map(gaps.map((gap) => [pairKey(gap.a, gap.b), gap]));
+  const whole = units.find((unit) => unit.kind === "space")!.rect;
+
+  const pairs = new Map<string, { a: string; b: string; wires: number; length: number }>();
+  for (const fact of facts) {
+    const [a, b] = [owner.get(fact.from), owner.get(fact.to)].sort();
+    if (!a || !b || a === b) continue;
+    const pair = pairs.get(pairKey(a, b)) ?? { a, b, wires: 0, length: 0 };
+    pair.wires += 1;
+    pair.length += fact.length;
+    pairs.set(pairKey(a, b), pair);
+  }
+  const centre = (rect: WorldRect): Point => ({ x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 });
+  const where = (pair: { a: string; b: string }) => {
+    const [a, b] = [byUnit.get(pair.a)!, byUnit.get(pair.b)!];
+    if (!a.section || !b.section) return "one end is a loose item";
+    if (a.inside.has(b.id) || b.inside.has(a.id)) return "one holds the other";
+    const gap = gapOf.get(pairKey(a.id, b.id));
+    if (gap) return `neighbours, ${gap.side}, gap ${gap.gap} px`;
+    const line = { a: centre(a.rect), b: centre(b.rect) };
+    const between = sections.filter((other) => other !== a && other !== b && ![a, b].some((end) => other.inside.has(end.id) || end.inside.has(other.id)) && runsThrough(line, other.rect));
+    return `NOT neighbours${between.length ? `: ${between.map((other) => other.id).join(", ")} ${between.length === 1 ? "lies" : "lie"} between them` : ""}`;
+  };
+
+  const incoming = new Map<string, WireFact[]>();
+  for (const fact of facts) {
+    if (!owner.has(fact.from) || owner.get(fact.from) === owner.get(fact.to)) continue;
+    incoming.set(fact.to, [...(incoming.get(fact.to) ?? []), fact]);
+  }
+  const named = (id: string) => `${id} (${owner.get(id) ?? "board"})`;
+  return {
+    shape: `${Math.round(whole.width)} × ${Math.round(whole.height)} px, aspect ratio ${(whole.width / whole.height).toFixed(2)} : 1`,
+    gaps: gaps.map((gap) => [
+      `${gap.a} ↔ ${gap.b}`, gap.side, `gap ${gap.gap} px`, `gutter ${span(gap.gutter)}`,
+      `${gap.wires.length} ${gap.wires.length === 1 ? "wire runs" : "wires run"} along it`, `${gap.chips} ${gap.chips === 1 ? "label chip" : "label chips"} in it`,
+      ...(gap.tight ? [`TIGHT: more than 1 wire per ${GAP_PX_PER_WIRE} px of gap`] : []),
+    ].join(" · ")),
+    pairs: [...pairs.values()].sort((a, b) => b.wires - a.wires || b.length - a.length)
+      .map((pair) => `${pair.a} ↔ ${pair.b} · ${pair.wires} ${pair.wires === 1 ? "wire" : "wires"} · ${pair.length} px of wire in total · ${where(pair)}`),
+    long: facts.filter((fact) => fact.length > LONG_WIRE_PX).sort((a, b) => b.length - a.length)
+      .map((fact) => `${fact.id} · ${named(fact.from)} → ${named(fact.to)} · ${fact.length} px · ${fact.bends} bends`),
+    sinks: [...incoming].filter(([, wires]) => wires.length >= 3).map(([id, wires]) => {
+      const lengths = wires.map((wire) => wire.length);
+      const from = [...new Set(wires.map((wire) => owner.get(wire.from)!))];
+      return `${id} ${JSON.stringify(short(byId.get(id)?.text))} in ${owner.get(id) ?? "board"} · ${wires.length} wires in from ${from.join(", ")}`
+        + ` · mean ${Math.round(lengths.reduce((sum, length) => sum + length, 0) / lengths.length)} px · longest ${Math.max(...lengths)} px`;
+    }),
+  };
+}
+
+/** An icon on this many nodes or more is listed for the choices reviewer. */
+const REPEATED_ICON_MIN = 4;
+
+/** The text blocks of the choices reviewer: each object's kind, shape, icon and colour, the wires, and what repeats. */
+export function choicesLines(board: Board, facts: WireFact[]): { objects: string[]; wires: string[]; counts: string[] } {
+  const byId = new Map(board.objects.map((object) => [object.id, object]));
+  const colour = (object: BoardObject | undefined) => object?.color ?? "no colour";
+  const sections = board.objects.filter((object) => object.type === SECTION);
+  const nodes = board.objects.filter((object) => object.type !== SECTION);
+  const group = <T,>(items: T[], key: (item: T) => string) => {
+    const groups = new Map<string, T[]>();
+    for (const item of items) groups.set(key(item), [...(groups.get(key(item)) ?? []), item]);
+    return [...groups];
+  };
+  const ids = (objects: BoardObject[]) => objects.map((object) => object.id).join(", ");
+  return {
+    objects: board.objects.map((object) => {
+      const parent = object.parentId ? byId.get(object.parentId) : undefined;
+      return [
+        object.id, object.type, `shape ${object.style?.shape ?? "-"}`, iconName(object.icon) ? `icon ${iconName(object.icon)}` : "no icon", colour(object),
+        parent ? `in ${parent.id} (${colour(parent)})` : "in board", JSON.stringify(short(object.text)),
+      ].join(" · ");
+    }),
+    wires: facts.map((fact) => `${fact.id} · ${fact.from} → ${fact.to} · ${fact.label ? JSON.stringify(short(fact.label)) : "no label"} · ${fact.style} ${fact.colour}`),
+    counts: [
+      ...group(sections, colour).map(([name, members]) => `${members.length} ${members.length === 1 ? "section has" : "sections have"} colour ${name}: ${ids(members)}`),
+      ...group(sections, (section) => section.parentId ?? "the board").filter(([, members]) => members.length > 1 && new Set(members.map(colour)).size === 1)
+        .map(([parent, members]) => `The ${members.length} sibling sections in ${parent} all have colour ${colour(members[0])}: ${ids(members)}`),
+      ...group(nodes, (node) => `${node.type}, shape ${node.style?.shape ?? "-"}, ${colour(node)}`).map(([name, members]) => `${members.length} of ${nodes.length} nodes are ${name}`),
+      ...group(nodes.filter((node) => iconName(node.icon)), (node) => iconName(node.icon)!).filter(([, members]) => members.length >= REPEATED_ICON_MIN)
+        .map(([name, members]) => `Icon ${name} is on ${members.length} nodes: ${members.map((node) => `${node.id} ${JSON.stringify(short(node.text, 24))}`).join(", ")}`),
+      `${nodes.filter((node) => !iconName(node.icon)).length} of ${nodes.length} nodes have no icon`,
+    ],
+  };
 }

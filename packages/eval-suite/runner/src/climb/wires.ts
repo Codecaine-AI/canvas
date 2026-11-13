@@ -1,8 +1,7 @@
 /**
  * The routed facts of every wire on a board, as the renderer draws it: the
- * wire sheet a reviewer reads, and the before and after numbers of a trial.
- * Ford: "if it's given a section, it also then gets to see the like, all of
- * the arrows and so it can, like, propose different routings".
+ * wire sheet a reviewer reads. Ford: "if it's given a section, it also then
+ * gets to see the like, all of the arrows".
  *
  * Every number comes from the canvas engine's own route, never from the
  * picture. The canvas modules load by path at run time, as render.ts loads
@@ -15,7 +14,7 @@ import type { CanvasFile, WorldRect } from "./render.ts";
 
 export interface Point { x: number; y: number }
 
-interface WireObject { id: string; type: string; parentId?: string | null; geometry: WorldRect }
+interface WireObject { id: string; type: string; text?: string; parentId?: string | null; geometry: WorldRect }
 interface WireConnection {
   id: string;
   from: { objectId: string };
@@ -48,6 +47,12 @@ export interface WireModules {
     layoutNumbers(board: unknown, canvasStyle: unknown): BoardTotals;
     layoutBlock(numbers: BoardTotals): string;
   };
+  labelChip: { connectionLabelChipMetrics(label: string, canvasStyle: unknown): { width: number; height: number } };
+  titleChip: {
+    titleChipHasContent(section: unknown, canvasStyle: unknown): boolean;
+    /** `box` is in section-local px. */
+    titleChipLayout(section: unknown, canvasStyle: unknown): { box: WorldRect };
+  };
 }
 
 export async function loadWireModules(root = CANVAS_REPO_ROOT): Promise<WireModules> {
@@ -58,6 +63,8 @@ export async function loadWireModules(root = CANVAS_REPO_ROOT): Promise<WireModu
     geometry: (await source("board/lints/geometry.ts")) as WireModules["geometry"],
     edgeRoute: (await source("board/edge-route.ts")) as WireModules["edgeRoute"],
     layout: (await source("board/layout-numbers.ts")) as WireModules["layout"],
+    labelChip: (await source("connectors/label-chip.ts")) as WireModules["labelChip"],
+    titleChip: (await source("objects/section/title-chip-layout.ts")) as WireModules["titleChip"],
   };
 }
 
@@ -92,6 +99,8 @@ export interface WireFact {
   label: string;
   /** The centre of the label chip as the board paints it, or null with no label. */
   labelAt: Point | null;
+  /** The box of the label chip as the board paints it (the engine's own chip size), or null with no label. */
+  chip: WorldRect | null;
   /** The route as the canvas prints it. Its segment numbers (s0, s1, ...) are the ones the `route` tool takes. */
   route: string;
   /** Boxes the wire runs through that hold neither of its ends. */
@@ -152,6 +161,7 @@ export function wireFacts(modules: WireModules, file: CanvasFile): WireFact[] {
     });
     const label = wire.label ?? "";
     const at = label ? modules.routing.chipPointOnRoute(modules.placement.placedLabelPoint(route, wire, board, style), route, wire) : null;
+    const size = at && modules.labelChip.connectionLabelChipMetrics(label, style);
     return {
       id: wire.id,
       from: wire.from.objectId,
@@ -166,12 +176,25 @@ export function wireFacts(modules: WireModules, file: CanvasFile): WireFact[] {
       arrow: wire.arrow ?? "forward",
       label,
       labelAt: at && { x: Math.round(at.x), y: Math.round(at.y) },
+      chip: at && size && { x: at.x - size.width / 2, y: at.y - size.height / 2, width: size.width, height: size.height },
       route: modules.edgeRoute.formatNumberedSegments(ends[0]!, ends[1]!, modules.edgeRoute.numberedSegmentsForPolyline(points)),
       through: ends[0] === ends[1] ? [] : modules.geometry.pathBoxViolationIds(points, ends[0]!, ends[1]!, board.objects, style),
       crosses: crosses.map((other) => other.wire.id),
       trunks: others.map((other) => ({ wire: other.wire.id, length: sharedRun(points, other.points) })).filter((trunk) => trunk.length > 0),
     };
   });
+}
+
+/** The header chip of each section that paints one (a title or an icon), in board coordinates. */
+export function sectionHeaders(modules: WireModules, file: CanvasFile): Map<string, WorldRect> {
+  const style = file.session.canvasStyle;
+  const headers = new Map<string, WorldRect>();
+  for (const object of (file.persisted as WireBoard).objects) {
+    if (object.type !== "section" || !modules.titleChip.titleChipHasContent(object, style)) continue;
+    const { box } = modules.titleChip.titleChipLayout(object, style);
+    headers.set(object.id, { x: object.geometry.x + box.x, y: object.geometry.y + box.y, width: box.width, height: box.height });
+  }
+  return headers;
 }
 
 /** The board's layout totals, and the LAYOUT block canvas_check prints for them. */

@@ -6,17 +6,20 @@
  * the canvas_check lints and the reviewers review the board, the drawer
  * revises in the same session (`--resume`), and the review runs again, until
  * a round has no blocker and no should and the drawer has answered every
- * finding it got, or `--critic-rounds` (10) are spent.
+ * finding it got, or `--critic-rounds` (20) are spent.
  * The board saved is the one that scored best. `critic/` in the brief folder
  * keeps each round's board, renders, findings and timings.
+ *
+ * `--timeout-min` is the time the first draw may take. A revise pass and the
+ * whole loop have their own (critic.ts CRITIC_FLAGS).
  */
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, rmdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { Semaphore } from "../semaphore.ts";
-import { loopSummary, reviewBoard, type LoopRecord } from "./critic-loop.ts";
+import { failedLoop, loopSummary, reviewBoard, type LoopRecord } from "./critic-loop.ts";
 import { CRITIC_FLAGS, loadReviewCanvas, parseCritic, type CriticOptions, type ReviewCanvas } from "./critic.ts";
-import { DRAWER_EFFORT, DRAWER_MODEL, drawerArgs, drawerFlags, runDrawer, sessionIdOf } from "./drawer.ts";
+import { DRAWER_EFFORT, DRAWER_MODEL, drawerFlags, drawerPass, sessionIdOf } from "./drawer.ts";
 import {
   DEFAULT_CLIMB_ROOT,
   briefPath,
@@ -37,6 +40,8 @@ export interface DrawRecord {
   exitCode: number | null;
   signal: string | null;
   timedOut: boolean;
+  /** The processes the first draw ran: over 1 after a rate limit (drawer.ts drawerPass). */
+  tries: number;
   durationMs: number;
   startedAt: string;
   /** The board file relative to the brief folder, or null when the drawer made none. */
@@ -83,24 +88,27 @@ async function drawOne(options: {
   const canvasesDir = resolve(dir, "canvases");
   mkdirSync(canvasesDir, { recursive: true });
 
-  const prompt = drawerPrompt(brief, readFileSync(briefPath(brief, options.briefDir), "utf8"));
+  const briefText = readFileSync(briefPath(brief, options.briefDir), "utf8");
   const startedAt = new Date();
-  const args = drawerArgs(dir, options.settingsPath, { persist: options.critic !== undefined });
-  const { exitCode, signal, timedOut } = await runDrawer(dir, args, [prompt], resolve(dir, "transcript.jsonl"), options.timeoutMs);
+  const first = await drawerPass({
+    dir, settingsPath: options.settingsPath, session: { persist: options.critic !== undefined },
+    message: [drawerPrompt(brief, briefText)], transcriptPath: resolve(dir, "transcript.jsonl"), timeoutMs: options.timeoutMs,
+  });
+  const { exitCode, signal, timedOut, tries } = first.run;
 
   // The critics and the revise passes work on the board where the drawer's canvas server keeps it.
   const created = resolve(canvasesDir, `${brief}.canvas.json`);
   let critic: LoopRecord | null = null;
   if (options.critic && exitCode === 0 && existsSync(created)) {
     try {
-      const session = sessionIdOf(readFileSync(resolve(dir, "transcript.jsonl"), "utf8"));
+      const session = sessionIdOf(first.transcript);
       if (!session) throw new Error("the first pass's transcript names no session to resume");
       critic = await reviewBoard({
-        canvas: options.critic.canvas, board: brief, boardPath: created, outDir: resolve(dir, "critic"), critic: options.critic.options,
-        drawer: { dir, settingsPath: options.settingsPath, timeoutMs: options.timeoutMs, session },
+        canvas: options.critic.canvas, board: brief, boardPath: created, outDir: resolve(dir, "critic"), critic: options.critic.options, brief: briefText,
+        drawer: { dir, settingsPath: options.settingsPath, session },
       });
     } catch (error) {
-      critic = { budget: options.critic.options.rounds, rounds: [], stop: "failed", error: error instanceof Error ? error.message : String(error), unanswered: [], kept: null, durationMs: 0 };
+      critic = failedLoop(options.critic.options.rounds, error instanceof Error ? error.message : String(error));
     }
     // The board stands as the loop kept it; draw.json says how the loop stopped and which round it kept.
     process.stdout.write(`${brief}: critic · ${loopSummary(critic)}\n`);
@@ -120,6 +128,7 @@ async function drawOne(options: {
     exitCode,
     signal,
     timedOut,
+    tries,
     durationMs: Date.now() - startedAt.getTime(),
     startedAt: startedAt.toISOString(),
     board: hasBoard ? board : null,

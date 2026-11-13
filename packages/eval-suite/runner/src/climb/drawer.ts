@@ -5,8 +5,11 @@
  * (critic-loop.ts).
  *
  * A pass reads its message on stdin as one `stream-json` user event, so the
- * message can hold images beside its text: the marked crops of a trial run
- * (trial.ts). The drawer has no tool that reads a file, and gets none.
+ * message can hold images beside its text: the reviewers' highlights
+ * (highlights.ts). The drawer has no tool that reads a file, and gets none.
+ *
+ * A pass that the API turns down for a rate limit or an overload runs again
+ * after a wait (drawerPass). Round 4 lost 5 loops to HTTP 429.
  *
  * The drawer must be the same in every round, so it runs in bare mode: no
  * CLAUDE.md discovery, hooks, plugins or skills, and no built-in tools. Auth
@@ -14,21 +17,25 @@
  * `apiKeyHelper`), the only setting bare mode reads from it that matters here.
  */
 import { spawn } from "node:child_process";
-import { closeSync, existsSync, openSync, readFileSync } from "node:fs";
+import { closeSync, existsSync, openSync, readFileSync, renameSync } from "node:fs";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
 
+import { isRateLimitText, retryRateLimited } from "./backoff.ts";
 import { CANVAS_REPO_ROOT } from "./paths.ts";
 
 export const DRAWER_MODEL = "claude-opus-5-5";
 export const DRAWER_EFFORT = "high";
 const MCP_SERVER = "canvas";
 /**
- * One pass: the first draw, or one revise. Each pass has its own clock, and
- * nothing times the critic loop as a whole, so more rounds never cut a loop
- * off. The longest pass of round 2 was a first draw of 49.5 minutes.
+ * The first draw. The longest of round 2 took 49.5 minutes. A revise pass has
+ * its own, shorter clock (critic.ts DEFAULT_REVISE_MINUTES).
  */
 const DEFAULT_TIMEOUT_MINUTES = 75;
+/** The first wait after the API turns a pass down for a rate limit. It doubles: 1, 2, 4, 8 minutes. */
+const DRAWER_FIRST_WAIT_MS = 60_000;
+/** The HTTP statuses of a rate limit and an overload. */
+const LIMIT_STATUSES: readonly unknown[] = [429, 503, 529];
 
 /** The session variables of the Claude Code that launched the climb, which must not leak into a drawer. */
 const PARENT_SESSION_VARIABLES = [
@@ -44,7 +51,7 @@ const PARENT_SESSION_VARIABLES = [
   "CLAUDE_PID",
 ];
 
-/** `--settings <path>` and `--timeout-min <n>`: the drawer's auth file and the time one pass may take. */
+/** `--settings <path>` and `--timeout-min <n>`: the drawer's auth file and the time the first draw may take. */
 export function drawerFlags(flags: Map<string, string>): { settingsPath: string; timeoutMs: number } {
   const timeoutMinutes = Number(flags.get("--timeout-min") ?? DEFAULT_TIMEOUT_MINUTES);
   if (!(timeoutMinutes > 0)) throw new Error("--timeout-min must be a positive number");
@@ -128,7 +135,27 @@ export function replyOf(jsonl: string): string {
   return typeof result === "string" ? result : "";
 }
 
-export interface DrawerRun { exitCode: number | null; signal: NodeJS.Signals | null; timedOut: boolean; durationMs: number }
+/**
+ * Whether a pass stopped because the API turned a request down for a rate
+ * limit or an overload: the transcript's closing `result` event is an API
+ * error with HTTP 429, 529 or 503, or with a text that names the limit.
+ */
+export function rateLimitedPass(jsonl: string): boolean {
+  const result = events(jsonl).findLast((event) => event.type === "result");
+  if (result?.is_error !== true) return false;
+  return LIMIT_STATUSES.includes(result.api_error_status)
+    || (result.terminal_reason === "api_error" && typeof result.result === "string" && isRateLimitText(result.result));
+}
+
+/** One drawer process. */
+export interface ProcessRun { exitCode: number | null; signal: NodeJS.Signals | null; timedOut: boolean; durationMs: number }
+/** One pass: its last process, and the tries a rate limit cost it. */
+export interface DrawerRun extends ProcessRun {
+  /** How many processes the pass ran: over 1 after a rate limit or an overload. `durationMs` holds them all, the waits too. */
+  tries: number;
+  /** True when the last try hit the limit too: the pass did not run to its end. */
+  rateLimited: boolean;
+}
 
 /**
  * One drawer process, its stdout to `transcriptPath` and its stderr appended to stderr.log.
@@ -137,7 +164,7 @@ export interface DrawerRun { exitCode: number | null; signal: NodeJS.Signals | n
  * inside a large event (a board image) and lose the closing `result` event,
  * and with it the drawer's answers.
  */
-export async function runDrawer(dir: string, args: string[], message: DrawerPart[], transcriptPath: string, timeoutMs: number): Promise<DrawerRun> {
+export async function runDrawer(dir: string, args: string[], message: DrawerPart[], transcriptPath: string, timeoutMs: number): Promise<ProcessRun> {
   const started = Date.now();
   const transcript = openSync(transcriptPath, "w");
   const stderr = openSync(resolve(dir, "stderr.log"), "a");
@@ -164,6 +191,43 @@ export async function runDrawer(dir: string, args: string[], message: DrawerPart
 }
 
 /**
+ * One pass, run again while the API turns it down for a rate limit or an
+ * overload: 5 tries, with waits of 1, 2, 4 and 8 minutes. A try after the
+ * first resumes the session the try before it left, when the pass keeps its
+ * session, and reads the same message again. `transcriptPath` holds the last
+ * try, and `<name>.try-<n>.jsonl` each try before it.
+ */
+export async function drawerPass(options: {
+  dir: string;
+  settingsPath: string;
+  session: { persist: boolean; resume?: string };
+  message: DrawerPart[];
+  transcriptPath: string;
+  timeoutMs: number;
+  run?: typeof runDrawer;
+  sleep?(ms: number): Promise<void>;
+}): Promise<{ run: DrawerRun; transcript: string }> {
+  const { dir, transcriptPath } = options;
+  const started = Date.now();
+  let resume = options.session.resume;
+  const { result, tries, limited } = await retryRateLimited({
+    attempt: async (attempt) => {
+      if (attempt > 1) renameSync(transcriptPath, transcriptPath.replace(/(\.jsonl)?$/, `.try-${attempt - 1}.jsonl`));
+      const args = drawerArgs(dir, options.settingsPath, { persist: options.session.persist, resume });
+      const run = await (options.run ?? runDrawer)(dir, args, options.message, transcriptPath, options.timeoutMs);
+      const transcript = readFileSync(transcriptPath, "utf8");
+      if (options.session.persist) resume = sessionIdOf(transcript) ?? resume;
+      return { run, transcript };
+    },
+    limited: ({ run, transcript }) => run.exitCode !== 0 && !run.timedOut && rateLimitedPass(transcript),
+    firstWaitMs: DRAWER_FIRST_WAIT_MS,
+    sleep: options.sleep,
+    onWait: (attempt, waitMs) => process.stdout.write(`drawer in ${dir}: rate limited on try ${attempt}, waits ${waitMs / 1000} s\n`),
+  });
+  return { run: { ...result.run, durationMs: Date.now() - started, tries, rateLimited: limited }, transcript: result.transcript };
+}
+
+/**
  * The drawer of one critic loop. Each pass resumes the session the pass
  * before it left and saves its own, so the loop can ask in the same session
  * for an answer a reply left out, after the last revise too. `session` is the
@@ -172,12 +236,14 @@ export async function runDrawer(dir: string, args: string[], message: DrawerPart
 export function drawerSession(
   drawer: { dir: string; settingsPath: string; timeoutMs: number; session?: string },
   run: typeof runDrawer = runDrawer,
+  sleep?: (ms: number) => Promise<void>,
 ): (message: DrawerPart[], transcriptPath: string) => Promise<{ run: DrawerRun; reply: string }> {
   let session = drawer.session;
   return async (message, transcriptPath) => {
-    const pass = await run(drawer.dir, drawerArgs(drawer.dir, drawer.settingsPath, { persist: true, resume: session }), message, transcriptPath, drawer.timeoutMs);
-    const transcript = readFileSync(transcriptPath, "utf8");
-    session = sessionIdOf(transcript) ?? session;
-    return { run: pass, reply: replyOf(transcript) };
+    const pass = await drawerPass({
+      dir: drawer.dir, settingsPath: drawer.settingsPath, session: { persist: true, resume: session }, message, transcriptPath, timeoutMs: drawer.timeoutMs, run, sleep,
+    });
+    session = sessionIdOf(pass.transcript) ?? session;
+    return { run: pass.run, reply: replyOf(pass.transcript) };
   };
 }

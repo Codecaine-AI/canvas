@@ -1,16 +1,18 @@
 /**
  * The critic loop: review, revise, review again, as the Sol loop runs a code
- * review. Ford: "we have the reviewers that then, like, in parallel, look
- * across the board and come back with findings and go back and forth similar
- * to how we run the sole loop for our system for code changes."
+ * review. Ford: "if there were failures in the previous run, the viewers have
+ * to, like, come back. And this is done, like, a programmatic way where it's,
+ * like, when the agent says it's done with the edits, it then does the review
+ * process automatically. And this goes until It ends And, like, I'm
+ * definitely thinking we, like, max out at 20".
  *
  * A round is one review (critic.ts): the lints canvas_check runs, plus the
  * reviewers. Each finding is a blocker, a should or a nit, and keeps one id
- * (F1, F2, ...) for the whole loop. A reviewer can propose a canvas call for
- * its finding. The trial run (trial.ts) applies each call to a copy of the
- * board, and the drawer gets the finding, the call, what the call did and the
- * marked images. The drawer revises in its own session and answers each
- * finding: fixed, disagree or declined.
+ * (F1, F2, ...) for the whole loop. A reviewer's finding says what is wrong
+ * and marks where. The drawer gets the list with one highlight image a
+ * reviewer (highlights.ts), revises in its own session, and answers each
+ * finding: fixed, disagree or declined. Ford: "It goes through and either
+ * you know, fixes them or rejects them or whatever its process is."
  *
  * Ford: "I see that there's these answers lost. We need to make sure that
  * doesn't happen." The loop checks that every id it sent has an answer, and
@@ -18,28 +20,35 @@
  * no answer after that goes into the next review and the next revise pass,
  * whatever that review finds.
  *
- * The loop stops at the first round with no blocker and no should and no id
- * without an answer, or when its budget of rounds is spent. A check round
- * then reviews the board the last revise left, so every board the loop leaves
- * has a score, and the loop keeps the board that scored best (bestRound).
+ * A finding the drawer turned down goes to the next round's reviewers with
+ * its reason. A fault turned down twice is settled: the loop sends it no
+ * more. A lint turned down with a reason is not sent again while the items
+ * it names stay as they are.
+ *
+ * The review starts by code each time a revise pass ends. The loop stops at
+ * the first round where every reviewer answered, none found a blocker or a
+ * should, and no id is without an answer, or at round 20 (`--critic-rounds`).
+ * The last round only reviews: nothing revises after it, so every board the
+ * loop leaves has a score, and the loop keeps the board that scored best
+ * (bestRound).
  *
  * `climb draw --critic on` runs the loop after the drawer's first pass
  * (draw.ts). `climb critic --board <path> --out <dir>` runs one review of a
  * frozen board, and with `--revise on` the whole loop on a copy of it, with a
  * new drawer session that stands in for the one that drew the board.
  */
-import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 
 import {
   CRITIC_FLAGS, SEVERITIES, critiqueBoard, critiqueSummary, loadReviewCanvas, parseCritic,
-  type CriticOptions, type EarlierFinding, type MergedFinding, type ReviewCanvas, type Severity,
+  type CriticOptions, type CritiqueRecord, type EarlierFinding, type Effort, type MergedFinding, type ReviewCanvas, type ReviewLint, type Severity,
 } from "./critic.ts";
 import { drawerFlags, drawerSession, type DrawerPart, type DrawerRun } from "./drawer.ts";
+import { renderHighlights, type HighlightImage } from "./highlights.ts";
 import { parseFlags } from "./paths.ts";
-import type { FindingAdvice, ProposedCall } from "./review-types.ts";
-import { renderBoardPng, type Lint } from "./render.ts";
-import { trialFindings } from "./trial.ts";
+import { renderBoardPng } from "./render.ts";
+import { REVIEWER_KINDS, SPACE_UNIT, type Mark, type ReviewerKind } from "./review-inputs.ts";
 
 export const VERDICTS = ["fixed", "disagree", "declined"] as const;
 export type Verdict = (typeof VERDICTS)[number];
@@ -49,51 +58,52 @@ export interface Answer { verdict: Verdict; reason: string }
 export interface LoopFinding {
   /** F1, F2, ...: one id for the whole loop. */
   id: string;
-  /** check: a canvas_check lint. reviewer: the whole-board, section and loose-item reviewers. */
+  /** check: a canvas_check lint. reviewer: one of the 6 kinds of reviewer. */
   source: "check" | "reviewer";
   severity: Severity;
   /** The lint's rule, or the reviewer's finding kind. */
   kind: string;
   ids: string[];
   labels: string[];
+  /** What is wrong. A reviewer never says how to fix it. */
   problem: string;
-  fix: string;
-  /** The units (board, a section id, loose) whose reviewers reported it. */
+  /** A lint's own advice, as canvas_check prints it. "" for a reviewer's finding. */
+  suggestion: string;
+  /** The units (space, wires, choices, a section id, gap-<n>, loose) whose reviewers reported it. */
   regions: string[];
-  /** The calls the reviewers proposed for it. A lint has none. */
-  calls: ProposedCall[];
+  /** Each of those reviewers' highlights of the fault. A lint has none. */
+  marks: Array<{ unit: string; marks: Mark[] }>;
+  /** A lint: the state of the items it names when the round reviewed them (critic.ts ReviewLint). "" for a reviewer's finding. */
+  state: string;
   /** The drawer's answer, or null while it has given none: in its round's revise pass, the re-ask, or a later round's pass. */
   answer: Answer | null;
+}
+
+/** A fault a round found and did not send the drawer. */
+export interface Withheld {
+  /** A lint's id from the round that sent it, or null for a reviewer's finding, which never got one. */
+  id: string | null;
+  source: LoopFinding["source"];
+  severity: Severity;
+  kind: string;
+  ids: string[];
+  problem: string;
+  /** held: a lint the drawer turned down with a reason, on items that have not changed since. settled: turned down twice. */
+  why: "held" | "settled";
 }
 
 /** What a revise pass carries besides its round's findings. */
 export interface ReviseNotes {
   /** Findings of earlier rounds the drawer has not answered. This pass asks for their answers again. */
   unanswered: LoopFinding[];
-  /** What the trial run found, for each finding with a call. */
-  advice: FindingAdvice[];
-  /** Why the trial run gave no advice, or null when it ran or had no call to run. */
-  notTrialled: string | null;
-}
-
-/** The trial run of one round's calls. */
-export interface TrialRecord {
-  /** The findings that carried a call, and how many of them the trial gave advice on. */
-  findings: number;
-  advised: number;
-  /** The images the drawer got with the advice. */
-  images: number;
-  durationMs: number;
-  /** Why the trial gave no advice, or null when it ran. */
-  error: string | null;
 }
 
 /** One revise pass, and what the answer check found after it. */
 export interface ReviseRecord extends DrawerRun {
   /** How many of the round's findings the drawer answered, the re-ask's answers among them. */
   answered: number;
-  /** The trial run before the pass, or null when no finding carried a call. */
-  trial: TrialRecord | null;
+  /** The highlight images the drawer got with the findings. */
+  images: number;
   /** The pass that asked again for the ids the reply left out, or null when there was none: the reply answered every id, or the revise pass failed. */
   reask: (DrawerRun & { ids: string[] }) | null;
   /** The ids this pass sent that still have no answer, earlier rounds' among them. */
@@ -104,26 +114,34 @@ export interface ReviseRecord extends DrawerRun {
 export interface Review {
   reviewMs: number;
   renderMs: number;
+  /** The reasoning effort of its reviewers. */
+  effort: Effort;
+  /** How many reviewers of each kind ran. A kind with nothing to review on the board has none. */
+  reviewers: Record<ReviewerKind, number>;
   regions: number;
-  /** Regions whose critic gave no answer. */
+  /** Reviewers that gave no answer. */
   unparsed: number;
-  lints: Lint[];
+  lints: ReviewLint[];
   findings: MergedFinding[];
 }
 
 export interface RoundRecord {
   round: number;
-  /** A check round only scores the board a revise pass left: it comes after the budget's last revise, or after a revise that failed, and has no revise. */
+  /** The loop's last review: the round the budget ends on, or the round after a revise pass that failed. Nothing revises after it. */
   check: boolean;
-  /** 3 for each blocker and 1 for each should this round found, the lints among them. Lower is better. */
+  /** What keep-best compares (roundFindings). Lower is better. */
   score: number;
-  /** Wall clock of the review: lints, renders, critics and the merge. */
+  /** Wall clock of the review: lints, renders, reviewers and the merge. */
   reviewMs: number;
   renderMs: number;
+  effort: Effort;
+  reviewers: Record<ReviewerKind, number>;
   regions: number;
   unparsed: number;
-  /** This round's findings, most severe first, each with the drawer's answer once it revised. */
+  /** The findings this round sent the drawer, most severe first, each with the drawer's answer once it revised. */
   findings: LoopFinding[];
+  /** The faults this round found and did not send. */
+  withheld: Withheld[];
   /** The drawer's revise pass, or null when the round had none. */
   revise: ReviseRecord | null;
 }
@@ -137,16 +155,21 @@ export interface Kept {
 }
 
 export interface LoopRecord {
-  /** The most revise passes. A check round comes on top of it. */
+  /** The most review rounds. The last one only reviews. */
   budget: number;
+  /** The reasoning effort of the reviewers, or null when no review ran. */
+  effort: Effort | null;
   rounds: RoundRecord[];
   /**
-   * clean: the last round had no blocker and no should, and every finding
-   * the drawer got has its answer. budget: the rounds ran out. incomplete:
-   * the rounds ran out and `unanswered` is not empty. review-only: no drawer
-   * to revise. failed: a step broke (error).
+   * clean: in the last round every reviewer answered, none found a blocker
+   * or a should, and every finding the drawer got has its answer. budget:
+   * the rounds ran out. incomplete: the rounds ran out and `unanswered` is
+   * not empty. time: the loop's time ran out (`--loop-timeout-min`).
+   * rate-limited: a revise pass hit a rate limit on each of its tries, and a
+   * last round reviewed what it left. review-only: no drawer to revise.
+   * failed: a step broke (error).
    */
-  stop: "clean" | "incomplete" | "budget" | "review-only" | "failed";
+  stop: "clean" | "incomplete" | "budget" | "time" | "rate-limited" | "review-only" | "failed";
   error: string | null;
   /** The ids the drawer got and never answered. */
   unanswered: string[];
@@ -155,102 +178,162 @@ export interface LoopRecord {
   durationMs: number;
 }
 
+/** A loop that broke before its first review. */
+export const failedLoop = (budget: number, error: string): LoopRecord =>
+  ({ budget, effort: null, rounds: [], stop: "failed", error, unanswered: [], kept: null, durationMs: 0 });
+
 const LINT_SEVERITY: Record<string, Severity> = { error: "blocker", warning: "should", note: "nit" };
 const rank = (finding: { severity: Severity }) => SEVERITIES.indexOf(finding.severity);
 /** A finding the loop does not stop on. */
 const isOpen = (finding: { severity: Severity }) => finding.severity !== "nit";
 const SCORE_WEIGHT: Record<Severity, number> = { blocker: 3, should: 1, nit: 0 };
-const scoreOf = (findings: LoopFinding[]) => findings.reduce((sum, finding) => sum + SCORE_WEIGHT[finding.severity], 0);
+/** A fault the drawer turned down this many times is settled. */
+const SETTLED_AFTER = 2;
 
+const normal = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+/** disagree and declined both turn a finding down. */
+const turnedDown = (finding: LoopFinding) => finding.answer !== null && finding.answer.verdict !== "fixed";
+const withReason = (finding: LoopFinding) => turnedDown(finding) && finding.answer!.reason.trim().length > 0;
 /**
- * One round's findings: the lints, then the critics', most severe first.
- * `ledger` holds every earlier round's findings with the drawer's answers.
- *
- * A lint an earlier round raised keeps its id, and is raised again each round
- * until it is off the board, whatever the drawer answered: a round counts
- * what the board still has. The critics read the earlier findings and answers
- * themselves, so each finding they return is new.
+ * What makes two reviewer findings of different rounds one fault: the kind
+ * and the same items, by id, or by label when it names no id. The words of
+ * the problem differ from round to round. Null for a finding that names
+ * nothing: it matches no other.
  */
-export function roundFindings(ledger: LoopFinding[], review: Pick<Review, "lints" | "findings">): LoopFinding[] {
-  const key = (finding: Pick<LoopFinding, "kind" | "ids" | "problem">) => JSON.stringify([finding.kind, finding.ids, finding.problem]);
-  const raised = new Map(ledger.filter((finding) => finding.source === "check").map((finding) => [key(finding), finding.id]));
-  let next = 1 + Math.max(0, ...ledger.map((finding) => Number(finding.id.slice(1))));
-  const findings: LoopFinding[] = [];
-  for (const lint of review.lints) {
-    const fresh = {
-      source: "check" as const, severity: LINT_SEVERITY[lint.severity] ?? "should", kind: lint.rule,
-      ids: lint.at, labels: [], problem: lint.message, fix: lint.suggestion ?? "", regions: [], calls: [], answer: null,
-    };
-    findings.push({ id: raised.get(key(fresh)) ?? `F${next++}`, ...fresh });
-  }
-  for (const finding of review.findings) {
-    findings.push({
-      id: `F${next++}`, source: "reviewer", severity: finding.severity, kind: finding.kind,
-      ids: finding.ids, labels: finding.labels, problem: finding.problem, fix: finding.fix, regions: finding.regions, calls: finding.calls, answer: null,
-    });
-  }
-  // The sort is stable: a lint stays ahead of the critics' findings of its severity.
-  return findings.sort((a, b) => rank(a) - rank(b));
+function faultKey(finding: Pick<LoopFinding, "kind" | "ids" | "labels">): string | null {
+  if (finding.ids.length > 0) return JSON.stringify([finding.kind, "ids", [...new Set(finding.ids)].sort()]);
+  if (finding.labels.length > 0) return JSON.stringify([finding.kind, "labels", [...new Set(finding.labels.map(normal))].sort()]);
+  return null;
 }
 
-const names = (finding: LoopFinding) => [...finding.ids, ...finding.labels.map((label) => JSON.stringify(label))].join(", ");
+/**
+ * One round's findings: the lints, then the reviewers', most severe first.
+ * `ledger` holds every earlier round's findings with the drawer's answers.
+ *
+ * A lint an earlier round raised keeps its id, and is sent again while it is
+ * on the board, with 2 exceptions. The drawer turned it down with a reason
+ * and the items it names have not changed since: it is held. The drawer
+ * turned it down with a reason twice: it is settled. Round 4 spent rounds on
+ * the same lints, declined each round (h1: 9 of them, to round 11).
+ *
+ * A reviewer's finding is new each round. One that names the kind and the
+ * items of a fault the drawer turned down twice is settled, and not sent.
+ *
+ * The score counts what the board has, sent or not: 3 for each blocker and 1
+ * for each should, over every lint on the board and the reviewers' findings
+ * sent. One thing does not count: a lint warning on items no earlier lint of
+ * its rule named, in a round after the first. A revise pass that moves whole
+ * sections can leave such warnings for one round, and keep-best must not go
+ * back to the old board for that alone. It counts from the next round on.
+ */
+export function roundFindings(ledger: LoopFinding[], review: Pick<Review, "lints" | "findings">, round = 1): { findings: LoopFinding[]; withheld: Withheld[]; score: number } {
+  const key = (finding: Pick<LoopFinding, "kind" | "ids" | "problem">) => JSON.stringify([finding.kind, finding.ids, finding.problem]);
+  const items = (finding: Pick<LoopFinding, "kind" | "ids">) => JSON.stringify([finding.kind, [...finding.ids].sort()]);
+  const checks = ledger.filter((finding) => finding.source === "check");
+  const knownItems = new Set(checks.map(items));
+  const declined = new Map<string, number>();
+  for (const finding of ledger) {
+    const fault = finding.source === "reviewer" && turnedDown(finding) ? faultKey(finding) : null;
+    if (fault) declined.set(fault, (declined.get(fault) ?? 0) + 1);
+  }
+  let next = 1 + Math.max(0, ...ledger.map((finding) => Number(finding.id.slice(1))));
+  let score = 0;
+  const findings: LoopFinding[] = [];
+  const withheld: Withheld[] = [];
+  for (const lint of review.lints) {
+    const fresh: Omit<LoopFinding, "id"> = {
+      source: "check", severity: LINT_SEVERITY[lint.severity] ?? "should", kind: lint.rule,
+      ids: lint.at, labels: [], problem: lint.message, suggestion: lint.suggestion ?? "", regions: [], marks: [], state: lint.state, answer: null,
+    };
+    const before = checks.filter((finding) => key(finding) === key(fresh));
+    const last = before.at(-1);
+    if (!(round > 1 && fresh.severity === "should" && !knownItems.has(items(fresh)))) score += SCORE_WEIGHT[fresh.severity];
+    const why = before.filter(withReason).length >= SETTLED_AFTER ? "settled" : last && withReason(last) && last.state === lint.state ? "held" : null;
+    if (why && last) withheld.push({ id: last.id, source: "check", severity: fresh.severity, kind: fresh.kind, ids: fresh.ids, problem: fresh.problem, why });
+    else findings.push({ id: last?.id ?? `F${next++}`, ...fresh });
+  }
+  for (const finding of review.findings) {
+    const fresh: Omit<LoopFinding, "id"> = {
+      source: "reviewer", severity: finding.severity, kind: finding.kind,
+      ids: finding.ids, labels: finding.labels, problem: finding.problem, suggestion: "", regions: finding.regions, marks: finding.marks, state: "", answer: null,
+    };
+    const fault = faultKey(fresh);
+    if (fault && (declined.get(fault) ?? 0) >= SETTLED_AFTER) {
+      withheld.push({ id: null, source: "reviewer", severity: fresh.severity, kind: fresh.kind, ids: fresh.ids, problem: fresh.problem, why: "settled" });
+      continue;
+    }
+    score += SCORE_WEIGHT[fresh.severity];
+    findings.push({ id: `F${next++}`, ...fresh });
+  }
+  // The sort is stable: a lint stays ahead of the reviewers' findings of its severity.
+  return { findings: findings.sort((a, b) => rank(a) - rank(b)), withheld, score };
+}
+
+const names = (finding: Pick<LoopFinding, "ids" | "labels">) => [...finding.ids, ...finding.labels.map((label) => JSON.stringify(label))].join(", ");
 const sentence = (text: string) => /[.!?]$/.test(text) ? text : `${text}.`;
 
-/** One finding as the drawer reads it. A lint's message names its items itself. */
+/** One finding as the drawer reads it. A lint's message names its items itself, and keeps canvas_check's advice. */
 export function findingLine(finding: LoopFinding): string {
   const tag = finding.source === "check" ? `check ${finding.kind}` : finding.kind;
   const subject = finding.source === "reviewer" && names(finding) ? `${names(finding)}: ` : "";
-  return `${finding.id} [${finding.severity}, ${tag}] ${subject}${sentence(finding.problem)}${finding.fix ? ` Fix: ${finding.fix}` : ""}`;
+  return `${finding.id} [${finding.severity}, ${tag}] ${subject}${sentence(finding.problem)}${finding.suggestion ? ` Fix: ${finding.suggestion}` : ""}`;
 }
 
-/** A critic's finding of an earlier round as the next round's critics read it, with the drawer's answer. */
-function earlierFinding(finding: LoopFinding): EarlierFinding {
-  const answer = finding.answer ? `${finding.answer.verdict}${finding.answer.reason ? `, ${finding.answer.reason}` : ""}` : "no answer";
-  return { ids: finding.ids, regions: finding.regions, line: `[${finding.kind}] ${names(finding)}: ${sentence(finding.problem)} Drawer: ${answer}` };
+/**
+ * The reviewers' findings the drawer turned down, as the next round's
+ * reviewers read them: one line a fault, with the drawer's last reason. A
+ * reviewer raises such a fault again only when the reason is wrong on the
+ * board as it is then. A fault turned down twice is settled.
+ */
+export function declinedFindings(ledger: LoopFinding[]): EarlierFinding[] {
+  const faults = new Map<string, LoopFinding[]>();
+  for (const finding of ledger) {
+    if (finding.source !== "reviewer" || !turnedDown(finding)) continue;
+    const fault = faultKey(finding) ?? finding.id;
+    faults.set(fault, [...(faults.get(fault) ?? []), finding]);
+  }
+  return [...faults.values()].map((same) => {
+    const last = same.at(-1)!;
+    const { verdict, reason } = last.answer!;
+    return {
+      ids: last.ids,
+      regions: [...new Set(same.flatMap((finding) => finding.regions))],
+      line: `[${last.kind}] ${names(last) ? `${names(last)}: ` : ""}${sentence(last.problem)} The drawer ${verdict === "disagree" ? "disagreed" : "declined"}: ${reason.trim() || "it gave no reason"}`,
+      settled: same.length >= SETTLED_AFTER,
+    };
+  });
 }
 
 const ANSWER_LINES = ["<id> fixed", "<id> disagree: <why the finding is wrong>", "<id> declined: <why you left it>"];
-const SECTION_TOOLS: readonly string[] = ["arrange_section", "fit_section"];
-/** A call that moves, arranges or fits a section. What the section holds moves with it. */
-const movesSection = ({ call }: ProposedCall, sections: ReadonlySet<string>) =>
-  SECTION_TOOLS.includes(call.tool) || (call.tool === "move" && sections.has(String(call.args.id)));
 
 /**
  * The drawer's revise turn, in its own session, after a review: the text,
- * then each image of the trial run under its number and its finding.
- * `sections` holds the board's section ids.
+ * then each highlight image under its number, its reviewer and its findings.
  */
-export function reviseMessage(board: string, findings: LoopFinding[], notes: Partial<ReviseNotes> & { sections?: ReadonlySet<string> } = {}): DrawerPart[] {
-  const { unanswered = [], advice = [], notTrialled = null, sections = new Set<string>() } = notes;
-  const sectionMove = (finding: LoopFinding) => finding.calls.some((call) => movesSection(call, sections));
+export function reviseMessage(board: string, findings: LoopFinding[], notes: Partial<ReviseNotes> & { images?: HighlightImage[] } = {}): DrawerPart[] {
+  const { unanswered = [], images = [] } = notes;
+  const space = (finding: LoopFinding) => finding.regions.includes(SPACE_UNIT);
   // The sort is stable: each group stays most severe first.
-  const ordered = [...findings].sort((a, b) => Number(sectionMove(b)) - Number(sectionMove(a)));
-  const images: Array<{ finding: string; path: string }> = [];
+  const ordered = [...findings].sort((a, b) => Number(space(b)) - Number(space(a)));
   const blocks = ordered.flatMap((finding) => {
-    const trial = advice.find((entry) => entry.finding === finding.id);
-    const shown = (trial?.images ?? []).map((path) => images.push({ finding: finding.id, path }));
-    return [
-      findingLine(finding),
-      ...finding.calls.map(({ unit, call }) => `  call from ${unit}: ${JSON.stringify(call)}`),
-      ...(trial?.lines ?? []).map((line) => `  ${line}`),
-      ...(finding.calls.length && notTrialled !== null ? [`  not trialled: ${notTrialled}`] : []),
-      ...(shown.length ? [`  ${shown.length === 1 ? "image" : "images"}: ${shown.join(", ")}`] : []),
-    ];
+    if (finding.source === "check") return [findingLine(finding)];
+    const shown = images.flatMap((image, index) => image.findings.includes(finding.id) ? [`image ${index + 1}`] : []);
+    return [findingLine(finding), `  from ${finding.regions.join(", ")}${shown.length ? ` · ${shown.join(", ")}` : ""}`];
   });
   const text = [
-    "Reviewers looked at your board: the canvas_check lints, and reviewers that read the whole board and each part of it. Their findings are below, most severe first.",
-    "blocker: a reader misreads the board, or something is broken, hidden or cut off. should: clearly off, and a tool call or two fixes it. nit: polish.",
+    "Reviewers looked at your board: the canvas_check lints, and reviewers that each read one part: a section, the gaps between sections at full size, the wires between sections,"
+    + " where the sections sit (`space`), the choices of colour, shape and icon against the brief, and the items in no section. Their findings are below, most severe first.",
+    "blocker: a reader misreads the board, or something is broken, hidden or cut off. should: clearly off to a careful designer. nit: polish.",
+    "A reviewer's finding says what is wrong and where. It does not say how to fix it: the fix is your decision. Look at the board, choose the tool calls, and check what each one did.",
     "Fix each blocker and each should you agree with, using the canvas tools. Fix a nit only when one call does it.",
-    "Skip a finding that is wrong or that would break something else.",
-    ...(findings.some((finding) => finding.calls.length) ? [
-      `A "call from" line under a finding is one canvas tool call that a reviewer proposes for it, as exact JSON, with the reviewer that sent it. The lines under the calls say what each call did in a trial run on a copy of your board.`,
-      "A call is advice, not an order: apply it, do something better, or decline it with a reason.",
-    ] : []),
-    ...(ordered.some(sectionMove) ? [
-      "The findings whose call moves, arranges or fits a section come first. Settle those first: a section takes everything it holds with it, so the numbers in the other calls can change.",
+    "Decline a finding that is wrong, or that you cannot fix without breaking something else, and give the reason. The reviewers read your reason in the next round.",
+    ...(ordered.some(space) ? [
+      "The findings from the `space` reviewer come first. A space finding is fixed by moving or resizing whole sections: `arrange`, `move`, `place_section`, `fit_section`."
+      + " That is expected, and nothing in this loop counts against it. Settle those first: a section takes everything it holds with it."
+      + " Then route the wires again, and fix the other findings on the board as it is then.",
     ] : []),
     ...(images.length ? [
-      "The images after this text show the trial runs, each under its number and its finding. Red marks: the board as it is now. Green marks: what the canvas engine drew when the call ran on the copy. Dashed marks: a reviewer's sketch, which no tool has run.",
+      "The images after this text show the findings on the board as it is now: one image a reviewer, each fault marked in red and tagged with its finding's id. The line under a finding names its images.",
     ] : []),
     ...(unanswered.length ? [
       "You gave no answer to the findings in <no_answer_yet>, from earlier rounds. Look at the board as it is now, and answer each of them by its id too.",
@@ -265,7 +348,7 @@ export function reviseMessage(board: string, findings: LoopFinding[], notes: Par
     "</findings>",
     ...(unanswered.length ? ["", "<no_answer_yet>", ...unanswered.map(findingLine), "</no_answer_yet>"] : []),
   ].join("\n");
-  return [text, ...images.flatMap((image, index) => [`Image ${index + 1} · ${image.finding}`, { image: image.path }])];
+  return [text, ...images.flatMap((image, index) => [`Image ${index + 1} · ${image.unit} · ${image.findings.join(", ")}`, { image: image.path }])];
 }
 
 /** The second ask, in the session of the revise pass, for the ids its reply gave no answer line. */
@@ -297,15 +380,17 @@ const idsOf = (findings: LoopFinding[]) => [...new Set(findings.map((finding) =>
 
 /**
  * The round whose board the loop keeps, given that the last round reviewed
- * the board as it stands: the lowest score, and on a tie the later round.
+ * the board as it stands: the lowest score (roundFindings), and on a tie the
+ * later round.
  *
- * The score is a sample, not a measure. The critics differ from run to run,
- * so two reviews of one board can score a few points apart. A later round's
- * critics also read what the drawer declined and do not report it again, so
- * a later board scores lower than a fresh review would score it. An earlier
- * round wins only against that lean. A round that lost a critic's answer
- * undercounts. As an earlier round it cannot win. As the last round it loses
- * only to a full review that scored less than its undercount.
+ * The score is a sample, not a measure. The reviewers differ from run to
+ * run, so two reviews of one board can score a few points apart. A later
+ * round also leaves out the settled faults and the new lint warnings of its
+ * revise pass, so a later board scores lower than a fresh review would score
+ * it. An earlier round wins only against that lean. A round that lost a
+ * reviewer's answer undercounts. As an earlier round it cannot win. As the
+ * last round it loses only to a full review that scored less than its
+ * undercount.
  */
 export function bestRound(rounds: RoundRecord[]): Kept | null {
   const last = rounds.at(-1);
@@ -316,38 +401,37 @@ export function bestRound(rounds: RoundRecord[]): Kept | null {
   if (best !== last) return { round: best.round, restored: true, reason: `round ${best.round} scored ${best.score}, and the last board (round ${last.round}) scored ${last.score}${orMore}` };
   const level = rounds.findLast((round) => round !== last && full(round) && round.score === last.score);
   let reason = `round ${last.round} is the last board and scored ${last.score}, the best of the loop`;
-  if (!full(last)) reason = `round ${last.round} is the last board. Its review lost ${last.unparsed} of ${last.regions} regions, so it scored ${last.score} or more, and no full review scored less than ${last.score}`;
+  if (!full(last)) reason = `round ${last.round} is the last board. Its review lost ${last.unparsed} of ${last.regions} reviewers, so it scored ${last.score} or more, and no full review scored less than ${last.score}`;
   else if (level) reason = `round ${last.round} is the last board and scored ${last.score}, level with round ${level.round}: a tie keeps the later board`;
   return { round: last.round, restored: false, reason };
 }
 
 /**
  * The loop itself. `review` is one review of the board as it stands, given
- * the critics' findings of the earlier rounds. `trial` runs the calls a
- * round's findings carry on the board as that round reviewed it. `revise`
- * hands a round's findings to the drawer, with the trial's advice, and
- * returns its run and its closing reply. `reask` asks the drawer once more,
- * in the session of that revise, for the ids its reply did not answer.
- * `restore` puts back the board a round reviewed. The loop calls it when an
- * earlier round's board scored better than the last one (bestRound).
+ * the findings the drawer turned down in the earlier rounds. `revise` hands
+ * a round's findings to the drawer and returns its run, its closing reply,
+ * and how many highlight images it got. `reask` asks the drawer once more, in
+ * the session of that revise, for the ids its reply did not answer. `restore`
+ * puts back the board a round reviewed. The loop calls it when an earlier
+ * round's board scored better than the last one (bestRound). `timeUp` is
+ * true once the loop may start no new revise pass.
  *
- * A round is clean when it has no blocker and no should and every critic
- * answered: a critic that timed out or failed did not approve. A clean round
- * still goes to the drawer when a finding of an earlier round has no answer.
- * The budget's last round still goes to the drawer, and so does a round whose
- * revise then fails. A check round reviews what that revise left, and nothing
- * revises it.
+ * A round is clean when every reviewer answered and it has no blocker and no
+ * should to send: a reviewer that timed out or failed did not approve, and
+ * nits alone end the loop. A clean round still goes to the drawer when a
+ * finding of an earlier round has no answer.
  *
- * A trial that throws does not stop the round: the drawer gets the findings
- * and their calls, and the reason no call was trialled.
+ * Round `budget` only reviews, and so does the round after a revise pass that
+ * failed or that a rate limit stopped on each of its tries: it scores what
+ * that pass left, and nothing revises it.
  */
 export async function reviewLoop(options: {
   budget: number;
   review(round: number, earlier: EarlierFinding[]): Promise<Review>;
-  trial?(round: number, findings: Array<{ id: string; calls: ProposedCall[] }>): Promise<FindingAdvice[]>;
-  revise?(round: number, findings: LoopFinding[], notes: ReviseNotes): Promise<{ run: DrawerRun; reply: string }>;
+  revise?(round: number, findings: LoopFinding[], notes: ReviseNotes): Promise<{ run: DrawerRun; reply: string; images?: number }>;
   reask?(round: number, ids: string[]): Promise<{ run: DrawerRun; reply: string }>;
   restore?(round: number): void;
+  timeUp?(): boolean;
 }): Promise<LoopRecord> {
   const started = Date.now();
   const rounds: RoundRecord[] = [];
@@ -356,48 +440,37 @@ export async function reviewLoop(options: {
   let unreviewed = false;
   const loop = async (): Promise<Pick<LoopRecord, "stop" | "error">> => {
     const done = (stop: LoopRecord["stop"], error: string | null = null) => ({ stop, error });
-    /** Why the last revise failed. The next round is then the check round. */
-    let failure: string | null = null;
+    /** Why the last revise pass did not end. The next round is then the last. */
+    let broken: { stop: "failed" | "rate-limited"; error: string } | null = null;
     try {
       for (let round = 1; ; round += 1) {
-        const check = round > options.budget || failure !== null;
         const carried = unansweredOf(rounds);
-        const review = await options.review(round, ledger().filter((finding) => finding.source === "reviewer").map(earlierFinding));
-        const findings = roundFindings(ledger(), review);
+        const review = await options.review(round, declinedFindings(ledger()));
         const record: RoundRecord = {
-          round, check, score: scoreOf(findings),
-          reviewMs: review.reviewMs, renderMs: review.renderMs, regions: review.regions, unparsed: review.unparsed,
-          findings, revise: null,
+          round, check: round >= options.budget || broken !== null, ...roundFindings(ledger(), review, round),
+          reviewMs: review.reviewMs, renderMs: review.renderMs, effort: review.effort, reviewers: review.reviewers, regions: review.regions, unparsed: review.unparsed,
+          revise: null,
         };
+        const { findings } = record;
         rounds.push(record);
         unreviewed = false;
-        if (failure !== null) return done("failed", failure);
-        const open = findings.some(isOpen);
-        /** Nothing to send the drawer: only a critic that gave no answer keeps the loop going. */
-        const idle = !open && carried.length === 0;
+        if (broken !== null) return done(broken.stop, broken.error);
+        /** Nothing to send the drawer: only a reviewer that gave no answer keeps the loop going. */
+        const idle = !findings.some(isOpen) && carried.length === 0;
         if (idle && review.unparsed === 0) return done("clean");
         if (!options.revise) return done("review-only");
-        if (check || (idle && round === options.budget)) return done(carried.length ? "incomplete" : "budget");
+        if (record.check) return done(carried.length ? "incomplete" : "budget");
+        if (options.timeUp?.()) {
+          record.check = true;
+          return done("time");
+        }
         if (idle) continue;
 
-        const called = findings.filter((finding) => finding.calls.length > 0).map(({ id, calls }) => ({ id, calls }));
         const notes: ReviseNotes = {
           // A lint that is still on the board is among this round's findings, under its old id.
           unanswered: [...new Map(carried.map((finding) => [finding.id, finding])).values()]
             .filter((finding) => !findings.some((now) => now.id === finding.id)),
-          advice: [],
-          notTrialled: null,
         };
-        let trial: TrialRecord | null = null;
-        if (options.trial && called.length > 0) {
-          const begun = Date.now();
-          try { notes.advice = await options.trial(round, called); } catch (error) { notes.notTrialled = message(error); }
-          trial = {
-            findings: called.length, advised: notes.advice.length, images: notes.advice.reduce((sum, advice) => sum + advice.images.length, 0),
-            durationMs: Date.now() - begun, error: notes.notTrialled,
-          };
-        }
-
         unreviewed = true;
         const sent = [...findings, ...carried];
         const take = (reply: string) => {
@@ -405,37 +478,39 @@ export async function reviewLoop(options: {
           for (const finding of sent) finding.answer ??= answers.get(finding.id) ?? null;
         };
         const tally = () => ({ answered: findings.filter((finding) => finding.answer).length, unanswered: idsOf(sent.filter((finding) => !finding.answer)) });
-        const { run, reply } = await options.revise(round, findings, notes);
+        const { run, reply, images = 0 } = await options.revise(round, findings, notes);
         take(reply);
         // The record stands before the second ask, so a second ask that throws does not lose the ids.
-        const revise: ReviseRecord = record.revise = { ...run, ...tally(), trial, reask: null };
+        const revise: ReviseRecord = record.revise = { ...run, ...tally(), images, reask: null };
         if (revise.unanswered.length > 0 && run.exitCode === 0 && options.reask) {
           const ids = revise.unanswered;
           const second = await options.reask(round, ids);
           take(second.reply);
           Object.assign(revise, tally(), { reask: { ...second.run, ids } });
         }
-        if (run.exitCode !== 0) failure = `round ${round}: the revise pass ${run.timedOut ? "timed out" : `exited ${run.exitCode ?? run.signal}`}`;
+        if (run.rateLimited) broken = { stop: "rate-limited", error: `round ${round}: the revise pass hit a rate limit on each of its ${run.tries} tries` };
+        else if (run.exitCode !== 0) broken = { stop: "failed", error: `round ${round}: the revise pass ${run.timedOut ? "timed out" : `exited ${run.exitCode ?? run.signal}`}` };
       }
     } catch (error) {
-      return done("failed", failure === null ? message(error) : `${failure}; then its check round failed: ${message(error)}`);
+      return done("failed", broken === null ? message(error) : `${broken.error}; then its last review failed: ${message(error)}`);
     }
   };
   const outcome = await loop();
   const kept = options.restore && !unreviewed ? bestRound(rounds) : null;
   if (kept?.restored) options.restore!(kept.round);
-  return { budget: options.budget, rounds, ...outcome, unanswered: idsOf(unansweredOf(rounds)), kept, durationMs: Date.now() - started };
+  return { budget: options.budget, effort: rounds[0]?.effort ?? null, rounds, ...outcome, unanswered: idsOf(unansweredOf(rounds)), kept, durationMs: Date.now() - started };
 }
 
-/** The whole loop's ledger as text: each round's findings, and the drawer's answer under each. */
+/** The whole loop's ledger as text: each round's findings, the drawer's answer under each, and what the round did not send. */
 export function ledgerText(record: LoopRecord): string {
   const lines = record.rounds.flatMap((round) => [
-    `## Round ${round.round}${round.check ? " (check round: no revise)" : ""} · score ${round.score}`,
+    `## Round ${round.round}${round.check ? " (last review: no revise)" : ""} · score ${round.score} · ${round.regions} reviewers at ${round.effort}`,
     ...(round.findings.length ? [] : ["No findings."]),
     ...round.findings.flatMap((finding) => [
       findingLine(finding),
       ...(finding.answer ? [`  → ${finding.answer.verdict}${finding.answer.reason ? `: ${finding.answer.reason}` : ""}`] : round.revise ? ["  → no answer"] : []),
     ]),
+    ...round.withheld.map((fault) => `Not sent (${fault.why}): ${fault.id ? `${fault.id} ` : ""}[${fault.severity}, ${fault.source === "check" ? `check ${fault.kind}` : fault.kind}] ${fault.ids.join(", ")}: ${sentence(fault.problem)}`),
     "",
   ]);
   const kept = record.kept ? `Kept: round ${record.kept.round}${record.kept.restored ? ", restored" : ""}. ${sentence(record.kept.reason)}\n` : "";
@@ -443,12 +518,27 @@ export function ledgerText(record: LoopRecord): string {
   return `${lines.join("\n")}Stop: ${record.stop}${record.error ? ` (${record.error})` : ""}\n${unanswered}${kept}`;
 }
 
+/** What the loop reads of one review. */
+export function reviewOf(critique: CritiqueRecord): Review {
+  const count = (kind: ReviewerKind) => critique.regions.filter((region) => region.kind === kind).length;
+  return {
+    reviewMs: critique.durationMs,
+    renderMs: critique.renderMs,
+    effort: critique.effort,
+    reviewers: Object.fromEntries(REVIEWER_KINDS.map((kind) => [kind, count(kind)])) as Record<ReviewerKind, number>,
+    regions: critique.regions.length,
+    unparsed: critique.regions.filter((region) => region.error !== null).length,
+    lints: critique.lints,
+    findings: critique.findings,
+  };
+}
+
 /**
  * The loop on one board file. Writes into `outDir`: `round-<n>/` per round
  * (board.canvas.json and overview.png: the board as that round reviewed it;
- * guides.png, units/ and critique.json from critic.ts; trial/ from
- * trial.ts; revise-transcript.jsonl; and revise-reask-transcript.jsonl when
- * the reply left an id without an answer), after.png (the board the loop
+ * guides.png, units/ and critique.json from critic.ts; highlights/ from
+ * highlights.ts; revise-transcript.jsonl; and revise-reask-transcript.jsonl
+ * when the reply left an id without an answer), after.png (the board the loop
  * kept), loop.json (a LoopRecord) and findings.md (the ledger as text). A
  * transcript holds the message the drawer got, its images too, and its reply.
  *
@@ -463,49 +553,43 @@ export async function reviewBoard(options: {
   boardPath: string;
   outDir: string;
   critic: CriticOptions;
+  /** The board's brief, for the choices reviewer, or null when the run has none. */
+  brief: string | null;
   /**
    * The drawer that revises: its folder (the canvas server's workspace, with
    * the board in canvases/), and the session to resume. Without a session the
    * first revise pass starts one. Undefined: one review, no revise.
    */
-  drawer?: { dir: string; settingsPath: string; timeoutMs: number; session?: string };
-  /** Stand-ins for the review and the trial run, for a run that proves the loop alone. */
-  hooks?: { critique?: typeof critiqueBoard; trial?: typeof trialFindings };
+  drawer?: { dir: string; settingsPath: string; session?: string };
 }): Promise<LoopRecord> {
-  const { canvas, board, boardPath, outDir, drawer } = options;
-  const { critique: critiqueOf = critiqueBoard, trial = trialFindings } = options.hooks ?? {};
+  const { canvas, board, boardPath, outDir, drawer, critic } = options;
+  const started = Date.now();
   const roundDir = (round: number) => resolve(outDir, `round-${round}`);
   const reviewed = (round: number) => resolve(roundDir(round), "board.canvas.json");
-  const pass = drawer && drawerSession(drawer);
+  const pass = drawer && drawerSession({ ...drawer, timeoutMs: critic.reviseTimeoutMs });
   const passed = (name: string, round: number, run: DrawerRun) =>
-    process.stdout.write(`${board}: ${name} ${round} · exit ${run.exitCode ?? run.signal}${run.timedOut ? " (timed out)" : ""} · ${Math.round(run.durationMs / 1000)} s\n`);
+    process.stdout.write(`${board}: ${name} ${round} · exit ${run.exitCode ?? run.signal}${run.timedOut ? " (timed out)" : ""}${run.tries > 1 ? ` · ${run.tries} tries` : ""} · ${Math.round(run.durationMs / 1000)} s\n`);
+  /** The review of the round the loop is in. */
+  let critique: CritiqueRecord | null = null;
   const record = await reviewLoop({
-    budget: options.critic.rounds,
+    budget: critic.rounds,
     review: async (round, earlier) => {
       mkdirSync(roundDir(round), { recursive: true });
       copyFileSync(boardPath, reviewed(round));
-      const critique = await critiqueOf({ canvas, boardPath, outDir: roundDir(round), critic: options.critic, earlier });
+      critique = await critiqueBoard({ canvas, boardPath, outDir: roundDir(round), critic, brief: options.brief, earlier });
       process.stdout.write(`${board}: review ${round} · ${critiqueSummary(critique)}\n`);
-      return {
-        reviewMs: critique.durationMs,
-        renderMs: critique.renderMs,
-        regions: critique.regions.length,
-        unparsed: critique.regions.filter((region) => region.error !== null).length,
-        lints: critique.lints,
-        findings: critique.findings,
-      };
-    },
-    trial: (round, findings) => {
-      const trialDir = resolve(roundDir(round), "trial");
-      mkdirSync(trialDir, { recursive: true });
-      return trial({ canvas, boardPath: reviewed(round), outDir: trialDir, findings });
+      return reviewOf(critique);
     },
     revise: pass && (async (round, findings, notes) => {
-      const objects = (canvas.toolkit.openCanvasFile(boardPath).persisted as { objects: Array<{ id: string; type: string }> }).objects;
-      const sections = new Set(objects.filter((object) => object.type === "section").map((object) => object.id));
-      const revise = await pass(reviseMessage(board, findings, { ...notes, sections }), resolve(roundDir(round), "revise-transcript.jsonl"));
+      const file = canvas.toolkit.openCanvasFile(reviewed(round));
+      const images = renderHighlights({
+        canvas, file, limit: canvas.render.boardCameraAtWorldScale(file.persisted, file.session.canvasStyle),
+        units: critique!.regions.map((region) => ({ id: region.region.id, kind: region.kind, rect: region.region, crops: region.crops })),
+        findings, outDir: resolve(roundDir(round), "highlights"),
+      });
+      const revise = await pass(reviseMessage(board, findings, { ...notes, images }), resolve(roundDir(round), "revise-transcript.jsonl"));
       passed("revise", round, revise.run);
-      return revise;
+      return { ...revise, images: images.length };
     }),
     reask: pass && (async (round, ids) => {
       const reask = await pass([reaskPrompt(ids)], resolve(roundDir(round), "revise-reask-transcript.jsonl"));
@@ -513,6 +597,7 @@ export async function reviewBoard(options: {
       return reask;
     }),
     restore: drawer && ((round) => copyFileSync(reviewed(round), boardPath)),
+    timeUp: () => Date.now() - started > critic.loopTimeoutMs,
   });
   if (record.rounds.some((round) => round.revise)) {
     writeFileSync(resolve(outDir, "after.png"), renderBoardPng(canvas, canvas.toolkit.openCanvasFile(boardPath), undefined).png);
@@ -525,22 +610,25 @@ export async function reviewBoard(options: {
 export function loopSummary(record: LoopRecord): string {
   const last = record.rounds.at(-1);
   const count = (severity: Severity) => last?.findings.filter((finding) => finding.severity === severity).length ?? 0;
-  const checks = record.rounds.filter((round) => round.check).length;
-  return `stop ${record.stop} after ${record.rounds.length - checks} of ${record.budget} rounds${checks ? " and a check round" : ""}`
+  const withheld = record.rounds.reduce((sum, round) => sum + round.withheld.length, 0);
+  return `stop ${record.stop} after ${record.rounds.length} of ${record.budget} rounds${record.effort ? ` at ${record.effort} effort` : ""}`
     + ` · last round: ${SEVERITIES.map((severity) => `${count(severity)} ${severity}`).join(", ")}`
+    + `${withheld ? ` · ${withheld} not sent (held or settled)` : ""}`
     + `${record.unanswered.length ? ` · no answer: ${record.unanswered.join(", ")}` : ""}`
     + `${record.kept ? ` · kept round ${record.kept.round}${record.kept.restored ? " (restored)" : ""}` : ""}`
     + ` · ${Math.round(record.durationMs / 1000)} s${record.error ? ` · ${record.error}` : ""}`;
 }
 
 /**
- * `climb critic --board <path> --out <dir> [--critic-count n] [--revise on|off]
- * [--critic-rounds n] [--settings path] [--timeout-min n]`: the critic step alone, on a board some drawer made
- * before. `--revise off` (the default) is one review of the board file.
- * `--revise on` is the whole loop on a copy in `<out>/canvases/`.
+ * `climb critic --board <path> --out <dir> [--brief <brief.md>] [--revise on|off]
+ * [--settings path]` and the critic flags (critic.ts CRITIC_FLAGS): the critic
+ * step alone, on a board some drawer made before. `--brief` is the board's
+ * brief, which the choices reviewer reads. `--revise off` (the default) is
+ * one review of the board file. `--revise on` is the whole loop on a copy in
+ * `<out>/canvases/`.
  */
 export async function runCritique(argv: string[]): Promise<void> {
-  const flags = parseFlags(argv, ["--board", "--out", ...CRITIC_FLAGS, "--revise", "--settings", "--timeout-min"]);
+  const flags = parseFlags(argv, ["--board", "--out", "--brief", ...CRITIC_FLAGS, "--revise", "--settings"]);
   const boardFlag = flags.get("--board");
   const outFlag = flags.get("--out");
   if (!boardFlag || !outFlag) throw new Error("climb critic needs --board <canvas.json> and --out <dir>");
@@ -549,17 +637,18 @@ export async function runCritique(argv: string[]): Promise<void> {
   const critic = parseCritic(flags);
   const source = resolve(boardFlag);
   if (!existsSync(source)) throw new Error(`No board at ${source}`);
+  const brief = flags.has("--brief") ? readFileSync(resolve(flags.get("--brief")!), "utf8") : null;
   const outDir = resolve(outFlag);
   const board = basename(source).replace(/\.canvas\.json$/, "");
   let boardPath = source;
-  let drawer: { dir: string; settingsPath: string; timeoutMs: number } | undefined;
+  let drawer: { dir: string; settingsPath: string } | undefined;
   if (revise === "on") {
-    drawer = { dir: outDir, ...drawerFlags(flags) };
+    drawer = { dir: outDir, settingsPath: drawerFlags(flags).settingsPath };
     boardPath = resolve(outDir, "canvases", `${board}.canvas.json`);
     mkdirSync(dirname(boardPath), { recursive: true });
     copyFileSync(source, boardPath);
   }
-  const record = await reviewBoard({ canvas: await loadReviewCanvas(), board, boardPath, outDir, critic, drawer });
+  const record = await reviewBoard({ canvas: await loadReviewCanvas(), board, boardPath, outDir, critic, brief, drawer });
   process.stdout.write(`${board}: ${loopSummary(record)}\n`);
   if (record.stop === "failed" || record.rounds.some((round) => round.unparsed > 0)) process.exitCode = 1;
 }

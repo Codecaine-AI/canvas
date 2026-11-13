@@ -2,35 +2,36 @@ import { describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
 
 import {
-  answerSchema, boardPrompt, decodeCall, loadReviewCanvas, lookPrompt, mergeFindings, parseAnswer, parseCritic, sectionPrompt,
-  type Finding, type UnitFinding,
+  answerSchema, askReviewer, choicesPrompt, criticArgs, critiqueSummary, gapPrompt, loadReviewCanvas, lookPrompt, marksOf, mergeFindings, parseAnswer, parseCritic,
+  reviewerEffort, sectionPrompt, spacePrompt, wirePrompt,
+  type CritiqueRecord, type Finding, type UnitFinding, type UnitRecord,
 } from "./critic.ts";
-import { drawerArgs, replyOf, sessionIdOf } from "./drawer.ts";
 import { boardWireSheet, lookFrame, measuresOf, ownerUnits, reviewUnits, routesOf, wireSheet, wireSheetLines, type Board, type BoardObject } from "./review-inputs.ts";
-import { BOARD_CALL_TOOLS, SECTION_CALL_TOOLS } from "./review-types.ts";
 import { wireFacts } from "./wires.ts";
 
 /** Board 05 as round 3 drew it: the board the round 4 design measures. */
 const BOARD = resolve(import.meta.dir, "fixtures/review/b05.canvas.json");
 
 const finding = (overrides: Partial<UnitFinding>): UnitFinding => ({
-  kind: "routing", ids: [], labels: [], problem: "Two wires share a segment.", fix: "Route them apart.", severity: "should", call: null, marks: [], ...overrides,
+  kind: "routing", ids: [], labels: [], problem: "Two wires share a segment.", severity: "should", marks: [], ...overrides,
 });
 const box = (id: string, type: string, parentId: string | null, x = 0, y = 0, width = 100, height = 100): BoardObject =>
   ({ id, type, parentId, geometry: { x, y, width, height } });
 const unitIds = (board: Board) => reviewUnits(board).units.map((unit) => `${unit.id}:${unit.owned.map((object) => object.id).join("+")}`);
 
 describe("climb review units", () => {
-  test("board 05 has the whole board, its 5 sections and the loose items: the page frame has no reviewer", async () => {
+  test("board 05 has a space, a wire and a choices reviewer, its 5 sections and the loose items: the page frame has no reviewer", async () => {
     const canvas = await loadReviewCanvas();
     const board = canvas.toolkit.openCanvasFile(BOARD).persisted as Board;
     const { pageFrame, units } = reviewUnits(board);
     expect(pageFrame?.id).toBe("page-frame");
-    expect(units.map((unit) => [unit.id, unit.stage])).toEqual([
-      ["board", "A"], ["sec_engine", "B"], ["sec_contract", "B"], ["sec_records", "B"], ["sec_providers", "B"], ["sec_ford", "B"], ["loose", "B"],
+    expect(units.map((unit) => [unit.id, unit.kind])).toEqual([
+      ["space", "space"], ["wires", "wire"], ["choices", "choices"],
+      ["sec_engine", "section"], ["sec_contract", "section"], ["sec_records", "section"], ["sec_providers", "section"], ["sec_ford", "section"], ["loose", "loose"],
     ]);
     const unit = (id: string) => units.find((entry) => entry.id === id)!;
-    expect(unit("board").owned.map((object) => object.id)).toEqual(["sec_engine", "sec_contract", "sec_records", "sec_providers", "sec_ford"]);
+    expect(unit("space").owned.map((object) => object.id)).toEqual(["sec_engine", "sec_contract", "sec_records", "sec_providers", "sec_ford"]);
+    expect(unit("choices").owned).toHaveLength(board.objects.length);
     expect(unit("sec_contract").owned.map((object) => object.id).sort()).toEqual(
       ["capabilities", "chunk_stream", "exec_context", "result_chunk", "s_caps", "s_chunks", "s_ctx", "s_send", "send_query"]);
     expect(unit("sec_contract").rect).toEqual({ x: 660, y: 80, width: 1380, height: 648 });
@@ -50,7 +51,7 @@ describe("climb review units", () => {
       connections: [],
     };
     expect(reviewUnits(board).pageFrame?.id).toBe("page");
-    expect(unitIds(board)).toEqual(["board:outer+inner", "outer:inner+a", "inner:b", "loose:key+stray"]);
+    expect(unitIds(board)).toEqual(["space:outer+inner", "choices:page+outer+inner+a+b+key+stray", "outer:inner+a", "inner:b", "loose:key+stray"]);
     const owners = ownerUnits(reviewUnits(board).units);
     expect([owners.get("a"), owners.get("b"), owners.get("inner"), owners.get("stray")]).toEqual(["outer", "inner", "inner", "loose"]);
   });
@@ -59,11 +60,18 @@ describe("climb review units", () => {
     // Two root sections: neither frames the whole page.
     const two: Board = { objects: [box("left", "section", null), box("in", "section", "left"), box("right", "section", null), box("a", "rectangle", "in")], connections: [] };
     expect(reviewUnits(two).pageFrame).toBeNull();
-    expect(unitIds(two)).toEqual(["board:left+in+right", "left:in", "in:a", "right:"]);
+    expect(unitIds(two)).toEqual(["space:left+in+right", "choices:left+in+right+a", "left:in", "in:a", "right:"]);
     // One root section that holds only items is a section like any other, and a board with no loose item has no loose reviewer.
     const flat: Board = { objects: [box("only", "section", null), box("a", "rectangle", "only")], connections: [] };
     expect(reviewUnits(flat).pageFrame).toBeNull();
-    expect(unitIds(flat)).toEqual(["board:only", "only:a"]);
+    expect(unitIds(flat)).toEqual(["space:only", "choices:only+a", "only:a"]);
+  });
+
+  test("a board with a wire has one wire reviewer, and a board with none has none", () => {
+    const objects = [box("only", "section", null), box("a", "rectangle", "only"), box("b", "rectangle", "only")];
+    const kinds = (board: Board) => reviewUnits(board).units.map((unit) => unit.kind);
+    expect(kinds({ objects, connections: [] })).toEqual(["space", "choices", "section"]);
+    expect(kinds({ objects, connections: [{ id: "w", from: { objectId: "a" }, to: { objectId: "b" } }] })).toEqual(["space", "wire", "choices", "section"]);
   });
 });
 
@@ -95,8 +103,12 @@ describe("climb review wire sheet", () => {
     ]);
     // A trunk names its wires by their tags on this sheet.
     expect(lines[9]).toEndWith("shares a trunk with W6 e_d_codex (407 px), W7 e_d_pi (407 px)");
+    // A wire with a label has the box of its chip, as the board paints it: the gap reviewers read it.
+    const chip = rows[0]!.fact.chip!;
+    expect([Math.round(chip.x + chip.width / 2), Math.round(chip.y + chip.height / 2)]).toEqual([614, 640]);
+    expect(rows[4]!.fact.chip).toBeNull();
 
-    // The whole-board reviewer has the wires that join 2 units, each with the units it joins.
+    // The wire reviewer has the wires that join 2 units, each with the units it joins.
     const between = boardWireSheet(units, facts);
     expect(between.map((row) => row.fact.id)).not.toContain("e_yields");
     expect(between.find((row) => row.fact.id === "e_calls")!.kind).toBe("sec_engine → sec_contract");
@@ -104,6 +116,11 @@ describe("climb review wire sheet", () => {
     // A look frames its ids with a 128 px ring, wires by their whole route.
     expect(lookFrame(["capabilities", "e_preflight"], board, facts)).toEqual({ x: 370 - 128, y: 160 - 128, width: 980 - 370 + 256, height: 612 - 160 + 256 });
     expect(lookFrame(["ghost"], board, facts)).toBeNull();
+    // A finding with no mark of its own is shown by its items: a box an object, a path a wire.
+    expect(marksOf(["capabilities", "ghost", "e_calls"], board, facts)).toEqual([
+      { box: board.objects.find((object) => object.id === "capabilities")!.geometry },
+      { path: facts.find((fact) => fact.id === "e_calls")!.points.map((point) => [point.x, point.y]) },
+    ]);
   });
 
   test("a wire passes through a section that holds neither end and that its route crosses", () => {
@@ -129,49 +146,139 @@ describe("climb review wire sheet", () => {
 describe("climb review prompts", () => {
   const unit = (board: Board, id: string) => reviewUnits(board).units.find((entry) => entry.id === id)!;
   const board: Board = { objects: [box("sec", "section", null, 100, 200, 800, 400), box("a", "rectangle", "sec"), box("key", "sticky", null)], connections: [] };
-  const text = {
-    scales: { board: 0.4, section: 1, neighbourhood: 0.5 }, ruler: true,
-    objects: ["a · rectangle"], measures: ["MEASURES · section sec 100,200 800×400"], wires: ["W1 w · a → b"], totals: "LAYOUT · wire length 10px", notes: { checked: [], earlier: [] },
+  const none = { checked: [], declined: [], settled: [] };
+  const section = {
+    scales: { board: 0.4, section: 1, neighbourhood: 0.5 },
+    objects: ["a · rectangle"], measures: ["MEASURES · section sec 100,200 800×400"], wires: ["W1 w · a → b"],
+    wireMeasures: ["W1 w runs 300 px at 10 px from the top border of section sec, from (100, 210) to (400, 210)"], totals: "LAYOUT · wire length 10px", notes: none,
   };
+  const crop = (x: number, lines: string[]) => ({ rect: { x, y: 200, width: 480, height: 360 }, lines });
+  const gap = { scale: 0.4, crops: [crop(100, [`chip "calls" of w · x 300 to 360, y 300 to 320`]), crop(600, [])], notes: none };
+  const wire = { scale: 0.4, wires: ["W1 w · a → b · sec → loose"], wireMeasures: [], totals: "LAYOUT", notes: none };
+  const space = {
+    scale: 0.4, shape: "2400 × 1200 px, aspect ratio 2.00 : 1", sections: ["sec · in board · x 100"],
+    gaps: ["sec ↔ far · side by side · gap 60 px · gutter x 900 to 960, y 200 to 600 · 3 wires run along it · 0 label chips in it · TIGHT: more than 1 wire per 40 px of gap"],
+    pairs: ["sec ↔ far · 4 wires · 3200 px of wire in total · NOT neighbours: mid lies between them"],
+    long: ["w · a (sec) → z (far) · 1200 px · 2 bends"], sinks: [`z "Store" in far · 3 wires in from sec · mean 900 px · longest 1200 px`], totals: "LAYOUT", notes: none,
+  };
+  const choices = {
+    scale: 0.4, brief: "Draw the 3 roles.\nThe store holds every trace.\n", objects: ["a · rectangle · shape - · no icon · no colour · in sec (gray) · \"Store\""],
+    wires: ["w · a → b · no label · solid default"], counts: ["1 section has colour gray: sec"], notes: none,
+  };
+  const prompts = () => [sectionPrompt(unit(board, "sec"), section), sectionPrompt(unit(board, "loose"), section), gapPrompt(gap), wirePrompt(wire), spacePrompt(space), choicesPrompt(choices)];
 
-  test("a section reviewer gets its 4 images, its numbers, the call tools of a section and the tool facts", () => {
-    const prompt = sectionPrompt(unit(board, "sec"), text);
-    expect(prompt).toContain(`You review one section of a diagram board: sec "", at board x 100 to 900, y 200 to 600.`);
+  test("every reviewer is told to be strict, to state problems with numbers, and never to say how to fix one or propose a tool call", () => {
+    for (const prompt of prompts()) {
+      expect(prompt).toContain("Be strict. Report every fault you can see and measure. Do not stop at the first few.");
+      expect(prompt).toContain("State each fault as a problem: what is wrong, where, and by how much, with the numbers you measured.");
+      expect(prompt).toContain("Do not say how to fix it. Do not propose a tool call, a new position, a new size or a new route. The drawer decides the fix.");
+      expect(prompt).toContain("`marks` highlights the fault as the board is now, in board coordinates");
+      expect(prompt).toContain("Give at most 10 findings, most severe first.");
+      expect(prompt).toContain("Look further:");
+      // No field of an answer holds a fix, and no canvas tool is offered.
+      expect(prompt).not.toMatch(/`fix`|`call`|- (route|move|resize|move_label|change_connection|arrange_section|fit_section) \{/);
+    }
+  });
+
+  test("a section reviewer gets its 4 images and its numbers, and the runner's measures of its wires", () => {
+    const prompt = sectionPrompt(unit(board, "sec"), section);
+    expect(prompt).toStartWith(`You review one section of a diagram board: sec "", at board x 100 to 900, y 200 to 600.`);
     for (const image of ["Image 1 is the whole board", "Image 2 is your section (full size: 1 image px is 1 board px), with the board's smart guides", "Image 3 is your section with every object wired to it", "Image 4 is image 3 with each wire tagged"]) {
       expect(prompt).toContain(image);
     }
     expect(prompt).toContain("The ruler on its top and left edges gives board coordinates");
     expect(prompt).toContain("Objects:\na · rectangle\nMEASURES · section sec 100,200 800×400");
     expect(prompt).toContain("W1 w · a → b");
+    expect(prompt).toContain("Measured on your wires:\nmeasured: W1 w runs 300 px at 10 px from the top border of section sec, from (100, 210) to (400, 210)");
     expect(prompt).toContain("Board totals:\nLAYOUT · wire length 10px");
-    expect(prompt).toContain("20 px");
-    expect(prompt).toContain("- route {id, points: [{x, y}, ...]}");
-    // Where the sections sit is the whole-board reviewer's, so its 2 tools are not offered to a section.
-    expect(prompt).not.toContain("arrange_section {");
+    expect(prompt).toContain("Never report a merged trunk as a fault");
     expect(prompt).not.toContain("Do not report them again");
-    expect(prompt).not.toContain("Earlier rounds");
-    expect(sectionPrompt(unit(board, "sec"), { ...text, ruler: false })).not.toContain("The ruler on its top and left edges");
-    expect(sectionPrompt(unit(board, "loose"), text)).toContain("You review the items of a diagram board that sit in no section: key.");
+    expect(prompt).not.toContain("The drawer declined these findings");
+    expect(sectionPrompt(unit(board, "sec"), { ...section, wireMeasures: [] })).toContain("Measured on your wires:\n(none)");
+    expect(sectionPrompt(unit(board, "loose"), section)).toStartWith("You review the items of a diagram board that sit in no section: key.");
   });
 
-  test("a reviewer is told what the lint already said and what earlier rounds settled", () => {
+  test("a gap reviewer gets the whole board and each of its crops at full size, with the lines of each crop", () => {
+    const prompt = gapPrompt(gap);
+    expect(prompt).toContain("Your 2 crops are outlined in red, each with its number.");
+    expect(prompt).toContain("Images 2 to 3 are your crops, in order, at full size: 1 image px is 1 board px.");
+    expect(prompt).toContain(`Crop 1 (image 2): board x 100 to 580, y 200 to 560.\nchip "calls" of w · x 300 to 360, y 300 to 320`);
+    expect(prompt).toContain("Crop 2 (image 3): board x 600 to 1080, y 200 to 560.\n(none)");
+    expect(prompt).toContain("- a label chip on a section border, or a few px from one;");
+    expect(prompt).toContain("- a label chip on a corner of a wire, on a junction or on an arrowhead;");
+    expect(prompt).toContain("Never report a merged trunk as a fault");
+    expect(gapPrompt({ ...gap, crops: [crop(100, [])] })).toContain("Your crop is outlined in red, each with its number.\nImage 2 is your crop at full size: 1 image px is 1 board px.");
+  });
+
+  test("the wire reviewer looks for a wire on the board's edge, through a header, on a section frame or along a border, and for separate lanes into one node", () => {
+    const prompt = wirePrompt(wire);
+    for (const fault of [
+      "- a detour, a wire that wraps round a section, or a wire along the board's outer edge;",
+      "- a wire through a section it does not belong to, or through a section's header or header chip;",
+      "- a wire that ends on a section frame and not on a node;",
+      "- a wire within 24 px of a section border along 100 px or more;",
+      "- wires that share a source or a target and run side by side in separate lanes, 40 px apart or less: they must read as one trunk.",
+    ]) expect(prompt).toContain(fault);
+    // Ford kept merged junctions. The reviewer must not ask the drawer to split one.
+    expect(prompt).toContain(`Never report a merged trunk as a fault: wires that share a source or a target and run on one line into one port, with one arrowhead, read as one trunk. Ford kept them: "The lines just appear more aesthetic."`);
+    expect(prompt).toContain("W1 w · a → b · sec → loose");
+    expect(prompt).toContain("Measured on your wires:\n(none)");
+  });
+
+  test("the space reviewer judges adjacency first, from the wires between each pair of sections, and never reports empty space alone", () => {
+    const prompt = spacePrompt(space);
+    expect(prompt).toContain("Your first job is adjacency: sections that talk to each other must sit next to each other.");
+    for (const fault of [
+      "- two sections with many wires between them that are not neighbours;",
+      "- a section that lies between two sections that talk to each other;",
+      "- a gap with more than 1 wire per 40 px of its width (marked TIGHT), or a gap too narrow for the label chips in it;",
+      "- a sink or a store far from its sources;",
+    ]) expect(prompt).toContain(fault);
+    expect(prompt).toContain("Never report an empty corner or an empty area as a fault on its own. Report wasted space only when a long wire or a tight gap exists at the same time, and name that wire or gap.");
+    expect(prompt).toContain("most wires first:\nsec ↔ far · 4 wires · 3200 px of wire in total · NOT neighbours: mid lies between them");
+    expect(prompt).toContain("Gaps between neighbour sections:\nsec ↔ far · side by side · gap 60 px");
+    expect(prompt).toContain("Wires longer than 800 px (id · from (its section) → to (its section) · length · bends):\nw · a (sec) → z (far) · 1200 px · 2 bends");
+    expect(prompt).toContain(`(sinks and stores):\nz "Store" in far · 3 wires in from sec`);
+    expect(prompt).toContain("Board:\n2400 × 1200 px, aspect ratio 2.00 : 1");
+    // The adjacency block comes ahead of the gaps and the long wires.
+    expect(prompt.indexOf("Wires between sections (")).toBeLessThan(prompt.indexOf("Gaps between neighbour sections:"));
+  });
+
+  test("the choices reviewer reads the brief beside the object list, and with no brief reports nothing as missing", () => {
+    const prompt = choicesPrompt(choices);
+    expect(prompt).toContain("<brief>\nDraw the 3 roles.\nThe store holds every trace.\n</brief>");
+    for (const fault of [
+      "- a gray or colourless section;",
+      "- sibling sections that all have one colour;",
+      "- a plain rectangle where the brief names a kind that has a shape or an icon",
+      "- one icon repeated on many unlike nodes;",
+      "- colour that carries no meaning",
+      "- an object or a relation in the brief that the board lacks (kind `missing`);",
+      "- a hierarchy in the brief that the board shows flat (kind `nesting`).",
+    ]) expect(prompt).toContain(fault);
+    expect(prompt).toContain(`Objects (id · type · shape · icon · colour · parent (its colour) · text):\na · rectangle · shape - · no icon · no colour · in sec (gray) · "Store"`);
+    expect(prompt).toContain("Counted:\n1 section has colour gray: sec");
+
+    const alone = choicesPrompt({ ...choices, brief: null });
+    expect(alone).toContain("No brief came with this board. Judge colour, shape and icon from the board alone, and report nothing as missing.");
+    expect(alone).toContain("- a gray or colourless section;");
+    expect(alone).not.toMatch(/<brief>|in the brief that the board/);
+  });
+
+  test("a reviewer is told what the lint already said, what the drawer declined and why, and what is settled", () => {
     const notes = {
-      checked: ["G1 b is 20px off a's center line, so w bends (move b by dy -20)"],
-      earlier: ["[routing] w: The wire bends twice. Drawer: declined, the bend clears the label"],
+      checked: ["near-miss: b is 20px off a's center line, so w bends (move b by dy -20)"],
+      declined: ["[routing] w: The wire bends twice. The drawer declined: the bend clears the label"],
+      settled: ["[spacing] sec, far: The gap is 60 px. The drawer declined: the chips fit"],
     };
-    for (const prompt of [sectionPrompt(unit(board, "sec"), { ...text, notes }), boardPrompt({ scale: 0.4, sections: [], wires: [], totals: "", notes })]) {
-      expect(prompt).toContain("Do not report them again:\nG1 b is 20px off a's center line, so w bends (move b by dy -20)");
-      expect(prompt).toContain("the drawer's reason does not hold:\n[routing] w: The wire bends twice. Drawer: declined, the bend clears the label");
+    for (const prompt of [sectionPrompt(unit(board, "sec"), { ...section, notes }), gapPrompt({ ...gap, notes }), wirePrompt({ ...wire, notes }), spacePrompt({ ...space, notes }), choicesPrompt({ ...choices, notes })]) {
+      expect(prompt).toContain("The strict lint already gave the drawer these. Do not report them again:\nnear-miss: b is 20px off a's center line, so w bends (move b by dy -20)");
+      expect(prompt).toContain(
+        "Raise one again only when its reason is wrong on the current images, and say why it is wrong. Name the same ids. Else do not report it:\n"
+        + "[routing] w: The wire bends twice. The drawer declined: the bend clears the label");
+      expect(prompt).toContain("These faults are settled: the drawer declined them twice. Do not report them:\n[spacing] sec, far: The gap is 60 px. The drawer declined: the chips fit");
     }
-  });
-
-  test("the whole-board reviewer gets the section map, a line a section and the 2 tools that place a section", () => {
-    const prompt = boardPrompt({ scale: 0.4, sections: ["sec · at the root · x 100"], wires: [], totals: "LAYOUT", notes: { checked: [], earlier: [] } });
-    expect(prompt).toContain("Image 2 is a map of the board's sections");
-    expect(prompt).toContain("sec · at the root · x 100");
-    expect(prompt).toContain("- arrange_section {section, rows");
-    expect(prompt).toContain("- fit_section {id}");
-    expect(prompt).toContain("Wires between sections");
+    for (const prompt of prompts()) expect(prompt).not.toMatch(/Do not report them again|The drawer declined these findings|These faults are settled/);
   });
 
   test("a reviewer that looks further gets its first prompt, its first answer and each view's image, routes and measures", () => {
@@ -185,77 +292,81 @@ describe("climb review prompts", () => {
   });
 });
 
-describe("climb review answer", () => {
-  const answer = (findings: unknown[], look: unknown = []) => JSON.stringify({ findings, look });
-  const route = { tool: "route", id: "e_preflight", points: [{ x: 370, y: 220 }], shift: null, reset: null };
-
-  test("the loop runs 10 rounds and a review runs 8 reviewers at once, unless the flags say more or fewer", () => {
-    expect(parseCritic(new Map())).toEqual({ count: 8, rounds: 10 });
-    expect(parseCritic(new Map([["--critic-rounds", "1"], ["--critic-count", "20"]]))).toEqual({ count: 20, rounds: 1 });
+describe("climb review options", () => {
+  test("the loop runs 20 rounds and a review runs 8 reviewers at once, unless the flags say more or fewer", () => {
+    expect(parseCritic(new Map())).toEqual({ count: 8, rounds: 20, effort: null, reviseTimeoutMs: 30 * 60_000, loopTimeoutMs: 240 * 60_000 });
+    expect(parseCritic(new Map([["--critic-rounds", "1"], ["--critic-count", "20"], ["--critic-effort", "high"], ["--revise-timeout-min", "12"], ["--loop-timeout-min", "90.5"]])))
+      .toEqual({ count: 20, rounds: 1, effort: "high", reviseTimeoutMs: 720_000, loopTimeoutMs: 5_430_000 });
+    expect(parseCritic(new Map([["--critic-effort", "auto"]])).effort).toBeNull();
+    expect(parseCritic(new Map([["--critic-effort", "medium"]])).effort).toBe("medium");
     expect(() => parseCritic(new Map([["--critic-rounds", "0"]]))).toThrow("--critic-rounds");
     expect(() => parseCritic(new Map([["--critic-count", "0"]]))).toThrow("--critic-count");
+    expect(() => parseCritic(new Map([["--critic-effort", "xhigh"]]))).toThrow("--critic-effort must be auto, medium or high");
+    expect(() => parseCritic(new Map([["--revise-timeout-min", "0"]]))).toThrow("--revise-timeout-min");
+    expect(() => parseCritic(new Map([["--loop-timeout-min", "soon"]]))).toThrow("--loop-timeout-min");
   });
+
+  test("a board with 30 wires or more, or 40 objects or more, gets high effort, and a smaller one medium", () => {
+    const sized = (objects: number, wires: number) => reviewerEffort({ objects: Array(objects).fill(0), connections: Array(wires).fill(0) });
+    expect([sized(39, 29), sized(0, 0)]).toEqual(["medium", "medium"]);
+    expect([sized(39, 30), sized(40, 29), sized(5, 60), sized(80, 0)]).toEqual(["high", "high", "high", "high"]);
+  });
+
+  test("a reviewer is Sol 6.1 in fast mode at the effort of its board", () => {
+    const args = criticArgs("/tmp/u", "PROMPT", ["/tmp/u/1.png", "/tmp/u/2.png"], "/tmp/schema.json", "/tmp/u/answer-1.json", "high");
+    const after = (flag: string) => args.flatMap((arg, index) => arg === flag ? [args[index + 1]] : []);
+    expect(after("-m")).toEqual(["gpt-6.1-sol"]);
+    expect(after("-c")).toEqual([`model_reasoning_effort="high"`, `service_tier="fast"`]);
+    expect(after("--enable")).toEqual(["fast_mode"]);
+    expect(after("-i")).toEqual(["/tmp/u/1.png", "/tmp/u/2.png"]);
+    expect(args.at(-1)).toBe("PROMPT");
+    expect(criticArgs("/tmp/u", "P", [], "/s", "/o", "medium")).toContain(`model_reasoning_effort="medium"`);
+  });
+});
+
+describe("climb review answer", () => {
+  const answer = (findings: unknown[], look: unknown = []) => JSON.stringify({ findings, look });
 
   test("an answer off the schema is refused", () => {
-    expect(parseAnswer(answer([finding({ ids: ["a"] })]), SECTION_CALL_TOOLS).findings).toHaveLength(1);
-    expect(() => parseAnswer(answer([{ ...finding({}), kind: "theme" }]), SECTION_CALL_TOOLS)).toThrow("unknown kind");
-    expect(() => parseAnswer(answer([{ ...finding({}), severity: 2 }]), SECTION_CALL_TOOLS)).toThrow("severity must be blocker, should or nit");
-    expect(() => parseAnswer("{}", SECTION_CALL_TOOLS)).toThrow("findings");
+    expect(parseAnswer(answer([finding({ ids: ["a"] })])).findings).toHaveLength(1);
+    expect(() => parseAnswer(answer([{ ...finding({}), kind: "theme" }]))).toThrow("unknown kind");
+    expect(() => parseAnswer(answer([{ ...finding({}), severity: 2 }]))).toThrow("severity must be blocker, should or nit");
+    expect(() => parseAnswer(answer([{ ...finding({}), problem: " " }]))).toThrow(`"problem" must be a non-empty string`);
+    expect(() => parseAnswer("{}")).toThrow("findings");
   });
 
-  test("a finding carries its call as the tool takes it, and its sketch", () => {
+  test("a finding is a problem and its highlight in board coordinates: a path along a wire, a box round an area", () => {
     const { findings, look } = parseAnswer(answer([{
-      ...finding({ ids: ["e_preflight"] }), call: route,
-      marks: [{ path: [{ x: 370, y: 612 }, { x: 370, y: 220 }, { x: 852, y: 220 }], box: null }, { path: null, box: { x: 780, y: 160, width: 200, height: 120 } }],
-    }]), SECTION_CALL_TOOLS);
-    expect(findings[0]).toMatchObject({
-      ids: ["e_preflight"],
-      call: { tool: "route", args: { id: "e_preflight", points: [[370, 220]] } },
-      marks: [{ style: "sketch", path: [[370, 612], [370, 220], [852, 220]] }, { style: "sketch", box: { x: 780, y: 160, width: 200, height: 120 } }],
-    });
+      ...finding({ ids: ["e_preflight"] }),
+      marks: [
+        { path: [{ x: 370, y: 612 }, { x: 370, y: 220 }, { x: 852, y: 220 }], box: null },
+        { path: null, box: { x: 780, y: 160, width: 200, height: 120 } },
+        // Not a highlight: a path of one point, a box with no area, a point that is no number.
+        { path: [{ x: 1, y: 2 }], box: null }, { path: null, box: { x: 0, y: 0, width: 0, height: 10 } }, { path: [{ x: 1, y: 2 }, { x: "3", y: 4 }], box: null },
+      ],
+    }]));
+    expect(findings).toEqual([{
+      kind: "routing", ids: ["e_preflight"], labels: [], problem: "Two wires share a segment.", severity: "should",
+      marks: [{ path: [[370, 612], [370, 220], [852, 220]] }, { box: { x: 780, y: 160, width: 200, height: 120 } }],
+    }]);
     expect(look).toEqual([]);
   });
 
-  test("each tool's fields decode to the arguments the canvas tool takes", () => {
-    const decode = (call: object) => decodeCall(call, BOARD_CALL_TOOLS)?.args ?? null;
-    expect(decode({ tool: "move", id: "a", to: { x: 740, y: 580 }, by: null })).toEqual({ id: "a", to: { x: 740, y: 580 } });
-    expect(decode({ tool: "move", id: "a", to: null, by: { dx: 0, dy: -20 } })).toEqual({ id: "a", by: { dx: 0, dy: -20 } });
-    expect(decode({ tool: "resize", id: "a", width: 300, height: null, like: null })).toEqual({ id: "a", width: 300 });
-    expect(decode({ tool: "resize", id: "a", width: null, height: null, like: "b" })).toEqual({ id: "a", like: "b" });
-    expect(decode({ tool: "change_connection", id: "w", from: null, to: { objectId: "b", anchor: "top" } })).toEqual({ id: "w", patch: { to: { objectId: "b", anchor: "top" } } });
-    expect(decode({ tool: "change_connection", id: "w", from: { objectId: "a", anchor: null }, to: null })).toEqual({ id: "w", patch: { from: { objectId: "a" } } });
-    expect(decode({ tool: "route", id: "w", points: null, shift: { segment: 1, to: 500 }, reset: null })).toEqual({ id: "w", shift: { segment: 1, to: 500 } });
-    expect(decode({ tool: "route", id: "w", points: [], shift: null, reset: true })).toEqual({ id: "w", reset: true });
-    expect(decode({ tool: "move_label", id: "w", along: 0.3, offset: null })).toEqual({ id: "w", along: 0.3 });
-    expect(decode({ tool: "move_label", id: "w", along: null, offset: 12 })).toEqual({ id: "w", along: 0.5, offset: 12 });
-    expect(decode({ tool: "move_label", id: "w", along: null, offset: null })).toEqual({ id: "w", along: "auto" });
-    expect(decode({ tool: "arrange_section", section: "s", rows: [["a", "b"], ["c"]] })).toEqual({ section: "s", rows: [["a", "b"], ["c"]] });
-    expect(decode({ tool: "fit_section", id: "s" })).toEqual({ id: "s" });
-    // Fields that do not make one call: both of to and by, none of them, 2 route modes, no size.
-    expect(decode({ tool: "move", id: "a", to: { x: 1, y: 2 }, by: { dx: 1, dy: 0 } })).toBeNull();
-    expect(decode({ tool: "move", id: "a", to: null, by: null })).toBeNull();
-    expect(decode({ tool: "route", id: "w", points: [{ x: 1, y: 2 }], shift: { segment: 0, to: 4 }, reset: null })).toBeNull();
-    expect(decode({ tool: "resize", id: "a", width: null, height: null, like: null })).toBeNull();
-  });
-
-  test("a call with a tool the reviewer cannot name is dropped, and its finding goes on as text", () => {
-    const fit = { ...finding({ ids: ["sec"], problem: "The section is too tall." }), call: { tool: "fit_section", id: "sec" }, marks: [{ path: null, box: { x: 0, y: 0, width: 10, height: 10 } }] };
-    const gone = { ...finding({ ids: ["a"], problem: "The box adds nothing." }), call: { tool: "delete", id: "a" } };
-    const section = parseAnswer(answer([fit, gone]), SECTION_CALL_TOOLS).findings;
-    expect(section.map((entry) => [entry.problem, entry.call, entry.marks])).toEqual([["The section is too tall.", null, []], ["The box adds nothing.", null, []]]);
-    // The whole-board reviewer places sections, so the same call stays.
-    const whole = parseAnswer(answer([fit, gone]), BOARD_CALL_TOOLS).findings;
-    expect(whole.map((entry) => entry.call)).toEqual([{ tool: "fit_section", args: { id: "sec" } }, null]);
-    expect(whole[0]!.marks).toHaveLength(1);
+  test("a fix or a tool call in an answer is not read: the finding goes on as its problem alone", () => {
+    const { findings } = parseAnswer(answer([{
+      ...finding({ ids: ["w"], problem: "The wire bends twice." }),
+      fix: "Route it along y 220.", call: { tool: "route", id: "w", points: [{ x: 370, y: 220 }] }, suggestion: "reset the route",
+    }]));
+    expect(findings).toEqual([{ kind: "routing", ids: ["w"], labels: [], problem: "The wire bends twice.", severity: "should", marks: [] }]);
   });
 
   test("an answer can ask for up to 5 views, each a list of ids", () => {
     const views = [["executor", "capabilities", "e_preflight"], [], ["a", "a", " "], ["b"], ["c"], ["d"], ["e"]];
-    expect(parseAnswer(answer([], views), SECTION_CALL_TOOLS).look).toEqual([["executor", "capabilities", "e_preflight"], ["a"], ["b"], ["c"], ["d"]]);
-    expect(parseAnswer(`{"findings":[]}`, SECTION_CALL_TOOLS).look).toEqual([]);
+    expect(parseAnswer(answer([], views)).look).toEqual([["executor", "capabilities", "e_preflight"], ["a"], ["b"], ["c"], ["d"]]);
+    expect(parseAnswer(`{"findings":[]}`).look).toEqual([]);
   });
 
-  test("the answer schema is strict: every field required, no open object, and only the reviewer's tools", () => {
+  test("the answer schema is strict, and a finding has no field for a fix or a tool call", () => {
     const open: string[] = [];
     const walk = (node: unknown, path: string) => {
       if (Array.isArray(node)) return node.forEach((item, index) => walk(item, `${path}[${index}]`));
@@ -267,46 +378,63 @@ describe("climb review answer", () => {
       }
       for (const [key, value] of Object.entries(node)) walk(value, `${path}.${key}`);
     };
-    walk(answerSchema(BOARD_CALL_TOOLS), "$");
+    const schema = answerSchema() as { properties: { findings: { items: { properties: Record<string, unknown> } } } };
+    walk(schema, "$");
     expect(open).toEqual([]);
-    const tools = (schema: object) => [...JSON.stringify(schema).matchAll(/"tool":\{"type":"string","enum":\["(\w+)"\]\}/g)].map((match) => match[1]);
-    expect(tools(answerSchema(SECTION_CALL_TOOLS))).toEqual([...SECTION_CALL_TOOLS]);
-    expect(tools(answerSchema(BOARD_CALL_TOOLS))).toEqual([...BOARD_CALL_TOOLS]);
+    expect(Object.keys(schema.properties.findings.items.properties)).toEqual(["kind", "ids", "labels", "problem", "severity", "marks"]);
+    expect(JSON.stringify(schema)).not.toMatch(/"(fix|call|tool|args)"/);
+  });
+
+  test("a reviewer that hits a rate limit is asked again after a wait, up to 5 times, and no other failure is", async () => {
+    const asking = async (stderrs: string[], extra: { timedOut?: boolean; answeredFrom?: number } = {}) => {
+      let calls = 0;
+      const waits: number[] = [];
+      const { result, tries, limited } = await askReviewer({
+        call: async () => { calls += 1; return { exitCode: 1, timedOut: extra.timedOut ?? false, stderr: stderrs[Math.min(calls, stderrs.length) - 1]! }; },
+        answered: () => calls >= (extra.answeredFrom ?? Infinity),
+        sleep: async (ms) => { waits.push(ms); },
+      });
+      return { calls, tries, limited, waits, stderr: result.stderr };
+    };
+    // 2 tries turned down with HTTP 429, then an answer.
+    expect(await asking(["stream error: 429 Too Many Requests", "exceeded retry limit, last status: 429", ""], { answeredFrom: 3 }))
+      .toEqual({ calls: 3, tries: 3, limited: false, waits: [20_000, 40_000], stderr: "" });
+    // Turned down every time: 5 tries, then the reviewer has no answer.
+    expect(await asking(["the model is overloaded (529)"])).toMatchObject({ calls: 5, tries: 5, limited: true, waits: [20_000, 40_000, 80_000, 160_000] });
+    // Not a rate limit: another error, a timeout, or an answer that Codex wrote before it failed.
+    expect(await asking(["unknown model gpt-6.1-sol"])).toMatchObject({ calls: 1, limited: false, waits: [] });
+    expect(await asking(["429 Too Many Requests"], { timedOut: true })).toMatchObject({ calls: 1, limited: false });
+    expect(await asking(["429 Too Many Requests"], { answeredFrom: 1 })).toMatchObject({ calls: 1, limited: false });
   });
 });
 
 describe("climb review merge", () => {
-  const plain = ({ call: _call, marks: _marks, ...rest }: UnitFinding): Finding => rest;
+  const plain = ({ marks: _marks, ...rest }: UnitFinding): Finding => rest;
 
   test("one fault seen by two reviewers reaches the drawer once", () => {
     const boardIds = new Set(["wire-a", "wire-b", "node-c"]);
     const merged = mergeFindings([
-      { region: "board", findings: [finding({ ids: ["wire-a", "wire-b"], severity: "nit" }), finding({ kind: "colour", ids: ["node-c"] })] },
+      { region: "wires", findings: [finding({ ids: ["wire-a", "wire-b"], severity: "nit" }), finding({ kind: "colour", ids: ["node-c"] })] },
       { region: "sec", findings: [finding({ ids: ["wire-b", "ghost"], severity: "blocker", problem: "The wires overlap." })] },
     ], boardIds);
     expect(merged).toHaveLength(2);
     expect(merged[0]).toEqual({
-      ...plain(finding({ severity: "blocker", problem: "The wires overlap." })), ids: ["wire-a", "wire-b"], labels: ["ghost"], regions: ["board", "sec"], calls: [],
+      ...plain(finding({ severity: "blocker", problem: "The wires overlap." })), ids: ["wire-a", "wire-b"], labels: ["ghost"], regions: ["sec", "wires"], marks: [],
     });
-    expect(merged[1]).toMatchObject({ kind: "colour", severity: "should", ids: ["node-c"], regions: ["board"], calls: [] });
+    expect(merged[1]).toMatchObject({ kind: "colour", severity: "should", ids: ["node-c"], regions: ["wires"], marks: [] });
   });
 
-  test("a merged finding keeps each distinct call with the reviewer that sent it, and identical calls collapse to one", () => {
-    const sketch = [{ style: "sketch" as const, path: [[370, 612], [370, 220]] as Array<[number, number]> }];
-    const shift = { tool: "route", args: { id: "w", shift: { segment: 1, to: 500 } } };
+  test("a merged finding keeps each reviewer's highlight with the reviewer that drew it", () => {
+    const along = [{ path: [[370, 612], [370, 220]] as Array<[number, number]> }];
+    const round = [{ box: { x: 300, y: 200, width: 140, height: 60 } }];
     const merged = mergeFindings([
-      { region: "board", findings: [finding({ ids: ["w"], call: { tool: "route", args: { id: "w", reset: true } } })] },
-      { region: "sec_a", findings: [finding({ ids: ["w"], call: shift, marks: sketch })] },
-      // The same call, its keys in another order.
-      { region: "sec_b", findings: [finding({ ids: ["w"], call: { tool: "route", args: { shift: { to: 500, segment: 1 }, id: "w" } } })] },
-      { region: "sec_c", findings: [finding({ ids: ["w"] })] },
+      { region: "wires", findings: [finding({ ids: ["w"], marks: along })] },
+      { region: "gap-1", findings: [finding({ ids: ["w"], marks: round })] },
+      { region: "sec_a", findings: [finding({ ids: ["w"] })] },
     ], new Set(["w"]));
     expect(merged).toHaveLength(1);
-    expect(merged[0]!.regions).toEqual(["board", "sec_a", "sec_b", "sec_c"]);
-    expect(merged[0]!.calls).toEqual([
-      { unit: "board", call: { tool: "route", args: { id: "w", reset: true } }, marks: [] },
-      { unit: "sec_a", call: shift, marks: sketch },
-    ]);
+    expect(merged[0]!.regions).toEqual(["gap-1", "sec_a", "wires"]);
+    expect(merged[0]!.marks).toEqual([{ unit: "wires", marks: along }, { unit: "gap-1", marks: round }]);
   });
 
   test("faults that only share an item stay separate findings, each with its own words", () => {
@@ -345,21 +473,19 @@ describe("climb review merge", () => {
       ["Wires b and c share a segment.", ["wire-b", "wire-c"], ["r03"]],
     ]);
   });
-});
 
-describe("climb drawer session", () => {
-  test("the first pass keeps its session, a revise pass resumes it, and its closing reply is read back", () => {
-    expect(drawerArgs("/tmp/b", "/s.json")).toContain("--no-session-persistence");
-    expect(drawerArgs("/tmp/b", "/s.json", { persist: true })).not.toContain("--no-session-persistence");
-    const revise = drawerArgs("/tmp/b", "/s.json", { persist: false, resume: "abc-123" });
-    expect(revise[revise.indexOf("--resume") + 1]).toBe("abc-123");
-    const transcript = [
-      `{"type":"system","subtype":"ui_invalidate","session_id":"abc-123"}`,
-      `{"type":"system","subtype":"init","session_id":"abc-123"}`,
-    ].join("\n");
-    expect(sessionIdOf(transcript)).toBe("abc-123");
-    expect(sessionIdOf("not json\n")).toBeNull();
-    expect(replyOf(`${transcript}\n{"type":"result","subtype":"success","result":"F1 fixed"}\n{"type":"torn`)).toBe("F1 fixed");
-    expect(replyOf(transcript)).toBe("");
+  test("the summary of a review names its effort, its reviewers of each kind and their findings", () => {
+    const region = (id: string, kind: UnitRecord["kind"], findings: number, error: string | null = null): UnitRecord => ({
+      region: { id, x: 0, y: 0, width: 1, height: 1 }, kind, crops: [], dir: id, images: [], objects: 0, wires: 0, durationMs: kind === "space" ? 61_200 : 30_000,
+      exitCode: 0, timedOut: false, tries: 1, error, look: kind === "wire" ? [["w"]] : [], lookError: null, findings: Array.from({ length: findings }, () => finding({})),
+    });
+    const record: CritiqueRecord = {
+      board: "/b.canvas.json", model: "gpt-6.1-sol", effort: "high", count: 8, startedAt: "", durationMs: 75_000, renderMs: 9_400, lints: [],
+      regions: [region("space", "space", 2), region("wires", "wire", 3), region("choices", "choices", 1), region("sec_a", "section", 4), region("sec_b", "section", 0, "timed out"), region("gap-1", "gap", 2)],
+      gap: { chips: 7, covered: 7, crops: 3 }, findings: [],
+    };
+    expect(critiqueSummary(record)).toBe(
+      "0 lints · 6 reviewers at high (2 section, 1 gap, 1 wire, 1 space, 1 choices, 0 loose) · 12 findings (section 4, gap 2, wire 3, space 2, choices 1, loose 0), 0 after merge"
+      + " · gap chips 7/7 in 3 crops · 1 looked further · 75.0 s wall (render 9.4 s, slowest reviewer 61.2 s) · 1 unparsed: sec_b");
   });
 });
