@@ -159,7 +159,7 @@ describe("shared Canvas authoring guidance", () => {
     expect(rules).toContain(`Its nodes fill ${SECTION_FILL_MIN * 100}% or more of the room inside its padding.`);
     expect(rules).toContain("Never stretch a section or a node to fill a row, align an edge or make room for a wire.");
     expect(rules).toContain("Center a section on the node or section it connects to, and a hub on the row it fans out to.");
-    expect(rules).toContain("Where two sections map node to node, put each target level with its source, so the wire runs straight.");
+    expect(rules).toContain("Where two sections map node to node, set each target in line with its source across the gap, so the wire runs straight.");
   });
 
   test("the flow sets the board shape up to the edge limit, and the image limit never squares a board", () => {
@@ -176,7 +176,7 @@ describe("shared Canvas authoring guidance", () => {
     expect(design).toContain("A fan-out takes a hub with its spokes around it.");
     expect(design).toContain("A row holds one chain of stages: a section off the chain goes in another row.");
     expect(design).toContain("To fit the image, never shrink a node, cut a label, square the board or make a band between sections narrower than topic `rules` says.");
-    expect(design).toContain("To stay under 3860px, give a long section 2 rows of nodes, then fold the row of stages into 2 rows.");
+    expect(design).toContain("To stay under 3860px, wrap a long section into 2 rows of nodes, then the row of stages into 2 rows.");
     expect(design).toContain("Never add room past what topic `rules` gives a band");
     // Round 5 cycle 2: these lines kept a pipeline board square at 45% fill.
     for (const topic of getCanvasAuthoringGuidance().topics) {
@@ -215,7 +215,7 @@ describe("shared Canvas authoring guidance", () => {
     expect(rules).toContain("A store or an outcome that several stages feed sits after the last of them, never before or above the first.");
     // A return or a retry runs against the main path, so the rule holds on the main path only.
     expect(rules).toContain("On the main path, a section sits after its source.");
-    expect(rules).toContain("Steps inside a section run the same way, and a chain never turns back.");
+    expect(rules).toContain("Steps inside a section run the same way, and a chain never turns back: one that wraps starts its next row at the same side.");
     // Round 5 cycle 2: this line put a store before the stages that feed it.
     expect(rules).not.toContain("sits beside the section that uses it");
   });
