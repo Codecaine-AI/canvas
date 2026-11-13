@@ -208,6 +208,9 @@ describe("climb empty blocks", () => {
         + ` Its largest empty block is 1000 × 620 px at x 0 to 1000, y 180 to 800. ${SPACE_FIXES}`,
       marks: [{ box: { x: 0, y: 180, width: 1000, height: 620 } }],
     }]);
+    // A sticky fills nothing: a note of 500 × 440 px moved in beside the node leaves the section as thin as it was.
+    const noted = plan(board(box("s", "section", null, 0, 0, 1000, 800), box("n", "rectangle", "s", 40, 80, 280, 100), box("note", "sticky", "s", 400, 200, 500, 440)));
+    expect(noted.thin.map((thin) => [thin.id, thin.items, Math.round(thin.fill * 100)])).toEqual([["s", 1, 4]]);
     // A section that holds nothing is an empty block of its parent's plan, not a thin section.
     expect(plan(board(box("s", "section", null, 0, 0, 1000, 800))).thin).toEqual([]);
   });

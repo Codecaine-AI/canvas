@@ -153,7 +153,8 @@ export interface ThinSection {
 
 /**
  * The sections whose direct children fill under THIN_FILL of the room inside
- * them, emptiest first. The room is the section less the frame padding on
+ * them, emptiest first. A sticky fills nothing here either: a note moved in
+ * closes no thin section. The room is the section less the frame padding on
  * each side and one more padding for the title band: the margins `arrange`
  * leaves. Against the whole area, a fitted row of 3 nodes at the engine's row
  * gap fills 29%, and 47 of the 161 sections of round 5 cycle 2 fall under
@@ -161,7 +162,7 @@ export interface ThinSection {
  */
 export function thinSections(board: Board, pageFrame: BoardObject | null, padding: number): ThinSection[] {
   return board.objects.filter((object) => object.type === SECTION && object.geometry && object !== pageFrame).flatMap((section): ThinSection[] => {
-    const items = board.objects.filter((object) => object.geometry && object.parentId === section.id);
+    const items = board.objects.filter((object) => object.geometry && object.parentId === section.id && object.type !== STICKY);
     const inner = { width: section.geometry.width - 2 * padding, height: section.geometry.height - 3 * padding };
     if (items.length === 0 || inner.width <= 0 || inner.height <= 0) return [];
     const filled = items.reduce((sum, object) => sum + area(object.geometry), 0);

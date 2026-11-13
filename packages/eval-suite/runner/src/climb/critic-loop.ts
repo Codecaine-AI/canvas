@@ -331,9 +331,10 @@ const BETTER = 0.8;
  * is about changed its row, its column or a neighbour, or the finding's own
  * number is 20% better. The number of a computed finding is its measure
  * (the px a band is short, the wires through a section, the length of a far
- * wire). The number of a reviewer's finding is the length, or the crossings,
- * of the wires it names. The words of the answer earn nothing. A finding that
- * names no item of a section is about every section.
+ * wire). The number of a reviewer's finding is the crossings of the wires it
+ * names, or their length when they cross nothing: a shorter wire that crosses
+ * as much as before closed no crossing. The words of the answer earn nothing.
+ * A finding that names no item of a section is about every section.
  */
 export function declineEarned(finding: Pick<LoopFinding, "source" | "ids" | "state">, before: LayoutFacts | undefined, after: LayoutFacts | undefined): boolean {
   if (!before || !after) return false;
@@ -343,7 +344,8 @@ export function declineEarned(finding: Pick<LoopFinding, "source" | "ids" | "sta
   if (finding.source === "computed") return better(before.numbers.faults[finding.state], after.numbers.faults[finding.state] ?? 0);
   const wires = finding.ids.filter((id) => before.numbers.length[id] !== undefined && after.numbers.length[id] !== undefined);
   const sum = (numbers: Record<string, number>) => wires.reduce((total, id) => total + numbers[id]!, 0);
-  return better(sum(before.numbers.length), sum(after.numbers.length)) || better(sum(before.numbers.crossings), sum(after.numbers.crossings));
+  const numbers = sum(before.numbers.crossings) > 0 ? "crossings" : "length";
+  return better(sum(before.numbers[numbers]), sum(after.numbers[numbers]));
 }
 
 /** How many revise passes turned these findings down. 2 findings one pass declined are one decline. */
@@ -610,7 +612,7 @@ export function reviseMessage(board: string, findings: LoopFinding[], notes: Par
       "A `layout finding` is a fault of where the sections sit: a crossing or a long wire between sections, a wire through a section, a band too narrow for its lanes."
       + " Move a section before you route or decline: swap 2 neighbours, or change the row or the column of one."
       + " A decline closes such a finding only when this turn changed the row, the column or a neighbour of a section it is about,"
-      + " or made the finding's own number 20% better or more: the length of its wires, their crossings, or the px its band is short."
+      + " or made the finding's own number 20% better or more: the crossings of its wires, their length when they cross nothing, or the px its band is short."
       + " The runner measures both on the board file. A move of a few px is no move, and the words of the answer close nothing.",
       "Any other decline brings the finding back in the next round, with its facts.",
     ] : []),

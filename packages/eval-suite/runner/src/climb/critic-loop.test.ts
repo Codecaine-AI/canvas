@@ -917,12 +917,15 @@ describe("critic loop decline rule for layout findings", () => {
     expect([earned(placed("sec_c")), earned(placed("sec_b"))]).toEqual([true, true]);
     // A section the finding is not about earns nothing. A finding that names no item of a section is about each one.
     expect([earned(placed("sec_c"), { ...wire, ids: ["a", "b"] }), earned(placed("sec_c"), { ...wire, ids: ["page"] })]).toEqual([false, true]);
-    // The number of a reviewer's finding: the length, or the crossings, of the wires it names. 1440 px is 20% under 1800 px.
-    const long = (length: number, crossings = 2): LayoutFacts =>
-      ({ ...LAYOUT, numbers: { ...LAYOUT.numbers, length: { ...LAYOUT.numbers.length, w: length }, crossings: { ...LAYOUT.numbers.crossings, w: crossings } } });
-    expect([earned(long(1441)), earned(long(1440)), earned(long(1800, 1)), earned(long(2457))]).toEqual([false, true, true, false]);
+    // The number of a reviewer's finding on wires that cross: their crossings. w crosses 2 wires, and half as long with 2 crossings closes nothing.
+    const now = (id: string, length: number, crossings: number): LayoutFacts =>
+      ({ ...LAYOUT, numbers: { ...LAYOUT.numbers, length: { ...LAYOUT.numbers.length, [id]: length }, crossings: { ...LAYOUT.numbers.crossings, [id]: crossings } } });
+    expect([earned(now("w", 900, 2)), earned(now("w", 1800, 1)), earned(now("w", 2457, 0))]).toEqual([false, true, true]);
+    // On wires that cross nothing: their length. 240 px is 20% under the 300 px of w1.
+    const plain = { ...wire, ids: ["w1"] };
+    expect([earned(now("w1", 241, 0), plain), earned(now("w1", 240, 0), plain), earned(now("w1", 300, 0), plain)]).toEqual([false, true, false]);
     // A shorter wire the finding does not name earns nothing, and neither does a wire the pass deleted.
-    expect(earned({ ...LAYOUT, numbers: { ...LAYOUT.numbers, length: { w: 1800, w1: 30, w2: 30, w3: 30 } } })).toBe(false);
+    expect(earned(now("w1", 30, 0))).toBe(false);
     expect(earned({ ...LAYOUT, numbers: { length: {}, crossings: {}, faults: {} } })).toBe(false);
     // The number of a computed finding is its own measure, by its key: the band is 40 px short. The wires it names do not count.
     const tight = { source: "computed" as const, ids: band().ids, state: band().key };
@@ -969,7 +972,7 @@ describe("critic loop decline rule for layout findings", () => {
     expect(first).toContain("A `layout finding` is a fault of where the sections sit: a crossing or a long wire between sections, a wire through a section, a band too narrow for its lanes."
       + " Move a section before you route or decline: swap 2 neighbours, or change the row or the column of one."
       + " A decline closes such a finding only when this turn changed the row, the column or a neighbour of a section it is about,"
-      + " or made the finding's own number 20% better or more: the length of its wires, their crossings, or the px its band is short."
+      + " or made the finding's own number 20% better or more: the crossings of its wires, their length when they cross nothing, or the px its band is short."
       + " The runner measures both on the board file. A move of a few px is no move, and the words of the answer close nothing.\n"
       + "Any other decline brings the finding back in the next round, with its facts.");
     expect(first).not.toContain("declined: moved <section>");
