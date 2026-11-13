@@ -17,11 +17,11 @@ const seen = (overrides: Partial<MergedFinding> = {}): MergedFinding => ({
 const NARROW = "The gap between sec_a and sec_b (side by side) is 200 px wide and 3 wires cross it or run along it: the gap rule asks 240 px, so it is 40 px too narrow";
 /** A measure of the runner that fails (space.ts): a gap under its rule number. */
 const measure = (overrides: Partial<ComputedFault> = {}): ComputedFault => ({
-  key: `["gap","under",["sec_a","sec_b"]]`, ids: ["sec_a", "sec_b"], problem: NARROW, marks: [{ box: { x: 300, y: 0, width: 200, height: 400 } }], ...overrides,
+  kind: "space", key: `["gap","under",["sec_a","sec_b"]]`, ids: ["sec_a", "sec_b"], problem: NARROW, marks: [{ box: { x: 300, y: 0, width: 200, height: 400 } }], ...overrides,
 });
 /** An empty block of the board frame (space.ts): 2 of them share the key, and the place tells them apart. */
 const hole = (x: number, y: number, width: number, height: number): ComputedFault => ({
-  key: `["empty-block","page"]`, ids: ["page"], block: { x, y, width, height }, marks: [{ box: { x, y, width, height } }],
+  kind: "space", key: `["empty-block","page"]`, ids: ["page"], block: { x, y, width, height }, marks: [{ box: { x, y, width, height } }],
   problem: `An empty block of ${width} × ${height} px sits in the board frame`,
 });
 const review = (overrides: Partial<Review> = {}): Review => ({

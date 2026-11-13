@@ -1,0 +1,1205 @@
+{
+  "schemaVersion": 1,
+  "id": "h6-eval-no-notes",
+  "title": "Offline Evaluation Harness",
+  "description": "Offline evaluation harness orchestration, read left to right, top row then bottom row.\n\n- **Pinned Suite** (green): frozen scenario versions (a wording change creates v2 instead of editing v1) and the run fingerprint (revision, config, prompt and rubric versions). The fingerprint stamps the scorecard.\n- **Bounded Execution** (violet): scheduler fans out to a bounded worker pool that runs steps in order against an isolated SUT (never prod). The scenario outcome decision separates infra faults (orange: retry, re-run through the scheduler) from SUT-behavior failures (red: recorded, then the worker continues). Completed scenarios yield transcript + final artifact.\n- **Grading** (teal): the Graders subsection holds the criterion graders (request + transcript), the artifact-only grader (artifact only) and the global concurrency limit that caps them. Every verdict passes the evidence check; a verdict without evidence is retried once and the re-graded verdict is checked again, and it is flagged if the retry fails. Checked verdicts are retained with their evidence.\n- **Scorecard & Baseline Comparison** (pink): assembler merges valid verdicts; the scorecard is compared to the baseline only on a fingerprint match; movements crossing the threshold are narrated.\n- **Retained Evidence** (orange): run results keep infra faults and product regressions apart; artifacts, transcripts and verdicts are kept for dispute review.\n- **Baseline** (yellow): promoting a run makes it the baseline that supplies the next comparison.\n\nNode colors: teal = harness actors, violet = graders, blue = records, yellow = gates, orange = infra faults/retries, red = product failures and invalid outcomes, green = promotion.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Offline Evaluation Harness",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 640,
+        "y": 920,
+        "width": 3280,
+        "height": 1904
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "suite",
+      "type": "section",
+      "text": "Pinned Suite",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 740,
+        "y": 1000,
+        "width": 340,
+        "height": 640
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "eval"
+    },
+    {
+      "id": "exec",
+      "type": "section",
+      "text": "Bounded Execution",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1420,
+        "y": 1000,
+        "width": 1320,
+        "height": 680
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "container"
+    },
+    {
+      "id": "grading",
+      "type": "section",
+      "text": "Grading",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 680,
+        "y": 1960,
+        "width": 1260,
+        "height": 824
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "judge"
+    },
+    {
+      "id": "compare",
+      "type": "section",
+      "text": "Scorecard & Baseline Comparison",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2200,
+        "y": 1976,
+        "width": 876,
+        "height": 596
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "chart"
+    },
+    {
+      "id": "graders",
+      "type": "section",
+      "text": "Graders",
+      "color": "pink",
+      "parentId": "grading",
+      "geometry": {
+        "x": 720,
+        "y": 2052,
+        "width": 1136,
+        "height": 404
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "judge"
+    },
+    {
+      "id": "scen_v1",
+      "type": "icon",
+      "text": "Scenario v1 (frozen)",
+      "color": "blue",
+      "parentId": "suite",
+      "geometry": {
+        "x": 760,
+        "y": 1056,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "scen_v2",
+      "type": "icon",
+      "text": "Scenario v2 (frozen)",
+      "color": "blue",
+      "parentId": "suite",
+      "geometry": {
+        "x": 760,
+        "y": 1256,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "fingerprint",
+      "type": "icon",
+      "text": "Fingerprint: revision, config, prompts, rubrics",
+      "color": "blue",
+      "parentId": "suite",
+      "geometry": {
+        "x": 760,
+        "y": 1456,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "scheduler",
+      "type": "icon",
+      "text": "Scheduler",
+      "color": "teal",
+      "parentId": "exec",
+      "geometry": {
+        "x": 1472,
+        "y": 1056,
+        "width": 300,
+        "height": 124
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "sut",
+      "type": "icon",
+      "text": "Isolated SUT (never prod)",
+      "color": "pink",
+      "parentId": "exec",
+      "geometry": {
+        "x": 2412,
+        "y": 1056,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "fail_kind",
+      "type": "decision",
+      "text": "Scenario outcome?",
+      "color": "yellow",
+      "parentId": "exec",
+      "geometry": {
+        "x": 1948,
+        "y": 1288,
+        "width": 284,
+        "height": 144
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "capture",
+      "type": "icon",
+      "text": "Transcript + final artifact",
+      "color": "blue",
+      "parentId": "exec",
+      "geometry": {
+        "x": 1472,
+        "y": 1300,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "documents"
+    },
+    {
+      "id": "retry_infra",
+      "type": "icon",
+      "text": "Retry scenario",
+      "color": "orange",
+      "parentId": "exec",
+      "geometry": {
+        "x": 2408,
+        "y": 1296,
+        "width": 304,
+        "height": 128
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "loop"
+    },
+    {
+      "id": "product_fail",
+      "type": "icon",
+      "text": "Product failure recorded",
+      "color": "red",
+      "parentId": "exec",
+      "geometry": {
+        "x": 1940,
+        "y": 1520,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "bug"
+    },
+    {
+      "id": "limit",
+      "type": "icon",
+      "text": "Global concurrency limit",
+      "color": "yellow",
+      "parentId": "graders",
+      "geometry": {
+        "x": 920,
+        "y": 2300,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "gauge"
+    },
+    {
+      "id": "crit_a",
+      "type": "icon",
+      "text": "Criterion grader A",
+      "color": "violet",
+      "parentId": "graders",
+      "geometry": {
+        "x": 740,
+        "y": 2100,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "judge"
+    },
+    {
+      "id": "crit_b",
+      "type": "icon",
+      "text": "Criterion grader B",
+      "color": "violet",
+      "parentId": "graders",
+      "geometry": {
+        "x": 1100,
+        "y": 2100,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "judge"
+    },
+    {
+      "id": "art_only",
+      "type": "icon",
+      "text": "Artifact-only grader (no request)",
+      "color": "violet",
+      "parentId": "graders",
+      "geometry": {
+        "x": 1468,
+        "y": 2100,
+        "width": 308,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "eval"
+    },
+    {
+      "id": "has_evidence",
+      "type": "decision",
+      "text": "Verdict has evidence?",
+      "color": "yellow",
+      "parentId": "grading",
+      "geometry": {
+        "x": 1620,
+        "y": 2552,
+        "width": 280,
+        "height": 140
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "retry_grade",
+      "type": "icon",
+      "text": "Retry grading once",
+      "color": "orange",
+      "parentId": "grading",
+      "geometry": {
+        "x": 1100,
+        "y": 2560,
+        "width": 304,
+        "height": 124
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "loop"
+    },
+    {
+      "id": "flagged",
+      "type": "octagon",
+      "text": "Flagged invalid verdict",
+      "color": "red",
+      "parentId": "grading",
+      "geometry": {
+        "x": 740,
+        "y": 2548,
+        "width": 140,
+        "height": 148
+      },
+      "style": {
+        "shape": "octagon"
+      }
+    },
+    {
+      "id": "assembler",
+      "type": "icon",
+      "text": "Scorecard assembler",
+      "color": "teal",
+      "parentId": "compare",
+      "geometry": {
+        "x": 2220,
+        "y": 2024,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "merge"
+    },
+    {
+      "id": "scorecard",
+      "type": "icon",
+      "text": "Scorecard",
+      "color": "blue",
+      "parentId": "compare",
+      "geometry": {
+        "x": 2700,
+        "y": 2024,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "chart"
+    },
+    {
+      "id": "same_fp",
+      "type": "decision",
+      "text": "Same fingerprint?",
+      "color": "yellow",
+      "parentId": "compare",
+      "geometry": {
+        "x": 2708,
+        "y": 2200,
+        "width": 284,
+        "height": 140
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "refused",
+      "type": "octagon",
+      "text": "Comparison refused",
+      "color": "red",
+      "parentId": "compare",
+      "geometry": {
+        "x": 2300,
+        "y": 2200,
+        "width": 140,
+        "height": 140
+      },
+      "style": {
+        "shape": "octagon"
+      }
+    },
+    {
+      "id": "compare_base",
+      "type": "icon",
+      "text": "Compare vs baseline",
+      "color": "teal",
+      "parentId": "compare",
+      "geometry": {
+        "x": 2700,
+        "y": 2416,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "search"
+    },
+    {
+      "id": "narrate",
+      "type": "icon",
+      "text": "Narrated movements",
+      "color": "blue",
+      "parentId": "compare",
+      "geometry": {
+        "x": 2220,
+        "y": 2416,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "results",
+      "type": "icon",
+      "text": "Run results (infra ≠ product)",
+      "color": "blue",
+      "parentId": "ret_ev",
+      "geometry": {
+        "x": 3180,
+        "y": 1220,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "table"
+    },
+    {
+      "id": "archive",
+      "type": "icon",
+      "text": "Artifacts, transcripts, verdicts",
+      "color": "blue",
+      "parentId": "ret_ev",
+      "geometry": {
+        "x": 3180,
+        "y": 1740,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "dispute",
+      "type": "icon",
+      "text": "Disputed score review",
+      "color": "pink",
+      "parentId": "ret_ev",
+      "geometry": {
+        "x": 3500,
+        "y": 1520,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "promote",
+      "type": "icon",
+      "text": "Promote run",
+      "color": "green",
+      "parentId": "ret_base",
+      "geometry": {
+        "x": 3440,
+        "y": 2416,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "event"
+    },
+    {
+      "id": "baseline",
+      "type": "icon",
+      "text": "Baseline run",
+      "color": "blue",
+      "parentId": "ret_base",
+      "geometry": {
+        "x": 3440,
+        "y": 2208,
+        "width": 300,
+        "height": 124
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "workers",
+      "type": "icon",
+      "text": "Worker pool (bounded)",
+      "color": "teal",
+      "parentId": "exec",
+      "geometry": {
+        "x": 1940,
+        "y": 1056,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "ret_ev",
+      "type": "section",
+      "text": "Retained Evidence",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 3124,
+        "y": 1172,
+        "width": 696,
+        "height": 724
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "ret_base",
+      "type": "section",
+      "text": "Baseline",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 3420,
+        "y": 2160,
+        "width": 340,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "database"
+    }
+  ],
+  "connections": [
+    {
+      "id": "e_version",
+      "from": {
+        "objectId": "scen_v1"
+      },
+      "to": {
+        "objectId": "scen_v2"
+      },
+      "label": "wording change",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_suite",
+      "from": {
+        "objectId": "scen_v2"
+      },
+      "to": {
+        "objectId": "scheduler"
+      },
+      "label": "pinned suite",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_fp",
+      "from": {
+        "objectId": "fingerprint"
+      },
+      "to": {
+        "objectId": "scorecard",
+        "anchor": "top"
+      },
+      "label": "run fingerprint",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1200,
+          1516
+        ],
+        [
+          1200,
+          1720
+        ],
+        [
+          2850,
+          1720
+        ]
+      ]
+    },
+    {
+      "id": "e_infra",
+      "from": {
+        "objectId": "fail_kind"
+      },
+      "to": {
+        "objectId": "retry_infra"
+      },
+      "label": "infra fault",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e_infra_rec",
+      "from": {
+        "objectId": "retry_infra",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "results",
+        "anchor": "left"
+      },
+      "label": "tagged infra fault",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e_product",
+      "from": {
+        "objectId": "fail_kind",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "product_fail",
+        "anchor": "top"
+      },
+      "label": "SUT behavior",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e_product_rec",
+      "from": {
+        "objectId": "product_fail",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "results",
+        "anchor": "bottom"
+      },
+      "label": "tagged product regression",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "labelPosition": {
+        "along": 0.55
+      }
+    },
+    {
+      "id": "e_continue",
+      "from": {
+        "objectId": "product_fail"
+      },
+      "to": {
+        "objectId": "capture",
+        "anchor": "right"
+      },
+      "label": "worker continues",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1800,
+          1580
+        ],
+        [
+          1800,
+          1360
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.5
+      }
+    },
+    {
+      "id": "e_to_a",
+      "from": {
+        "objectId": "capture"
+      },
+      "to": {
+        "objectId": "crit_a",
+        "anchor": "top"
+      },
+      "label": "request + transcript",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1622,
+          1880
+        ],
+        [
+          890,
+          1880
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.71
+      }
+    },
+    {
+      "id": "e_to_b",
+      "from": {
+        "objectId": "capture"
+      },
+      "to": {
+        "objectId": "crit_b",
+        "anchor": "top"
+      },
+      "label": "request + transcript",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1622,
+          1880
+        ],
+        [
+          1250,
+          1880
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.875
+      }
+    },
+    {
+      "id": "e_to_art",
+      "from": {
+        "objectId": "capture",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "art_only",
+        "anchor": "top"
+      },
+      "label": "artifact only",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.825
+      }
+    },
+    {
+      "id": "e_retain_cap",
+      "from": {
+        "objectId": "capture",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "archive",
+        "anchor": "left"
+      },
+      "label": "retain",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.25
+      }
+    },
+    {
+      "id": "e_va",
+      "from": {
+        "objectId": "crit_a",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "has_evidence",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          890,
+          2500
+        ],
+        [
+          1760,
+          2500
+        ]
+      ]
+    },
+    {
+      "id": "e_vb",
+      "from": {
+        "objectId": "crit_b",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "has_evidence",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1250,
+          2500
+        ],
+        [
+          1760,
+          2500
+        ]
+      ]
+    },
+    {
+      "id": "e_vart",
+      "from": {
+        "objectId": "art_only",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "has_evidence",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1622,
+          2500
+        ],
+        [
+          1760,
+          2500
+        ]
+      ]
+    },
+    {
+      "id": "e_valid",
+      "from": {
+        "objectId": "has_evidence",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "assembler"
+      },
+      "label": "valid verdict",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          2100,
+          2622
+        ],
+        [
+          2100,
+          2084
+        ]
+      ]
+    },
+    {
+      "id": "e_noevid",
+      "from": {
+        "objectId": "has_evidence",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "retry_grade",
+        "anchor": "right"
+      },
+      "label": "no evidence",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e_retry_ok",
+      "from": {
+        "objectId": "retry_grade",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "has_evidence",
+        "anchor": "bottom"
+      },
+      "label": "re-graded verdict",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1252,
+          2740
+        ],
+        [
+          1760,
+          2740
+        ]
+      ]
+    },
+    {
+      "id": "e_retry_fail",
+      "from": {
+        "objectId": "retry_grade"
+      },
+      "to": {
+        "objectId": "flagged"
+      },
+      "label": "retry fails",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e_retain_verdict",
+      "from": {
+        "objectId": "has_evidence",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "archive",
+        "anchor": "left"
+      },
+      "label": "verdict + evidence",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          2000,
+          2622
+        ],
+        [
+          2000,
+          1800
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.38
+      }
+    },
+    {
+      "id": "e_merge",
+      "from": {
+        "objectId": "assembler"
+      },
+      "to": {
+        "objectId": "scorecard"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_check_fp",
+      "from": {
+        "objectId": "scorecard"
+      },
+      "to": {
+        "objectId": "same_fp"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_mismatch",
+      "from": {
+        "objectId": "same_fp"
+      },
+      "to": {
+        "objectId": "refused"
+      },
+      "label": "mismatch",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e_match",
+      "from": {
+        "objectId": "same_fp"
+      },
+      "to": {
+        "objectId": "compare_base"
+      },
+      "label": "match",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_base_fp",
+      "from": {
+        "objectId": "baseline",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "same_fp",
+        "anchor": "right"
+      },
+      "label": "baseline + fingerprint",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_narrate",
+      "from": {
+        "objectId": "compare_base"
+      },
+      "to": {
+        "objectId": "narrate"
+      },
+      "label": "crosses threshold",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_promote",
+      "from": {
+        "objectId": "compare_base",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "promote",
+        "anchor": "left"
+      },
+      "label": "if promoted",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e_new_base",
+      "from": {
+        "objectId": "promote"
+      },
+      "to": {
+        "objectId": "baseline"
+      },
+      "label": "becomes baseline",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e_dispute",
+      "from": {
+        "objectId": "archive",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "dispute",
+        "anchor": "bottom"
+      },
+      "label": "re-examine disputes",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.4
+      }
+    },
+    {
+      "id": "e_completed",
+      "from": {
+        "objectId": "fail_kind"
+      },
+      "to": {
+        "objectId": "capture"
+      },
+      "label": "completed",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.15,
+        "offset": -40
+      }
+    },
+    {
+      "id": "e_fanout",
+      "from": {
+        "objectId": "scheduler"
+      },
+      "to": {
+        "objectId": "workers"
+      },
+      "label": "bounded fan-out",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_steps",
+      "from": {
+        "objectId": "workers"
+      },
+      "to": {
+        "objectId": "sut"
+      },
+      "label": "steps in order",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_fail",
+      "from": {
+        "objectId": "workers",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "fail_kind",
+        "anchor": "top"
+      },
+      "label": "step result",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_rerun",
+      "from": {
+        "objectId": "retry_infra",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "scheduler",
+        "anchor": "bottom"
+      },
+      "label": "re-run",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    }
+  ],
+  "annotations": []
+}

@@ -146,7 +146,7 @@ describe("climb review wire sheet", () => {
 describe("climb review prompts", () => {
   const unit = (board: Board, id: string) => reviewUnits(board).units.find((entry) => entry.id === id)!;
   const board: Board = { objects: [box("sec", "section", null, 100, 200, 800, 400), box("a", "rectangle", "sec"), box("key", "sticky", null)], connections: [] };
-  const none = { checked: [], declined: [], settled: [] };
+  const none = { checked: [], declined: [], settled: [], returned: [] };
   const section = {
     scales: { board: 0.4, section: 1, neighbourhood: 0.5 },
     objects: ["a · rectangle"], measures: ["MEASURES · section sec 100,200 800×400"], wires: ["W1 w · a → b"],
@@ -154,10 +154,11 @@ describe("climb review prompts", () => {
   };
   const crop = (x: number, lines: string[]) => ({ rect: { x, y: 200, width: 480, height: 360 }, lines });
   const gap = { scale: 0.4, crops: [crop(100, [`chip "calls" of w · x 300 to 360, y 300 to 320`]), crop(600, [])], notes: none };
-  const wire = { scale: 0.4, wires: ["W1 w · a → b · sec → loose"], wireMeasures: [], totals: "LAYOUT", notes: none };
+  const through = "1 wire runs through section mid, which holds neither end of it: w (sec → far, 1200 px)";
+  const wire = { scale: 0.4, wires: ["W1 w · a → b · sec → loose"], wireMeasures: [], computed: [through], totals: "LAYOUT", notes: none };
   const space = {
     scale: 0.4, shape: "2400 × 1200 px, aspect ratio 2.00 : 1", sections: ["sec · in board · x 100"],
-    gaps: ["sec ↔ far · side by side · gap 60 px · gutter x 900 to 960, y 200 to 600 · 3 wires run along it · 0 label chips in it · TIGHT: more than 1 wire per 40 px of gap"],
+    gaps: ["sec ↔ far · side by side · gap 60 px · gutter x 900 to 960, y 200 to 600 · 3 wires run along it · 0 label chips in it"],
     pairs: ["sec ↔ far · 4 wires · 3200 px of wire in total · NOT neighbours: mid lies between them"],
     long: ["w · a (sec) → z (far) · 1200 px · 2 bends"], sinks: [`z "Store" in far · 3 wires in from sec · mean 900 px · longest 1200 px`],
     measured: ["An empty block of 900 × 500 px sits in the board frame at x 1500 to 2400, y 700 to 1200: 16% of the frame holds no section, node or sticky"], totals: "LAYOUT", notes: none,
@@ -180,6 +181,11 @@ describe("climb review prompts", () => {
       // A finding of kind `missing` says where the missing item goes: round 5 added nodes with no place for them (h1).
       expect(prompt).toContain("- missing: an object or a relation the brief names that the board lacks. Name the section it belongs in and the neighbour it belongs beside.");
       expect(prompt).toContain("Look further:");
+      // Round 5 cycle 2. A "missing" finding asked for wires the brief does not name (h1), and one asked the drawer to take icons off (h5).
+      expect(prompt).toContain("Name the section it belongs in and the neighbour it belongs beside. Never report a node or a wire the brief does not name.");
+      expect(prompt).toContain("- icon: a plain box where the kind has a shape or an icon, an icon that does not fit its meaning, or one icon repeated on unlike nodes. Never report an icon as one to remove.");
+      // "The wire ends on a section frame" took board 02 from 20 wires to 30, and "its endpoints have no node" deleted a subsection of h6.
+      expect(prompt).toContain("Never report a wire that ends on the frame of a section or a subsection when the whole group sends or receives it: the frame is its end, and it needs no node there.");
       // No field of an answer holds a fix, and no canvas tool is offered.
       expect(prompt).not.toMatch(/`fix`|`call`|- (route|move|resize|move_label|change_connection|arrange_section|fit_section) \{/);
     }
@@ -215,12 +221,11 @@ describe("climb review prompts", () => {
     expect(gapPrompt({ ...gap, crops: [crop(100, [])] })).toContain("Your crop is outlined in red, each with its number.\nImage 2 is your crop at full size: 1 image px is 1 board px.");
   });
 
-  test("the wire reviewer looks for a wire on the board's edge, through a header, on a section frame or along a border, and for separate lanes of one meaning into one node", () => {
+  test("the wire reviewer looks for a wire on the board's edge, through a header or along a border, and for separate lanes of one meaning into one node, and leaves the computed wire findings to the runner", () => {
     const prompt = wirePrompt(wire);
     for (const fault of [
       "- a detour, a wire that wraps round a section, or a wire along the board's outer edge;",
       "- a wire through a section it does not belong to, or through a section's header or header chip;",
-      "- a wire that ends on a section frame and not on a node;",
       "- a wire within 24 px of a section border along 100 px or more;",
       "- wires of one dash and one colour that share a source or a target and run side by side in separate lanes, 40 px apart or less: they must read as one trunk.",
     ]) expect(prompt).toContain(fault);
@@ -230,6 +235,11 @@ describe("climb review prompts", () => {
       + ` Ford kept them: "The lines just appear more aesthetic."`);
     expect(prompt).toContain("W1 w · a → b · sec → loose");
     expect(prompt).toContain("Measured on your wires:\n(none)");
+    expect(prompt).not.toContain("ends on a section frame and not on a node");
+    expect(prompt).toContain(
+      "The runner sends the drawer each of these as its own finding. Do not report one of them again"
+      + ` (wires through a section that holds neither end, wires over 1500 px between sections that are not neighbours, bands too narrow for their wires):\n${through}`);
+    expect(wirePrompt({ ...wire, computed: [] })).toContain("bands too narrow for their wires):\n(none)");
   });
 
   test("a reviewer that reads wires reports a line that wires of different dash or colour share, and never words close lanes of such wires as a merge", () => {
@@ -243,25 +253,29 @@ describe("climb review prompts", () => {
     expect(prompt).not.toContain("parallel wires that must merge");
   });
 
-  test("the space reviewer judges adjacency first, from the wires between each pair of sections, and reads the runner's measures of empty blocks and gaps", () => {
+  test("the space reviewer judges adjacency first, from the wires between each pair of sections, and leaves what the runner measures to the runner", () => {
     const prompt = spacePrompt(space);
     expect(prompt).toContain("Your first job is adjacency: sections that talk to each other must sit next to each other.");
     for (const fault of [
       "- two sections with many wires between them that are not neighbours;",
       "- a section that lies between two sections that talk to each other;",
-      "- a gap with more than 1 wire per 40 px of its width (marked TIGHT), or a gap too narrow for the label chips in it;",
+      "- a gap too narrow for the label chips in it;",
       "- a sink or a store far from its sources;",
+      "- a store or an outcome section that sits before the stages that feed it: left of them or above them, against the way the board reads;",
       "- an empty area the board does not need: a hole between sections, or a corner that no section fills;",
-      "- a story that does not start at the top or the left of the board: say where it starts and where it ends;",
     ]) expect(prompt).toContain(fault);
+    // The band check of the runner measures a gap against its wires, and the choices reviewer has the brief to hold the start of the board against.
+    expect(prompt).not.toMatch(/TIGHT|more than 1 wire per|does not start at the top/);
     // Round 5: the judges faulted an empty block on every weak board, and this reviewer was told never to report one.
     expect(prompt).not.toMatch(/Never report an empty corner|ragged section edges/);
     expect(prompt).toContain("a blue box for each section, a yellow box for each sticky");
-    expect(prompt).toContain(`sends the drawer each line of the block "Measured by the runner" as its own finding. Do not report one of them again.`);
     expect(prompt).toContain(
-      "Measured by the runner (empty blocks over the limit, gaps off their gap rule number):\n"
+      "The runner measures the empty blocks, how full each section is, each gap and each band of gaps against the gap rule, each wire through a section that holds neither of its ends,"
+      + " and each wire over 1500 px between sections that are not neighbours. Use their numbers in your findings, and report what the measures miss.");
+    expect(prompt).toContain(
+      "The runner sends the drawer each of these as its own finding. Do not report one of them again:\n"
       + "An empty block of 900 × 500 px sits in the board frame at x 1500 to 2400, y 700 to 1200: 16% of the frame holds no section, node or sticky");
-    expect(spacePrompt({ ...space, measured: [] })).toContain("gaps off their gap rule number):\n(none)");
+    expect(spacePrompt({ ...space, measured: [] })).toContain("Do not report one of them again:\n(none)");
     expect(prompt).toContain("most wires first:\nsec ↔ far · 4 wires · 3200 px of wire in total · NOT neighbours: mid lies between them");
     expect(prompt).toContain("Gaps between neighbour sections:\nsec ↔ far · side by side · gap 60 px");
     expect(prompt).toContain("Wires longer than 800 px (id · from (its section) → to (its section) · length · bends):\nw · a (sec) → z (far) · 1200 px · 2 bends");
@@ -282,8 +296,10 @@ describe("climb review prompts", () => {
       "- colour that carries no meaning",
       "- a node with the colour of its section: it does not stand out from it;",
       "- 4 or more gray nodes in one section;",
-      "- a section whose steps run against the reading direction of the board (kind `placement`);",
+      "- a step with no icon among nodes that have one (kind `icon`);",
+      "- a section whose steps run against the reading direction of the board, or a chain that reverses direction inside a section (kind `placement`);",
       "- an object or a relation in the brief that the board lacks (kind `missing`);",
+      "- a board that starts where the story of the brief does not: say what a reader meets first at the top or the left of the board, and where the brief's story starts (kind `placement`);",
       "- a hierarchy in the brief that the board shows flat (kind `nesting`).",
     ]) expect(prompt).toContain(fault);
     expect(prompt).toContain(`Objects (id · type · shape · icon · colour · parent (its colour) · text):\na · rectangle · shape - · no icon · no colour · in sec (gray) · "Store"`);
@@ -292,14 +308,15 @@ describe("climb review prompts", () => {
     const alone = choicesPrompt({ ...choices, brief: null });
     expect(alone).toContain("No brief came with this board. Judge colour, shape and icon from the board alone, and report nothing as missing.");
     expect(alone).toContain("- a gray or colourless section;");
-    expect(alone).not.toMatch(/<brief>|in the brief that the board/);
+    expect(alone).not.toMatch(/<brief>|in the brief that the board|story of the brief/);
   });
 
-  test("a reviewer is told what the lint already said, what the drawer declined and why, and what is settled", () => {
+  test("a reviewer is told what the lint already said, what the drawer declined and why, what is settled, and what the runner sends again itself", () => {
     const notes = {
       checked: ["near-miss: b is 20px off a's center line, so w bends (move b by dy -20)"],
       declined: ["[routing] w: The wire bends twice. The drawer declined: the bend clears the label"],
       settled: ["[spacing] sec, far: The gap is 60 px. The drawer declined: the chips fit"],
+      returned: ["[placement] sec, far: 4 wires join sec and far, and mid lies between them."],
     };
     for (const prompt of [sectionPrompt(unit(board, "sec"), { ...section, notes }), gapPrompt({ ...gap, notes }), wirePrompt({ ...wire, notes }), spacePrompt({ ...space, notes }), choicesPrompt({ ...choices, notes })]) {
       expect(prompt).toContain("The strict lint already gave the drawer these. Do not report them again:\nnear-miss: b is 20px off a's center line, so w bends (move b by dy -20)");
@@ -307,8 +324,9 @@ describe("climb review prompts", () => {
         "Raise one again only when its reason is wrong on the current images, and say why it is wrong. Name the same ids. Else do not report it:\n"
         + "[routing] w: The wire bends twice. The drawer declined: the bend clears the label");
       expect(prompt).toContain("These faults are settled: the drawer declined them twice. Do not report them:\n[spacing] sec, far: The gap is 60 px. The drawer declined: the chips fit");
+      expect(prompt).toContain("The drawer declined these with no section move. The runner sends them again itself. Do not report them:\n[placement] sec, far: 4 wires join sec and far, and mid lies between them.");
     }
-    for (const prompt of prompts()) expect(prompt).not.toMatch(/Do not report them again|The drawer declined these findings|These faults are settled/);
+    for (const prompt of prompts()) expect(prompt).not.toMatch(/Do not report them again|The drawer declined these|These faults are settled/);
   });
 
   test("a reviewer that looks further gets its first prompt, its first answer and each view's image, routes and measures", () => {
@@ -514,7 +532,7 @@ describe("climb review merge", () => {
     const record: CritiqueRecord = {
       board: "/b.canvas.json", model: "gpt-6.1-sol", effort: "high", count: 8, startedAt: "", durationMs: 75_000, renderMs: 9_400, lints: [],
       regions: [region("space", "space", 2), region("wires", "wire", 3), region("choices", "choices", 1), region("sec_a", "section", 4), region("sec_b", "section", 0, "timed out"), region("gap-1", "gap", 2)],
-      gap: { chips: 7, covered: 7, crops: 3 }, findings: [], computed: [],
+      gap: { chips: 7, covered: 7, crops: 3 }, findings: [], computed: [], layout: { sections: {}, holders: {}, wires: {} },
     };
     expect(critiqueSummary(record)).toBe(
       "0 lints · 6 reviewers at high (2 section, 1 gap, 1 wire, 1 space, 1 choices, 0 loose) · 12 findings (section 4, gap 2, wire 3, space 2, choices 1, loose 0), 0 after merge"

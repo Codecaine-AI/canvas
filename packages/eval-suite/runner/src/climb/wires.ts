@@ -36,6 +36,8 @@ export interface WireModules {
   };
   placement: { placedLabelPoint(routed: Routed, connection: unknown, board: unknown, canvasStyle: unknown): Point };
   geometry: {
+    /** The height of a wire's label chip. */
+    CHIP_HEIGHT: number;
     pathBoxViolationIds(points: readonly Point[], fromId: string, toId: string, objects: readonly unknown[], canvasStyle: unknown): string[];
     crossingPoints(a: readonly Point[], b: readonly Point[]): Point[];
   };
@@ -55,7 +57,9 @@ export interface WireModules {
   };
   /** The numbers of the gap rule, as topic `rules` prints them. */
   rules: { SECTION_GAP_PER_WIRE: number; LABEL_LEG: { base: number; perCharacter: number } };
-  craft: { CRAFT_TARGETS: { sectionGutterSideBySide: number } };
+  craft: { CRAFT_TARGETS: { sectionGutterSideBySide: number; framePadding: number } };
+  /** The grid a drawer's numbers land on. */
+  grid: { AGENT_GRID: number };
 }
 
 export async function loadWireModules(root = CANVAS_REPO_ROOT): Promise<WireModules> {
@@ -70,6 +74,7 @@ export async function loadWireModules(root = CANVAS_REPO_ROOT): Promise<WireModu
     titleChip: (await source("objects/section/title-chip-layout.ts")) as WireModules["titleChip"],
     rules: (await source("authoring/rules.ts")) as WireModules["rules"],
     craft: (await source("authoring/style-guide/craft-targets.ts")) as WireModules["craft"],
+    grid: (await source("session/tools/grid.ts")) as WireModules["grid"],
   };
 }
 

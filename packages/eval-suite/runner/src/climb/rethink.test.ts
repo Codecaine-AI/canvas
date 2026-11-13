@@ -6,7 +6,7 @@ import type { Board, BoardObject } from "./review-inputs.ts";
 import { planOf, type GapRule } from "./space.ts";
 import type { WireFact } from "./wires.ts";
 
-const RULE: GapRule = { base: 200, perWire: 20, labelBase: 100, labelPerCharacter: 10 };
+const RULE: GapRule = { base: 200, perWire: 20, labelBase: 100, labelPerCharacter: 10, perLabel: 20, padding: 40 };
 const measured = (objects: BoardObject[], facts: WireFact[] = []): Measured => {
   const board: Board = { objects, connections: [] };
   return { board, facts, plan: planOf(board, facts, RULE) };
@@ -42,10 +42,11 @@ describe("climb rethink turn message", () => {
     expect(message).toContain("Move whole sections (`arrange`, `move`, `place_section`, `fit_section`)");
     expect(message).toContain("After you move a section, close the space it left, then route the wires again.");
     expect(message).toContain("Do not spread the nodes inside a section, and do not resize a section past its content.");
+    expect(message).toContain("Never narrow a gap below its rule number: the number counts every wire of its band, from every pair of sections.");
     expect(message).toContain(`canvas_open, canvas id "b1"`);
   });
 
-  test("it gives the facts the runner measured: the board's size, the wires of each section pair, each gap against its rule number, the 5 longest wires and the empty blocks", () => {
+  test("it gives the facts the runner measured: the board's size, the wires of each section pair, each gap against its rule number by band, the 5 longest wires and the computed findings", () => {
     expect(message.slice(message.indexOf("\nBoard:"))).toBe([
       "",
       "Board:",
@@ -55,12 +56,14 @@ describe("climb rethink turn message", () => {
       "a ↔ b · 3 wires · 600 px of wire in total · neighbours, side by side, gap 200 px",
       "b ↔ c · 1 wire · 1050 px of wire in total · neighbours, stacked, gap 200 px",
       "",
-      "Gaps between neighbour sections, each against the gap rule: 200 px, plus 20 px for each wire after the first that crosses the gap or runs along it."
+      "Gaps between neighbour sections, each against the gap rule. A gap's band is the gap drawn out along its row or column of sections, and the rule counts every wire that crosses the gap or runs along the band:"
+      + " 200 px, plus 20 px for each wire after the first, plus 20 px more for each of them with a label."
       + " A labelled wire that crosses a side-by-side gap needs 100 px plus 10 px a character of its label."
       + " A gap is off its number when it is under it, or over it by more than 120 px with nothing in it:",
-      "a ↔ b · side by side · gap 200 px · gutter x 300 to 500, y 0 to 400 · 3 wires cross it or run along it · 0 label chips in it · rule number 240 px · UNDER its number by 40 px",
-      "a ↔ c · stacked · gap 200 px · gutter x 0 to 300, y 400 to 600 · 0 wires cross it or run along it · 0 label chips in it · rule number 200 px · within its number",
-      "b ↔ c · stacked · gap 200 px · gutter x 500 to 800, y 400 to 600 · 1 wire crosses it or runs along it · 0 label chips in it · rule number 200 px · within its number",
+      "a ↔ b · side by side · gap 200 px · gutter x 300 to 500, y 0 to 400 · band y 0 to 400 · 3 wires cross it or run along its band · 0 label chips in it · rule number 240 px · UNDER its number by 40 px",
+      // w4 leaves b and runs along the band over c: the gap of a and c counts it too.
+      "a ↔ c · stacked · gap 200 px · gutter x 0 to 300, y 400 to 600 · band x 0 to 800 · 1 wire crosses it or runs along its band · 0 label chips in it · rule number 200 px · within its number",
+      "b ↔ c · stacked · gap 200 px · gutter x 500 to 800, y 400 to 600 · band x 0 to 800 · 1 wire crosses it or runs along its band · 0 label chips in it · rule number 200 px · within its number",
       "",
       "The 5 longest wires (id · from (its section) → to (its section) · length · bends):",
       "w4 · q (b) → r (c) · 1050 px · 2 bends",
@@ -68,19 +71,23 @@ describe("climb rethink turn message", () => {
       "w2 · p (a) → q (b) · 200 px · 0 bends",
       "w3 · p (a) → q (b) · 200 px · 0 bends",
       "",
-      "Empty blocks over the limit: 400 × 400 px or 5% of the board frame, 400 × 300 px inside a section. A section, a node or a sticky fills space. A wire does not:",
-      "900 × 600 px empty at x 800 to 1700, y 0 to 600, in the board frame (32% of it)",
+      "Computed findings: the measures of the board that fail now. The review loop sends you each one that still fails after this turn, until it passes:",
+      "- An empty block of 900 × 600 px sits in the board frame at x 800 to 1700, y 0 to 600: 32% of the frame holds no section, node or sticky."
+      + " The limit is 120,000 px² with a short side of 200 px. The allowed fixes: shrink the section or the frame, or move a neighbour in. Not a fix: widen a section, add a sticky, reverse a chain.",
+      "- The band between a (left) and b (right), x 300 to 500, is 200 px wide and 3 wires cross it or run along it: w1, w2, w3."
+      + " The gap rule asks 240 px for them (200 px, plus 20 px for each wire after the first), so the band is 40 px too narrow."
+      + " Facts: the band is 200 px wide now with 3 wires, and it needs 240 px.",
     ].join("\n"));
   });
 
-  test("a board with no wire between sections and no empty block says so, and lists 5 wires at most", () => {
+  test("a board with no wire between sections and no computed finding says so, and lists 5 wires at most", () => {
     const six = [1, 2, 3, 4, 5, 6].map((n) => wire(`w${n}`, "p", "p", [[0, 0], [n * 10, 0]]));
     const text = rethinkMessage("b1", measured(full("a", "p", null, 0, 0, 300, 400), six), RULE);
     expect(text).toContain("most wires first:\n(none)\n");
     expect(text).toContain("with nothing in it:\n(none)\n");
     expect(text).toContain("bends):\nw6 · p (a) → p (a) · 60 px · 0 bends\nw5 ");
     expect(text).not.toContain("\nw1 · ");
-    expect(text).toEndWith("A wire does not:\n(none)");
+    expect(text).toEndWith("until it passes:\n(none)");
   });
 });
 

@@ -59,6 +59,7 @@ describe("climb review measures of wires", () => {
     const rows = [
       wire("hug", "a", "n", [[150, 110], [450, 110]]),
       wire("head", "a", "n", [[750, 50], [750, 150]]),
+      // A wire that ends on a section frame is the wire of the whole group: no measure.
       wire("frame", "a", "t", [[600, 250], [700, 250]]),
       wire("l1", "p", "n", [[520, 300], [640, 300]]),
       wire("l2", "q", "n", [[520, 320], [640, 320]]),
@@ -69,7 +70,6 @@ describe("climb review measures of wires", () => {
       "W6 edge runs 300 px at 10 px from the top border of the board frame page, from (150, 10) to (450, 10)",
       "W6 edge runs 300 px along the outer top edge of the board, from (150, 10) to (450, 10): no object lies beyond it",
       "W2 head runs through the header chip of section t (x 700 to 820, y 100 to 128)",
-      "W3 frame ends on the frame of section t at (700, 250), not on a node",
       "W4 l1 and W5 l2 both end on n and run 120 px in 2 lanes 20 px apart, from (520, 300) to (640, 300)",
     ]);
     // A clean sheet has no measure.
@@ -118,17 +118,9 @@ describe("climb review measures of space", () => {
   test("2 sections that face each other with no section between them have a gap: its width, its gutter and the wires along it", () => {
     const board = sections(["a", 0, 0, 300, 400], ["b", 360, 0, 300, 400], ["c", 0, 500, 300, 200]);
     expect(gaps(board, [along("w1", 320), labelled("across", "p", "q", [[250, 200], [400, 200]], "calls", 310, 190)])).toEqual([
-      { a: "a", b: "b", side: "side by side", gap: 60, gutter: { x: 300, y: 0, width: 60, height: 400 }, wires: ["w1"], chips: 1, tight: false },
-      { a: "a", b: "c", side: "stacked", gap: 100, gutter: { x: 0, y: 400, width: 300, height: 100 }, wires: [], chips: 0, tight: false },
+      { a: "a", b: "b", side: "side by side", gap: 60, gutter: { x: 300, y: 0, width: 60, height: 400 }, wires: ["w1"], chips: 1 },
+      { a: "a", b: "c", side: "stacked", gap: 100, gutter: { x: 0, y: 400, width: 300, height: 100 }, wires: [], chips: 0 },
     ]);
-  });
-
-  test("a gap is tight when more than 1 wire per 40 px of its width runs along it", () => {
-    const board = sections(["a", 0, 0, 300, 400], ["b", 360, 0, 300, 400]);
-    expect(gaps(board, [along("w1", 320)]).map((gap) => gap.tight)).toEqual([false]);
-    expect(gaps(board, [along("w1", 320), along("w2", 340)])).toMatchObject([{ gap: 60, wires: ["w1", "w2"], tight: true }]);
-    // 2 wires fit a gap of 80 px.
-    expect(gaps(sections(["a", 0, 0, 300, 400], ["b", 380, 0, 300, 400]), [along("w1", 320), along("w2", 340)])).toMatchObject([{ gap: 80, tight: false }]);
   });
 
   test("sections with a section between them, a section and one it holds, and sections that do not face each other have no gap", () => {
@@ -169,10 +161,10 @@ describe("climb review measures of space", () => {
     });
   });
 
-  test("a tight gap is marked for the space reviewer", () => {
+  test("a gap line carries the count of its wires and no verdict: the band check of the runner measures a gap against its wires (space.ts)", () => {
     const board = sections(["a", 0, 0, 300, 400], ["b", 360, 0, 300, 400]);
     expect(spaceLines(reviewUnits(board).units, [along("w1", 320), along("w2", 340)], board).gaps)
-      .toEqual(["a ↔ b · side by side · gap 60 px · gutter x 300 to 360, y 0 to 400 · 2 wires run along it · 0 label chips in it · TIGHT: more than 1 wire per 40 px of gap"]);
+      .toEqual(["a ↔ b · side by side · gap 60 px · gutter x 300 to 360, y 0 to 400 · 2 wires run along it · 0 label chips in it"]);
   });
 });
 
@@ -201,7 +193,7 @@ describe("climb review measures of choices", () => {
     expect(lines.wires).toEqual([`w · n1 → n5 · "writes" · solid default`, "v · n2 → n5 · no label · dashed violet"]);
   });
 
-  test("it counts what repeats: sections of one colour, sibling sections all of one colour, nodes of one look, one icon on 4 nodes or more", () => {
+  test("it counts what repeats: sections of one colour, sibling sections all of one colour, nodes of one look, one icon on 4 nodes or more, a step with no icon among icon nodes", () => {
     expect(choicesLines(board("gray", 4), facts).counts).toEqual([
       "2 sections have colour gray: p1, p2",
       "The 2 sibling sections in the board all have colour gray: p1, p2",
@@ -209,14 +201,17 @@ describe("climb review measures of choices", () => {
       "1 of 5 nodes are rectangle, shape cylinder, blue",
       `Icon gear is on 4 nodes: n1 "A", n2 "B", n3 "C", n4 "D"`,
       "1 of 5 nodes have no icon",
+      `The node nearest the top-left corner of the board: n1 "A" in p1`,
+      `Nodes that send a wire and receive none (where a chain starts), nearest the top-left corner first: n1 "A" in p1, n2 "B" in p1`,
     ]);
-    // Sibling sections with 2 colours, and an icon on 3 nodes, are not listed.
-    expect(choicesLines(board("blue", 3), facts).counts).toEqual([
+    // Sibling sections with 2 colours, and an icon on 3 nodes, are not listed. The 1 step of p1 with no icon is.
+    expect(choicesLines(board("blue", 3), facts).counts.slice(0, -2)).toEqual([
       "1 section has colour gray: p1",
       "1 section has colour blue: p2",
       "4 of 5 nodes are rectangle, shape -, no colour",
       "1 of 5 nodes are rectangle, shape cylinder, blue",
       "2 of 5 nodes have no icon",
+      "1 of the 4 nodes in section p1 has no icon, and the others have one: n4",
       "1 node has the colour of its section p2 (blue): n5",
     ]);
   });
@@ -235,16 +230,32 @@ describe("climb review measures of choices", () => {
     };
     const line = (id: string, from: string, to: string) => wire(id, from, to, [[0, 0], [10, 0]]);
     const wires = [line("a", "n1", "n2"), line("b", "n2", "n3"), line("c", "n3", "n4"), line("d", "n1", "m1"), line("e", "m1", "m2"), line("f", "m2", "m3"), line("g", "n5", "m1")];
-    expect(choicesLines(steps, wires).counts.slice(-4)).toEqual([
+    expect(choicesLines(steps, wires).counts.slice(-6)).toEqual([
       "1 node has the colour of its section p1 (blue): n5",
       // A sticky is no node here.
       "3 nodes have the colour of their section p2 (green): m1, m2, m3",
       "4 of the 5 nodes in section p1 are gray: n1, n2, n3, n4",
       "3 of the 3 wires between nodes of section p1 point left, and 4 of the board's 7 wires point right: a, b, c",
+      // Where the board starts, for the reviewer to hold against where the story of the brief starts.
+      `The node nearest the top-left corner of the board: n4 "D" in p1`,
+      `Nodes that send a wire and receive none (where a chain starts), nearest the top-left corner first: n5 "E" in p1, n1 "A" in p1`,
     ]);
-    // 3 gray nodes, a gray node in a gray section, and a section that runs with the board are not listed.
+    // 3 gray nodes, a gray node in a gray section, and a section that runs with the board are not listed. A wire back that closes a loop is no reversal.
     const quiet: Board = { objects: steps.objects.filter((object) => object.id !== "n4" && object.id !== "n5").map((object) => ({ ...object, color: "gray" })), connections: [] };
-    expect(choicesLines(quiet, [line("e", "m1", "m2"), line("f", "m2", "m3"), line("back", "m3", "m2")]).counts.filter((count) => /colour of|are gray|point/.test(count))).toEqual([]);
+    expect(choicesLines(quiet, [line("e", "m1", "m2"), line("f", "m2", "m3"), line("back", "m3", "m1")]).counts.filter((count) => /colour of|are gray|point/.test(count))).toEqual([]);
+  });
+
+  test("it counts a chain that reverses inside a section: steps that close no loop and point both ways", () => {
+    // 4 steps in 2 rows: s1 → s2 runs right, s2 → s3 drops a row, and s3 → s4 runs back left.
+    const snake: Board = {
+      objects: [box("p", "section", null, 0, 0, 600, 400), ...[[40, 40], [340, 40], [340, 240], [40, 240]].map(([x, y], index) => box(`s${index + 1}`, "rectangle", "p", x!, y!, 100, 60, { text: `S${index + 1}` }))],
+      connections: [],
+    };
+    const line = (id: string, from: string, to: string) => wire(id, from, to, [[0, 0], [10, 0]]);
+    const both = (wires: ReturnType<typeof wire>[]) => choicesLines(snake, wires).counts.filter((count) => /both ways/.test(count));
+    expect(both([line("a", "s1", "s2"), line("b", "s2", "s3"), line("c", "s3", "s4")])).toEqual(["The wires between nodes of section p that close no loop point both ways: 1 point right and 1 point left (c)"]);
+    // With s4 → s1 the 4 steps are one loop.
+    expect(both([line("a", "s1", "s2"), line("b", "s2", "s3"), line("c", "s3", "s4"), line("d", "s4", "s1")])).toEqual([]);
   });
 });
 

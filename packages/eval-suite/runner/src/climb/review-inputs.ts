@@ -562,8 +562,6 @@ export const BORDER_RUN_MIN_PX = 100;
 /** Wires that share an end and run side by side on 2 lines, this near, read as 2 lanes where one trunk would do. */
 export const LANE_NEAR_PX = 40;
 const LANE_RUN_MIN_PX = 60;
-/** A gap is tight when more than 1 wire per this many px of its width runs along it. */
-export const GAP_PX_PER_WIRE = 40;
 /** The space reviewer gets each wire longer than this. */
 export const LONG_WIRE_PX = 800;
 /** The most lines one kind of measure prints. */
@@ -694,16 +692,17 @@ export function mixedTrunks(facts: WireFact[], minRun: number): MixedTrunk[] {
 /**
  * What the runner measured on the wires of a sheet, one line a fact: a wire
  * along a section border or the board's outer edge, through a section's
- * header chip, with an end on a section frame, 2 wires of different dash or
- * colour on one line, and 2 wires of one node and one look in separate close
- * lanes. A line is a fact to judge on the image, not a fault.
+ * header chip, 2 wires of different dash or colour on one line, and 2 wires
+ * of one node and one look in separate close lanes. A line is a fact to judge
+ * on the image, not a fault. A wire that ends on a section frame is no fact
+ * here: the whole group sends or receives it (round 5 cycle 2, board 02: the
+ * line made the drawer wire each member, 20 wires became 30).
  */
 export function wireMeasureLines(rows: WireRow[], context: WireContext): string[] {
   const { board, pageFrame, headers } = context;
   const facts = rows.map((row) => row.fact);
   const tagOf = new Map(rows.map((row) => [row.fact.id, row.tag]));
   const name = (id: string) => `${tagOf.get(id)} ${id}`;
-  const byId = new Map(board.objects.map((object) => [object.id, object]));
   const sections = board.objects.filter((object) => object.type === SECTION && object.geometry);
   const frame = (id: string) => id === pageFrame?.id ? `the board frame ${id}` : `section ${id}`;
   const stretch = (run: Stretch) => `from ${at(run.from)} to ${at(run.to)}`;
@@ -714,9 +713,6 @@ export function wireMeasureLines(rows: WireRow[], context: WireContext): string[
     ...capped(outerEdgeRuns(facts, board, pageFrame).map((run) => `${name(run.wire)} runs ${run.length} px along the outer ${run.side} edge of the board, ${stretch(run)}: no object lies beyond it`)),
     ...capped(facts.flatMap((fact) => [...headers].filter(([, header]) => segmentsOf(fact.points).some((segment) => runsThrough(segment, header)))
       .map(([section, header]) => `${name(fact.id)} runs through the header chip of section ${section} (${span(header)})`))),
-    ...capped(facts.flatMap((fact) => ([["starts", fact.from, fact.points[0]!], ["ends", fact.to, fact.points.at(-1)!]] as const)
-      .filter(([, id]) => byId.get(id)?.type === SECTION)
-      .map(([verb, id, point]) => `${name(fact.id)} ${verb} on the frame of section ${id} at ${at(point)}, not on a node`))),
     ...capped(mixedTrunks(facts, TRUNK_TAG_MIN).map((trunk) => `${name(trunk.wire)} (${look(trunk.wire)}) and ${name(trunk.other)} (${look(trunk.other)}) differ in dash or colour and share one line for ${trunk.length} px, ${stretch(trunk)}`
       + trunk.chips.map((id) => `; the label chip of ${name(id)} ${JSON.stringify(short(factOf.get(id)!.label, 24))} sits on that line`).join(""))),
     // Lanes of wires that differ in dash or colour are no fact here: a line for them reads as "merge them".
@@ -737,8 +733,6 @@ export interface SectionGap {
   wires: string[];
   /** The label chips in the gutter. */
   chips: number;
-  /** More than 1 wire per GAP_PX_PER_WIRE px of the gap. */
-  tight: boolean;
 }
 
 const FACING_MIN_PX = 40;
@@ -764,10 +758,7 @@ export function sectionGaps(units: ReviewUnit[], facts: WireFact[]): SectionGap[
       const [low, high, from, to] = side === "side by side" ? [gutter.x, gutter.x + gutter.width, gutter.y, gutter.y + gutter.height] : [gutter.y, gutter.y + gutter.height, gutter.x, gutter.x + gutter.width];
       return run.fixed > low && run.fixed < high && Math.min(run.to, to) - Math.max(run.from, from) >= 40;
     })).map((fact) => fact.id);
-    gaps.push({
-      a: a.id, b: b.id, side, gap, gutter, wires, chips: facts.filter((fact) => fact.chip && touches(fact.chip, gutter)).length,
-      tight: wires.length > gap / GAP_PX_PER_WIRE,
-    });
+    gaps.push({ a: a.id, b: b.id, side, gap, gutter, wires, chips: facts.filter((fact) => fact.chip && touches(fact.chip, gutter)).length });
   }
   return gaps;
 }
@@ -815,7 +806,6 @@ export function spaceLines(units: ReviewUnit[], facts: WireFact[], board: Board)
     gaps: gaps.map((gap) => [
       `${gap.a} ↔ ${gap.b}`, gap.side, `gap ${gap.gap} px`, `gutter ${span(gap.gutter)}`,
       `${gap.wires.length} ${gap.wires.length === 1 ? "wire runs" : "wires run"} along it`, `${gap.chips} ${gap.chips === 1 ? "label chip" : "label chips"} in it`,
-      ...(gap.tight ? [`TIGHT: more than 1 wire per ${GAP_PX_PER_WIRE} px of gap`] : []),
     ].join(" · ")),
     pairs: [...pairs.values()].sort((a, b) => b.wires - a.wires || b.length - a.length)
       .map((pair) => `${pair.a} ↔ ${pair.b} · ${pair.wires} ${pair.wires === 1 ? "wire" : "wires"} · ${pair.length} px of wire in total · ${where(pair)}`),
@@ -839,7 +829,11 @@ const GRAY = "gray";
 const NO_HUE: ReadonlySet<string | undefined> = new Set([GRAY, "white", undefined]);
 const STICKY = "sticky";
 
-type Heading = "right" | "left" | "down" | "up";
+/** The most chain starts the choices reviewer reads. */
+const MAX_STARTS = 8;
+
+const HEADINGS = ["right", "down", "left", "up"] as const;
+type Heading = typeof HEADINGS[number];
 const AGAINST: Record<Heading, Heading> = { right: "left", left: "right", down: "up", up: "down" };
 /** The way a wire points, from the centre of its source to the centre of its target. Null when an end has no place. */
 function headingOf(fact: WireFact, byId: ReadonlyMap<string, BoardObject>): Heading | null {
@@ -865,7 +859,14 @@ export function choicesLines(board: Board, facts: WireFact[]): { objects: string
   const headings = facts.flatMap((fact) => headingOf(fact, byId) ? [{ fact, heading: headingOf(fact, byId)! }] : []);
   const count = (list: typeof headings, heading: Heading) => list.filter((entry) => entry.heading === heading).length;
   // The board reads the way most of its wires point.
-  const reading = (["right", "down", "left", "up"] as const).reduce((best, heading) => count(headings, heading) > count(headings, best) ? heading : best);
+  const most = (list: typeof headings) => HEADINGS.reduce((best, heading) => count(list, heading) > count(list, best) ? heading : best);
+  const reading = most(headings);
+  const placed = nodes.filter((node) => node.geometry && node.type !== STICKY);
+  const corner = { x: Math.min(...placed.map((node) => node.geometry.x)), y: Math.min(...placed.map((node) => node.geometry.y)) };
+  const fromCorner = (node: BoardObject) => node.geometry.x - corner.x + node.geometry.y - corner.y;
+  const named = (node: BoardObject) => `${node.id} ${JSON.stringify(short(node.text, 24))} in ${node.parentId ?? "board"}`;
+  // A chain starts on a node that sends a wire and receives none.
+  const starts = placed.filter((node) => facts.some((fact) => fact.from === node.id) && !facts.some((fact) => fact.to === node.id)).sort((a, b) => fromCorner(a) - fromCorner(b));
   return {
     objects: board.objects.map((object) => {
       const parent = object.parentId ? byId.get(object.parentId) : undefined;
@@ -884,6 +885,12 @@ export function choicesLines(board: Board, facts: WireFact[]): { objects: string
         .map(([name, members]) => `Icon ${name} is on ${members.length} nodes: ${members.map((node) => `${node.id} ${JSON.stringify(short(node.text, 24))}`).join(", ")}`),
       `${nodes.filter((node) => !iconName(node.icon)).length} of ${nodes.length} nodes have no icon`,
       ...sections.flatMap((section) => {
+        const [all, bare] = [inSection(section), inSection(section).filter((node) => !iconName(node.icon))];
+        return bare.length > 0 && bare.length < all.length - bare.length
+          ? [`${bare.length} of the ${all.length} nodes in section ${section.id} ${bare.length === 1 ? "has" : "have"} no icon, and the others have one: ${ids(bare)}`]
+          : [];
+      }),
+      ...sections.flatMap((section) => {
         const same = inSection(section).filter((node) => !NO_HUE.has(node.color) && node.color === section.color);
         return same.length ? [`${same.length} ${same.length === 1 ? "node has" : "nodes have"} the colour of ${same.length === 1 ? "its" : "their"} section ${section.id} (${colour(section)}): ${ids(same)}`] : [];
       }),
@@ -895,10 +902,26 @@ export function choicesLines(board: Board, facts: WireFact[]): { objects: string
         // The steps of a section: the wires between 2 of its own nodes.
         const steps = headings.filter(({ fact }) => byId.get(fact.from)?.parentId === section.id && byId.get(fact.to)?.parentId === section.id);
         const against = steps.filter((step) => step.heading === AGAINST[reading]);
-        return against.length > count(steps, reading)
-          ? [`${against.length} of the ${steps.length} wires between nodes of section ${section.id} point ${AGAINST[reading]}, and ${count(headings, reading)} of the board's ${headings.length} wires point ${reading}: ${against.map((step) => step.fact.id).join(", ")}`]
-          : [];
+        // A wire that closes a loop points back by design. A chain reverses when the other steps of one section point both ways along one line.
+        const reaches = (from: string, to: string, seen = new Set<string>()): boolean => {
+          if (from === to) return true;
+          if (seen.has(from)) return false;
+          seen.add(from);
+          return steps.some(({ fact }) => fact.from === from && reaches(fact.to, to, seen));
+        };
+        const chain = steps.filter(({ fact }) => !reaches(fact.to, fact.from));
+        const back = chain.filter((step) => step.heading === AGAINST[most(chain)]);
+        return [
+          ...(against.length > count(steps, reading)
+            ? [`${against.length} of the ${steps.length} wires between nodes of section ${section.id} point ${AGAINST[reading]}, and ${count(headings, reading)} of the board's ${headings.length} wires point ${reading}: ${against.map((step) => step.fact.id).join(", ")}`]
+            : []),
+          ...(back.length
+            ? [`The wires between nodes of section ${section.id} that close no loop point both ways: ${count(chain, most(chain))} point ${most(chain)} and ${back.length} point ${AGAINST[most(chain)]} (${back.map((step) => step.fact.id).join(", ")})`]
+            : []),
+        ];
       }),
+      ...(placed.length ? [`The node nearest the top-left corner of the board: ${named(placed.reduce((best, node) => fromCorner(node) < fromCorner(best) ? node : best))}`] : []),
+      ...(starts.length ? [`Nodes that send a wire and receive none (where a chain starts), nearest the top-left corner first: ${starts.slice(0, MAX_STARTS).map(named).join(", ")}`] : []),
     ],
   };
 }

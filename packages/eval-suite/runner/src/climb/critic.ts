@@ -31,13 +31,13 @@ import { gapCoverage, gapCropLines, gapCrops, gapUnits, wiresIn } from "./gaps.t
 import { CANVAS_REPO_ROOT } from "./paths.ts";
 import { loadCanvas, renderBoardPng, type CanvasFile, type CanvasModules, type Lint, type WorldRect } from "./render.ts";
 import {
-  BORDER_NEAR_PX, BORDER_RUN_MIN_PX, CHOICES_UNIT, FONT, GAP_PX_PER_WIRE, LANE_NEAR_PX, LONG_WIRE_PX, LOOSE_UNIT, OWN, REVIEWER_KINDS, SPACE_UNIT, WIRE_UNIT,
+  BORDER_NEAR_PX, BORDER_RUN_MIN_PX, CHOICES_UNIT, FONT, LANE_NEAR_PX, LONG_WIRE_PX, LOOSE_UNIT, OWN, REVIEWER_KINDS, SPACE_UNIT, WIRE_UNIT,
   boardWireSheet, choicesLines, fadeMarks, grow, linkedSections, lookFrame, markBox, measuresOf, neighbourhoodFrame, objectLines, outline,
   routesOf, rulerMarks, scaleText, sectionFrame, sectionLines, sectionMapSvg, spaceLines, touches, wholeBoardMarks, wireMarks, wireMeasureLines, wireSheet,
   untagWires, wireSheetLines,
   type Board, type Mark, type ReviewUnit, type ReviewerKind, type WireRow,
 } from "./review-inputs.ts";
-import { gapRule, planOf, type ComputedFault } from "./space.ts";
+import { FAR_WIRE_PX, gapRule, planOf, type ComputedFault, type LayoutFacts, type Plan } from "./space.ts";
 import { boardTotals, loadWireModules, sectionHeaders, wireFacts, type WireFact, type WireModules } from "./wires.ts";
 
 export const CRITIC_MODEL = "gpt-6.1-sol";
@@ -213,6 +213,8 @@ export interface UnitNotes {
   declined: string[];
   /** Faults the drawer declined twice. */
   settled: string[];
+  /** Layout findings the loop sends the drawer again by itself: their decline closed nothing (critic-loop.ts declineEarned). */
+  returned: string[];
 }
 
 const KIND_LINES: Record<FindingKind, string> = {
@@ -222,8 +224,8 @@ const KIND_LINES: Record<FindingKind, string> = {
   label_chip: "a wire label on or near a border, on a corner, a junction or an arrowhead, on another wire, far from its wire, or on a wire too short for it.",
   nesting: "an item in the wrong container, a container that adds nothing, or a group with no container.",
   colour: "a colour choice that does not help a reader tell items and groups apart.",
-  icon: "a plain box where the kind has a shape or an icon, or an icon that does not fit its meaning.",
-  missing: "an object or a relation the brief names that the board lacks. Name the section it belongs in and the neighbour it belongs beside.",
+  icon: "a plain box where the kind has a shape or an icon, an icon that does not fit its meaning, or one icon repeated on unlike nodes. Never report an icon as one to remove.",
+  missing: "an object or a relation the brief names that the board lacks. Name the section it belongs in and the neighbour it belongs beside. Never report a node or a wire the brief does not name.",
 };
 
 /** What every prompt says about an answer. */
@@ -244,6 +246,7 @@ function answerRules(): string[] {
     "State each fault as a problem: what is wrong, where, and by how much, with the numbers you measured.",
     "Do not say how to fix it. Do not propose a tool call, a new position, a new size or a new route. The drawer decides the fix.",
     "Never report the outer edge of a section as ragged or out of line with the edge of another section.",
+    "Never report a wire that ends on the frame of a section or a subsection when the whole group sends or receives it: the frame is its end, and it needs no node there.",
     "`marks` highlights the fault as the board is now, in board coordinates from the text below: `box` round the items or the area at fault, `path` along the stretch of wire at fault."
     + " Set the one a mark does not use to null. Give each finding 1 to 3 marks.",
     "",
@@ -264,6 +267,8 @@ const MERGED_TRUNK = "Never report a merged trunk of one meaning as a fault: wir
 const MIXED_TRUNK = "Wires that differ in dash or colour differ in meaning. Report a line or a trunk that such wires share, and a label chip on it: a reader cannot tell which wire the line or the label belongs to."
   + " When such wires run in lanes too close to tell apart, the fault is the room between the lanes. Never word it so that it reads as \"merge them\".";
 const MEASURED = "A \"measured\" line is a fact the runner measured on the board file. Judge it on the images: report it when it reads as a fault, with its numbers.";
+/** The heading of the computed findings in a prompt (space.ts computedFaults): the reviewer leaves them to the runner. */
+const SENT_BY_RUNNER = "The runner sends the drawer each of these as its own finding. Do not report one of them again";
 
 const block = (title: string, lines: string[]) => ["", title, ...(lines.length ? lines : ["(none)"])];
 const notesBlocks = (notes: UnitNotes) => [
@@ -274,6 +279,7 @@ const notesBlocks = (notes: UnitNotes) => [
     ...notes.declined,
   ] : []),
   ...(notes.settled.length ? ["", "These faults are settled: the drawer declined them twice. Do not report them:", ...notes.settled] : []),
+  ...(notes.returned.length ? ["", "The drawer declined these with no section move. The runner sends them again itself. Do not report them:", ...notes.returned] : []),
 ];
 const WIRE_SHEET_KEY = "tag id · from → to · kind · ports · length · bends · route · style colour · arrow · label; then the route, the corner points, the boxes it runs through, the wires it crosses, shared trunks";
 
@@ -359,7 +365,7 @@ export function gapPrompt(text: GapText): string {
 }
 
 /** What the wire prompt prints. */
-export interface WireText { scale: number; wires: string[]; wireMeasures: string[]; totals: string; notes: UnitNotes }
+export interface WireText { scale: number; wires: string[]; wireMeasures: string[]; computed: string[]; totals: string; notes: UnitNotes }
 
 export function wirePrompt(text: WireText): string {
   return [
@@ -376,7 +382,6 @@ export function wirePrompt(text: WireText): string {
     "- a shared trunk that hides a wire: wires with no common source or target on one line;",
     "- a line or a trunk shared by wires that differ in dash or colour, and a label chip on such a line;",
     "- a wire through a section it does not belong to, or through a section's header or header chip;",
-    "- a wire that ends on a section frame and not on a node;",
     `- a wire within ${BORDER_NEAR_PX} px of a section border along ${BORDER_RUN_MIN_PX} px or more;`,
     "- many wires into one node from different sides;",
     `- wires of one dash and one colour that share a source or a target and run side by side in separate lanes, ${LANE_NEAR_PX} px apart or less: they must read as one trunk.`,
@@ -388,6 +393,7 @@ export function wirePrompt(text: WireText): string {
     ...notesBlocks(text.notes),
     ...block(`Wire sheet (${WIRE_SHEET_KEY}; kind is the 2 parts the wire joins):`, text.wires),
     ...block("Measured on your wires:", text.wireMeasures.map((line) => `measured: ${line}`)),
+    ...block(`${SENT_BY_RUNNER} (wires through a section that holds neither end, wires over ${FAR_WIRE_PX} px between sections that are not neighbours, bands too narrow for their wires):`, text.computed),
     ...block("Board totals:", [text.totals]),
   ].join("\n");
 }
@@ -409,14 +415,14 @@ export function spacePrompt(text: SpaceText): string {
     "Your first job is adjacency: sections that talk to each other must sit next to each other. Read the block \"Wires between sections\" first, then the images. The faults to look for:",
     "- two sections with many wires between them that are not neighbours;",
     "- a section that lies between two sections that talk to each other;",
-    `- a gap with more than 1 wire per ${GAP_PX_PER_WIRE} px of its width (marked TIGHT), or a gap too narrow for the label chips in it;`,
+    "- a gap too narrow for the label chips in it;",
     "- a sink or a store far from its sources;",
+    "- a store or an outcome section that sits before the stages that feed it: left of them or above them, against the way the board reads;",
     "- a board shape (aspect ratio) that forces long wires;",
     "- an empty area the board does not need: a hole between sections, or a corner that no section fills;",
-    "- a story that does not start at the top or the left of the board: say where it starts and where it ends;",
     "- a flat section whose nodes form clear sub-groups with no subsection, or a subsection that adds nothing.",
-    "The runner measures the empty blocks and each gap against the gap rule, and sends the drawer each line of the block \"Measured by the runner\" as its own finding."
-    + " Do not report one of them again. Use their numbers in your findings, and report an empty area or a gap that the measures miss.",
+    "The runner measures the empty blocks, how full each section is, each gap and each band of gaps against the gap rule, each wire through a section that holds neither of its ends,"
+    + ` and each wire over ${FAR_WIRE_PX} px between sections that are not neighbours. Use their numbers in your findings, and report what the measures miss.`,
     "",
     ...answerRules(),
     ...notesBlocks(text.notes),
@@ -424,7 +430,7 @@ export function spacePrompt(text: SpaceText): string {
     ...block("Sections (id · parent · x · y of the top-left corner · width · height · items · subsections · title):", text.sections),
     ...block("Wires between sections (the 2 sections · wires · their total length · whether the 2 are neighbours), most wires first:", text.pairs),
     ...block("Gaps between neighbour sections:", text.gaps),
-    ...block("Measured by the runner (empty blocks over the limit, gaps off their gap rule number):", text.measured),
+    ...block(`${SENT_BY_RUNNER}:`, text.measured),
     ...block(`Wires longer than ${LONG_WIRE_PX} px (id · from (its section) → to (its section) · length · bends):`, text.long),
     ...block("Nodes that 3 or more wires from other sections end on (sinks and stores):", text.sinks),
     ...block("Board totals:", [text.totals]),
@@ -449,12 +455,14 @@ export function choicesPrompt(text: ChoicesText): string {
     "- sibling sections that all have one colour;",
     "- a plain rectangle where the brief names a kind that has a shape or an icon (a store, a queue, a person, a decision, a brand);",
     "- one icon repeated on many unlike nodes;",
+    "- a step with no icon among nodes that have one (kind `icon`);",
     "- colour that carries no meaning: nodes of one kind in several colours, or unlike kinds in one colour;",
     "- a node with the colour of its section: it does not stand out from it;",
     "- 4 or more gray nodes in one section;",
-    "- a section whose steps run against the reading direction of the board (kind `placement`);",
+    "- a section whose steps run against the reading direction of the board, or a chain that reverses direction inside a section (kind `placement`);",
     ...(text.brief === null ? [] : [
       "- an object or a relation in the brief that the board lacks (kind `missing`);",
+      "- a board that starts where the story of the brief does not: say what a reader meets first at the top or the left of the board, and where the brief's story starts (kind `placement`);",
       "- a hierarchy in the brief that the board shows flat (kind `nesting`).",
     ]),
     "",
@@ -695,8 +703,26 @@ export interface CritiqueRecord {
   gap: { chips: number; covered: number; crops: number };
   /** The reviewers' findings, merged. */
   findings: MergedFinding[];
-  /** What fails the runner's own measures of the plan: the empty blocks over the limit and the gaps off their rule number (space.ts). */
+  /** What fails the runner's own measures of the board (space.ts computedFaults): empty space, thin sections, gaps and bands off their rule number, wires through a section, far wires. */
   computed: ComputedFault[];
+  /** What the loop needs to judge a decline of a layout finding (space.ts layoutFacts). */
+  layout: LayoutFacts;
+}
+
+/** What the code measures on a board, with no reviewer: the lints of canvas_check and the runner's own measures of the plan. */
+export interface BoardChecks { board: Board; facts: WireFact[]; lints: ReviewLint[]; plan: Plan }
+
+export function checkBoard(canvas: ReviewCanvas, file: CanvasFile): BoardChecks {
+  const board = file.persisted as Board;
+  const facts = wireFacts(canvas.wires, file);
+  const factOf = new Map(facts.map((fact) => [fact.id, fact]));
+  const objectOf = new Map(board.objects.map((object) => [object.id, object]));
+  /** The place of each item a lint names. A lint the drawer declined comes back only when this changes. */
+  const stateOf = (ids: string[]) => createHash("sha1")
+    .update(JSON.stringify(ids.map((id) => [id, objectOf.get(id)?.geometry ?? null, factOf.get(id)?.points ?? null, factOf.get(id)?.labelAt ?? null]))).digest("hex").slice(0, 12);
+  const lints = canvas.lints.sessionDiagnostics(file.session, canvas.lints.FINISHING_RULES)
+    .map(({ rule, severity, at, message, suggestion }): ReviewLint => ({ rule, severity, at, message, suggestion, state: stateOf(at) }));
+  return { board, facts, lints, plan: planOf(board, facts, gapRule(canvas.wires)) };
 }
 
 /** An earlier round's finding the drawer declined, as a reviewer reads it: the finding and the drawer's reason, in one line. */
@@ -706,6 +732,8 @@ export interface EarlierFinding {
   line: string;
   /** Declined twice: no reviewer reports it again. */
   settled: boolean;
+  /** A layout finding whose decline closed nothing: the loop sends it again under its id, so no reviewer reports it. */
+  returned?: true;
 }
 
 interface CriticRun { exitCode: number | null; timedOut: boolean; stderr: string }
@@ -815,17 +843,9 @@ export async function critiqueBoard(options: {
   writeFileSync(schemaPath, `${JSON.stringify(answerSchema(), null, 2)}\n`);
 
   const file: CanvasFile = canvas.toolkit.openCanvasFile(boardPath);
-  const board = file.persisted as Board;
+  const { board, facts, lints, plan } = checkBoard(canvas, file);
   const style = file.session.canvasStyle;
   const effort = options.critic.effort ?? reviewerEffort(board);
-  const facts = wireFacts(canvas.wires, file);
-  const factOf = new Map(facts.map((fact) => [fact.id, fact]));
-  const objectOf = new Map(board.objects.map((object) => [object.id, object]));
-  /** The place of each item a lint names. A lint the drawer declined comes back only when this changes. */
-  const stateOf = (ids: string[]) => createHash("sha1")
-    .update(JSON.stringify(ids.map((id) => [id, objectOf.get(id)?.geometry ?? null, factOf.get(id)?.points ?? null, factOf.get(id)?.labelAt ?? null]))).digest("hex").slice(0, 12);
-  const lints = canvas.lints.sessionDiagnostics(file.session, canvas.lints.FINISHING_RULES)
-    .map(({ rule, severity, at, message, suggestion }): ReviewLint => ({ rule, severity, at, message, suggestion, state: stateOf(at) }));
   const totals = boardTotals(canvas.wires, file).text;
   const overview = renderBoardPng(canvas, file, undefined);
   writeFileSync(resolve(outDir, "overview.png"), overview.png);
@@ -837,7 +857,6 @@ export async function critiqueBoard(options: {
   const lookGate = new Semaphore(1);
   const look = (view: string | string[]) => lookGate.run(() => canvas.toolkit.callToolkitTool(file, "look", { view }));
 
-  const plan = planOf(board, facts, gapRule(canvas.wires));
   const { pageFrame, units: fixed } = plan;
   const crops = gapCrops(board, pageFrame, fixed, facts);
   const units = [...fixed, ...gapUnits(crops)];
@@ -938,7 +957,11 @@ export async function critiqueBoard(options: {
     /** The earlier findings this unit reads: the ones on items it holds, or that its own reviewer reported. */
     const notes = (holds: ReadonlySet<string>, checked: string[]): UnitNotes => {
       const mine = earlier.filter((finding) => finding.regions.includes(unit.id) || finding.ids.some((id) => holds.has(id)));
-      return { checked, declined: mine.filter((finding) => !finding.settled).map((finding) => finding.line), settled: mine.filter((finding) => finding.settled).map((finding) => finding.line) };
+      const lines = (keep: (finding: EarlierFinding) => boolean) => mine.filter(keep).map((finding) => finding.line);
+      return {
+        checked, declined: lines((finding) => !finding.settled && !finding.returned), settled: lines((finding) => finding.settled && !finding.returned),
+        returned: lines((finding) => finding.returned === true),
+      };
     };
     const lintsAt = (holds: ReadonlySet<string>) => lints.filter((lint) => lint.at.some((id) => holds.has(id)));
     const scale = overview.size.scale;
@@ -963,7 +986,10 @@ export async function critiqueBoard(options: {
         save("2-tagged.png", png(markedSvg(overviewSvg, `${fade}${wireMarks(rows, scale)}`))),
       ];
       const holds = new Set(rows.map((row) => row.fact.id));
-      const prompt = wirePrompt({ scale, wires: wireSheetLines(rows), wireMeasures: wireMeasureLines(rows, wireContext), totals, notes: notes(holds, lintsAt(holds).map(lintLine)) });
+      const prompt = wirePrompt({
+        scale, wires: wireSheetLines(rows), wireMeasures: wireMeasureLines(rows, wireContext), computed: plan.faults.filter((fault) => fault.kind === "wire").map((fault) => fault.problem),
+        totals, notes: notes(holds, lintsAt(holds).map(lintLine)),
+      });
       return { unit, dir, images, prompt, wires: rows.length, rows };
     }
     if (unit.kind === "gap") {
@@ -1038,6 +1064,7 @@ export async function critiqueBoard(options: {
     gap: { ...gapCoverage(board, pageFrame, facts, crops), crops: crops.length },
     findings,
     computed: plan.faults,
+    layout: plan.layout,
   };
   writeFileSync(resolve(outDir, "critique.json"), `${JSON.stringify(record, null, 2)}\n`);
   return record;

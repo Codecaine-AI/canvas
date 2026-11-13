@@ -1,0 +1,1919 @@
+{
+  "schemaVersion": 1,
+  "id": "h1-session-dense",
+  "title": "Long-lived agent session orchestration",
+  "description": "How the platform runs long-lived AI agent sessions through a shared control plane.\n\n**Reading order:** top row = Client → Control plane (API gateway → auth → workspace & quotas → session scheduler, plus quota enforcer and heartbeat monitor) → Lifecycle & recovery, split into a \"Graceful drain\" subsection (drain old-version hosts → suspend or idle) and a \"Resume & recovery\" subsection (resume on another host and crash rescue converging on rehydrate). Middle row = Runner host (orchestrator turn loop: assemble request → call model → execute tools → append results → commit checkpoint → done/ceiling decision, plus stream output and cancel/interrupt) → Durable state (snapshot store with fork and reachability GC, event log below). Bottom row = Session tree (child A, tree budget ledger, child B, orphan reaper) and Audit & accounting (per-session cost ← usage metering, forensic replay) under the event log. Explanatory stickies (color key, checkpoint, event log, idempotency) sit in a right-hand column.\n\n**Color key (nodes and wires):** blue request/placement, violet agent turn execution, green durable state, orange quotas/budgets, teal lifecycle & recovery, red cancel/crash/termination. Dashed wires are reattach/replay and child results. Cancel/interrupt fans out one red trunk to model, tools, the checkpoint commit and both children; all \"release runner\" wires join teal trunks into the scheduler.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Long-lived agent session orchestration",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 60,
+        "y": -60,
+        "width": 3860,
+        "height": 2060
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-client",
+      "type": "section",
+      "text": "Client",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 40,
+        "width": 340,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "browser"
+    },
+    {
+      "id": "sec-control",
+      "type": "section",
+      "text": "Control plane",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 860,
+        "y": 40,
+        "width": 1180,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "sec-life",
+      "type": "section",
+      "text": "Lifecycle & recovery",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2460,
+        "y": 40,
+        "width": 1260,
+        "height": 540
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "loop"
+    },
+    {
+      "id": "sec-runner",
+      "type": "section",
+      "text": "Runner host",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 780,
+        "width": 2192,
+        "height": 572
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "cpu"
+    },
+    {
+      "id": "sec-durable",
+      "type": "section",
+      "text": "Durable state",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2620,
+        "y": 900,
+        "width": 900,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "sec-tree",
+      "type": "section",
+      "text": "Session tree",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 220,
+        "y": 1720,
+        "width": 1720,
+        "height": 220
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-acct",
+      "type": "section",
+      "text": "Audit & accounting",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2260,
+        "y": 1660,
+        "width": 1040,
+        "height": 220
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "chart"
+    },
+    {
+      "id": "sec-loop",
+      "type": "section",
+      "text": "Orchestrator turn loop",
+      "color": "pink",
+      "parentId": "sec-runner",
+      "geometry": {
+        "x": 180,
+        "y": 860,
+        "width": 1520,
+        "height": 460
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "client",
+      "type": "icon",
+      "text": "Client",
+      "color": "blue",
+      "parentId": "sec-client",
+      "geometry": {
+        "x": 120,
+        "y": 96,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "browser"
+    },
+    {
+      "id": "user_decision",
+      "type": "icon",
+      "text": "User decision",
+      "color": "blue",
+      "parentId": "sec-client",
+      "geometry": {
+        "x": 120,
+        "y": 296,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "api",
+      "type": "icon",
+      "text": "API gateway",
+      "color": "blue",
+      "parentId": "sec-control",
+      "geometry": {
+        "x": 880,
+        "y": 96,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "api"
+    },
+    {
+      "id": "auth",
+      "type": "icon",
+      "text": "Authenticate user",
+      "color": "blue",
+      "parentId": "sec-control",
+      "geometry": {
+        "x": 1232,
+        "y": 96,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "key"
+    },
+    {
+      "id": "ws",
+      "type": "icon",
+      "text": "Resolve workspace & quotas",
+      "color": "blue",
+      "parentId": "sec-control",
+      "geometry": {
+        "x": 1660,
+        "y": 96,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "quota",
+      "type": "icon",
+      "text": "Quota enforcer",
+      "color": "orange",
+      "parentId": "sec-control",
+      "geometry": {
+        "x": 880,
+        "y": 296,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "gauge"
+    },
+    {
+      "id": "hb",
+      "type": "icon",
+      "text": "Heartbeat monitor",
+      "color": "teal",
+      "parentId": "sec-control",
+      "geometry": {
+        "x": 1232,
+        "y": 296,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "monitor"
+    },
+    {
+      "id": "sched",
+      "type": "icon",
+      "text": "Session scheduler",
+      "color": "blue",
+      "parentId": "sec-control",
+      "geometry": {
+        "x": 1660,
+        "y": 296,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "schedule"
+    },
+    {
+      "id": "drain",
+      "type": "icon",
+      "text": "Drain, then replace host",
+      "color": "teal",
+      "parentId": "sec-drain",
+      "geometry": {
+        "x": 3360,
+        "y": 176,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "container"
+    },
+    {
+      "id": "suspend",
+      "type": "icon",
+      "text": "Suspend or idle",
+      "color": "teal",
+      "parentId": "sec-drain",
+      "geometry": {
+        "x": 3360,
+        "y": 376,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "wait"
+    },
+    {
+      "id": "resume",
+      "type": "icon",
+      "text": "Resume on another host",
+      "color": "teal",
+      "parentId": "sec-recovery",
+      "geometry": {
+        "x": 2940,
+        "y": 176,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "loop"
+    },
+    {
+      "id": "recover",
+      "type": "icon",
+      "text": "Rescue crashed session",
+      "color": "teal",
+      "parentId": "sec-recovery",
+      "geometry": {
+        "x": 2520,
+        "y": 176,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "rehydrate",
+      "type": "icon",
+      "text": "Rehydrate latest snapshot",
+      "color": "teal",
+      "parentId": "sec-recovery",
+      "geometry": {
+        "x": 2732,
+        "y": 376,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "package"
+    },
+    {
+      "id": "assemble",
+      "type": "icon",
+      "text": "Assemble model request",
+      "color": "violet",
+      "parentId": "sec-loop",
+      "geometry": {
+        "x": 260,
+        "y": 916,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "layers"
+    },
+    {
+      "id": "model",
+      "type": "icon",
+      "text": "Call model",
+      "color": "violet",
+      "parentId": "sec-loop",
+      "geometry": {
+        "x": 840,
+        "y": 916,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "model"
+    },
+    {
+      "id": "tools",
+      "type": "icon",
+      "text": "Execute tool calls",
+      "color": "violet",
+      "parentId": "sec-loop",
+      "geometry": {
+        "x": 1380,
+        "y": 916,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "tool"
+    },
+    {
+      "id": "ceiling",
+      "type": "decision",
+      "text": "Done or at ceiling?",
+      "color": "violet",
+      "parentId": "sec-loop",
+      "geometry": {
+        "x": 268,
+        "y": 1152,
+        "width": 284,
+        "height": 140
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "checkpoint",
+      "type": "icon",
+      "text": "Commit turn checkpoint",
+      "color": "violet",
+      "parentId": "sec-loop",
+      "geometry": {
+        "x": 840,
+        "y": 1160,
+        "width": 300,
+        "height": 124
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "commit"
+    },
+    {
+      "id": "append",
+      "type": "icon",
+      "text": "Append tool results",
+      "color": "violet",
+      "parentId": "sec-loop",
+      "geometry": {
+        "x": 1380,
+        "y": 1160,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "documents"
+    },
+    {
+      "id": "stream",
+      "type": "icon",
+      "text": "Stream turn output",
+      "color": "violet",
+      "parentId": "sec-runner",
+      "geometry": {
+        "x": 1972,
+        "y": 912,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "send"
+    },
+    {
+      "id": "interrupt",
+      "type": "octagon",
+      "text": "Cancel or interrupt",
+      "color": "red",
+      "parentId": "sec-runner",
+      "geometry": {
+        "x": 2052,
+        "y": 1164,
+        "width": 140,
+        "height": 144
+      },
+      "style": {
+        "shape": "octagon"
+      }
+    },
+    {
+      "id": "eventlog",
+      "type": "icon",
+      "text": "Durable event log",
+      "color": "green",
+      "parentId": "sec-durable",
+      "geometry": {
+        "x": 2640,
+        "y": 1156,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "snapshots",
+      "type": "icon",
+      "text": "Snapshot store",
+      "color": "green",
+      "parentId": "sec-durable",
+      "geometry": {
+        "x": 2640,
+        "y": 956,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "fork",
+      "type": "icon",
+      "text": "Fork from checkpoint",
+      "color": "green",
+      "parentId": "sec-durable",
+      "geometry": {
+        "x": 3192,
+        "y": 956,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "branch"
+    },
+    {
+      "id": "gc",
+      "type": "icon",
+      "text": "Reachability GC",
+      "color": "green",
+      "parentId": "sec-durable",
+      "geometry": {
+        "x": 3192,
+        "y": 1156,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "filter"
+    },
+    {
+      "id": "child_a",
+      "type": "icon",
+      "text": "Child session A",
+      "color": "violet",
+      "parentId": "sec-tree",
+      "geometry": {
+        "x": 240,
+        "y": 1776,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "child_b",
+      "type": "icon",
+      "text": "Child session B",
+      "color": "violet",
+      "parentId": "sec-tree",
+      "geometry": {
+        "x": 1100,
+        "y": 1776,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "budget",
+      "type": "icon",
+      "text": "Tree budget ledger",
+      "color": "orange",
+      "parentId": "sec-tree",
+      "geometry": {
+        "x": 640,
+        "y": 1776,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "coin"
+    },
+    {
+      "id": "reaper",
+      "type": "icon",
+      "text": "Orphan reaper",
+      "color": "red",
+      "parentId": "sec-tree",
+      "geometry": {
+        "x": 1620,
+        "y": 1776,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "meter",
+      "type": "icon",
+      "text": "Usage metering",
+      "color": "orange",
+      "parentId": "sec-acct",
+      "geometry": {
+        "x": 2640,
+        "y": 1716,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "chart"
+    },
+    {
+      "id": "cost",
+      "type": "icon",
+      "text": "Per-session cost",
+      "color": "orange",
+      "parentId": "sec-acct",
+      "geometry": {
+        "x": 2292,
+        "y": 1716,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "dashboard"
+    },
+    {
+      "id": "forensic",
+      "type": "icon",
+      "text": "Forensic replay",
+      "color": "green",
+      "parentId": "sec-acct",
+      "geometry": {
+        "x": 2980,
+        "y": 1716,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "search"
+    },
+    {
+      "id": "note-key",
+      "type": "sticky",
+      "text": "**Color key**\n- blue: request & placement path\n- violet: agent turn execution\n- green: durable state\n- orange: quotas & budgets\n- teal: lifecycle & recovery\n- red: cancel, crash, termination",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 3580,
+        "y": 680,
+        "width": 300,
+        "height": 200
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "note-snap",
+      "type": "sticky",
+      "text": "**Checkpoint** = conversation state + tool results + workspace files. Content-addressed, parent = prior snapshot: an immutable chain that dedupes unchanged content. A snapshot a fork still references stays alive.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 3580,
+        "y": 960,
+        "width": 300,
+        "height": 200
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "note-log",
+      "type": "sticky",
+      "text": "**Event log records:** request · model response · tool call + result · checkpoint ref · budget decision · lifecycle transition",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 3580,
+        "y": 1240,
+        "width": 300,
+        "height": 140
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "note-idem",
+      "type": "sticky",
+      "text": "State-changing tool calls carry an **idempotency key**: recovery replays at most the in-flight turn, so a call that finished before the crash is not repeated.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 3580,
+        "y": 1460,
+        "width": 300,
+        "height": 160
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "sec-drain",
+      "type": "section",
+      "text": "Graceful drain",
+      "color": "yellow",
+      "parentId": "sec-life",
+      "geometry": {
+        "x": 3340,
+        "y": 120,
+        "width": 340,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "container"
+    },
+    {
+      "id": "sec-recovery",
+      "type": "section",
+      "text": "Resume & recovery",
+      "color": "blue",
+      "parentId": "sec-life",
+      "geometry": {
+        "x": 2500,
+        "y": 120,
+        "width": 760,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "activity"
+    }
+  ],
+  "connections": [
+    {
+      "id": "w-open",
+      "from": {
+        "objectId": "client"
+      },
+      "to": {
+        "objectId": "api"
+      },
+      "label": "open session",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "w-auth",
+      "from": {
+        "objectId": "api"
+      },
+      "to": {
+        "objectId": "auth"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "w-ws",
+      "from": {
+        "objectId": "auth"
+      },
+      "to": {
+        "objectId": "ws"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "w-placereq",
+      "from": {
+        "objectId": "ws"
+      },
+      "to": {
+        "objectId": "sched"
+      },
+      "label": "placement request",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "w-wsquota",
+      "from": {
+        "objectId": "ws"
+      },
+      "to": {
+        "objectId": "quota"
+      },
+      "label": "workspace quotas",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "w-place",
+      "from": {
+        "objectId": "sched",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "assemble",
+        "anchor": "top"
+      },
+      "label": "capacity + residency + isolation",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          1820,
+          720
+        ],
+        [
+          420,
+          720
+        ]
+      ]
+    },
+    {
+      "id": "w-req",
+      "from": {
+        "objectId": "assemble"
+      },
+      "to": {
+        "objectId": "model"
+      },
+      "label": "context + history + tools",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "labelPosition": {
+        "along": 0.3
+      }
+    },
+    {
+      "id": "w-toolcalls",
+      "from": {
+        "objectId": "model"
+      },
+      "to": {
+        "objectId": "tools"
+      },
+      "label": "tool calls",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "w-results",
+      "from": {
+        "objectId": "tools"
+      },
+      "to": {
+        "objectId": "append"
+      },
+      "label": "results",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "labelPosition": {
+        "along": 0.25
+      }
+    },
+    {
+      "id": "w-turndone",
+      "from": {
+        "objectId": "append"
+      },
+      "to": {
+        "objectId": "checkpoint"
+      },
+      "label": "turn complete",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "w-check",
+      "from": {
+        "objectId": "checkpoint"
+      },
+      "to": {
+        "objectId": "ceiling"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "w-next",
+      "from": {
+        "objectId": "ceiling"
+      },
+      "to": {
+        "objectId": "assemble"
+      },
+      "label": "no: next turn",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "w-ceilhit",
+      "from": {
+        "objectId": "ceiling",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "quota",
+        "anchor": "bottom"
+      },
+      "label": "ceiling reached",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange",
+      "waypoints": [
+        [
+          80,
+          1222
+        ],
+        [
+          80,
+          540
+        ],
+        [
+          1030,
+          540
+        ]
+      ]
+    },
+    {
+      "id": "w-done",
+      "from": {
+        "objectId": "ceiling",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "sched",
+        "anchor": "right",
+        "position": [
+          1,
+          0.3373493975903614
+        ]
+      },
+      "label": "done: release runner",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal",
+      "waypoints": [
+        [
+          410,
+          1440
+        ],
+        [
+          1940,
+          1440
+        ],
+        [
+          1940,
+          356
+        ]
+      ]
+    },
+    {
+      "id": "w-output",
+      "from": {
+        "objectId": "model",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "stream",
+        "anchor": "left"
+      },
+      "label": "turn output",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          990,
+          820
+        ],
+        [
+          2020,
+          820
+        ],
+        [
+          2020,
+          972
+        ]
+      ]
+    },
+    {
+      "id": "w-live",
+      "from": {
+        "objectId": "stream",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "client",
+        "anchor": "top"
+      },
+      "label": "live stream",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          2120,
+          20
+        ],
+        [
+          280,
+          20
+        ]
+      ]
+    },
+    {
+      "id": "w-commitlog",
+      "from": {
+        "objectId": "stream"
+      },
+      "to": {
+        "objectId": "eventlog"
+      },
+      "label": "same stream",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "waypoints": [
+        [
+          2340,
+          972
+        ],
+        [
+          2340,
+          1216
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.64
+      }
+    },
+    {
+      "id": "w-replay",
+      "from": {
+        "objectId": "client",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "eventlog",
+        "anchor": "top"
+      },
+      "label": "reattach: replay from last ack",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "green",
+      "waypoints": [
+        [
+          80,
+          160
+        ],
+        [
+          80,
+          0
+        ],
+        [
+          2400,
+          0
+        ],
+        [
+          2400,
+          1120
+        ],
+        [
+          2800,
+          1120
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.795
+      }
+    },
+    {
+      "id": "w-snap",
+      "from": {
+        "objectId": "checkpoint",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "snapshots",
+        "anchor": "left"
+      },
+      "label": "snapshot, parent = prior",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "waypoints": [
+        [
+          1000,
+          1400
+        ],
+        [
+          2560,
+          1400
+        ],
+        [
+          2560,
+          1020
+        ]
+      ]
+    },
+    {
+      "id": "w-stopstream",
+      "from": {
+        "objectId": "interrupt",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "model",
+        "anchor": "bottom"
+      },
+      "label": "stop model stream",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          1860,
+          1236
+        ],
+        [
+          1860,
+          1080
+        ],
+        [
+          990,
+          1080
+        ]
+      ]
+    },
+    {
+      "id": "w-abandon",
+      "from": {
+        "objectId": "interrupt",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "tools",
+        "anchor": "top"
+      },
+      "label": "abandon",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          1860,
+          1236
+        ],
+        [
+          1860,
+          900
+        ],
+        [
+          1530,
+          900
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.88
+      }
+    },
+    {
+      "id": "w-resumable",
+      "from": {
+        "objectId": "interrupt",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "checkpoint",
+        "anchor": "top"
+      },
+      "label": "resumable checkpoint + uncertain outcomes",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          1860.000783637895,
+          1236
+        ],
+        [
+          1860.000783637895,
+          1120
+        ],
+        [
+          990,
+          1120
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.75
+      }
+    },
+    {
+      "id": "w-intrelease",
+      "from": {
+        "objectId": "interrupt",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "sched",
+        "anchor": "right"
+      },
+      "label": "then release runner",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal",
+      "waypoints": [
+        [
+          2122,
+          1060
+        ],
+        [
+          1940,
+          1060
+        ],
+        [
+          1940,
+          356
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.055
+      }
+    },
+    {
+      "id": "w-propagate",
+      "from": {
+        "objectId": "interrupt",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "child_b",
+        "anchor": "right"
+      },
+      "label": "cancel/fail",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          2122,
+          1640
+        ],
+        [
+          1460,
+          1640
+        ],
+        [
+          1460,
+          1836
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.917
+      }
+    },
+    {
+      "id": "w-pause",
+      "from": {
+        "objectId": "quota",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "user_decision",
+        "anchor": "top"
+      },
+      "label": "allowance exhausted: pause",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange",
+      "waypoints": [
+        [
+          1030,
+          260
+        ],
+        [
+          270,
+          260
+        ]
+      ]
+    },
+    {
+      "id": "w-decide",
+      "from": {
+        "objectId": "user_decision"
+      },
+      "to": {
+        "objectId": "quota"
+      },
+      "label": "extend or stop",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "w-treespend",
+      "from": {
+        "objectId": "budget",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "quota",
+        "anchor": "bottom"
+      },
+      "label": "tokens, time, tool calls, sessions",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange",
+      "waypoints": [
+        [
+          800,
+          540
+        ],
+        [
+          1040,
+          540
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.2
+      }
+    },
+    {
+      "id": "w-spawn-a",
+      "from": {
+        "objectId": "tools",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "child_a",
+        "anchor": "top"
+      },
+      "label": "spawn: scoped context + budget",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          1760,
+          980
+        ],
+        [
+          1760,
+          1560
+        ],
+        [
+          400,
+          1560
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.63
+      }
+    },
+    {
+      "id": "w-spawn-b",
+      "from": {
+        "objectId": "tools",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "child_b",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          1760,
+          980
+        ],
+        [
+          1760,
+          1560
+        ],
+        [
+          1260,
+          1560
+        ]
+      ]
+    },
+    {
+      "id": "w-result-a",
+      "from": {
+        "objectId": "child_a",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "append",
+        "anchor": "bottom"
+      },
+      "label": "child result",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet",
+      "labelPosition": {
+        "along": 0.25
+      }
+    },
+    {
+      "id": "w-result-b",
+      "from": {
+        "objectId": "child_b",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "append",
+        "anchor": "bottom"
+      },
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "w-spend-a",
+      "from": {
+        "objectId": "child_a",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "budget",
+        "anchor": "left"
+      },
+      "label": "draws from parent",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "w-spend-b",
+      "from": {
+        "objectId": "child_b",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "budget",
+        "anchor": "right"
+      },
+      "label": "held child still counted",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "w-reap",
+      "from": {
+        "objectId": "reaper",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "child_b",
+        "anchor": "right"
+      },
+      "label": "parent gone",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "labelPosition": {
+        "along": 0.25
+      }
+    },
+    {
+      "id": "w-suspend",
+      "from": {
+        "objectId": "suspend",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "sched",
+        "anchor": "right"
+      },
+      "label": "release runner, keep chain",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal",
+      "waypoints": [
+        [
+          3510,
+          620
+        ],
+        [
+          2240,
+          620
+        ],
+        [
+          2240,
+          356
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.25
+      }
+    },
+    {
+      "id": "w-resume-place",
+      "from": {
+        "objectId": "resume",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "sched",
+        "anchor": "right"
+      },
+      "label": "place on any host",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal",
+      "waypoints": [
+        [
+          3100,
+          80
+        ],
+        [
+          2240,
+          80
+        ],
+        [
+          2240,
+          360
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.03
+      }
+    },
+    {
+      "id": "w-resume-rehyd",
+      "from": {
+        "objectId": "resume",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "rehydrate",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "w-latest",
+      "from": {
+        "objectId": "snapshots"
+      },
+      "to": {
+        "objectId": "rehydrate"
+      },
+      "label": "latest snapshot",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "labelPosition": {
+        "along": 0.25
+      }
+    },
+    {
+      "id": "w-continue",
+      "from": {
+        "objectId": "rehydrate",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "assemble",
+        "anchor": "left"
+      },
+      "label": "continue session",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal",
+      "waypoints": [
+        [
+          2360,
+          436
+        ],
+        [
+          2360,
+          660
+        ],
+        [
+          300,
+          660
+        ],
+        [
+          300,
+          976
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.55
+      }
+    },
+    {
+      "id": "w-crash",
+      "from": {
+        "objectId": "hb",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "recover",
+        "anchor": "left"
+      },
+      "label": "runner crashed",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          1382,
+          500
+        ],
+        [
+          2320,
+          500
+        ],
+        [
+          2320,
+          236
+        ]
+      ]
+    },
+    {
+      "id": "w-capacity",
+      "from": {
+        "objectId": "hb"
+      },
+      "to": {
+        "objectId": "sched"
+      },
+      "label": "return capacity",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "w-rescue",
+      "from": {
+        "objectId": "recover",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "rehydrate",
+        "anchor": "top"
+      },
+      "label": "last checkpoint",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "w-stopplace",
+      "from": {
+        "objectId": "drain",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "sched",
+        "anchor": "right"
+      },
+      "label": "stop placing",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal",
+      "waypoints": [
+        [
+          3300,
+          240
+        ],
+        [
+          3300,
+          80
+        ],
+        [
+          2240,
+          80
+        ],
+        [
+          2240,
+          360
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.21
+      }
+    },
+    {
+      "id": "w-drain",
+      "from": {
+        "objectId": "drain"
+      },
+      "to": {
+        "objectId": "suspend"
+      },
+      "label": "complete, suspend or checkpoint",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "w-fork",
+      "from": {
+        "objectId": "fork"
+      },
+      "to": {
+        "objectId": "snapshots"
+      },
+      "label": "divergent chain",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "labelPosition": {
+        "along": 0.3
+      }
+    },
+    {
+      "id": "w-gc",
+      "from": {
+        "objectId": "gc"
+      },
+      "to": {
+        "objectId": "snapshots"
+      },
+      "label": "session deleted: collect unreachable",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "w-meter",
+      "from": {
+        "objectId": "eventlog"
+      },
+      "to": {
+        "objectId": "meter"
+      },
+      "label": "usage events",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "labelPosition": {
+        "along": 0.736
+      }
+    },
+    {
+      "id": "w-cost",
+      "from": {
+        "objectId": "meter"
+      },
+      "to": {
+        "objectId": "cost"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "w-forensic",
+      "from": {
+        "objectId": "eventlog"
+      },
+      "to": {
+        "objectId": "forensic",
+        "anchor": "top"
+      },
+      "label": "reconstruct + replay",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "labelPosition": {
+        "along": 0.851
+      }
+    },
+    {
+      "id": "w-propagate-a",
+      "from": {
+        "objectId": "interrupt",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "child_a",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          2122,
+          1640
+        ],
+        [
+          180,
+          1640
+        ],
+        [
+          180,
+          1836
+        ]
+      ]
+    },
+    {
+      "id": "w-reap-a",
+      "from": {
+        "objectId": "reaper",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "child_a",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          1780,
+          1980
+        ],
+        [
+          180,
+          1980
+        ],
+        [
+          180,
+          1840
+        ]
+      ]
+    }
+  ],
+  "annotations": []
+}
