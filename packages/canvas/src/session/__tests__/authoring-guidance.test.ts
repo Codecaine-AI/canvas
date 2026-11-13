@@ -395,9 +395,11 @@ describe("shared Canvas authoring guidance", () => {
       `Which band is under its need in topic \`rules\`, over ${SECTION_GAP_SLACK} more, or needs over ${BAND_NEED_MAX}?`,
       "Does another board shape (wider, taller, a grid, a hub with spokes) fit the flow better and close an empty block?",
       "whole sections with `arrange` or `move`",
-      "then each row's gap again (`arrange` with `space` along a row, `move` with `by` for the rows below), then `tighten_wires`",
+      "then each band's width again (`move` with `by`), then `tighten_wires`",
       "Moving sections after the first draft is normal.",
     ]) expect(rethink, part).toContain(part);
+    // One `arrange` gap for a row wipes bands that need different widths.
+    expect(rethink).not.toMatch(/each row's gap|`space` along a row/);
     // The runner sends this step as its own turn with the numbers, so the step stays short.
     expect(Buffer.byteLength(rethink)).toBeLessThan(900);
     const design = topicText("diagram_design");
