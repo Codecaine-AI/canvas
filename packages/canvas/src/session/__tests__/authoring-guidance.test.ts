@@ -162,7 +162,7 @@ describe("shared Canvas authoring guidance", () => {
     const rules = topicText("rules");
     expect(rules).toContain("Choose the board shape that makes the wires shortest (wider, taller, a grid, a hub with spokes), and move whole sections to get it.");
     expect(rules).toContain(`Keep no empty block over ${EMPTY_BLOCK.frame.width} by ${EMPTY_BLOCK.frame.height} in the frame, or over ${EMPTY_BLOCK.section.width} by ${EMPTY_BLOCK.section.height} in a section.`);
-    expect(rules).toContain("Bend a wire before you keep an empty column.");
+    expect(rules).toContain("Bend or lengthen a wire before you keep an empty block.");
     expect(rules).toContain("After you move a section, close the space it left.");
     const design = topicText("diagram_design");
     expect(design).toContain("a hub with its spokes around it");
@@ -259,6 +259,8 @@ describe("shared Canvas authoring guidance", () => {
     expect(rules).toContain("Never pin a wire end with `position` to place or spread arrowheads. The board centers and merges them. `anchor` only picks the side.");
     // Round 5 cycle 1: this line put two meanings on one line into a node.
     expect(rules).not.toContain("keep that junction");
+    // The build step names the call at the point the drawer connects.
+    expect(topicText("workflow")).toContain("Where wires of two meanings end at one node, set `anchor` in `connect`: each meaning gets its own side.");
   });
 
   test("`anchor` gives each meaning its own side of a node, and each side still merges its wires", () => {
@@ -299,7 +301,7 @@ describe("shared Canvas authoring guidance", () => {
     for (const part of [
       "Call `canvas_check`, and read its whole-board PNG and its LAYOUT block.",
       "`look` at `page-frame`: MEASURES prints the gaps between its sections",
-      "Which section moves shorten the 3 longest wires?",
+      "Which section moves shorten the 3 longest wires and open no empty block?",
       `Which gap is under its number in topic \`rules\`, or over ${SECTION_GAP_SLACK} more than its row needs?`,
       "Does another board shape (wider, taller, a grid, a hub with spokes) or section order read better and close an empty block?",
       "whole sections with `arrange` or `move`",
@@ -313,6 +315,7 @@ describe("shared Canvas authoring guidance", () => {
     // Room for wires beats the real-size image, and no other room does.
     expect(design).toContain("or make a gap between sections narrower than topic `rules` says");
     expect(design).toContain("A board that keeps those gaps can pass 2576px. Never add room past what topic `rules` gives a row");
+    expect(design).toContain("The longer edge sets the scale, so past it grow the shorter edge first.");
     expect(design).toContain("page-frame is working room: resize it to hold the plan first");
   });
 

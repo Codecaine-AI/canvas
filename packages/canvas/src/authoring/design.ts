@@ -79,7 +79,7 @@ export const DESIGN_TOPICS: readonly AuthoringTopic[] = [
 
 <layout_and_connections>
     <board_size>
-        The board is judged as one image of its whole extent. Up to ${JUDGE_PNG_MAX_EDGE} × ${JUDGE_PNG_MAX_EDGE}px that image is real size. Past it the image scales down and every label prints smaller.
+        The board is judged as one image of its whole extent. Up to ${JUDGE_PNG_MAX_EDGE} × ${JUDGE_PNG_MAX_EDGE}px that image is real size. Past it the image scales down and every label prints smaller. The longer edge sets the scale, so past it grow the shorter edge first.
 
         - Lay 4 or more sections out in the shape that makes the wires shortest: 2 or 3 rows that grow down, a grid, or a hub with its spokes around it. Never one long row. Rows can differ in width, but no empty block passes ${EMPTY_BLOCK.frame.width} × ${EMPTY_BLOCK.frame.height}px.
         - Size each section to its content. A section with three nodes is small, not a full-width band.
