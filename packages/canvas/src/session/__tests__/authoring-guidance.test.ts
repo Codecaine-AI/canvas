@@ -167,7 +167,7 @@ describe("shared Canvas authoring guidance", () => {
     expect(design).toContain("The flow sets the board's shape, not this limit: a board whose flow needs the room passes 2576px on either edge.");
     expect(design).toContain("A left-to-right pipeline with feedback takes a wide board: its stages in one row, in order, and the sections they feed under them.");
     expect(design).toContain("A fan-out takes a hub with its spokes around it.");
-    expect(design).toContain("One row holds one chain of stages, never every section.");
+    expect(design).toContain("A row holds one chain of stages: a section off the chain goes in another row.");
     expect(design).toContain("To fit the image, never shrink a node, cut a label, square the board, break a chain into 2 rows or make a band between sections narrower than topic `rules` says.");
     expect(design).toContain("Never add room past what topic `rules` gives a band");
     // Round 5 cycle 2: these lines kept a pipeline board square at 45% fill.
@@ -205,7 +205,8 @@ describe("shared Canvas authoring guidance", () => {
     const rules = topicText("rules");
     expect(rules).toContain("A store sits beside the nodes that write to it.");
     expect(rules).toContain("A store or an outcome that several stages feed sits after the last of them, never before or above the first.");
-    expect(rules).toContain("A section sits after its source in that order.");
+    // A return or a retry runs against the main path, so the rule holds on the main path only.
+    expect(rules).toContain("On the main path, a section sits after its source.");
     expect(rules).toContain("Steps inside a section run the same way, and a chain never turns back.");
     // Round 5 cycle 2: this line put a store before the stages that feed it.
     expect(rules).not.toContain("sits beside the section that uses it");
@@ -214,7 +215,7 @@ describe("shared Canvas authoring guidance", () => {
   test("a group wire ends on the frame once, a record is one stacked subsection, and no fix deletes a subsection", () => {
     const rules = topicText("rules");
     expect(rules).toContain("When every member of a section or subsection sends or receives the same wire, `connect` its frame once, not each member, and keep it there. Any other wire ends on a node.");
-    expect(rules).toContain("A record is one subsection titled for the record, with its fields stacked in one column, never loose boxes.");
+    expect(rules).toContain("A record of 2 or more fields is one subsection titled for the record, with its fields stacked in one column, never loose boxes.");
     expect(rules).toContain("A wire that must end on a node ends on a node inside the subsection.");
     const design = topicText("diagram_design");
     expect(design).toContain("When every node in a section or subsection sends or receives the same wire, connect its frame once. When only some act, connect one wire per node.");
