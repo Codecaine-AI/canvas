@@ -259,8 +259,9 @@ describe("shared Canvas authoring guidance", () => {
     expect(bandGap(1)).toBe(200);
     expect(bandGap(0)).toBe(200);
     expect(SECTION_GAP_PER_WIRE + SECTION_GAP_PER_LABEL).toBeGreaterThanOrEqual(CHIP_HEIGHT);
-    // Round 5 cycle 2, board h4: 7 plain wires share a band of 260. Board h1: 13 wires, 9 with a label, share 280.
+    // Round 5 cycle 2: 7 plain wires shared a band of 260 on board h4, and 13 wires a band of 280 on board h1.
     expect(bandGap(7)).toBe(320);
+    expect(bandGap(13)).toBe(440);
     expect(bandGap(13, 9)).toBe(620);
     expect(rules).toContain(`A horizontal wire leg that carries a label is at least ${LABEL_LEG.base} plus ${LABEL_LEG.perCharacter} for each label character long`);
     expect(rules).toContain(`A vertical one is at least ${LABEL_LEG.vertical} long.`);
