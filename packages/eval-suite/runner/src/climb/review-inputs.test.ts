@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import { box, labelled, wire } from "./fixtures/review/stubs.ts";
-import { borderRuns, choicesLines, closeLanes, outerEdgeRuns, reviewUnits, sectionGaps, spaceLines, untagWires, wireMeasureLines, type Board } from "./review-inputs.ts";
+import { borderRuns, choicesLines, closeLanes, mixedTrunks, outerEdgeRuns, reviewUnits, sectionGaps, sectionMapSvg, spaceLines, untagWires, wireMeasureLines, type Board } from "./review-inputs.ts";
 
 describe("climb review measures of wires", () => {
   const section = [box("s", "section", null, 100, 100, 400, 300)];
@@ -74,6 +74,32 @@ describe("climb review measures of wires", () => {
     ]);
     // A clean sheet has no measure.
     expect(wireMeasureLines([{ tag: "W1", kind: "s → t", fact: wire("ok", "a", "n", [[500, 200], [800, 200]]) }], { board, pageFrame: page, headers: new Map() })).toEqual([]);
+  });
+
+  test("2 wires that differ in dash or colour and share one line are found, with the label chip on that line", () => {
+    const solid = wire("s", "a", "n", [[0, 100], [300, 100], [300, 200]]);
+    const joins = (extra: Parameters<typeof wire>[4] = {}) => wire("d", "b", "n", [[100, 0], [100, 100], [300, 100], [300, 200]], extra);
+    const shared = { wire: "s", other: "d", length: 200, from: { x: 100, y: 100 }, to: { x: 300, y: 100 } };
+    expect(mixedTrunks([solid, joins({ style: "dashed" })], 20)).toEqual([{ ...shared, chips: [] }]);
+    expect(mixedTrunks([solid, joins({ colour: "violet" })], 20)).toEqual([{ ...shared, chips: [] }]);
+    // Ford kept merged junctions: 2 wires of one look on one line are one trunk, and no fact.
+    expect(mixedTrunks([solid, joins()], 20)).toEqual([]);
+    // A shared stretch no longer than the least run is a junction, not a line.
+    expect(mixedTrunks([solid, joins({ style: "dashed" })], 200)).toEqual([]);
+    const chip = { ...labelled("d", "b", "n", [[100, 0], [100, 100], [300, 100], [300, 200]], "on error", 170, 90), style: "dashed", colour: "violet" };
+    expect(mixedTrunks([solid, chip], 20)).toEqual([{ ...shared, chips: ["d"] }]);
+    expect(mixedTrunks([solid, { ...chip, chip: { x: 70, y: 40, width: 60, height: 20 } }], 20)).toEqual([{ ...shared, chips: [] }]);
+
+    // The wire reviewer reads it as a fact. 2 lanes of wires that differ are no fact: a line for them reads as "merge them".
+    const page = box("page", "section", null, 0, 0, 1200, 600);
+    const board: Board = { objects: [page, box("t", "section", "page", 700, 100, 300, 300), box("n", "rectangle", "t", 800, 150)], connections: [] };
+    const lanes = (extra: Parameters<typeof wire>[4]) => wireMeasureLines(
+      [solid, chip, wire("l1", "p", "n", [[520, 300], [640, 300]]), wire("l2", "q", "n", [[520, 320], [640, 320]], extra)].map((fact, index) => ({ tag: `W${index + 1}`, kind: "s → t", fact })),
+      { board, pageFrame: page, headers: new Map() },
+    ).filter((line) => /share one line|lanes/.test(line));
+    const mixed = `W1 s (solid default) and W2 d (dashed violet) differ in dash or colour and share one line for 200 px, from (100, 100) to (300, 100); the label chip of W2 d "on error" sits on that line`;
+    expect(lanes({ style: "dashed" })).toEqual([mixed]);
+    expect(lanes({})).toEqual([mixed, "W3 l1 and W4 l2 both end on n and run 120 px in 2 lanes 20 px apart, from (520, 300) to (640, 300)"]);
   });
 
   test("a finding names its wires by id: the tags of the reviewer's own wire sheet are not in the text the drawer reads", () => {
@@ -191,6 +217,42 @@ describe("climb review measures of choices", () => {
       "4 of 5 nodes are rectangle, shape -, no colour",
       "1 of 5 nodes are rectangle, shape cylinder, blue",
       "2 of 5 nodes have no icon",
+      "1 node has the colour of its section p2 (blue): n5",
     ]);
+  });
+
+  test("it counts a node with the hue of its section, 4 gray nodes or more in one section, and a section whose steps run against the board", () => {
+    const steps: Board = {
+      objects: [
+        box("p1", "section", null, 0, 0, 400, 400, { color: "blue", text: "Engine" }), box("p2", "section", null, 500, 0, 600, 400, { color: "green", text: "Store" }),
+        // 4 gray steps that run right to left, and one node in the blue of its section.
+        ...["A", "B", "C", "D"].map((text, index) => box(`n${index + 1}`, "rectangle", "p1", 310 - 90 * index, 50, 60, 60, { text, color: "gray" })),
+        box("n5", "rectangle", "p1", 40, 300, 60, 60, { color: "blue", text: "E" }),
+        ...["F", "G", "H"].map((text, index) => box(`m${index + 1}`, "rectangle", "p2", 550 + 180 * index, 50, 100, 60, { text, color: "green" })),
+        box("note", "sticky", "p2", 550, 250, 100, 60, { color: "green", text: "note" }),
+      ],
+      connections: [],
+    };
+    const line = (id: string, from: string, to: string) => wire(id, from, to, [[0, 0], [10, 0]]);
+    const wires = [line("a", "n1", "n2"), line("b", "n2", "n3"), line("c", "n3", "n4"), line("d", "n1", "m1"), line("e", "m1", "m2"), line("f", "m2", "m3"), line("g", "n5", "m1")];
+    expect(choicesLines(steps, wires).counts.slice(-4)).toEqual([
+      "1 node has the colour of its section p1 (blue): n5",
+      // A sticky is no node here.
+      "3 nodes have the colour of their section p2 (green): m1, m2, m3",
+      "4 of the 5 nodes in section p1 are gray: n1, n2, n3, n4",
+      "3 of the 3 wires between nodes of section p1 point left, and 4 of the board's 7 wires point right: a, b, c",
+    ]);
+    // 3 gray nodes, a gray node in a gray section, and a section that runs with the board are not listed.
+    const quiet: Board = { objects: steps.objects.filter((object) => object.id !== "n4" && object.id !== "n5").map((object) => ({ ...object, color: "gray" })), connections: [] };
+    expect(choicesLines(quiet, [line("e", "m1", "m2"), line("f", "m2", "m3"), line("back", "m3", "m2")]).counts.filter((count) => /colour of|are gray|point/.test(count))).toEqual([]);
+  });
+});
+
+describe("climb review section map", () => {
+  test("the map of the space reviewer draws each sticky as a yellow box: it fills space as a section does", () => {
+    const board: Board = { objects: [box("p1", "section", null, 0, 0, 400, 400, { text: "Engine" }), box("note", "sticky", null, 550, 250, 100, 60)], connections: [] };
+    const map = (stickies: Board["objects"]) => sectionMapSvg(reviewUnits(board).units, [], { x: 0, y: 0, width: 1000, height: 500 }, 500, stickies);
+    expect(map([board.objects[1]!])).toContain(`<rect x="550" y="250" width="100" height="60" fill="#fde68a" stroke="#b45309" stroke-width="4"/><text x="562" y="282" font-size="22" fill="#111827">sticky</text>`);
+    expect(map([])).not.toContain("sticky");
   });
 });

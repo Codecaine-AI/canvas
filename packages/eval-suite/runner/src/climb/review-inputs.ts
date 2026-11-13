@@ -485,10 +485,11 @@ export function wireMarks(rows: WireRow[], scale: number): string {
 
 /**
  * The section map of the space reviewer, a whole SVG: each reviewed section as a box
- * with its title and id, and a line between 2 sections that wires join, with
- * the number of wires.
+ * with its title and id, each sticky as a yellow box, and a line between 2
+ * sections that wires join, with the number of wires. A sticky fills space as
+ * a section does: a map without them shows an empty area where one sits.
  */
-export function sectionMapSvg(units: ReviewUnit[], facts: WireFact[], camera: WorldRect, width: number): string {
+export function sectionMapSvg(units: ReviewUnit[], facts: WireFact[], camera: WorldRect, width: number, stickies: BoardObject[] = []): string {
   const scale = width / camera.width;
   const px = (value: number) => value / scale;
   const sections = units.filter((unit) => unit.section);
@@ -532,10 +533,13 @@ export function sectionMapSvg(units: ReviewUnit[], facts: WireFact[], camera: Wo
       + `<text x="${rect.x + px(8)}" y="${rect.y + px(20)}" font-size="${px(14)}" font-weight="700" fill="#111827">${escape(fit(unit.section!.text ?? "", 8))}</text>`
       + `<text x="${rect.x + px(8)}" y="${rect.y + px(37)}" font-size="${px(12)}" fill="#374151">${escape(fit(unit.id, 7))}</text>`;
   });
+  const notes = stickies.map(({ geometry: rect }) =>
+    `<rect x="${rect.x}" y="${rect.y}" width="${rect.width}" height="${rect.height}" fill="#fde68a" stroke="#b45309" stroke-width="${px(2)}"/>`
+    + `<text x="${rect.x + px(6)}" y="${rect.y + px(16)}" font-size="${px(11)}" fill="#111827">sticky</text>`);
   const height = Math.round(camera.height * scale);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${camera.x} ${camera.y} ${camera.width} ${camera.height}" ${FONT}>`
     + `<rect x="${camera.x}" y="${camera.y}" width="${camera.width}" height="${camera.height}" fill="#ffffff"/>`
-    + `${boxes.join("")}${lines.join("")}${chips.join("")}</svg>`;
+    + `${boxes.join("")}${notes.join("")}${lines.join("")}${chips.join("")}</svg>`;
 }
 
 /** The frame of one "look further" view: the named objects and the full paths of the named wires, with a 128 px ring. Null when no id is on the board. */
@@ -659,11 +663,40 @@ export interface WireContext {
   headers: ReadonlyMap<string, WorldRect>;
 }
 
+/** One line that 2 wires of different dash or colour share, and the label chips that sit on it. */
+export interface MixedTrunk extends Stretch { other: string; chips: string[] }
+
+/**
+ * The pairs of wires that differ in dash or colour and lie on one line for
+ * more than `minRun` px: the longest such stretch of each pair, with each of
+ * the 2 wires whose label chip sits on it.
+ */
+export function mixedTrunks(facts: WireFact[], minRun: number): MixedTrunk[] {
+  const runs = facts.map((fact) => runsOf(fact.points));
+  const found: MixedTrunk[] = [];
+  for (let i = 0; i < facts.length; i += 1) for (let j = i + 1; j < facts.length; j += 1) {
+    const [a, b] = [facts[i]!, facts[j]!];
+    if (a.style === b.style && a.colour === b.colour) continue;
+    let best: { run: Run; from: number; to: number } | null = null;
+    for (const first of runs[i]!) for (const second of runs[j]!) {
+      const shared = overlap(first, second);
+      if (shared && shared[1] - shared[0] > minRun && (!best || shared[1] - shared[0] > best.to - best.from)) best = { run: first, from: shared[0], to: shared[1] };
+    }
+    if (!best) continue;
+    const [from, to] = [pointOn(best.run, best.from), pointOn(best.run, best.to)];
+    // A chip sits on the line when the line runs through its box.
+    const line = { x: from.x - 0.5, y: from.y - 0.5, width: to.x - from.x + 1, height: to.y - from.y + 1 };
+    found.push({ wire: a.id, other: b.id, length: Math.round(best.to - best.from), from, to, chips: [a, b].filter((fact) => fact.chip && touches(fact.chip, line)).map((fact) => fact.id) });
+  }
+  return found;
+}
+
 /**
  * What the runner measured on the wires of a sheet, one line a fact: a wire
  * along a section border or the board's outer edge, through a section's
- * header chip, with an end on a section frame, and 2 wires of one node in
- * separate close lanes. A line is a fact to judge on the image, not a fault.
+ * header chip, with an end on a section frame, 2 wires of different dash or
+ * colour on one line, and 2 wires of one node and one look in separate close
+ * lanes. A line is a fact to judge on the image, not a fault.
  */
 export function wireMeasureLines(rows: WireRow[], context: WireContext): string[] {
   const { board, pageFrame, headers } = context;
@@ -674,6 +707,8 @@ export function wireMeasureLines(rows: WireRow[], context: WireContext): string[
   const sections = board.objects.filter((object) => object.type === SECTION && object.geometry);
   const frame = (id: string) => id === pageFrame?.id ? `the board frame ${id}` : `section ${id}`;
   const stretch = (run: Stretch) => `from ${at(run.from)} to ${at(run.to)}`;
+  const factOf = new Map(facts.map((fact) => [fact.id, fact]));
+  const look = (id: string) => `${factOf.get(id)!.style} ${factOf.get(id)!.colour}`;
   return [
     ...capped(borderRuns(facts, sections).map((run) => `${name(run.wire)} runs ${run.length} px at ${run.distance} px from the ${run.side} border of ${frame(run.section)}, ${stretch(run)}`)),
     ...capped(outerEdgeRuns(facts, board, pageFrame).map((run) => `${name(run.wire)} runs ${run.length} px along the outer ${run.side} edge of the board, ${stretch(run)}: no object lies beyond it`)),
@@ -682,7 +717,10 @@ export function wireMeasureLines(rows: WireRow[], context: WireContext): string[
     ...capped(facts.flatMap((fact) => ([["starts", fact.from, fact.points[0]!], ["ends", fact.to, fact.points.at(-1)!]] as const)
       .filter(([, id]) => byId.get(id)?.type === SECTION)
       .map(([verb, id, point]) => `${name(fact.id)} ${verb} on the frame of section ${id} at ${at(point)}, not on a node`))),
-    ...capped(closeLanes(facts, LANE_NEAR_PX, LANE_RUN_MIN_PX).filter((lane) => lane.shared)
+    ...capped(mixedTrunks(facts, TRUNK_TAG_MIN).map((trunk) => `${name(trunk.wire)} (${look(trunk.wire)}) and ${name(trunk.other)} (${look(trunk.other)}) differ in dash or colour and share one line for ${trunk.length} px, ${stretch(trunk)}`
+      + trunk.chips.map((id) => `; the label chip of ${name(id)} ${JSON.stringify(short(factOf.get(id)!.label, 24))} sits on that line`).join(""))),
+    // Lanes of wires that differ in dash or colour are no fact here: a line for them reads as "merge them".
+    ...capped(closeLanes(facts, LANE_NEAR_PX, LANE_RUN_MIN_PX).filter((lane) => lane.shared && look(lane.wire) === look(lane.other))
       .map((lane) => `${name(lane.wire)} and ${name(lane.other)} both ${lane.shared!.end === "target" ? "end on" : "start from"} ${lane.shared!.id} and run ${lane.length} px in 2 lanes ${lane.distance} px apart, ${stretch(lane)}`)),
   ];
 }
@@ -794,6 +832,22 @@ export function spaceLines(units: ReviewUnit[], facts: WireFact[], board: Board)
 
 /** An icon on this many nodes or more is listed for the choices reviewer. */
 const REPEATED_ICON_MIN = 4;
+/** This many gray nodes or more in one section are listed for the choices reviewer. */
+const GRAY_NODES_MIN = 4;
+const GRAY = "gray";
+/** The colours that are no hue: a node that shares one with its section is not listed. */
+const NO_HUE: ReadonlySet<string | undefined> = new Set([GRAY, "white", undefined]);
+const STICKY = "sticky";
+
+type Heading = "right" | "left" | "down" | "up";
+const AGAINST: Record<Heading, Heading> = { right: "left", left: "right", down: "up", up: "down" };
+/** The way a wire points, from the centre of its source to the centre of its target. Null when an end has no place. */
+function headingOf(fact: WireFact, byId: ReadonlyMap<string, BoardObject>): Heading | null {
+  const [from, to] = [byId.get(fact.from)?.geometry, byId.get(fact.to)?.geometry];
+  if (!from || !to) return null;
+  const [dx, dy] = [to.x + to.width / 2 - from.x - from.width / 2, to.y + to.height / 2 - from.y - from.height / 2];
+  return Math.abs(dx) >= Math.abs(dy) ? (dx >= 0 ? "right" : "left") : (dy >= 0 ? "down" : "up");
+}
 
 /** The text blocks of the choices reviewer: each object's kind, shape, icon and colour, the wires, and what repeats. */
 export function choicesLines(board: Board, facts: WireFact[]): { objects: string[]; wires: string[]; counts: string[] } {
@@ -807,6 +861,11 @@ export function choicesLines(board: Board, facts: WireFact[]): { objects: string
     return [...groups];
   };
   const ids = (objects: BoardObject[]) => objects.map((object) => object.id).join(", ");
+  const inSection = (section: BoardObject) => nodes.filter((node) => node.parentId === section.id && node.type !== STICKY);
+  const headings = facts.flatMap((fact) => headingOf(fact, byId) ? [{ fact, heading: headingOf(fact, byId)! }] : []);
+  const count = (list: typeof headings, heading: Heading) => list.filter((entry) => entry.heading === heading).length;
+  // The board reads the way most of its wires point.
+  const reading = (["right", "down", "left", "up"] as const).reduce((best, heading) => count(headings, heading) > count(headings, best) ? heading : best);
   return {
     objects: board.objects.map((object) => {
       const parent = object.parentId ? byId.get(object.parentId) : undefined;
@@ -824,6 +883,22 @@ export function choicesLines(board: Board, facts: WireFact[]): { objects: string
       ...group(nodes.filter((node) => iconName(node.icon)), (node) => iconName(node.icon)!).filter(([, members]) => members.length >= REPEATED_ICON_MIN)
         .map(([name, members]) => `Icon ${name} is on ${members.length} nodes: ${members.map((node) => `${node.id} ${JSON.stringify(short(node.text, 24))}`).join(", ")}`),
       `${nodes.filter((node) => !iconName(node.icon)).length} of ${nodes.length} nodes have no icon`,
+      ...sections.flatMap((section) => {
+        const same = inSection(section).filter((node) => !NO_HUE.has(node.color) && node.color === section.color);
+        return same.length ? [`${same.length} ${same.length === 1 ? "node has" : "nodes have"} the colour of ${same.length === 1 ? "its" : "their"} section ${section.id} (${colour(section)}): ${ids(same)}`] : [];
+      }),
+      ...sections.flatMap((section) => {
+        const gray = inSection(section).filter((node) => node.color === GRAY);
+        return gray.length >= GRAY_NODES_MIN ? [`${gray.length} of the ${inSection(section).length} nodes in section ${section.id} are gray: ${ids(gray)}`] : [];
+      }),
+      ...sections.flatMap((section) => {
+        // The steps of a section: the wires between 2 of its own nodes.
+        const steps = headings.filter(({ fact }) => byId.get(fact.from)?.parentId === section.id && byId.get(fact.to)?.parentId === section.id);
+        const against = steps.filter((step) => step.heading === AGAINST[reading]);
+        return against.length > count(steps, reading)
+          ? [`${against.length} of the ${steps.length} wires between nodes of section ${section.id} point ${AGAINST[reading]}, and ${count(headings, reading)} of the board's ${headings.length} wires point ${reading}: ${against.map((step) => step.fact.id).join(", ")}`]
+          : [];
+      }),
     ],
   };
 }
