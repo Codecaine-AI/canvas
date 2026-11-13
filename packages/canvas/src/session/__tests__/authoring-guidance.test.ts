@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { CANVAS_COLORS, CANVAS_ICON_GLYPHS, type CanvasIconGlyph } from "../../state/schema";
 import { CANVAS_THEME_IDS, canvasThemePreset } from "../../theme/canvas-style";
 import { getCanvasAuthoringGuidance } from "../../authoring";
-import { bandGap, EMPTY_BLOCK, LABEL_LEG, LONG_WIRE, SECTION_FILL_MIN, SECTION_GAP_PER_LABEL, SECTION_GAP_PER_WIRE, SECTION_GAP_SLACK } from "../../authoring/rules";
+import { bandGap, BOARD_EDGE_MAX, EMPTY_BLOCK, LABEL_LEG, LONG_WIRE, SECTION_FILL_MIN, SECTION_GAP_PER_LABEL, SECTION_GAP_PER_WIRE, SECTION_GAP_SLACK } from "../../authoring/rules";
 import { FINISHING_RULES } from "../../board/lints";
 import { CHIP_HEIGHT } from "../../board/lints/geometry";
 import { runDiagnostics } from "../../board/lints/run";
@@ -11,6 +11,7 @@ import { LANE_GAP_PX } from "../../connectors/lanes";
 import { routeConnectionOnBoard } from "../../connectors/routing";
 import { OBJECT_PREFERENCES } from "../../objects/registry";
 import { ICON_GLYPH_CATEGORIES, resolveIconGlyph } from "../../objects/shapes/icon/icon-glyphs";
+import { JUDGE_PNG_MAX_EDGE } from "../../render/judge-size";
 import { box, connect, makeDocument } from "./synthetic";
 
 function topicText(id: string): string {
@@ -154,21 +155,28 @@ describe("shared Canvas authoring guidance", () => {
     }
     const rules = topicText("rules");
     expect(rules).toContain("A section keeps the size of its content: `fit_section` sets it.");
-    // A section `arrange_section` laid out can fill less: a 2 by 2 grid of flow nodes fills 32%.
-    expect(rules).toContain(`Its nodes fill ${SECTION_FILL_MIN * 100}% or more of it, less only at the gaps \`arrange_section\` sets.`);
+    // Of the whole section, a 2 by 2 grid `arrange_section` laid out fills 32%: the measure is the room inside the padding.
+    expect(rules).toContain(`Its nodes fill ${SECTION_FILL_MIN * 100}% or more of the room inside its padding.`);
     expect(rules).toContain("Never stretch a section or a node to fill a row, align an edge or make room for a wire.");
     expect(rules).toContain("Center a section on the node or section it connects to, and a hub on the row it fans out to.");
+    expect(rules).toContain("Where two sections map node to node, put each target level with its source, so the wire runs straight.");
   });
 
-  test("the flow sets the board shape, and the image limit never squares a board", () => {
+  test("the flow sets the board shape up to the edge limit, and the image limit never squares a board", () => {
     const rules = topicText("rules");
     expect(rules).toContain("Choose the board shape the flow needs (wide for a left-to-right pipeline with feedback, a hub with spokes for a fan-out, a grid or 2 or 3 rows otherwise), and move whole sections to get it.");
+    expect(rules).toContain("Of two shapes that fit, take the one with the shorter wires. No edge passes 3860.");
+    // 1.5 times the judged edge, on the grid: a label prints at two thirds of its size.
+    expect(BOARD_EDGE_MAX).toBe(3860);
+    expect(JUDGE_PNG_MAX_EDGE / BOARD_EDGE_MAX).toBeCloseTo(2 / 3, 2);
     const design = topicText("diagram_design");
-    expect(design).toContain("The flow sets the board's shape, not this limit: a board whose flow needs the room passes 2576px on either edge.");
+    expect(design).toContain("every label prints smaller: the longer edge sets the scale.");
+    expect(design).toContain("The flow sets the board's shape, not this limit: a board whose flow needs the room passes 2576px, up to 3860px on its longer edge.");
     expect(design).toContain("A left-to-right pipeline with feedback takes a wide board: its stages in one row, in order, and the sections they feed under them.");
     expect(design).toContain("A fan-out takes a hub with its spokes around it.");
     expect(design).toContain("A row holds one chain of stages: a section off the chain goes in another row.");
-    expect(design).toContain("To fit the image, never shrink a node, cut a label, square the board, break a chain into 2 rows or make a band between sections narrower than topic `rules` says.");
+    expect(design).toContain("To fit the image, never shrink a node, cut a label, square the board or make a band between sections narrower than topic `rules` says.");
+    expect(design).toContain("To stay under 3860px, give a long section 2 rows of nodes, then fold the row of stages into 2 rows.");
     expect(design).toContain("Never add room past what topic `rules` gives a band");
     // Round 5 cycle 2: these lines kept a pipeline board square at 45% fill.
     for (const topic of getCanvasAuthoringGuidance().topics) {

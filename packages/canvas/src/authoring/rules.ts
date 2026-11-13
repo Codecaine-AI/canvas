@@ -19,12 +19,14 @@
  * and sections stretched past their content.
  * The order, band, group-wire and record rules answer the round 5 cycle 2
  * diagnoses: wires of 1500 to 2900 px declined as forced, a band of 280 that
- * 13 wires share, and a section 79% empty.
+ * 13 wires share, and a section 79% empty. The edge limit answers the first
+ * drafts those rules drew: boards 4264 to 4940 wide, judged at 0.52 to 0.60.
  */
 import { CHIP_HEIGHT } from "../board/lints/geometry";
 import { NAME_TARGET_WORDS } from "../board/text-rules";
 import { LABELLED_GAP_AIR_PX } from "../connectors/label-placement";
 import { LANE_GAP_PX } from "../connectors/lanes";
+import { JUDGE_PNG_MAX_EDGE } from "../render/judge-size";
 import { AGENT_GRID } from "../session/tools/grid";
 import type { AuthoringTopic } from "./design";
 import { CRAFT_TARGETS } from "./style-guide/craft-targets";
@@ -73,8 +75,11 @@ export const LONG_WIRE = 1500;
 /** The empty block no board keeps, in the frame or inside a section: this area or more, with both sides `side` or more. */
 export const EMPTY_BLOCK = { area: 120_000, side: 200 } as const;
 
-/** The least share of a section its nodes and subsections cover. A section `arrange_section` laid out may sit under it. */
+/** The least share its nodes and subsections cover of the room inside a section's padding. */
 export const SECTION_FILL_MIN = 0.35;
+
+/** The longest edge a board takes: 1.5 times the judged image edge, where a label prints at two thirds of its size. */
+export const BOARD_EDGE_MAX = Math.floor((JUDGE_PNG_MAX_EDGE * 1.5) / AGENT_GRID) * AGENT_GRID;
 
 /**
  * The Layout section, one rule a line. A rule a layout tool needs the drawer
@@ -94,10 +99,10 @@ const LAYOUT_RULES: readonly string[] = [
   `One \`arrange\` call sets one gap, so give a row of sections the widest gap a band in it needs, and never over ${SECTION_GAP_SLACK} more: a wider gap is an empty band. Never narrow a band below its number. After \`connect\`, call \`arrange_section\` again on a section of nodes that holds a labeled wire: it widens the gap under the label.`,
   "Draw what lives inside a thing as a subsection: `place_section` inside the section, titled for the thing. A host and its loop, a mode and its knobs, a pool and its servers: the parts go in the subsection, and no wire runs from the thing to each part. A record of 2 or more fields is one subsection titled for the record, with its fields stacked in one column, never loose boxes. 2 or more nodes that share a group name make a subsection too. A section of 8 or more nodes holds subsections: name its groups before you place a node. When the source names two sides (inside and outside, existing and proposed), each side of 2 or more nodes is a subsection. Never draw a subsection for 1 node or for a group with no name.",
   "Never call `arrange_section` on a section that holds subsections. `arrange` its subsections and loose nodes with `space`, then call `fit_section` on it.",
-  "Choose the board shape the flow needs (wide for a left-to-right pipeline with feedback, a hub with spokes for a fan-out, a grid or 2 or 3 rows otherwise), and move whole sections to get it.",
+  `Choose the board shape the flow needs (wide for a left-to-right pipeline with feedback, a hub with spokes for a fan-out, a grid or 2 or 3 rows otherwise), and move whole sections to get it. Of two shapes that fit, take the one with the shorter wires. No edge passes ${BOARD_EDGE_MAX}.`,
   `Keep no empty block of ${EMPTY_BLOCK.area.toLocaleString("en-US")} px² or more with both sides ${EMPTY_BLOCK.side} or more (300 by 400, 200 by 600), in the frame or in a section. To close one, shrink the section or the frame, or move a neighbour in. Never widen a section, add a sticky or reverse a chain to fill space. Bend a wire before you keep an empty block.`,
-  `A section keeps the size of its content: \`fit_section\` sets it. Its nodes fill ${SECTION_FILL_MIN * 100}% or more of it, less only at the gaps \`arrange_section\` sets. Never stretch a section or a node to fill a row, align an edge or make room for a wire.`,
-  "Center a section on the node or section it connects to, and a hub on the row it fans out to.",
+  `A section keeps the size of its content: \`fit_section\` sets it. Its nodes fill ${SECTION_FILL_MIN * 100}% or more of the room inside its padding. Never stretch a section or a node to fill a row, align an edge or make room for a wire.`,
+  "Center a section on the node or section it connects to, and a hub on the row it fans out to. Where two sections map node to node, put each target level with its source, so the wire runs straight.",
   "After you move, add or delete a node in a section, call `fit_section`. It centers the children and evens each row.",
   "The engine straightens a wire less than 40px off axis and names the move. Never move that box back. Offset 40px or more to keep an elbow.",
   "Never pin a wire end with `position` to place or spread arrowheads. The board centers and merges them. `anchor` only picks the side.",

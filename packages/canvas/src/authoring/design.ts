@@ -1,7 +1,7 @@
 import { NAME_TARGET_WORDS, NOTE_MAX_WORDS } from "../board/text-rules";
 import { JUDGE_PNG_MAX_EDGE } from "../render/judge-size";
 import { creationDefaultFor } from "../session/tools/creation-defaults";
-import { EMPTY_BLOCK } from "./rules";
+import { BOARD_EDGE_MAX, EMPTY_BLOCK } from "./rules";
 import { CRAFT_TARGETS } from "./style-guide/craft-targets";
 import { VISUAL_PATTERNS } from "./visual-patterns";
 
@@ -79,10 +79,10 @@ export const DESIGN_TOPICS: readonly AuthoringTopic[] = [
 
 <layout_and_connections>
     <board_size>
-        The board is judged as one image of its whole extent. Up to ${JUDGE_PNG_MAX_EDGE} × ${JUDGE_PNG_MAX_EDGE}px that image is real size. Past it the image scales down and every label prints smaller. The flow sets the board's shape, not this limit: a board whose flow needs the room passes ${JUDGE_PNG_MAX_EDGE}px on either edge.
+        The board is judged as one image of its whole extent. Up to ${JUDGE_PNG_MAX_EDGE} × ${JUDGE_PNG_MAX_EDGE}px that image is real size. Past it the image scales down and every label prints smaller: the longer edge sets the scale. The flow sets the board's shape, not this limit: a board whose flow needs the room passes ${JUDGE_PNG_MAX_EDGE}px, up to ${BOARD_EDGE_MAX}px on its longer edge. There a label prints at two thirds of its size.
 
         - Lay 4 or more sections out in the shape the flow needs. A left-to-right pipeline with feedback takes a wide board: its stages in one row, in order, and the sections they feed under them. A fan-out takes a hub with its spokes around it. Other boards take a grid, or 2 or 3 rows that grow down. A row holds one chain of stages: a section off the chain goes in another row. Rows can differ in width, but no empty block reaches ${EMPTY_BLOCK.area.toLocaleString("en-US")} px² with both sides ${EMPTY_BLOCK.side}px or more.
-        - To fit the image, never shrink a node, cut a label, square the board, break a chain into 2 rows or make a band between sections narrower than topic \`rules\` says. Never add room past what topic \`rules\` gives a band: it makes the wires long and every label small.
+        - To fit the image, never shrink a node, cut a label, square the board or make a band between sections narrower than topic \`rules\` says. To stay under ${BOARD_EDGE_MAX}px, give a long section 2 rows of nodes, then fold the row of stages into 2 rows. Never add room past what topic \`rules\` gives a band: it makes the wires long and every label small.
         - When a section must grow or the board gets full, make room before you add: \`arrange\` the sections in reading order with \`flow: {axis: "x" or "y", gap}\`, then call tighten_wires again.
     </board_size>
 
