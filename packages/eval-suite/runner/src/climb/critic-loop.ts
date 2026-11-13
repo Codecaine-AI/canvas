@@ -58,6 +58,8 @@ export interface Answer { verdict: Verdict; reason: string }
 export interface LoopFinding {
   /** F1, F2, ...: one id for the whole loop. */
   id: string;
+  /** The round that found it. A lint still on the board is found again each round, under its id. */
+  round: number;
   /** check: a canvas_check lint. reviewer: one of the 6 kinds of reviewer. */
   source: "check" | "reviewer";
   severity: Severity;
@@ -131,6 +133,8 @@ export interface RoundRecord {
   check: boolean;
   /** What keep-best compares (roundFindings). Lower is better. */
   score: number;
+  /** The part of the score keep-best leaves out while this round is the last: the lint warnings new in it. */
+  grace: number;
   /** Wall clock of the review: lints, renders, reviewers and the merge. */
   reviewMs: number;
   renderMs: number;
@@ -207,6 +211,20 @@ function faultKey(finding: Pick<LoopFinding, "kind" | "ids" | "labels">): string
 }
 
 /**
+ * The rounds in which the drawer turned down each reviewer fault. A fault
+ * counts once a round: a reviewer can report 2 faults of one kind on the same
+ * items, and the drawer that declines both has declined the fault once.
+ */
+function declinedRounds(ledger: LoopFinding[]): Map<string, Set<number>> {
+  const rounds = new Map<string, Set<number>>();
+  for (const finding of ledger) {
+    const fault = finding.source === "reviewer" && turnedDown(finding) ? faultKey(finding) : null;
+    if (fault) rounds.set(fault, (rounds.get(fault) ?? new Set()).add(finding.round));
+  }
+  return rounds;
+}
+
+/**
  * One round's findings: the lints, then the reviewers', most severe first.
  * `ledger` holds every earlier round's findings with the drawer's answers.
  *
@@ -221,44 +239,42 @@ function faultKey(finding: Pick<LoopFinding, "kind" | "ids" | "labels">): string
  *
  * The score counts what the board has, sent or not: 3 for each blocker and 1
  * for each should, over every lint on the board and the reviewers' findings
- * sent. One thing does not count: a lint warning on items no earlier lint of
- * its rule named, in a round after the first. A revise pass that moves whole
- * sections can leave such warnings for one round, and keep-best must not go
- * back to the old board for that alone. It counts from the next round on.
+ * sent. `grace` is the part of it from lint warnings on items no earlier lint
+ * of its rule named, in a round after the first. A revise pass that moves
+ * whole sections can leave such warnings for one round, and keep-best must
+ * not go back to the old board for that alone: it takes the grace off the
+ * last round's score, and off no earlier round's (bestRound).
  */
-export function roundFindings(ledger: LoopFinding[], review: Pick<Review, "lints" | "findings">, round = 1): { findings: LoopFinding[]; withheld: Withheld[]; score: number } {
+export function roundFindings(ledger: LoopFinding[], review: Pick<Review, "lints" | "findings">, round = 1): { findings: LoopFinding[]; withheld: Withheld[]; score: number; grace: number } {
   const key = (finding: Pick<LoopFinding, "kind" | "ids" | "problem">) => JSON.stringify([finding.kind, finding.ids, finding.problem]);
   const items = (finding: Pick<LoopFinding, "kind" | "ids">) => JSON.stringify([finding.kind, [...finding.ids].sort()]);
   const checks = ledger.filter((finding) => finding.source === "check");
   const knownItems = new Set(checks.map(items));
-  const declined = new Map<string, number>();
-  for (const finding of ledger) {
-    const fault = finding.source === "reviewer" && turnedDown(finding) ? faultKey(finding) : null;
-    if (fault) declined.set(fault, (declined.get(fault) ?? 0) + 1);
-  }
+  const declined = declinedRounds(ledger);
   let next = 1 + Math.max(0, ...ledger.map((finding) => Number(finding.id.slice(1))));
-  let score = 0;
+  let [score, grace] = [0, 0];
   const findings: LoopFinding[] = [];
   const withheld: Withheld[] = [];
   for (const lint of review.lints) {
     const fresh: Omit<LoopFinding, "id"> = {
-      source: "check", severity: LINT_SEVERITY[lint.severity] ?? "should", kind: lint.rule,
+      round, source: "check", severity: LINT_SEVERITY[lint.severity] ?? "should", kind: lint.rule,
       ids: lint.at, labels: [], problem: lint.message, suggestion: lint.suggestion ?? "", regions: [], marks: [], state: lint.state, answer: null,
     };
     const before = checks.filter((finding) => key(finding) === key(fresh));
     const last = before.at(-1);
-    if (!(round > 1 && fresh.severity === "should" && !knownItems.has(items(fresh)))) score += SCORE_WEIGHT[fresh.severity];
+    score += SCORE_WEIGHT[fresh.severity];
+    if (round > 1 && fresh.severity === "should" && !knownItems.has(items(fresh))) grace += SCORE_WEIGHT[fresh.severity];
     const why = before.filter(withReason).length >= SETTLED_AFTER ? "settled" : last && withReason(last) && last.state === lint.state ? "held" : null;
     if (why && last) withheld.push({ id: last.id, source: "check", severity: fresh.severity, kind: fresh.kind, ids: fresh.ids, problem: fresh.problem, why });
     else findings.push({ id: last?.id ?? `F${next++}`, ...fresh });
   }
   for (const finding of review.findings) {
     const fresh: Omit<LoopFinding, "id"> = {
-      source: "reviewer", severity: finding.severity, kind: finding.kind,
+      round, source: "reviewer", severity: finding.severity, kind: finding.kind,
       ids: finding.ids, labels: finding.labels, problem: finding.problem, suggestion: "", regions: finding.regions, marks: finding.marks, state: "", answer: null,
     };
     const fault = faultKey(fresh);
-    if (fault && (declined.get(fault) ?? 0) >= SETTLED_AFTER) {
+    if (fault && (declined.get(fault)?.size ?? 0) >= SETTLED_AFTER) {
       withheld.push({ id: null, source: "reviewer", severity: fresh.severity, kind: fresh.kind, ids: fresh.ids, problem: fresh.problem, why: "settled" });
       continue;
     }
@@ -266,7 +282,7 @@ export function roundFindings(ledger: LoopFinding[], review: Pick<Review, "lints
     findings.push({ id: `F${next++}`, ...fresh });
   }
   // The sort is stable: a lint stays ahead of the reviewers' findings of its severity.
-  return { findings: findings.sort((a, b) => rank(a) - rank(b)), withheld, score };
+  return { findings: findings.sort((a, b) => rank(a) - rank(b)), withheld, score, grace };
 }
 
 const names = (finding: Pick<LoopFinding, "ids" | "labels">) => [...finding.ids, ...finding.labels.map((label) => JSON.stringify(label))].join(", ");
@@ -299,7 +315,7 @@ export function declinedFindings(ledger: LoopFinding[]): EarlierFinding[] {
       ids: last.ids,
       regions: [...new Set(same.flatMap((finding) => finding.regions))],
       line: `[${last.kind}] ${names(last) ? `${names(last)}: ` : ""}${sentence(last.problem)} The drawer ${verdict === "disagree" ? "disagreed" : "declined"}: ${reason.trim() || "it gave no reason"}`,
-      settled: same.length >= SETTLED_AFTER,
+      settled: new Set(same.map((finding) => finding.round)).size >= SETTLED_AFTER,
     };
   });
 }
@@ -381,13 +397,15 @@ const idsOf = (findings: LoopFinding[]) => [...new Set(findings.map((finding) =>
 /**
  * The round whose board the loop keeps, given that the last round reviewed
  * the board as it stands: the lowest score (roundFindings), and on a tie the
- * later round.
+ * later round. The last round's score is less its grace: the drawer had no
+ * round to clear the lint warnings its last revise pass left. An earlier
+ * round's score is whole: the warnings it left count against it.
  *
  * The score is a sample, not a measure. The reviewers differ from run to
  * run, so two reviews of one board can score a few points apart. A later
- * round also leaves out the settled faults and the new lint warnings of its
- * revise pass, so a later board scores lower than a fresh review would score
- * it. An earlier round wins only against that lean. A round that lost a
+ * round also leaves out the settled faults, so a later board scores lower
+ * than a fresh review would score it. An earlier round wins only against
+ * that lean. A round that lost a
  * reviewer's answer undercounts. As an earlier round it cannot win. As the
  * last round it loses only to a full review that scored less than its
  * undercount.
@@ -397,12 +415,14 @@ export function bestRound(rounds: RoundRecord[]): Kept | null {
   if (!last) return null;
   const full = (round: RoundRecord) => round.unparsed === 0;
   const orMore = full(last) ? "" : " or more";
-  const best = rounds.filter((round) => full(round) || round === last).reduce((low, round) => round.score <= low.score ? round : low);
-  if (best !== last) return { round: best.round, restored: true, reason: `round ${best.round} scored ${best.score}, and the last board (round ${last.round}) scored ${last.score}${orMore}` };
-  const level = rounds.findLast((round) => round !== last && full(round) && round.score === last.score);
-  let reason = `round ${last.round} is the last board and scored ${last.score}, the best of the loop`;
-  if (!full(last)) reason = `round ${last.round} is the last board. Its review lost ${last.unparsed} of ${last.regions} reviewers, so it scored ${last.score} or more, and no full review scored less than ${last.score}`;
-  else if (level) reason = `round ${last.round} is the last board and scored ${last.score}, level with round ${level.round}: a tie keeps the later board`;
+  const points = (round: RoundRecord) => round === last ? round.score - round.grace : round.score;
+  const lastScored = `scored ${points(last)}${last.grace ? ` (${last.score} less ${last.grace} for the lint warnings new in it)` : ""}`;
+  const best = rounds.filter((round) => full(round) || round === last).reduce((low, round) => points(round) <= points(low) ? round : low);
+  if (best !== last) return { round: best.round, restored: true, reason: `round ${best.round} scored ${best.score}, and the last board (round ${last.round}) ${lastScored}${orMore}` };
+  const level = rounds.findLast((round) => round !== last && full(round) && round.score === points(last));
+  let reason = `round ${last.round} is the last board and ${lastScored}, the best of the loop`;
+  if (!full(last)) reason = `round ${last.round} is the last board. Its review lost ${last.unparsed} of ${last.regions} reviewers, so it ${lastScored} or more, and no full review scored less than ${points(last)}`;
+  else if (level) reason = `round ${last.round} is the last board and ${lastScored}, level with round ${level.round}: a tie keeps the later board`;
   return { round: last.round, restored: false, reason };
 }
 

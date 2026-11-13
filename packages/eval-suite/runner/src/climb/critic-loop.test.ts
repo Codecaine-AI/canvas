@@ -94,6 +94,10 @@ describe("critic loop findings", () => {
     expect(third.findings.map((finding) => [finding.id, finding.kind, finding.ids])).toEqual([["F3", "routing", ["v"]], ["F4", "label_chip", ["w"]]]);
     expect(third.withheld).toEqual([{ id: null, source: "reviewer", severity: "should", kind: "routing", ids: ["w"], problem: "The wire bends twice.", why: "settled" }]);
     expect(third.score).toBe(2);
+    // 2 faults of one kind on one wire, declined in one round, are one decline: the wire's next fault is still sent.
+    const pair = answeredRound([], { lints: [], findings: [seen(), seen({ problem: "The wire runs along the border." })] }, "F1 declined: the bend clears a label\nF2 declined: the border is 30 px off");
+    expect(roundFindings(pair, { lints: [], findings: [seen()] }, 2)).toMatchObject({ findings: [{ id: "F3" }], withheld: [] });
+    expect(declinedFindings(pair).map((fault) => fault.settled)).toEqual([false]);
     // A fault the drawer fixed and that came back is not settled, however often.
     const fixed = answeredRound(answeredRound([], { lints: [], findings: [seen()] }, "F1 fixed"), { lints: [], findings: [seen()] }, "F2 fixed", 2);
     expect(roundFindings(fixed, { lints: [], findings: [seen()] }, 3).withheld).toEqual([]);
@@ -494,12 +498,26 @@ describe("critic loop keeps its best board", () => {
       restore: () => {},
     });
     const two = await loop(2);
-    // The warning both boards have counts on both. The 2 new ones count 0 in round 2.
-    expect(two.rounds.map((round) => round.score)).toEqual([2, 1]);
-    expect(two.kept).toMatchObject({ round: 2, restored: false });
-    // The drawer still gets them, and they count from the next round on.
+    // The warning both boards have counts on both. The 2 new ones are the grace of round 2: as the last round it counts 1.
+    expect(two.rounds.map((round) => [round.score, round.grace])).toEqual([[2, 0], [3, 2]]);
+    expect(two.kept).toEqual({ round: 2, restored: false, reason: "round 2 is the last board and scored 1 (3 less 2 for the lint warnings new in it), the best of the loop" });
+    // The drawer still gets them, and a round later they count: the board that kept them loses to the first.
     expect(two.rounds[1]!.findings.map((finding) => finding.kind)).toEqual(["near-miss", "near-miss", "tight-gap"]);
-    expect((await loop(3)).rounds.map((round) => round.score)).toEqual([2, 1, 3]);
+    const three = await loop(3);
+    expect(three.rounds.map((round) => [round.score, round.grace])).toEqual([[2, 0], [3, 2], [3, 0]]);
+    expect(three.kept).toMatchObject({ round: 1, restored: true });
+  });
+
+  test("the grace is for the last board only: a board that left 3 new warnings does not beat the later board that cleared 2 of them", async () => {
+    const left = [lint({ at: ["sec_a", "n1"] }), lint({ at: ["sec_a", "n2"] }), lint({ at: ["sec_a", "n3"] })];
+    const record = await reviewLoop({
+      budget: 3,
+      review: async (round) => review(round === 1 ? { findings: [seen({ kind: "spacing", ids: ["sec_a", "sec_b"], regions: ["space"] })] } : { lints: left.slice(0, round === 2 ? 3 : 1) }),
+      revise: async (_round, findings) => ran(answered(findings, "fixed")),
+      restore: () => {},
+    });
+    expect(record.rounds.map((round) => [round.score, round.grace])).toEqual([[1, 0], [3, 3], [1, 0]]);
+    expect(record.kept).toEqual({ round: 3, restored: false, reason: "round 3 is the last board and scored 1, level with round 1: a tie keeps the later board" });
   });
 
   test("the last board stays when it scored best, and on a tie", async () => {

@@ -405,6 +405,8 @@ describe("climb review answer", () => {
     expect(await asking(["unknown model gpt-6.1-sol"])).toMatchObject({ calls: 1, limited: false, waits: [] });
     expect(await asking(["429 Too Many Requests"], { timedOut: true })).toMatchObject({ calls: 1, limited: false });
     expect(await asking(["429 Too Many Requests"], { answeredFrom: 1 })).toMatchObject({ calls: 1, limited: false });
+    // Codex prints the prompt first. A number in it is not a rate limit: only the end of stderr holds the error.
+    expect(await asking([`user\np1 · x 429 · y 503\n${"codex ".repeat(400)}\nERROR: unexpected status 400 Bad Request`])).toMatchObject({ calls: 1, limited: false, waits: [] });
   });
 });
 

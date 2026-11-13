@@ -21,7 +21,7 @@
  */
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { relative, resolve } from "node:path";
 
 import { Semaphore } from "../semaphore.ts";
@@ -706,15 +706,20 @@ async function runCritic(args: string[], timeoutMs: number): Promise<CriticRun> 
   return { exitCode, timedOut, stderr };
 }
 
+/** The end of Codex's stderr that holds its error. */
+const ERROR_TAIL = 2000;
+
 /**
  * One reviewer's answer, asked again while Codex fails on a rate limit or an
  * overload (HTTP 429, 529): it wrote no answer, did not time out, and its
- * error names the limit. `call` runs Codex once.
+ * error names the limit. `call` runs Codex once. Codex prints the prompt to
+ * stderr first, and a prompt holds numbers such as "x 429": only the end of
+ * stderr, where the error is, is read.
  */
 export function askReviewer(options: { call(): Promise<CriticRun>; answered(): boolean; sleep?(ms: number): Promise<void>; onWait?(tries: number, waitMs: number): void }) {
   return retryRateLimited({
     attempt: options.call,
-    limited: (run) => !run.timedOut && !options.answered() && isRateLimitText(run.stderr),
+    limited: (run) => !run.timedOut && !options.answered() && isRateLimitText(run.stderr.slice(-ERROR_TAIL)),
     firstWaitMs: REVIEWER_FIRST_WAIT_MS,
     sleep: options.sleep,
     onWait: options.onWait,
@@ -825,16 +830,20 @@ export async function critiqueBoard(options: {
     const answerPath = resolve(job.dir, `answer-${turn}.json`);
     writeFileSync(resolve(job.dir, `prompt-${turn}.md`), `${prompt}\n`);
     const args = criticArgs(job.dir, prompt, images, schemaPath, answerPath, effort);
+    const read = () => {
+      const text = readFileSync(answerPath, "utf8");
+      return { text, answer: parseAnswer(text) };
+    };
     const { result: run, tries } = await askReviewer({
       call: () => runCritic(args, CRITIC_TIMEOUT_MS[effort]),
-      answered: () => existsSync(answerPath),
+      // Codex can leave an empty answer file when the API turns it down.
+      answered: () => { try { read(); return true; } catch { return false; } },
       onWait: (tried, waitMs) => process.stdout.write(`reviewer ${job.unit.id}: rate limited on try ${tried}, waits ${waitMs / 1000} s\n`),
     });
     try {
-      const text = readFileSync(answerPath, "utf8");
-      return { run, tries, text, answer: parseAnswer(text), error: null };
+      return { run, tries, ...read(), error: null };
     } catch (failure) {
-      const error = run.timedOut ? "timed out" : `${failure instanceof Error ? failure.message : String(failure)}\n${run.stderr.slice(-2000)}`;
+      const error = run.timedOut ? "timed out" : `${failure instanceof Error ? failure.message : String(failure)}\n${run.stderr.slice(-ERROR_TAIL)}`;
       return { run, tries, text: "", answer: null, error };
     }
   };
