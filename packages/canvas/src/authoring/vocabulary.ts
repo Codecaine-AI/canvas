@@ -94,7 +94,7 @@ export function colorPalette(): AuthoringTopic {
     - A nested section never shares its parent's color, and a gray section never sits directly in a gray section. Two sibling sections closer than one gutter (${TOUCH_GUTTER}px) never share a color.
     - A node takes its role's hue, whatever its icon. Use the preferred color a catalog entry lists only when its role has no hue in the key.
     - Red means failure, reject, or error, and nothing else. Keep orange, yellow and pink for emphasis you choose.
-    - When a viewer cannot guess the key from the names, put it on the board as a short note beside the title or the first section, one line per hue.
+    - When a viewer cannot guess the key from the names, put it on the board as a short note under the title, one line per hue.
 </color_meaning>
 
 <theme>

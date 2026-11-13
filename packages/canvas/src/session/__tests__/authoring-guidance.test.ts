@@ -2,16 +2,14 @@ import { describe, expect, test } from "bun:test";
 import { CANVAS_COLORS, CANVAS_ICON_GLYPHS, type CanvasIconGlyph } from "../../state/schema";
 import { CANVAS_THEME_IDS, canvasThemePreset } from "../../theme/canvas-style";
 import { getCanvasAuthoringGuidance } from "../../authoring";
-import { bandGap, BOARD_EDGE_MAX, EMPTY_BLOCK, LABEL_LEG, LONG_WIRE, SECTION_FILL_MIN, SECTION_GAP_PER_LABEL, SECTION_GAP_PER_WIRE, SECTION_GAP_SLACK } from "../../authoring/rules";
+import { BAND_LANE_RUN, BAND_NEED_MAX, bandNeed, EMPTY_BLOCK, LABEL_LEG, LONG_WIRE, SECTION_FILL_MIN, SECTION_GAP_PER_WIRE, SECTION_GAP_SLACK } from "../../authoring/rules";
 import { FINISHING_RULES } from "../../board/lints";
-import { CHIP_HEIGHT } from "../../board/lints/geometry";
 import { runDiagnostics } from "../../board/lints/run";
 import { NAME_MAX_CHARS, NAME_MAX_WORDS, NAME_TARGET_WORDS } from "../../board/text-rules";
 import { LANE_GAP_PX } from "../../connectors/lanes";
 import { routeConnectionOnBoard } from "../../connectors/routing";
 import { OBJECT_PREFERENCES } from "../../objects/registry";
 import { ICON_GLYPH_CATEGORIES, resolveIconGlyph } from "../../objects/shapes/icon/icon-glyphs";
-import { JUDGE_PNG_MAX_EDGE } from "../../render/judge-size";
 import { box, connect, makeDocument } from "./synthetic";
 
 function topicText(id: string): string {
@@ -142,18 +140,17 @@ describe("shared Canvas authoring guidance", () => {
   test("facts go in a name, a wire label or a sticky beside the node, and a wire label names its cargo", () => {
     const rules = topicText("rules");
     expect(rules).toContain("Put a fact a reader needs (a size, a tool name) in the name, a wire label or a sticky.");
-    expect(rules).toContain("Put each sticky beside the node it explains, and the color key beside the title or the first section, never alone in a corner.");
-    expect(topicText("color_palette")).toContain("as a short note beside the title or the first section");
+    expect(rules).toContain("Put each sticky beside the node it explains and the color key under the title, never in a band between sections.");
+    expect(topicText("color_palette")).toContain("as a short note under the title");
+    // Round 5 cycle 3: board 03 moved its notes and its key into the gaps between sections.
+    for (const topic of getCanvasAuthoringGuidance().topics) expect(topic.text, topic.id).not.toContain("or the first section");
     expect(rules).toContain("A wire label says what the wire carries. It never repeats a node or section name.");
   });
 
   test("a full board makes room with arrange flow, and a section keeps the size of its content", () => {
-    for (const id of ["rules", "diagram_design"]) {
-      const text = topicText(id);
-      expect(text, id).toContain('`flow: {axis: "x" or "y", gap}`');
-      expect(text, id).not.toContain("Leave no empty column or band");
-    }
     const rules = topicText("rules");
+    expect(rules).toContain('`flow: {axis: "x" or "y", gap}`');
+    for (const id of ["rules", "diagram_design"]) expect(topicText(id), id).not.toContain("Leave no empty column or band");
     expect(rules).toContain("A section keeps the size of its content: `fit_section` sets it.");
     // Of the whole section, a 2 by 2 grid `arrange_section` laid out fills 32%: the measure is the room inside the padding.
     expect(rules).toContain(`Its nodes fill ${SECTION_FILL_MIN * 100}% or more of the room inside its padding.`);
@@ -162,36 +159,33 @@ describe("shared Canvas authoring guidance", () => {
     expect(rules).toContain("Where two sections map node to node, set each target in line with its source across the gap, so the wire runs straight.");
   });
 
-  test("the flow sets the board shape up to the edge limit, and the image limit never squares a board", () => {
+  test("the flow sets the board shape, a board past the image size grows its shorter edge first, and no edge has a cap", () => {
     const rules = topicText("rules");
-    expect(rules).toContain("Choose the board shape the flow needs (wide for a left-to-right pipeline with feedback, a hub with spokes for a fan-out, a grid or 2 or 3 rows otherwise), and move whole sections to get it.");
-    expect(rules).toContain("Of two shapes that fit, take the one with the shorter wires. No edge passes 3860.");
-    // 1.5 times the judged edge, on the grid: a label prints at two thirds of its size.
-    expect(BOARD_EDGE_MAX).toBe(3860);
-    expect(JUDGE_PNG_MAX_EDGE / BOARD_EDGE_MAX).toBeCloseTo(2 / 3, 2);
+    expect(rules).toContain("Choose the board shape the flow needs, and move whole sections to get it. Of two shapes that fit, take the one with the shorter wires.");
     const design = topicText("diagram_design");
-    expect(design).toContain("every label prints smaller: the longer edge sets the scale.");
-    expect(design).toContain("The flow sets the board's shape, not this limit: a board whose flow needs the room passes 2576px, up to 3860px on its longer edge.");
+    expect(design).toContain("Up to 2576 × 2576px that image is real size.");
+    expect(design).toContain("every label prints smaller: the longer edge sets the scale, so past it grow the shorter edge first.");
+    expect(design).toContain("Grow a board only when its wires need the room.");
     expect(design).toContain("A left-to-right pipeline with feedback takes a wide board: its stages in one row, in order, and the sections they feed under them.");
     expect(design).toContain("A fan-out takes a hub with its spokes around it.");
     expect(design).toContain("A row holds one chain of stages: a section off the chain goes in another row.");
-    expect(design).toContain("To fit the image, never shrink a node, cut a label, square the board or make a band between sections narrower than topic `rules` says.");
-    expect(design).toContain("To stay under 3860px, wrap a long section into 2 rows of nodes, then the row of stages into 2 rows.");
+    expect(design).toContain("To fit the image, never shrink a node, cut a label, square the board or make a band between sections narrower than its need in topic `rules`.");
     expect(design).toContain("Never add room past what topic `rules` gives a band");
-    // Round 5 cycle 2: these lines kept a pipeline board square at 45% fill.
     for (const topic of getCanvasAuthoringGuidance().topics) {
-      expect(topic.text, topic.id).not.toMatch(/grow the shorter edge first|Never one long row|stack a long row into 2 rows/);
+      // Round 5 cycle 2: these lines kept a pipeline board square at 45% fill.
+      expect(topic.text, topic.id).not.toMatch(/Never one long row|stack a long row into 2 rows/);
+      // Round 5 cycle 3: the edge cap put board h1 in 3 rows round a 1360 by 650 empty block.
+      expect(topic.text, topic.id).not.toMatch(/3860|No edge passes|To stay under/);
     }
   });
 
   test("an empty block is measured by area, and its fix shrinks or moves in, never fills", () => {
     expect(EMPTY_BLOCK).toEqual({ area: 120_000, side: 200 });
     const rules = topicText("rules");
-    expect(rules).toContain("Keep no empty block of 120,000 px² or more with both sides 200 or more (300 by 400, 200 by 600), in the frame or in a section.");
+    expect(rules).toContain("Keep no empty block of 120,000 px² or more with both sides 200 or more, in the frame or in a section.");
     expect(rules).toContain("To close one, shrink the section or the frame, or move a neighbour in.");
-    expect(rules).toContain("Never widen a section, add a sticky or reverse a chain to fill space.");
+    expect(rules).toContain("Never widen a section, reverse a chain, or add or move a sticky or the key to fill space.");
     expect(rules).toContain("Bend a wire before you keep an empty block.");
-    expect(topicText("diagram_design")).toContain("Rows can differ in width, but no empty block reaches 120,000 px² with both sides 200px or more.");
     for (const topic of getCanvasAuthoringGuidance().topics) {
       // The round 1 outline line excused the empty blocks the round 5 judges faulted.
       expect(topic.text, topic.id).not.toMatch(/not a rectangle|An empty corner is fine|Every move after the board is wired is rework|move sections closer/);
@@ -220,15 +214,33 @@ describe("shared Canvas authoring guidance", () => {
     expect(rules).not.toContain("sits beside the section that uses it");
   });
 
-  test("a group wire ends on the frame once, a record is one stacked subsection, and no fix deletes a subsection", () => {
+  test("a wire starts on a node, and ends on a frame only for a subsection of 2 or more nodes that all receive it", () => {
     const rules = topicText("rules");
-    expect(rules).toContain("When every member of a section or subsection sends or receives the same wire, `connect` its frame once, not each member, and keep it there. Any other wire ends on a node.");
-    expect(rules).toContain("A record of 2 or more fields is one subsection titled for the record, with its fields stacked in one column, never loose boxes.");
-    expect(rules).toContain("A wire that must end on a node ends on a node inside the subsection.");
+    expect(rules).toContain("A wire always starts on a node.");
+    expect(rules).toContain("It ends on a frame only when the frame is a subsection of 2 or more nodes, drawn round exactly the group that receives it: `connect` that frame once.");
+    expect(rules).toContain("Any other wire ends on a node: a section with one node wires to the node.");
     const design = topicText("diagram_design");
-    expect(design).toContain("When every node in a section or subsection sends or receives the same wire, connect its frame once. When only some act, connect one wire per node.");
+    expect(design).toContain("Start each wire at the node that sends and end it at the node that acts.");
+    expect(design).toContain("When every node of a subsection receives the same wire, end it on the subsection's frame once. When only some act, connect one wire per node.");
     // Round 5 cycle 2: this line turned 20 wires into 30.
     expect(design).not.toContain("not one to the frame");
+    // Round 5 cycle 3: these lines drew 8 wires that start on a frame on board h4.
+    for (const topic of getCanvasAuthoringGuidance().topics) expect(topic.text, topic.id).not.toMatch(/sends or receives the same wire/);
+  });
+
+  test("a record is one stacked subsection whose fields keep their icons, and past 8 sections a parent groups them", () => {
+    const rules = topicText("rules");
+    expect(rules).toContain("A record of 2 or more fields is one subsection titled for the record, its fields stacked in one column.");
+    expect(rules).toContain("Each field keeps its icon or its typed shape: a row of plain rectangles is not a record.");
+    expect(rules).toContain("Past 8 top-level sections, group related sections under a parent section.");
+  });
+
+  test("stacked sections share a left edge and a width, rows of nodes sit level, and a hub keeps a band for one bus", () => {
+    const rules = topicText("rules");
+    expect(rules).toContain("Sections stacked in a column share one left edge and one width, from rows of nodes that match, not from a stretch.");
+    expect(rules).toContain("Sections side by side keep their rows of nodes level.");
+    expect(rules).toContain(`A hub over a row of children keeps one band of ${bandNeed(1)} under it, where the wires to the children run as one bus.`);
+    expect(rules).toContain("3 or more wires into one node enter one side as one bus, the side that faces their sources: never turn a wire back to reach another side.");
   });
 
   test("the board reads one way from the top or the left, and a row of targets follows its sources", () => {
@@ -241,14 +253,18 @@ describe("shared Canvas authoring guidance", () => {
   test("the plan is a wire table by pair of sections and by band, written before the first place_section", () => {
     const workflow = topicText("workflow");
     const understand = workflow.slice(workflow.indexOf("1. Understand."), workflow.indexOf("2. Build."));
-    expect(understand).toContain("Before the first `place_section`, write a wire table: one row for each pair of sections with its wires, then one row for each band between rows or columns of sections, with every wire that runs in it and the gap that count needs.");
+    expect(understand).toContain("Before the first `place_section`, write a wire table: one row for each pair of sections with its wires, then one row for each band between neighbour sections, with the wires that run along it and the width that count needs.");
     expect(understand).toContain("choose one reading direction and the board shape the flow needs, and order each row of targets as their sources");
-    expect(workflow).toContain("Size each band between sections from every wire in it: topic `rules` has the numbers.");
-    expect(topicText("diagram_design")).toContain("the color key, and the wire table: every wire by pair of sections, then the wires in each band between rows or columns.");
+    expect(workflow).toContain("Size each band between sections from the wires that run along it: topic `rules` has the numbers.");
+    const design = topicText("diagram_design");
+    expect(design).toContain("the color key, and the wire table: every wire by pair of sections, then the lanes in each band between neighbour sections.");
+    expect(design).toContain("A band needs 200, and more only for a long label or wires that run along it: topic `rules` has the numbers.");
   });
 
   test("a fix never stretches a section, merges nodes, deletes a subsection or grows an empty block", () => {
-    expect(topicText("rules")).toContain("Fix a finding without stretching a section, merging nodes, deleting a subsection or growing an empty block.");
+    const rules = topicText("rules");
+    expect(rules).toContain("Fix a finding without stretching a section, merging nodes, deleting a subsection or growing an empty block.");
+    expect(rules).toContain("Keep a subsection the source names, then shrink the section round it.");
   });
 
   test("sections that wire to each other sit side by side, in the plan and in the rules", () => {
@@ -258,20 +274,28 @@ describe("shared Canvas authoring guidance", () => {
     expect(topicText("workflow")).toContain("Put the pairs with the most wires next to each other");
   });
 
-  test("a band between sections is sized for every wire in it, with the router's lane and the chip's height", () => {
+  test("a band is sized for the wires that run along it and its longest label, and a band at its need is never empty space", () => {
     const rules = topicText("rules");
-    expect(rules).toContain("A band is the gap between two sections, or between two rows or two columns of sections.");
-    expect(rules).toContain(`Size it for every wire that crosses it or runs along it, from every pair of sections, not one pair: ${bandGap(1)}, plus ${SECTION_GAP_PER_WIRE} for each wire after the first, plus ${SECTION_GAP_PER_LABEL} more for each of them that carries a label.`);
-    // The maximum counts from what the band needs, labels and all, so it never asks for less than the minimum.
-    expect(rules).toContain(`give a row of sections the widest gap a band in it needs, and never over ${SECTION_GAP_SLACK} more: a wider gap is an empty band. Never narrow a band below its number.`);
-    // One plain wire takes the base gutter, and a labeled lane holds a chip.
-    expect(bandGap(1)).toBe(200);
-    expect(bandGap(0)).toBe(200);
-    expect(SECTION_GAP_PER_WIRE + SECTION_GAP_PER_LABEL).toBeGreaterThanOrEqual(CHIP_HEIGHT);
-    // Round 5 cycle 2: 7 plain wires shared a band of 260 on board h4, and 13 wires a band of 280 on board h1.
-    expect(bandGap(7)).toBe(320);
-    expect(bandGap(13)).toBe(440);
-    expect(bandGap(13, 9)).toBe(620);
+    expect(rules).toContain("A band is the gap between two neighbour sections, over the span the two share.");
+    expect(rules).toContain(`Its lanes are the wires that run along it for ${BAND_LANE_RUN} or more inside that span: a wire that only crosses it straight is no lane.`);
+    expect(rules).toContain(`A band needs ${bandNeed(1)}, or the longest label leg of a chip that sits in it when that is more, plus ${SECTION_GAP_PER_WIRE} for each lane after the first.`);
+    expect(rules).toContain(`From its need to ${SECTION_GAP_SLACK} over, a band is right, and is never empty space.`);
+    expect(rules).toContain(`A band that needs over ${BAND_NEED_MAX} is a section-order fault: reorder the sections, never widen it.`);
+    expect(rules).toContain("One `arrange` call gives a row of sections one gap: where its bands need different widths, set each with `move`.");
+    expect([BAND_LANE_RUN, SECTION_GAP_SLACK, BAND_NEED_MAX]).toEqual([40, 120, 400]);
+    // A band with no lane, or with one, takes the base gutter.
+    expect(bandNeed(0)).toBe(200);
+    expect(bandNeed(1)).toBe(200);
+    // Round 5 cycle 3: 11 wires that only cross the band of board 09 set it at 820. Its 4 lanes need 260.
+    expect(bandNeed(4)).toBe(260);
+    // A label leg counts once, as the longest, and only when it passes the gutter.
+    expect(bandNeed(1, LABEL_LEG.base + LABEL_LEG.perCharacter * 8)).toBe(200);
+    expect(bandNeed(3, LABEL_LEG.base + LABEL_LEG.perCharacter * 16)).toBe(300);
+    // 11 lanes are the most a band holds: one more is a section-order fault.
+    expect(bandNeed(11)).toBe(BAND_NEED_MAX);
+    expect(bandNeed(12)).toBeGreaterThan(BAND_NEED_MAX);
+    // Round 5 cycle 3: these lines counted the wires that cross a band, and one gap for a whole row.
+    expect(rules).not.toMatch(/crosses it or runs along it|from every pair of sections|more for each of them|the widest gap a band in it needs/);
     expect(rules).toContain(`A horizontal wire leg that carries a label is at least ${LABEL_LEG.base} plus ${LABEL_LEG.perCharacter} for each label character long`);
     expect(rules).toContain(`A vertical one is at least ${LABEL_LEG.vertical} long.`);
     expect(rules).toContain("Gaps inside a section stay as `arrange_section` sets them.");
@@ -320,7 +344,7 @@ describe("shared Canvas authoring guidance", () => {
     expect(rules).toContain("Wires that share a source or a target and one meaning run as one trunk and split at the end.");
     expect(rules).toContain("Give them one color and one dash, and never split a trunk the board merged.");
     expect(rules).toContain("Wires that differ in color or dash never share a line or an arrowhead.");
-    expect(rules).toContain("give each meaning its own side of the node, nearest its other ends: set `anchor` on that end in `connect`, or with `change_connection`");
+    expect(rules).toContain("Where two meanings meet one node, give each its own side of the node, nearest its other ends: set `anchor` on that end in `connect`, or with `change_connection`");
     expect(rules).toContain("Two wires that cross on the way in trade sides, so choose sides that keep them apart.");
     expect(rules).toContain("Never pin a wire end with `position` to place or spread arrowheads. The board centers and merges them. `anchor` only picks the side.");
     // Round 5 cycle 1: this line put two meanings on one line into a node.
@@ -368,9 +392,9 @@ describe("shared Canvas authoring guidance", () => {
       "Call `canvas_check`, and read its whole-board PNG and its LAYOUT block.",
       "`look` at `page-frame`: MEASURES prints the gaps between its sections",
       `Which section move (swap two neighbours, change a row) removes each wire over ${LONG_WIRE}, each wire through a section that holds neither end and each crossing between sections?`,
-      `Which band is under its number in topic \`rules\` for every wire in it, or over ${SECTION_GAP_SLACK} more?`,
+      `Which band is under its need in topic \`rules\`, over ${SECTION_GAP_SLACK} more, or needs over ${BAND_NEED_MAX}?`,
       "Does another board shape (wider, taller, a grid, a hub with spokes) fit the flow better and close an empty block?",
-      "Never narrow a band below its number.",
+      "Never narrow a band below its need.",
       "whole sections with `arrange` or `move`",
       "then each row's gap again (`arrange` with `space` along a row, `move` with `by` for the rows below), then `tighten_wires`",
       "Moving sections after the first draft is normal.",
