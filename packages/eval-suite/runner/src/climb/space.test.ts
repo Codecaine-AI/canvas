@@ -407,6 +407,12 @@ describe("climb wires between sections", () => {
     expect(layout.wires.w).toStartWith("w is 700 px now, a → b, not neighbours: m lies between them; it runs through m");
   });
 
+  test("2 sections that touch are a band too narrow, with its own legal width", () => {
+    const { gaps, faults } = plan(board(full("a", null, 0, 0, 300, 400), full("b", null, 300, 0, 300, 400)));
+    expect(gaps.map((gap) => [gap.gap, gap.need, gap.most, gap.fault])).toEqual([[0, 200, 320, "under"]]);
+    expect(faults.find((fault) => fault.kind === "wire")!.problem).toContain("Move the 2 sections apart to 200 px, and no more than 320 px");
+  });
+
   test("a section's place is its neighbours and the side each is on: a swap or another row changes it, and a move of a few px does not", () => {
     const places = (...sections: BoardObject[][]) => plan(board(...sections)).layout.places;
     const [a, m, b] = [full("a", null, 0, 0, 300, 400), full("m", null, 500, 0, 300, 400), full("b", null, 1000, 0, 300, 400)];

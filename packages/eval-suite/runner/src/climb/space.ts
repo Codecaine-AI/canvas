@@ -247,7 +247,7 @@ export function gapMeasures(board: Board, units: ReviewUnit[], facts: WireFact[]
   const strip = (a: SectionGap, b: SectionGap) => a.side === b.side && [a.a, a.b].some((id) => id === b.a || id === b.b) && depth(a)[0] < depth(b)[1] && depth(b)[0] < depth(a)[1];
   return needs.map((gap): GapMeasure => {
     const { parent, need, ruled } = gap;
-    const most = Math.max(...needs.filter((other) => other.ruled === ruled && strip(gap, other)).map((other) => other.need)) + rule.slack;
+    const most = Math.max(need, ...needs.filter((other) => other.ruled === ruled && strip(gap, other)).map((other) => other.need)) + rule.slack;
     // A sticky in the band does not use it: a note moved into a band leaves the band as wide.
     const clear = !board.objects.some((object) => object.geometry && object.type !== STICKY && (object.parentId ?? null) === parent && object.id !== gap.a && object.id !== gap.b && touches(object.geometry, gap.gutter));
     return { ...gap, most, fault: !ruled ? null : gap.gap < need ? "under" : clear && gap.gap > most ? "over" : null };
