@@ -1,0 +1,634 @@
+{
+  "schemaVersion": 1,
+  "id": "08-trigger-bindings",
+  "title": "Trigger bindings",
+  "description": "How a trigger binding starts a workflow and where the run happens. Left: the four RUN_TRIGGER kinds converge on the binding's `trigger kind` field; under them, the pr-label label state machine (agent:review → agent:in-progress → agent:blocked, all GitHub Actions labels). Center: the Binding record (outside the workflow YAML) with its five fields. Right: the `run location` field goes straight to local (version 1) in Run locations, or, in Piece 2 (above), to the Scheduler on services-01, which picks dev-01 or sandbox by load. Key: green solid = version 1; violet dashed = later / reserved.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Trigger bindings",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 60,
+        "y": 20,
+        "width": 2320,
+        "height": 1760
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "triggers",
+      "type": "section",
+      "text": "Trigger kinds (RUN_TRIGGER)",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 352,
+        "y": 100,
+        "width": 340,
+        "height": 820
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "event"
+    },
+    {
+      "id": "binding",
+      "type": "section",
+      "text": "Binding (outside the YAML)",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 960,
+        "y": 180,
+        "width": 360,
+        "height": 1020
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "link"
+    },
+    {
+      "id": "piece2",
+      "type": "section",
+      "text": "Piece 2",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1560,
+        "y": 340,
+        "width": 340,
+        "height": 220
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "layers"
+    },
+    {
+      "id": "runlocs",
+      "type": "section",
+      "text": "Run locations",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1548,
+        "y": 800,
+        "width": 800,
+        "height": 400
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "labels",
+      "type": "section",
+      "text": "Label states",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 340,
+        "y": 1120,
+        "width": 360,
+        "height": 620
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "brand-github"
+    },
+    {
+      "id": "t-manual",
+      "type": "icon",
+      "text": "manual (version 1)",
+      "color": "green",
+      "parentId": "triggers",
+      "geometry": {
+        "x": 372,
+        "y": 556,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "t-prlabel",
+      "type": "icon",
+      "text": "pr-label (version 1)",
+      "color": "green",
+      "parentId": "triggers",
+      "geometry": {
+        "x": 372,
+        "y": 756,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "pull-request"
+    },
+    {
+      "id": "t-schedule",
+      "type": "icon",
+      "text": "schedule (reserved · later)",
+      "color": "violet",
+      "parentId": "triggers",
+      "geometry": {
+        "x": 372,
+        "y": 156,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "schedule"
+    },
+    {
+      "id": "t-webhook",
+      "type": "icon",
+      "text": "webhook (reserved · later)",
+      "color": "violet",
+      "parentId": "triggers",
+      "geometry": {
+        "x": 372,
+        "y": 356,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "webhook"
+    },
+    {
+      "id": "f-workflow",
+      "type": "rectangle",
+      "text": "workflow",
+      "color": "blue",
+      "parentId": "binding",
+      "geometry": {
+        "x": 1000,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "f-trigger",
+      "type": "rectangle",
+      "text": "trigger kind",
+      "color": "blue",
+      "parentId": "binding",
+      "geometry": {
+        "x": 1000,
+        "y": 460,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "f-resource",
+      "type": "rectangle",
+      "text": "resource",
+      "color": "blue",
+      "parentId": "binding",
+      "geometry": {
+        "x": 1000,
+        "y": 660,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "f-overlap",
+      "type": "rectangle",
+      "text": "overlap policy",
+      "color": "blue",
+      "parentId": "binding",
+      "geometry": {
+        "x": 1000,
+        "y": 860,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "f-runloc",
+      "type": "rectangle",
+      "text": "run location",
+      "color": "blue",
+      "parentId": "binding",
+      "geometry": {
+        "x": 1000,
+        "y": 1060,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "scheduler",
+      "type": "icon",
+      "text": "Scheduler (services-01)",
+      "color": "violet",
+      "parentId": "piece2",
+      "geometry": {
+        "x": 1580,
+        "y": 396,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "r-local",
+      "type": "icon",
+      "text": "local (command-center · version 1)",
+      "color": "green",
+      "parentId": "runlocs",
+      "geometry": {
+        "x": 1800,
+        "y": 1052,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "laptop"
+    },
+    {
+      "id": "r-dev01",
+      "type": "icon",
+      "text": "dev-01 (later · background)",
+      "color": "violet",
+      "parentId": "runlocs",
+      "geometry": {
+        "x": 1580,
+        "y": 860,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "r-sandbox",
+      "type": "icon",
+      "text": "sandbox (later · Daytona)",
+      "color": "violet",
+      "parentId": "runlocs",
+      "geometry": {
+        "x": 2020,
+        "y": 860,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "container"
+    },
+    {
+      "id": "s-review",
+      "type": "process",
+      "text": "agent:review",
+      "color": "green",
+      "parentId": "labels",
+      "geometry": {
+        "x": 380,
+        "y": 1200,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s-inprogress",
+      "type": "process",
+      "text": "agent:in-progress",
+      "color": "green",
+      "parentId": "labels",
+      "geometry": {
+        "x": 380,
+        "y": 1400,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s-blocked",
+      "type": "process",
+      "text": "agent:blocked",
+      "color": "green",
+      "parentId": "labels",
+      "geometry": {
+        "x": 380,
+        "y": 1600,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "n-trigger",
+      "type": "sticky",
+      "text": "Each new trigger kind joins `RUN_TRIGGER` in `agent-runs.ts`.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 440,
+        "width": 180,
+        "height": 140
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "n-binding",
+      "type": "sticky",
+      "text": "Bindings live outside the workflow YAML.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1360,
+        "y": 160,
+        "width": 180,
+        "height": 100
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "n-piece2",
+      "type": "sticky",
+      "text": "A later Session builds the Scheduler.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1960,
+        "y": 380,
+        "width": 180,
+        "height": 100
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "n-key",
+      "type": "sticky",
+      "text": "**Key**\n- green, solid: version 1\n- violet, dashed: later / reserved",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 100,
+        "width": 180,
+        "height": 160
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "n-labels",
+      "type": "sticky",
+      "text": "The pr-label states are GitHub Actions labels.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 740,
+        "y": 1260,
+        "width": 180,
+        "height": 100
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-manual",
+      "from": {
+        "objectId": "t-manual"
+      },
+      "to": {
+        "objectId": "f-trigger"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e-prlabel",
+      "from": {
+        "objectId": "t-prlabel"
+      },
+      "to": {
+        "objectId": "f-trigger"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e-schedule",
+      "from": {
+        "objectId": "t-schedule"
+      },
+      "to": {
+        "objectId": "f-trigger"
+      },
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-webhook",
+      "from": {
+        "objectId": "t-webhook"
+      },
+      "to": {
+        "objectId": "f-trigger"
+      },
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-local",
+      "from": {
+        "objectId": "f-runloc"
+      },
+      "to": {
+        "objectId": "r-local"
+      },
+      "label": "version 1",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "labelPosition": {
+        "along": 0.7
+      }
+    },
+    {
+      "id": "e-piece2",
+      "from": {
+        "objectId": "f-runloc",
+        "anchor": "right",
+        "position": [
+          1,
+          0.4
+        ]
+      },
+      "to": {
+        "objectId": "scheduler",
+        "anchor": "left"
+      },
+      "label": "piece 2",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          1380,
+          1100
+        ],
+        [
+          1380,
+          456
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.45
+      }
+    },
+    {
+      "id": "e-dev01",
+      "from": {
+        "objectId": "scheduler"
+      },
+      "to": {
+        "objectId": "r-dev01"
+      },
+      "label": "by load",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet",
+      "labelPosition": {
+        "along": 0.55
+      }
+    },
+    {
+      "id": "e-sandbox",
+      "from": {
+        "objectId": "scheduler"
+      },
+      "to": {
+        "objectId": "r-sandbox"
+      },
+      "label": "by load",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          1740,
+          600
+        ],
+        [
+          2180,
+          600
+        ]
+      ]
+    },
+    {
+      "id": "e-drives",
+      "from": {
+        "objectId": "t-prlabel"
+      },
+      "to": {
+        "objectId": "s-review"
+      },
+      "label": "label state machine",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e-s1",
+      "from": {
+        "objectId": "s-review"
+      },
+      "to": {
+        "objectId": "s-inprogress"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e-s2",
+      "from": {
+        "objectId": "s-inprogress"
+      },
+      "to": {
+        "objectId": "s-blocked"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    }
+  ],
+  "annotations": []
+}

@@ -5,6 +5,8 @@ import {
   type LoopFinding, type Review,
 } from "./critic-loop.ts";
 import { parseCritic, type MergedFinding, type ReviewLint } from "./critic.ts";
+import type { RethinkRecord } from "./rethink.ts";
+import type { ComputedFault } from "./space.ts";
 
 const lint = (overrides: Partial<ReviewLint> = {}): ReviewLint => ({
   rule: "near-miss", severity: "warning", at: ["a", "b"], message: "b is 20px off a's center line, so w bends", suggestion: "move b by dy -20", state: "s1", ...overrides,
@@ -12,14 +14,24 @@ const lint = (overrides: Partial<ReviewLint> = {}): ReviewLint => ({
 const seen = (overrides: Partial<MergedFinding> = {}): MergedFinding => ({
   kind: "routing", ids: ["w"], labels: ["ghost"], problem: "The wire bends twice.", severity: "should", regions: ["sec_a"], marks: [], ...overrides,
 });
+const NARROW = "The gap between sec_a and sec_b (side by side) is 200 px wide and 3 wires cross it or run along it: the gap rule asks 240 px, so it is 40 px too narrow";
+/** A measure of the runner that fails (space.ts): a gap under its rule number. */
+const measure = (overrides: Partial<ComputedFault> = {}): ComputedFault => ({
+  key: `["gap","under",["sec_a","sec_b"]]`, ids: ["sec_a", "sec_b"], problem: NARROW, marks: [{ box: { x: 300, y: 0, width: 200, height: 400 } }], ...overrides,
+});
+/** An empty block of the board frame (space.ts): 2 of them share the key, and the place tells them apart. */
+const hole = (x: number, y: number, width: number, height: number): ComputedFault => ({
+  key: `["empty-block","page"]`, ids: ["page"], block: { x, y, width, height }, marks: [{ box: { x, y, width, height } }],
+  problem: `An empty block of ${width} × ${height} px sits in the board frame`,
+});
 const review = (overrides: Partial<Review> = {}): Review => ({
-  reviewMs: 40, renderMs: 4, effort: "medium", reviewers: { section: 1, gap: 0, wire: 1, space: 1, choices: 1, loose: 0 }, regions: 4, unparsed: 0, lints: [], findings: [], ...overrides,
+  reviewMs: 40, renderMs: 4, effort: "medium", reviewers: { section: 1, gap: 0, wire: 1, space: 1, choices: 1, loose: 0 }, regions: 4, unparsed: 0, lints: [], findings: [], computed: [], ...overrides,
 });
 const ran = (reply: string, exitCode: number | null = 0, limit: { tries?: number; rateLimited?: boolean } = {}) =>
   ({ run: { exitCode, signal: null, timedOut: exitCode === null, durationMs: 9, tries: 1, rateLimited: false, ...limit }, reply });
 const answered = (findings: LoopFinding[], verdict: string) => findings.map((finding) => `${finding.id} ${verdict}`).join("\n");
 /** The round's findings with the drawer's answers on them: the ledger the next round reads. */
-const answeredRound = (ledger: LoopFinding[], input: Pick<Review, "lints" | "findings">, reply: string, round = 1) => {
+const answeredRound = (ledger: LoopFinding[], input: Parameters<typeof roundFindings>[1], reply: string, round = 1) => {
   const { findings } = roundFindings(ledger, input, round);
   const answers = parseAnswers(reply);
   for (const finding of findings) finding.answer = answers.has(finding.id) ? { ...answers.get(finding.id)!, round } : null;
@@ -156,8 +168,9 @@ describe("critic loop findings", () => {
     expect(prompt).toContain("<findings>\nF1 [should, check near-miss] b is 20px off a's center line, so w bends. Fix: move b by dy -20\n</findings>");
     expect(prompt).toContain("<id> declined: <why you left it>");
     expect(prompt).toContain("It does not say how to fix it: the fix is your decision.");
+    expect(prompt).toContain("A fix must not resize a section past its content, merge nodes, or grow an empty block. After you move a section, close the space it left.");
     // With no space finding, no image and every earlier id answered, the message says nothing about them.
-    expect(prompt).not.toMatch(/A space finding is fixed|The images after this text|no_answer_yet/);
+    expect(prompt).not.toMatch(/fixed by moving or resizing whole sections|The images after this text|no_answer_yet|`measured`|`history`/);
   });
 
   test("the revise message puts the space findings first, says a section move is expected, and names each finding's reviewer and image", () => {
@@ -183,7 +196,8 @@ describe("critic loop findings", () => {
       "  from sec_a · image 2",
       "</findings>",
     ].join("\n"));
-    expect(text).toContain("A space finding is fixed by moving or resizing whole sections: `arrange`, `move`, `place_section`, `fit_section`. That is expected, and nothing in this loop counts against it.");
+    expect(text).toContain("The `measured` findings and the findings from the `space` reviewer come first. They are fixed by moving or resizing whole sections: `arrange`, `move`, `place_section`, `fit_section`."
+      + " That is expected, and nothing in this loop counts against it.");
     expect(text).toContain("Then route the wires again");
     expect(text).toContain("each fault marked in red and tagged with its finding's id");
     expect(message.slice(1)).toEqual([
@@ -196,6 +210,279 @@ describe("critic loop findings", () => {
     expect(prompt).toContain("no answer line for F2, F5");
     expect(prompt).toContain("Make no new edits");
     expect(parseAnswers(prompt).size).toBe(0);
+  });
+});
+
+describe("critic loop computed findings", () => {
+  const only = (computed: ComputedFault[]) => ({ lints: [], findings: [], computed });
+
+  test("a measure of the runner that fails is a finding: a should of kind space, after the lints and ahead of the reviewers' findings", () => {
+    const { findings, score } = roundFindings([], { lints: [lint()], findings: [seen()], computed: [measure()] });
+    expect(findings.map((finding) => [finding.id, finding.source, finding.severity, finding.kind, finding.regions])).toEqual([
+      ["F1", "check", "should", "near-miss", []], ["F2", "computed", "should", "space", ["space"]], ["F3", "reviewer", "should", "routing", ["sec_a"]],
+    ]);
+    // Its problem names its items and holds its numbers. Its mark goes on the image of the space reviewer.
+    expect(findingLine(findings[1]!)).toBe(`F2 [should, measured space] ${NARROW}.`);
+    expect(findings[1]!.marks).toEqual([{ unit: "space", marks: [{ box: { x: 300, y: 0, width: 200, height: 400 } }] }]);
+    expect(score).toBe(3);
+  });
+
+  test("no decline settles or holds a computed finding: it comes back under its id, with its new numbers, and counts in the score", () => {
+    const wider = measure({ problem: NARROW.replace("200 px wide", "220 px wide").replace("40 px too", "20 px too") });
+    let ledger = answeredRound([], only([measure()]), "F1 declined: the 3 wires fit in 200 px");
+    // A lint declined with a reason is held here, and a reviewer's finding goes to the next reviewers with the reason.
+    const second = roundFindings(ledger, only([wider]), 2);
+    expect(second.findings.map((finding) => [finding.id, finding.problem, finding.answer])).toEqual([["F1", wider.problem, null]]);
+    expect([second.withheld, second.score]).toEqual([[], 1]);
+    expect(declinedFindings(ledger)).toEqual([]);
+
+    ledger = answeredRound(ledger, only([wider]), "F1 declined: the 3 wires still fit", 2);
+    // 2 declines settle any other finding.
+    const third = roundFindings(ledger, only([wider]), 3);
+    expect([third.findings.map((finding) => finding.id), third.withheld, third.score]).toEqual([["F1"], [], 1]);
+  });
+
+  test("a computed finding the drawer got 3 times is stuck: it is listed with the drawer's last answer, not sent, and still scored, until the measure passes", () => {
+    let ledger = answeredRound([], only([measure()]), "F1 fixed");
+    ledger = answeredRound(ledger, only([measure()]), "F1 declined: sec_b cannot move right", 2);
+    ledger = answeredRound(ledger, only([measure()]), "F1 disagree: the wires fit", 3);
+    const fourth = roundFindings(ledger, { lints: [], findings: [seen({ severity: "nit" })], computed: [measure()] }, 4);
+    expect(fourth.findings.map((finding) => finding.id)).toEqual(["F2"]);
+    expect(fourth.withheld).toEqual([{
+      id: "F1", source: "computed", severity: "should", kind: "space", ids: ["sec_a", "sec_b"], problem: NARROW, why: "stuck", answer: { verdict: "disagree", reason: "the wires fit" },
+    }]);
+    expect(fourth.score).toBe(1);
+    // Another measure that fails in round 4 is new: it is sent.
+    const block = hole(0, 0, 900, 600);
+    expect(roundFindings(ledger, only([measure(), block]), 4)).toMatchObject({ findings: [{ id: "F2", state: block.key }], withheld: [{ id: "F1" }], score: 2 });
+    expect(roundFindings(ledger, only([]), 4)).toEqual({ findings: [], withheld: [], score: 0, grace: 0 });
+  });
+
+  test("an empty block is the fault of the earlier block at its place, not of the block that had its rank", () => {
+    const [large, small] = [hole(0, 0, 1000, 600), hole(2000, 0, 500, 500)];
+    let ledger = answeredRound([], only([large, small]), "F1 fixed\nF2 declined: the legend goes there");
+    // The drawer filled the large block. The small one is now the first of the frame, 50 px narrower: it is still F2.
+    const left = hole(2050, 0, 450, 500);
+    expect(roundFindings(ledger, only([left]), 2).findings.map((finding) => [finding.id, finding.problem, finding.history])).toEqual([["F2", left.problem, undefined]]);
+    ledger = answeredRound(ledger, only([left]), "F2 declined: the legend goes there", 2);
+    ledger = answeredRound(ledger, only([left]), "F2 declined: the legend goes there", 3);
+    // A new block, larger than the one that is stuck, is a new finding: the 3 sends of F2 are not its own. It may come from the fix of F1.
+    const fresh = hole(0, 1000, 800, 800);
+    const fourth = roundFindings(ledger, only([fresh, left]), 4);
+    expect(fourth.findings.map((finding) => [finding.id, finding.problem])).toEqual([["F3", fresh.problem]]);
+    expect(fourth.findings[0]!.history).toStartWith("in round 1 you fixed F1 on page:");
+    expect(fourth.withheld.map((fault) => [fault.id, fault.why, fault.answer])).toEqual([["F2", "stuck", { verdict: "declined", reason: "the legend goes there" }]]);
+    // A node cuts one block in 2: the larger part keeps the id, and the other part is a new finding.
+    const cut = roundFindings(answeredRound([], only([large]), "F1 fixed"), only([hole(0, 0, 600, 600), hole(700, 0, 300, 600)]), 2);
+    expect(cut.findings.map((finding) => finding.id)).toEqual(["F1", "F2"]);
+  });
+
+  test("a block that drifts is matched at its latest place, sent or stuck: a new block at its first place is a new finding", () => {
+    const at = (x: number) => hole(x, 0, 1000, 600);
+    // The block moves 500 px a round: each round's block holds half of the one before.
+    let ledger: LoopFinding[] = [];
+    for (const [index, x] of [0, 500, 1000].entries()) ledger = answeredRound(ledger, only([at(x)]), "F1 declined: the room is for the legend", index + 1);
+    expect(ledger.map((finding) => finding.id)).toEqual(["F1", "F1", "F1"]);
+    const fourth = roundFindings(ledger, only([at(1500), at(0)]), 4, { findings: ledger.slice(2), withheld: [] });
+    expect(fourth.findings.map((finding) => [finding.id, finding.block?.x])).toEqual([["F2", 0]]);
+    expect(fourth.withheld.map((fault) => [fault.id, fault.why, fault.block?.x])).toEqual([["F1", "stuck", 1500]]);
+    // The stuck block moves on: its place is the one round 4 held, not the last one sent.
+    const fifth = roundFindings(ledger, only([at(2000)]), 5, fourth);
+    expect(fifth.withheld.map((fault) => [fault.id, fault.block?.x])).toEqual([["F1", 2000]]);
+    expect(fifth.findings).toEqual([]);
+  });
+
+  test("a measure that passed closed its finding: the same fault back on the board is a new finding, with the fix that may have caused it", async () => {
+    const moved = seen({ kind: "placement", ids: ["sec_b"], labels: [], problem: "sec_b sits under the legend.", regions: ["space"] });
+    const record = await reviewLoop({
+      budget: 3,
+      // The gap is too narrow, the drawer widens it, and its fix of the round 2 finding closes it again.
+      review: async (round) => review(round === 2 ? { findings: [moved] } : { computed: [measure()] }),
+      revise: async (_round, findings) => ran(answered(findings, "fixed")),
+    });
+    const after = (round: number, id: string, on: string, problem: string) =>
+      `in round ${round} you fixed ${id} on ${on}: ${JSON.stringify(problem)}. This finding is on the same items, so that fix may have caused it. Fix it in a way that keeps ${id} fixed.`;
+    expect(record.rounds.map((round) => round.findings.map((finding) => [finding.id, finding.history]))).toEqual([
+      [["F1", undefined]], [["F2", after(1, "F1", "sec_a, sec_b", NARROW)]], [["F3", after(2, "F2", "sec_b", "sec_b sits under the legend.")]],
+    ]);
+    // With no other fix between, it is new all the same, and its own earlier fix is no history.
+    const ledger = answeredRound([], only([measure()]), "F1 fixed");
+    expect(roundFindings(ledger, only([measure()]), 3, { findings: [], withheld: [] }).findings.map((finding) => [finding.id, finding.history])).toEqual([["F2", undefined]]);
+    // On the board in the round before, it keeps its id.
+    expect(roundFindings(ledger, only([measure()]), 2, { findings: ledger, withheld: [] }).findings.map((finding) => finding.id)).toEqual(["F1"]);
+  });
+
+  test("a finding that was stuck is not asked for when its measure passes later", async () => {
+    const asked: string[][] = [];
+    const record = await reviewLoop({
+      budget: 8,
+      // The gap fails for 4 rounds, with one reviewer finding a round. Round 5 has neither.
+      review: async (round) => review(round < 5 ? { computed: [measure()], findings: [seen()] } : {}),
+      // The drawer answers each finding but F1.
+      revise: async (_round, findings, notes) => {
+        asked.push([...findings, ...notes.unanswered].map((finding) => finding.id));
+        return ran(answered(findings.filter((finding) => finding.id !== "F1"), "fixed"));
+      },
+    });
+    expect(asked).toEqual([["F1", "F2"], ["F1", "F3"], ["F1", "F4"], ["F5"]]);
+    expect([record.stop, record.rounds.length, record.unanswered]).toEqual(["clean", 5, ["F1"]]);
+  });
+
+  test("a stuck finding the drawer never answered is not asked for again: the loop stops stuck", async () => {
+    const asked: string[][] = [];
+    const record = await reviewLoop({
+      budget: 7,
+      review: async () => review({ computed: [measure()] }),
+      revise: async (_round, findings, notes) => { asked.push([...findings, ...notes.unanswered].map((finding) => finding.id)); return ran(""); },
+    });
+    expect([record.stop, record.rounds.length, asked]).toEqual(["stuck", 4, [["F1"], ["F1"], ["F1"]]]);
+    expect(record.unanswered).toEqual(["F1"]);
+  });
+
+  test("a measure that never passes goes to the drawer in 3 revise passes, then the loop stops stuck and its record lists the finding", async () => {
+    let revises = 0;
+    const record = await reviewLoop({
+      budget: 20,
+      review: async () => review({ computed: [measure()] }),
+      revise: async (_round, findings) => { revises += 1; return ran(answered(findings, "declined: the wires fit")); },
+    });
+    expect([record.stop, record.rounds.length, revises]).toEqual(["stuck", 4, 3]);
+    expect(record.rounds.map((round) => [round.findings.map((finding) => finding.id), round.score])).toEqual([[["F1"], 1], [["F1"], 1], [["F1"], 1], [[], 1]]);
+    expect(ledgerText(record)).toContain(`## Round 4 · score 1 · 4 reviewers at medium\nNo findings.\nNot sent (stuck): F1 [should, measured space] sec_a, sec_b: ${NARROW}. The drawer's last answer: declined: the wires fit\n`);
+    expect(ledgerText(record)).toContain("\nStop: stuck\n");
+    expect(loopSummary(record)).toContain("stop stuck after 4 of 20 rounds");
+  });
+
+  test("a measure that passes closes its finding: the loop stops clean, whatever the drawer answered", async () => {
+    const record = await reviewLoop({
+      budget: 20,
+      review: async (round) => review({ computed: round === 1 ? [measure()] : [] }),
+      revise: async (_round, findings) => ran(answered(findings, "declined: the wires fit")),
+    });
+    expect([record.stop, record.rounds.length, record.rounds[1]!.withheld]).toEqual(["clean", 2, []]);
+  });
+
+  test("a computed finding counts when the loop chooses its best board", async () => {
+    const restored: number[] = [];
+    const boards = (first: Partial<Review>, last: Partial<Review>) => reviewLoop({
+      budget: 2,
+      review: async (round) => review(round === 1 ? first : last),
+      revise: async (_round, findings) => ran(answered(findings, "fixed")),
+      restore: (round) => restored.push(round),
+    });
+    const block = hole(0, 0, 900, 600);
+    // The first board fails 2 measures, and the last one has 1 fault a reviewer saw: the last one is better.
+    expect((await boards({ computed: [measure(), block] }, { findings: [seen()] })).kept).toMatchObject({ round: 2, restored: false });
+    // The last board fails 2 measures, and the first one had 1 fault a reviewer saw: the first one goes back.
+    expect((await boards({ findings: [seen()] }, { computed: [measure(), block] })).kept).toMatchObject({ round: 1, restored: true });
+    expect(restored).toEqual([1]);
+  });
+
+  test("the revise message says a computed finding is the runner's own number, and that a decline does not close it", () => {
+    const { findings } = roundFindings([], { lints: [lint()], findings: [seen()], computed: [measure()] });
+    const text = reviseMessage("b1", findings, { images: [{ unit: "space", path: "/t/space.png", findings: ["F2"] }] })[0] as string;
+    // The computed finding is a space finding: it comes first.
+    expect(text).toContain([
+      "<findings>",
+      `F2 [should, measured space] ${NARROW}.`,
+      "  measured by the runner on the board file · image 1",
+      "F1 [should, check near-miss] b is 20px off a's center line, so w bends. Fix: move b by dy -20",
+      `F3 [should, routing] w, "ghost": The wire bends twice.`,
+      "  from sec_a",
+      "</findings>",
+    ].join("\n"));
+    expect(text).toContain("A `measured` finding is a number the runner computed on the board file: an empty block, or a gap between sections off its gap rule number."
+      + " A decline does not close it: it comes back until the number passes.");
+    expect(text).toContain("The `measured` findings and the findings from the `space` reviewer come first.");
+  });
+});
+
+describe("critic loop reversal guard", () => {
+  const apart = seen({ kind: "spacing", ids: ["sec_a", "sec_b"], labels: [], problem: "sec_a and sec_b sit 900 px apart, and 5 wires join them.", regions: ["space"] });
+  const covers = seen({ kind: "placement", ids: ["sec_a"], labels: [], problem: "sec_a covers the legend.", regions: ["space"] });
+  const HISTORY = `in round 1 you fixed F1 on sec_a, sec_b: "sec_a and sec_b sit 900 px apart, and 5 wires join them.".`
+    + " This finding is on the same items, so that fix may have caused it. Fix it in a way that keeps F1 fixed.";
+
+  test("a layout finding on the items of a layout finding the drawer fixed in an earlier round is sent with that fix in one line", () => {
+    const ledger = answeredRound([], { lints: [], findings: [apart, seen()] }, "F1 fixed\nF2 fixed");
+    const second = roundFindings(ledger, { lints: [], findings: [covers, seen()], computed: [measure()] }, 2);
+    // The gap finding names both sections of F1, and the placement finding one of them. The wire finding is no layout finding.
+    expect(second.findings.map((finding) => [finding.id, finding.kind, finding.history])).toEqual([["F3", "space", HISTORY], ["F4", "placement", HISTORY], ["F5", "routing", undefined]]);
+    // It is not dropped: it counts, and the drawer reads the history under it.
+    expect([second.withheld, second.score]).toEqual([[], 3]);
+    const text = reviseMessage("b1", second.findings)[0] as string;
+    expect(text).toContain([
+      "<findings>",
+      `F3 [should, measured space] ${NARROW}.`,
+      "  measured by the runner on the board file",
+      `  history: ${HISTORY}`,
+      "F4 [should, placement] sec_a: sec_a covers the legend.",
+      "  from space",
+      `  history: ${HISTORY}`,
+      `F5 [should, routing] w, "ghost": The wire bends twice.`,
+      "  from sec_a",
+      "</findings>",
+    ].join("\n"));
+    expect(text).toContain("A `history` line under a finding names a fix of an earlier round on the same items. Do not swap one fault for the other: find the layout that clears both.");
+  });
+
+  test("a finding has no history when the earlier one was declined, was a lint, is on other items, or is the same measure", () => {
+    const history = (ledger: LoopFinding[], input: Parameters<typeof roundFindings>[1]) => roundFindings(ledger, input, 2).findings.map((finding) => finding.history);
+    expect(history(answeredRound([], { lints: [], findings: [apart] }, "F1 declined: they are neighbours"), { lints: [], findings: [covers] })).toEqual([undefined]);
+    expect(history(answeredRound([], { lints: [lint({ rule: "spacing", at: ["sec_a"] })], findings: [] }, "F1 fixed"), { lints: [], findings: [covers] })).toEqual([undefined]);
+    expect(history(answeredRound([], { lints: [], findings: [apart] }, "F1 fixed"), { lints: [], findings: [{ ...covers, ids: ["sec_c"] }] })).toEqual([undefined]);
+    // A measure the drawer called fixed that still fails is the same finding, not the undo of a fix.
+    expect(history(answeredRound([], { lints: [], findings: [], computed: [measure()] }, "F1 fixed"), { lints: [], findings: [], computed: [measure()] })).toEqual([undefined]);
+    // The other way round: the gap went from too narrow to too wide.
+    const wide = measure({ key: `["gap","over",["sec_a","sec_b"]]`, problem: "The gap between sec_a and sec_b (side by side) is 400 px wide" });
+    expect(history(answeredRound([], { lints: [], findings: [], computed: [measure()] }, "F1 fixed"), { lints: [], findings: [], computed: [wide] }))
+      .toEqual([`in round 1 you fixed F1 on sec_a, sec_b: ${JSON.stringify(NARROW)}. This finding is on the same items, so that fix may have caused it. Fix it in a way that keeps F1 fixed.`]);
+  });
+});
+
+describe("critic loop rethink turn", () => {
+  const turn = (): RethinkRecord => ({
+    ...ran("").run,
+    answers: { A1: "move sec_b under sec_a: w4 runs 1900 px", A2: "no change: every gap is within its number", A3: "" }, reask: null,
+    toolCalls: { total: 7, byTool: { arrange: 2, route: 5 } }, moved: [{ id: "sec_b", dx: -900, dy: 600 }],
+    frame: { before: "2400 × 900 px", after: "1500 × 1500 px" }, faults: { before: 3, after: 1 },
+  });
+
+  test("the rethink turn runs once, before the first review, and the record keeps it", async () => {
+    const order: string[] = [];
+    const record = await reviewLoop({
+      budget: 3,
+      rethink: async () => { order.push("rethink"); return turn(); },
+      review: async (round) => { order.push(`review ${round}`); return review(round === 1 ? { findings: [seen()] } : {}); },
+      revise: async (round, findings) => { order.push(`revise ${round}`); return ran(answered(findings, "fixed")); },
+    });
+    expect(order).toEqual(["rethink", "review 1", "revise 1", "review 2"]);
+    expect([record.stop, record.rethink]).toEqual(["clean", turn()]);
+    expect(ledgerText(record)).toStartWith([
+      "## Rethink turn · exit 0 · 7 tool calls · moved sec_b · frame 2400 × 900 px → 1500 × 1500 px · 3 → 1 computed findings",
+      "A1: move sec_b under sec_a: w4 runs 1900 px",
+      "A2: no change: every gap is within its number",
+      "A3: no answer",
+      "",
+      "## Round 1 · score 1",
+    ].join("\n"));
+    expect(loopSummary(record)).toContain("stop clean after 2 of 3 rounds at medium effort · rethink: 7 tool calls, 1 section moved · last round:");
+  });
+
+  test("a loop with no rethink turn has none in its record", async () => {
+    const record = await reviewLoop({ budget: 3, review: async () => review() });
+    expect(record.rethink).toBeNull();
+    expect(ledgerText(record)).toStartWith("## Round 1 ");
+    expect(loopSummary(record)).not.toContain("rethink");
+  });
+
+  test("a rethink turn that breaks fails the loop before its first review, and the loop keeps the board as it is", async () => {
+    const restored: number[] = [];
+    const record = await reviewLoop({
+      budget: 3, rethink: async () => { throw new Error("no drawer"); }, review: async () => review(), restore: (round) => restored.push(round),
+    });
+    expect(record).toMatchObject({ stop: "failed", error: "no drawer", rethink: null, rounds: [], kept: null });
+    expect(restored).toEqual([]);
   });
 });
 
@@ -377,7 +664,7 @@ describe("critic loop stop rule", () => {
     expect([record.stop, record.rounds.length, revises]).toEqual(["clean", 2, 1]);
     expect(record.rounds[1]).toMatchObject({ findings: [], score: 1, withheld: [{ id: "F1", why: "held" }] });
     expect(ledgerText(record)).toContain("Not sent (held): F1 [should, check near-miss] a, b: b is 20px off a's center line, so w bends.");
-    expect(loopSummary(record)).toContain("1 not sent (held or settled)");
+    expect(loopSummary(record)).toContain("1 not sent (held, settled or stuck)");
   });
 
   test("a lint the drawer declines with no reason is still sent each round", async () => {
