@@ -30,7 +30,7 @@ const band = (overrides: Partial<ComputedFault> = {}): ComputedFault => ({
 const LAYOUT: LayoutFacts = {
   sections: { sec_a: "Intake", sec_b: "Engine", sec_c: "Store" },
   holders: { sec_a: ["sec_a"], sec_b: ["sec_b"], sec_c: ["sec_c"], a: ["sec_a"], b: ["sec_b"], c: ["sec_c"], w: ["sec_a", "sec_c", "sec_b"], w1: ["sec_a", "sec_b"], w2: ["sec_a", "sec_b"], w3: ["sec_a", "sec_b"] },
-  wires: { w: "w is 1800 px now, sec_a → sec_c, not neighbours: sec_b lies between them; by section centres, a swap of sec_b and sec_c saves about 700 px of wire between sections" },
+  wires: { w: "w is 1800 px now, sec_a → sec_c, not neighbours: sec_b lies between them" },
   places: { sec_a: `["sec_b right"]`, sec_b: `["sec_a left","sec_c right"]`, sec_c: `["sec_b left"]` },
   centres: { sec_a: [200, 200], sec_b: [800, 200], sec_c: [1400, 200] },
   numbers: { length: { w: 1800, w1: 300, w2: 300, w3: 300 }, crossings: { w: 2, w1: 0, w2: 0, w3: 0 }, faults: { [`["band","stacked","page"]`]: 40 } },
@@ -986,9 +986,8 @@ describe("critic loop decline rule for layout findings", () => {
       + "Any other decline brings the finding back in the next round, with its facts.");
     expect(first).not.toContain("declined: moved <section>");
     expect(first).not.toContain("`facts` line");
-    expect(second).toContain(`  from wires · layout finding\n  facts: ${BACK} w is 1800 px now, sec_a → sec_c, not neighbours: sec_b lies between them; by section centres, a swap of sec_b and sec_c saves about 700 px of wire between sections.\n</findings>`);
-    expect(second).toContain("A `facts` line under a finding says why it is back, and how the fault stands now: the wire's length, the sections between its ends,"
-      + " and a swap of 2 sections that would shorten it when the runner found one.");
+    expect(second).toContain(`  from wires · layout finding\n  facts: ${BACK} w is 1800 px now, sec_a → sec_c, not neighbours: sec_b lies between them.\n</findings>`);
+    expect(second).toContain("A `facts` line under a finding says why it is back, and how the fault stands now: the wire's length and the sections between its ends.");
     // A board with no layout finding gets none of it.
     expect(reviseMessage("b1", roundFindings([], { lints: [lint()], findings: [seen()], layout: LAYOUT }).findings.filter((finding) => finding.source === "check"))[0]).not.toMatch(/layout finding|`facts`/);
   });

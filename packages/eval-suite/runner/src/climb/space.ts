@@ -327,46 +327,19 @@ export function sectionLinks(board: Board, facts: WireFact[], gaps: GapMeasure[]
   });
 }
 
-/** A swap of 2 sibling sections worth this many px of wire or more is named. */
-const SWAP_MIN_PX = 200;
-
-/**
- * The swap of one of a link's 2 sections with a sibling that shortens the
- * wires between sections the most, by section centres, or null when none
- * brings the 2 closer and saves SWAP_MIN_PX. An estimate: the sections differ
- * in size, and the router has the last word.
- */
-function bestSwap(link: Link, links: Link[], board: Board): { a: string; b: string; saves: number } | null {
-  const siblings = board.objects.filter((object) => object.type === SECTION && object.geometry && (object.parentId ?? null) === link.parent);
-  const place = new Map(siblings.map((section) => [section.id, centre(section.geometry)]));
-  const among = links.filter((each) => each.parent === link.parent);
-  const far = (at: Map<string, Point>, a: string, b: string) => Math.abs(at.get(a)!.x - at.get(b)!.x) + Math.abs(at.get(a)!.y - at.get(b)!.y);
-  const total = (at: Map<string, Point>) => among.reduce((sum, each) => sum + far(at, each.a, each.b), 0);
-  let best: { a: string; b: string; saves: number } | null = null;
-  for (const end of [link.a, link.b]) for (const other of siblings) {
-    if (other.id === link.a || other.id === link.b) continue;
-    const swapped = new Map(place).set(end, place.get(other.id)!).set(other.id, place.get(end)!);
-    const saves = Math.round(total(place) - total(swapped));
-    if (far(swapped, link.a, link.b) < far(place, link.a, link.b) && saves >= SWAP_MIN_PX && saves > (best?.saves ?? 0)) best = { a: end, b: other.id, saves };
-  }
-  return best;
-}
-
 const list = (ids: string[]) => ids.length <= 1 ? ids.join("") : `${ids.slice(0, -1).join(", ")} and ${ids.at(-1)}`;
 
-/** A wire between 2 sections as one line of facts: its length now, its 2 sections, the sections between them, and the swap that shortens it. */
-export function linkLine(link: Link, links: Link[], board: Board): string {
-  const swap = link.neighbours ? null : bestSwap(link, links, board);
+/** A wire between 2 sections as one line of facts: its length now, its 2 sections and the sections between them. */
+export function linkLine(link: Link): string {
   return `${link.fact.id} is ${link.fact.length} px now, ${link.a} → ${link.b}`
     + (link.neighbours ? ", neighbours" : `, not neighbours${link.between.length ? `: ${list(link.between)} ${link.between.length === 1 ? "lies" : "lie"} between them` : ""}`)
-    + (link.through.length ? `; it runs through ${list(link.through)}` : "")
-    + (swap ? `; by section centres, a swap of ${swap.a} and ${swap.b} saves about ${swap.saves} px of wire between sections` : "");
+    + (link.through.length ? `; it runs through ${list(link.through)}` : "");
 }
 
 /** A wire through a section as one line of facts: linkLine when it joins 2 sections, and its 2 ends when it joins none. */
-function throughLine({ fact, sections }: Through, links: Link[], board: Board): string {
+function throughLine({ fact, sections }: Through, links: Link[]): string {
   const link = links.find((each) => each.fact === fact);
-  return link ? linkLine(link, links, board) : `${fact.id} is ${fact.length} px now, ${fact.from} → ${fact.to}; it runs through ${list(sections)}`;
+  return link ? linkLine(link) : `${fact.id} is ${fact.length} px now, ${fact.from} → ${fact.to}; it runs through ${list(sections)}`;
 }
 
 /**
@@ -420,8 +393,8 @@ export function layoutFacts(
       }),
     ]),
     wires: Object.fromEntries([
-      ...through.map((each): [string, string] => [each.fact.id, throughLine(each, links, board)]),
-      ...links.filter(({ fact }) => fact.crosses.length > 0 || fact.length > LONG_WIRE_PX).map((link): [string, string] => [link.fact.id, linkLine(link, links, board)]),
+      ...through.map((each): [string, string] => [each.fact.id, throughLine(each, links)]),
+      ...links.filter(({ fact }) => fact.crosses.length > 0 || fact.length > LONG_WIRE_PX).map((link): [string, string] => [link.fact.id, linkLine(link)]),
     ]),
     places: Object.fromEntries(sections.filter((section) => section.geometry).map((section) => [section.id, place(section.id)])),
     centres: Object.fromEntries(sections.filter((section) => section.geometry).map(({ id, geometry: at }) => [id, [at.x + at.width / 2, at.y + at.height / 2]])),
@@ -551,7 +524,7 @@ function wireFaults({ board, rule, gaps, links, through }: Measures): ComputedFa
   const crossed = group(through, (each) => each.sections).sort(([, a], [, b]) => b.length - a.length || longest(a[0]!, b[0]!)).map(([section, group]): ComputedFault => ({
     kind: "wire", key: JSON.stringify(["through", section]), ids: [section, ...group.map(({ fact }) => fact.id)], number: group.length,
     problem: `${count(group.length, "wire runs", "wires run")} through section ${section}, which holds neither end of ${group.length === 1 ? "it" : "them"}: ${group.map(wire).join(", ")}`,
-    facts: throughLine(group[0]!, links, board),
+    facts: throughLine(group[0]!, links),
     marks: [{ box: byId.get(section)!.geometry }, ...group.slice(0, MAX_MARKED).map(({ fact }) => pathOf(fact))],
   }));
   const far = group(links.filter((link) => link.fact.length > FAR_WIRE_PX && !link.neighbours), (link) => [[link.a, link.b].sort().join("\n")])
@@ -561,7 +534,7 @@ function wireFaults({ board, rule, gaps, links, through }: Measures): ComputedFa
         kind: "wire", key: JSON.stringify(["long", [a, b].sort()]), ids: [...[a, b].sort(), ...group.map((link) => link.fact.id)], number: group[0]!.fact.length,
         problem: `${count(group.length, "wire", "wires")} over ${FAR_WIRE_PX} px ${group.length === 1 ? "joins" : "join"} sections ${a} and ${b}, which are not neighbours`
           + `${between.length ? ` (${list(between)} ${between.length === 1 ? "lies" : "lie"} between them)` : ""}: ${group.map((link) => `${link.fact.id} (${link.fact.length} px)`).join(", ")}`,
-        facts: linkLine(group[0]!, links, board),
+        facts: linkLine(group[0]!),
         marks: group.slice(0, MAX_MARKED).map((link) => pathOf(link.fact)),
       };
     });

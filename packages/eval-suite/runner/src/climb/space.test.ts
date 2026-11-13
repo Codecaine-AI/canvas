@@ -100,8 +100,7 @@ describe("climb computed checks on final boards of round 5", () => {
     expect(wires[0]!.ids).toEqual(["sec-runner", "w-treespend"]);
     expect(wires[1]!.problem).toBe("1 wire over 1500 px joins sections sec-client and sec-durable, which are not neighbours (sec-control and sec-runner lie between them): w-replay (4216 px)");
     expect(wires[1]!.facts).toBe(
-      "w-replay is 4216 px now, sec-client → sec-durable, not neighbours: sec-control and sec-runner lie between them;"
-      + " by section centres, a swap of sec-client and sec-life saves about 520 px of wire between sections");
+      "w-replay is 4216 px now, sec-client → sec-durable, not neighbours: sec-control and sec-runner lie between them");
   });
 
   test("board h6 of cycle 2: 3 nodes fill 29% of section ret_ev, and its empty block is that fault, not a second one", async () => {
@@ -349,7 +348,7 @@ describe("climb wires between sections", () => {
     expect(found.faults).toEqual([{
       kind: "wire", key: `["through","m"]`, ids: ["m", "w"], number: 1,
       problem: "1 wire runs through section m, which holds neither end of it: w (a → b, 700 px)",
-      facts: "w is 700 px now, a → b, not neighbours: m lies between them; it runs through m; by section centres, a swap of a and m saves about 500 px of wire between sections",
+      facts: "w is 700 px now, a → b, not neighbours: m lies between them; it runs through m",
       marks: [{ box: { x: 500, y: 0, width: 300, height: 400 } }, { path: [[300, 200], [1000, 200]] }],
     }]);
     // A wire that ends in the section, or in a subsection of it, runs through nothing.
@@ -388,7 +387,7 @@ describe("climb wires between sections", () => {
     expect(plan(row(2000), [over]).faults.filter((fault) => fault.kind === "wire")).toEqual([{
       kind: "wire", key: `["long",["a","b"]]`, ids: ["a", "b", "w"], number: 2200,
       problem: "1 wire over 1500 px joins sections a and b, which are not neighbours (m lies between them): w (2200 px)",
-      facts: "w is 2200 px now, a → b, not neighbours: m lies between them; by section centres, a swap of b and m saves about 1500 px of wire between sections",
+      facts: "w is 2200 px now, a → b, not neighbours: m lies between them",
       marks: [{ path: [[150, 0], [150, -100], [2150, -100], [2150, 0]] }],
     }]);
     // 1500 px is no fault, and a wire of any length between 2 sections that face each other is none.

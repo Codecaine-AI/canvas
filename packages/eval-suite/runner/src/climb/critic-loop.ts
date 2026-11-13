@@ -636,7 +636,7 @@ export function reviseMessage(board: string, findings: LoopFinding[], notes: Par
       "Any other decline brings the finding back in the next round, with its facts.",
     ] : []),
     ...(ordered.some((finding) => finding.facts) ? [
-      "A `facts` line under a finding says why it is back, and how the fault stands now: the wire's length, the sections between its ends, and a swap of 2 sections that would shorten it when the runner found one.",
+      "A `facts` line under a finding says why it is back, and how the fault stands now: the wire's length and the sections between its ends.",
     ] : []),
     ...(ordered.some(space) ? [
       "The `measured` findings and the findings from the `space` reviewer come first. They are fixed by moving or resizing whole sections: `arrange`, `move`, `place_section`, `fit_section`."
