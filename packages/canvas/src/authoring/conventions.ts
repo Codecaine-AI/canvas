@@ -77,8 +77,6 @@ ${defaults}
     <spacing_targets>
 ${formatCraftTargets().split("\n").map(line => line ? `        ${line}` : "").join("\n")}
     </spacing_targets>
-
-    Spacing targets are starting points for local groups. Adjust them for content, labels, and actual routes.
 </geometry>`,
   };
 }
