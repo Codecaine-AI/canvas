@@ -26,19 +26,22 @@
  * it names stay as they are.
  *
  * Ford: "this is done, like, a programmatic way". The runner measures the
- * plan of the board itself (space.ts): the empty space, each gap and each band
- * between sections against the gap rule, each wire through a section that
- * holds neither of its ends, and each far wire. A measure that fails is a
+ * plan of the board itself (space.ts): the empty space, each band between
+ * sections against the band rule, each wire through a section that holds
+ * neither of its ends, and each far wire. A measure that fails is a
  * computed finding. It stays, and counts in the score, until the measure
  * passes. The drawer gets it 3 times at most (MEASURED_SENDS), and the loop
  * lists it after that. Before round 1, the drawer gets one rethink turn on the
  * same measures (rethink.ts).
  *
  * A layout finding is one that a section move fixes (isLayout). A decline
- * closes it only when earned (declineEarned): the revise pass moved a section
- * it is about, or the answer names the section move tried and what it
- * measured. Any other decline brings it back the next round under its id,
- * with one line of facts, MEASURED_SENDS sends at most.
+ * closes it only when earned (declineEarned): the revise pass changed the row,
+ * the column or a neighbour of a section it is about, or made the finding's
+ * own number 20% better. A move of a few px is no move. Any other decline
+ * brings it back the next round under its id, with one line of facts,
+ * MEASURED_SENDS sends at most. A loop that ends while a decline keeps a
+ * layout finding from the drawer stops "settled", never "clean", and lists
+ * those findings (LoopRecord `settled`).
  *
  * The review starts by code each time a revise pass ends. The loop stops at
  * the first round where every reviewer answered, none found a blocker or a
@@ -127,6 +130,8 @@ export interface Withheld {
    * finding that came back that many times.
    */
   why: "held" | "settled" | "stuck";
+  /** True for a layout finding (LoopFinding `layout`): a loop that ends on it stops "settled". */
+  layout?: true;
   /** stuck: the drawer's last answer to it, or null when it gave none. */
   answer?: Answer | null;
   /** A stuck empty block's place this round (LoopFinding `block`). */
@@ -151,6 +156,8 @@ export interface ReviseRecord extends DrawerRun {
   unanswered: string[];
   /** The sections the pass moved as a whole (rethink.ts sectionMoves). */
   moved: SectionMove[];
+  /** The sections whose row, column or neighbours the pass changed (placedSections): what the decline rule counts as a move. */
+  placed: string[];
 }
 
 /** What one review found (critic.ts), as the loop reads it. */
@@ -229,29 +236,38 @@ export interface LoopRecord {
   rounds: RoundRecord[];
   /**
    * clean: in the last round every reviewer answered, none found a blocker
-   * or a should, and every finding the drawer got has its answer. stuck: as
-   * clean, but a computed finding the drawer got MEASURED_SENDS times is
-   * still on the board (the last round's `withheld` lists it). budget:
+   * or a should, and every finding the drawer got has its answer. settled: as
+   * clean, but a decline keeps a layout finding of that round from the drawer
+   * (`settled` lists them). stuck: as clean, but a measure of the board's
+   * space the drawer got MEASURED_SENDS times still fails (the last round's
+   * `withheld` lists it). budget:
    * the rounds ran out. incomplete: the rounds ran out and `unanswered` is
    * not empty. time: the loop's time ran out (`--loop-timeout-min`).
    * rate-limited: a revise pass hit a rate limit on each of its tries, and a
    * last round reviewed what it left. review-only: no drawer to revise.
    * failed: a step broke (error).
    */
-  stop: "clean" | "stuck" | "incomplete" | "budget" | "time" | "rate-limited" | "review-only" | "failed";
+  stop: "clean" | "settled" | "stuck" | "incomplete" | "budget" | "time" | "rate-limited" | "review-only" | "failed";
   error: string | null;
+  /**
+   * The layout findings the last round found and did not send, one line each
+   * (withheldLine): an earned decline closed it and the fault is still on the
+   * board, or the drawer declined it MEASURED_SENDS times with no section
+   * change and no better number.
+   */
+  settled: string[];
   /** The ids the drawer got and never answered. */
   unanswered: string[];
   /** Null when the loop could not choose: no drawer, or no review of the last board. */
   kept: Kept | null;
-  /** Null when the loop restored no round, the restore lost no fix a last turn can make, or the loop had no time or no working drawer left. */
+  /** Null when the loop restored no round, the restore lost no fix, or the loop had no time or no working drawer left. */
   last: LastTurn | null;
   durationMs: number;
 }
 
 /** A loop that broke before its first review. */
 export const failedLoop = (budget: number, error: string): LoopRecord =>
-  ({ budget, effort: null, rethink: null, rounds: [], stop: "failed", error, unanswered: [], kept: null, last: null, durationMs: 0 });
+  ({ budget, effort: null, rethink: null, rounds: [], stop: "failed", error, settled: [], unanswered: [], kept: null, last: null, durationMs: 0 });
 
 const LINT_SEVERITY: Record<string, Severity> = { error: "blocker", warning: "should", note: "nit" };
 const rank = (finding: { severity: Severity }) => SEVERITIES.indexOf(finding.severity);
@@ -299,36 +315,35 @@ export function isLayout(finding: Pick<LoopFinding, "source" | "kind" | "ids" | 
     || (finding.ids.length > 0 && finding.ids.every((id) => layout?.sections[id] !== undefined));
 }
 
-/** A move the answer says it made or tried. "cannot move", "was not moved", "a swap would" and "tried a route" say no move. */
-const MOVE_TRIED = /(?<!(?:\b(?:not|never|cannot|without|no)|n['’]t)\s+(?:\w+\s+)?)\b(moved|swapped|shifted|reordered|rearranged|relocated|placed|put|tried\s+(?:\w+\s+){0,2}(?:mov|swap|shift|reorder|rearrang|relocat|plac|put)\w*)\b/gi;
-/** The words between a move and the section it moves: "moved the section Store", "tried a swap of Store and Engine". */
-const MOVE_FILLER = /^(?:(?:the|a|both|whole|section|sections|of) )*/;
-/** What a move measured: "1701 px", "4 crossings", "one crossing", "no bends". */
-const RESULT_WORDS = /(?:\d\s*|\b(?:no|zero|one|two|three|four|five|six|seven|eight|nine|ten)\s+)(px|%|wires?\b|crossings?\b|bends?\b)/i;
+/** The sections whose row, column or neighbours differ between 2 readings of a board (space.ts LayoutFacts `places`). A move of a few px changes none. */
+export const placedSections = (before: LayoutFacts, after: LayoutFacts): string[] =>
+  Object.keys(before.places).filter((id) => after.places[id] !== undefined && after.places[id] !== before.places[id]);
+
+/** A finding's number is better at this part of what it was, or less: 20% better. */
+const BETTER = 0.8;
 
 /**
- * Whether a decline of a layout finding closes it. Round 5 cycle 2 closed
- * crossings and long wires on "forced" and "must cross once" with no section
- * moved (h1 F146, h4 F34, 06 F13), and the section order stayed wrong. A
- * decline is earned when the revise pass moved a section the finding is
- * about (`moved`: the ids), or when its reason says a move it made or tried
- * of a section it names, and what it measured. The section is what the move
- * moves: "moved Store under Intake", "Store was moved". A reason why no move
- * was tried is not one, and neither is a route it tried or a move of a label
- * near a section. A finding that names no item of a section is about every
- * section.
+ * Whether a decline of a layout finding closes it. Round 5 cycle 3 closed
+ * findings on a 20 px move of a section and on an answer that named a move
+ * (h3: 10 findings, h1 F17 with its wire still 2457 px). A decline is earned
+ * by what the revise pass did to the board, from `before` (the board the
+ * round reviewed) to `after` (the board the pass left): a section the finding
+ * is about changed its row, its column or a neighbour, or the finding's own
+ * number is 20% better. The number of a computed finding is its measure
+ * (the px a band is short, the wires through a section, the length of a far
+ * wire). The number of a reviewer's finding is the length, or the crossings,
+ * of the wires it names. The words of the answer earn nothing. A finding that
+ * names no item of a section is about every section.
  */
-export function declineEarned(finding: Pick<LoopFinding, "ids">, reason: string, moved: string[], layout: LayoutFacts | undefined): boolean {
-  const about = new Set(finding.ids.flatMap((id) => layout?.holders[id] ?? []));
-  if (moved.some((id) => about.size === 0 || about.has(id))) return true;
-  const sections = Object.entries(layout?.sections ?? {}).flat().map(normal).filter((name) => name.length > 2);
-  const moves = (sentence: string) => [...sentence.matchAll(MOVE_TRIED)].some((move) => {
-    const after = `${normal(sentence.slice(move.index + move[0].length)).replace(MOVE_FILLER, "")} `;
-    const before = normal(sentence.slice(0, move.index)).replace(/ (?:was|were|is|got)$/, "");
-    // "Store's label" is a label, and "store s" is how it reads here.
-    return sections.some((name) => (after.startsWith(`${name} `) && !after.startsWith(`${name} s `)) || ` ${before}`.endsWith(` ${name}`));
-  });
-  return reason.split(/[.;\n]\s/).some(moves) && RESULT_WORDS.test(reason);
+export function declineEarned(finding: Pick<LoopFinding, "source" | "ids" | "state">, before: LayoutFacts | undefined, after: LayoutFacts | undefined): boolean {
+  if (!before || !after) return false;
+  const about = new Set(finding.ids.flatMap((id) => before.holders[id] ?? []));
+  if (placedSections(before, after).some((id) => about.size === 0 || about.has(id))) return true;
+  const better = (was: number | undefined, now: number) => was !== undefined && was > 0 && now <= was * BETTER;
+  if (finding.source === "computed") return better(before.numbers.faults[finding.state], after.numbers.faults[finding.state] ?? 0);
+  const wires = finding.ids.filter((id) => before.numbers.length[id] !== undefined && after.numbers.length[id] !== undefined);
+  const sum = (numbers: Record<string, number>) => wires.reduce((total, id) => total + numbers[id]!, 0);
+  return better(sum(before.numbers.length), sum(after.numbers.length)) || better(sum(before.numbers.crossings), sum(after.numbers.crossings));
 }
 
 /** How many revise passes turned these findings down. 2 findings one pass declined are one decline. */
@@ -362,7 +377,7 @@ function returningOf(ledger: LoopFinding[], previous: Pick<RoundRecord, "finding
 }
 
 /** The line of facts under a layout finding that came back. */
-const returnLine = (last: LoopFinding, facts: string) => `your decline in round ${last.answer!.round} moved no section of this finding, and named no section move with what it measured. ${sentence(facts)}`;
+const returnLine = (last: LoopFinding, facts: string) => `your decline in round ${last.answer!.round} changed no section's row, column or neighbours, and did not make this finding's number 20% better. ${sentence(facts)}`;
 
 /**
  * The reversal guard. A layout finding on the items of a layout finding the
@@ -406,7 +421,7 @@ function historyOf(ledger: LoopFinding[], fresh: Pick<LoopFinding, "kind" | "ids
  *
  * A reviewer's finding is new each round. One that names the kind and the
  * items of a fault the drawer turned down twice is settled, and not sent.
- * A layout finding the drawer declined with no section move is the exception:
+ * A layout finding whose decline closed nothing (declineEarned) is the exception:
  * it comes back under its id with a line of facts, while its items are on the
  * board and it still is a layout finding there, and a new finding on the same
  * items is dropped. After MEASURED_SENDS sends it is stuck.
@@ -475,7 +490,7 @@ export function roundFindings(
       const answer = last.answer && { verdict: last.answer.verdict, reason: last.answer.reason };
       withheld.push({
         id: last.id, source: "computed", severity: fresh.severity, kind: fresh.kind, ids: fresh.ids, problem: fresh.problem, why: earned ? "settled" : "stuck", answer,
-        ...(fault.block ? { block: fault.block } : {}),
+        ...(fault.block ? { block: fault.block } : {}), ...(fresh.layout ? { layout: true } : {}),
       });
     // A finding that keeps its id was on the board before the fix of any other: it is no reversal.
     } else findings.push(last ? { id: last.id, ...fresh, ...(earned === false && fault.facts ? { facts: returnLine(last, fault.facts) } : {}) } : { id: `F${next++}`, ...fresh, ...history(fresh) });
@@ -490,7 +505,7 @@ export function roundFindings(
     if (fault) back.add(fault);
     score += SCORE_WEIGHT[last.severity];
     if (ledger.filter((finding) => finding.id === last.id).length >= MEASURED_SENDS) {
-      withheld.push({ id: last.id, source: "reviewer", severity: last.severity, kind: last.kind, ids: last.ids, problem: last.problem, why: "stuck", answer: { verdict: last.answer!.verdict, reason: last.answer!.reason } });
+      withheld.push({ id: last.id, source: "reviewer", severity: last.severity, kind: last.kind, ids: last.ids, problem: last.problem, why: "stuck", answer: { verdict: last.answer!.verdict, reason: last.answer!.reason }, layout: true });
       continue;
     }
     const about = new Set(last.ids.flatMap((id) => layout?.holders[id] ?? []));
@@ -508,7 +523,7 @@ export function roundFindings(
     const fault = faultKey(fresh);
     if (fault && back.has(fault)) continue;
     if (fault && declines(declined.get(fault) ?? []) >= SETTLED_AFTER) {
-      withheld.push({ id: null, source: "reviewer", severity: fresh.severity, kind: fresh.kind, ids: fresh.ids, problem: fresh.problem, why: "settled" });
+      withheld.push({ id: null, source: "reviewer", severity: fresh.severity, kind: fresh.kind, ids: fresh.ids, problem: fresh.problem, why: "settled", ...(fresh.layout ? { layout: true } : {}) });
       continue;
     }
     score += SCORE_WEIGHT[fresh.severity];
@@ -559,8 +574,6 @@ export function declinedFindings(ledger: LoopFinding[], previous: Pick<RoundReco
 }
 
 const ANSWER_LINES = ["<id> fixed", "<id> disagree: <why the finding is wrong>", "<id> declined: <why you left it>"];
-/** How a decline of a layout finding must read to close it (declineEarned). */
-const MOVE_ANSWER = "<id> declined: moved <section> <where>, measured <the wire length, the crossings or the gap in px after the move>";
 
 /**
  * The drawer's revise turn, in its own session, after a review: the text,
@@ -590,14 +603,15 @@ export function reviseMessage(board: string, findings: LoopFinding[], notes: Par
     "Decline a finding that is wrong, or that you cannot fix without breaking something else, and give the reason. The reviewers read your reason in the next round.",
     "A fix must not resize a section past its content, merge nodes, or grow an empty block. After you move a section, close the space it left.",
     ...(ordered.some((finding) => finding.source === "computed") ? [
-      "A `measured` finding is a number the runner computed on the board file: an empty block, a section that is mostly empty, a gap or a band between sections off its gap rule number,"
+      "A `measured` finding is a number the runner computed on the board file: an empty block, a section that is mostly empty, a band between sections that is too narrow or too wide,"
       + " a wire through a section that holds neither of its ends, a far wire. A decline does not close a `measured space` finding: it comes back until the number passes.",
     ] : []),
     ...(ordered.some((finding) => finding.layout) ? [
-      "A `layout finding` is a fault of where the sections sit: a crossing or a long wire between sections, a wire through a section, a band too narrow for its wires."
+      "A `layout finding` is a fault of where the sections sit: a crossing or a long wire between sections, a wire through a section, a band too narrow for its lanes."
       + " Move a section before you route or decline: swap 2 neighbours, or change the row or the column of one."
-      + " A decline closes such a finding only when this turn moved a whole section it is about, or when your answer names the section move you tried and what it measured:",
-      MOVE_ANSWER,
+      + " A decline closes such a finding only when this turn changed the row, the column or a neighbour of a section it is about,"
+      + " or made the finding's own number 20% better or more: the length of its wires, their crossings, or the px its band is short."
+      + " The runner measures both on the board file. A move of a few px is no move, and the words of the answer close nothing.",
       "Any other decline brings the finding back in the next round, with its facts.",
     ] : []),
     ...(ordered.some((finding) => finding.facts) ? [
@@ -701,8 +715,10 @@ export function bestRound(rounds: RoundRecord[]): Kept | null {
  *
  * A round is clean when every reviewer answered and it has no blocker and no
  * should to send: a reviewer that timed out or failed did not approve, and
- * nits alone end the loop. Such a round that still holds a stuck computed
- * finding stops the loop as "stuck", not "clean". A clean round still goes to the drawer when a
+ * nits alone end the loop. Such a round is not "clean" while it holds a fault
+ * it did not send: "stuck" for a measure of the board's space the drawer got
+ * MEASURED_SENDS times, else "settled" for a layout finding a decline keeps
+ * from the drawer (idleStop). A clean round still goes to the drawer when a
  * finding of an earlier round has no answer.
  *
  * Round `budget` only reviews, and so does the round after a revise pass that
@@ -714,7 +730,8 @@ export async function reviewLoop(options: {
   /** The drawer's rethink turn, before round 1. */
   rethink?(): Promise<RethinkRecord>;
   review(round: number, earlier: EarlierFinding[]): Promise<Review>;
-  revise?(round: number, findings: LoopFinding[], notes: ReviseNotes): Promise<{ run: DrawerRun; reply: string; images?: number; moved?: SectionMove[] }>;
+  /** `layout`: what the decline rule reads of the board the pass left (space.ts LayoutFacts). */
+  revise?(round: number, findings: LoopFinding[], notes: ReviseNotes): Promise<{ run: DrawerRun; reply: string; images?: number; moved?: SectionMove[]; layout?: LayoutFacts }>;
   reask?(round: number, ids: string[]): Promise<{ run: DrawerRun; reply: string }>;
   restore?(round: number): void;
   /** One more revise turn on the restored board, for the fixes the restore lost, and what the code checks find on the board it leaves. */
@@ -753,7 +770,7 @@ export async function reviewLoop(options: {
         if (broken !== null) return done(broken.stop, broken.error);
         /** Nothing to send the drawer: only a reviewer that gave no answer keeps the loop going. */
         const idle = !findings.some(isOpen) && carried.length === 0;
-        if (idle && review.unparsed === 0) return done(record.withheld.some((fault) => fault.why === "stuck") ? "stuck" : "clean");
+        if (idle && review.unparsed === 0) return done(idleStop(record.withheld));
         if (!options.revise) return done("review-only");
         if (record.check) return done(carried.length ? "incomplete" : "budget");
         if (options.timeUp?.()) {
@@ -770,20 +787,20 @@ export async function reviewLoop(options: {
         unreviewed = true;
         const sent = [...findings, ...carried];
         const tally = () => ({ answered: findings.filter((finding) => finding.answer).length, unanswered: idsOf(sent.filter((finding) => !finding.answer)) });
-        const { run, reply, images = 0, moved = [] } = await options.revise(round, findings, notes);
+        const { run, reply, images = 0, moved = [], layout: after } = await options.revise(round, findings, notes);
         const take = (reply: string) => {
           const answers = parseAnswers(reply);
           for (const finding of sent) {
             const answer = answers.get(finding.id);
             if (finding.answer || !answer) continue;
             // A decline of a layout finding closes it only when earned.
-            const earned = finding.layout && answer.verdict !== "fixed" ? { earned: declineEarned(finding, answer.reason, moved.map((move) => move.id), review.layout) } : {};
+            const earned = finding.layout && answer.verdict !== "fixed" ? { earned: declineEarned(finding, review.layout, after) } : {};
             finding.answer = { ...answer, round, ...earned };
           }
         };
         take(reply);
         // The record stands before the second ask, so a second ask that throws does not lose the ids.
-        const revise: ReviseRecord = record.revise = { ...run, ...tally(), images, reask: null, moved };
+        const revise: ReviseRecord = record.revise = { ...run, ...tally(), images, reask: null, moved, placed: after ? placedSections(review.layout, after) : [] };
         if (revise.unanswered.length > 0 && run.exitCode === 0 && options.reask) {
           const ids = revise.unanswered;
           const second = await options.reask(round, ids);
@@ -804,18 +821,16 @@ export async function reviewLoop(options: {
     options.restore!(kept.round);
     const lost = lostFixes(rounds, kept.round);
     kept.lost = lost.map((finding) => finding.id);
-    // A layout finding and a computed one need a section move, and no reviewer reads the board after this turn.
-    const local = lost.filter((finding) => finding.source !== "computed" && !finding.layout);
     const working = outcome.stop !== "failed" && outcome.stop !== "rate-limited" && !options.timeUp?.();
-    if (options.last && local.length > 0 && working) {
+    if (options.last && lost.length > 0 && working) {
       const on = rounds.find((round) => round.round === kept.round)!;
       const before = [...on.findings, ...on.withheld].filter((finding) => finding.source !== "reviewer").reduce((sum, finding) => sum + SCORE_WEIGHT[finding.severity], 0);
       try {
-        const { run, reply, moved = [], lints, computed } = await options.last(kept, local);
+        const { run, reply, moved = [], lints, computed } = await options.last(kept, lost);
         const after = lints.reduce((sum, lint) => sum + SCORE_WEIGHT[LINT_SEVERITY[lint.severity] ?? "should"], 0) + computed.length * SCORE_WEIGHT.should;
         const answers = parseAnswers(reply);
         last = {
-          ...run, round: kept.round, sent: local.map((finding) => finding.id), answers: Object.fromEntries(local.flatMap((finding) => answers.has(finding.id) ? [[finding.id, answers.get(finding.id)!]] : [])),
+          ...run, round: kept.round, sent: lost.map((finding) => finding.id), answers: Object.fromEntries(lost.flatMap((finding) => answers.has(finding.id) ? [[finding.id, answers.get(finding.id)!]] : [])),
           moved, checks: { before, after }, undone: run.exitCode !== 0 || after > before,
         };
       } catch (error) {
@@ -825,7 +840,8 @@ export async function reviewLoop(options: {
       if (last?.undone) options.restore!(kept.round);
     }
   }
-  return { budget: options.budget, effort: rounds[0]?.effort ?? null, rethink, rounds, ...outcome, unanswered: idsOf(unansweredOf(rounds)), kept, last, durationMs: Date.now() - started };
+  const settled = (rounds.at(-1)?.withheld ?? []).filter((fault) => fault.layout).map(withheldLine);
+  return { budget: options.budget, effort: rounds[0]?.effort ?? null, rethink, rounds, ...outcome, settled, unanswered: idsOf(unansweredOf(rounds)), kept, last, durationMs: Date.now() - started };
 }
 
 /**
@@ -854,8 +870,8 @@ export function lastMessage(board: string, kept: Kept, findings: LoopFinding[]):
   return [
     `The review loop ended. It keeps the board that scored best, and that is the board of round ${kept.round}: ${sentence(kept.reason)}`,
     `The board file is that board again. The fixes you made after it are gone. The findings below are the ones you answered \`fixed\` from round ${kept.round} on.`,
-    "Look at each one on the board as it is now. Make the fix again when it is local: a label chip, a port, a route, a colour, an icon, a text, one node.",
-    "Do not move or resize a section in this turn: no reviewer reads the board after it. Decline a finding that needs that, and one that is not on this board.",
+    "Look at each one on the board as it is now, and make the fix again. A layout finding or a `measured` one needs its section move again: make it, close the space it left, then route the wires again.",
+    "No reviewer reads the board after this turn, so change nothing else. Decline a finding that is not on this board.",
     `The canvas server restarted. Open the board again with canvas_open, canvas id "${board}", and read any guidance topic it asks for.`,
     "Run canvas_check when you are done. The runner then runs the lints and its measures once more, and puts this board back when they come out worse.",
     "End your reply with one line per finding, and nothing after them:",
@@ -866,6 +882,19 @@ export function lastMessage(board: string, kept: Kept, findings: LoopFinding[]):
     "</findings>",
   ].join("\n");
 }
+
+/** A fault a round did not send, in one line: a stuck one with the drawer's last answer. */
+const withheldLine = (fault: Withheld) => `${fault.id ? `${fault.id} ` : ""}[${fault.severity}, ${tagOf(fault)}] ${fault.ids.join(", ")}: ${sentence(fault.problem)}`
+  + `${fault.why === "stuck" ? ` The drawer's last answer: ${fault.answer ? `${fault.answer.verdict}${fault.answer.reason ? `: ${fault.answer.reason}` : ""}` : "none"}` : ""}`;
+
+/**
+ * How a round with nothing to send stops the loop. stuck: a measure of the
+ * board's space still fails after MEASURED_SENDS sends, and no decline closes
+ * one. settled: a decline keeps a layout finding from the drawer, earned with
+ * the fault still on the board, or MEASURED_SENDS times with nothing earned.
+ */
+const idleStop = (withheld: Withheld[]): "clean" | "settled" | "stuck" =>
+  withheld.some((fault) => fault.why === "stuck" && !fault.layout) ? "stuck" : withheld.some((fault) => fault.layout) ? "settled" : "clean";
 
 /** The whole loop's ledger as text: each round's findings, the drawer's answer under each, and what the round did not send. */
 export function ledgerText(record: LoopRecord): string {
@@ -883,11 +912,11 @@ export function ledgerText(record: LoopRecord): string {
     ...round.findings.flatMap((finding) => [
       findingLine(finding),
       ...(finding.facts ? [`  facts: ${finding.facts}`] : []),
-      ...(finding.answer ? [`  → ${finding.answer.verdict}${finding.answer.reason ? `: ${finding.answer.reason}` : ""}${finding.answer.earned === false ? " (closes nothing: no section move)" : ""}`] : round.revise ? ["  → no answer"] : []),
+      ...(finding.answer ? [`  → ${finding.answer.verdict}${finding.answer.reason ? `: ${finding.answer.reason}` : ""}${finding.answer.earned === false ? " (closes nothing: no section changed its row, column or neighbours, and its number is not 20% better)" : ""}`] : round.revise ? ["  → no answer"] : []),
     ]),
     ...(round.revise?.moved.length ? [`Sections moved in the revise pass: ${round.revise.moved.map((move) => `${move.id} (${move.dx}, ${move.dy})`).join(", ")}`] : []),
-    ...round.withheld.map((fault) => `Not sent (${fault.why}): ${fault.id ? `${fault.id} ` : ""}[${fault.severity}, ${tagOf(fault)}] ${fault.ids.join(", ")}: ${sentence(fault.problem)}`
-      + `${fault.why === "stuck" ? ` The drawer's last answer: ${fault.answer ? `${fault.answer.verdict}${fault.answer.reason ? `: ${fault.answer.reason}` : ""}` : "none"}` : ""}`),
+    ...(round.revise?.placed.length ? [`Sections that changed row, column or neighbours in the revise pass: ${round.revise.placed.join(", ")}`] : []),
+    ...round.withheld.map((fault) => `Not sent (${fault.why}): ${withheldLine(fault)}`),
     "",
   ]);
   const { last } = record;
@@ -896,7 +925,8 @@ export function ledgerText(record: LoopRecord): string {
     + `${last ? `Last turn on round ${last.round}: sent ${last.sent.join(", ")} · ${Object.entries(last.answers).map(([id, answer]) => `${id} ${answer.verdict}`).join(", ") || "no answer"}`
       + ` · lints and computed checks ${last.checks.before} → ${last.checks.after}${last.undone ? " · undone: the kept board is back" : ""}\n` : ""}` : "";
   const unanswered = record.unanswered.length ? `No answer: ${record.unanswered.join(", ")}\n` : "";
-  return `${[...turn, ...lines].join("\n")}Stop: ${record.stop}${record.error ? ` (${record.error})` : ""}\n${unanswered}${kept}`;
+  const settled = record.settled.length ? `Layout findings a decline keeps from the drawer:\n${record.settled.map((line) => `- ${line}`).join("\n")}\n` : "";
+  return `${[...turn, ...lines].join("\n")}Stop: ${record.stop}${record.error ? ` (${record.error})` : ""}\n${settled}${unanswered}${kept}`;
 }
 
 /** What the loop reads of one review. */
@@ -999,7 +1029,8 @@ export async function reviewBoard(options: {
       });
       const revise = await pass(reviseMessage(board, findings, { ...notes, images }), resolve(roundDir(round), "revise-transcript.jsonl"));
       passed(`revise ${round}`, revise.run);
-      return { ...revise, images: images.length, moved: movedSince(round) };
+      const now = measured();
+      return { ...revise, images: images.length, moved: movedSince(round, now), layout: now.plan.layout };
     }),
     reask: pass && (async (round, ids) => {
       const reask = await pass([reaskPrompt(ids)], resolve(roundDir(round), "revise-reask-transcript.jsonl"));
@@ -1032,6 +1063,7 @@ export function loopSummary(record: LoopRecord): string {
     + `${rethink ? ` · rethink: ${rethink.toolCalls.total} tool calls, ${rethink.moved.length} ${rethink.moved.length === 1 ? "section" : "sections"} moved` : ""}`
     + ` · last round: ${SEVERITIES.map((severity) => `${count(severity)} ${severity}`).join(", ")}`
     + `${withheld ? ` · ${withheld} not sent (held, settled or stuck)` : ""}`
+    + `${record.settled.length ? ` · ${record.settled.length} layout ${record.settled.length === 1 ? "finding" : "findings"} closed by a decline` : ""}`
     + `${record.unanswered.length ? ` · no answer: ${record.unanswered.join(", ")}` : ""}`
     + `${record.kept ? ` · kept round ${record.kept.round}${record.kept.restored ? " (restored)" : ""}` : ""}`
     + `${record.last ? ` · last turn: ${record.last.sent.length} lost ${record.last.sent.length === 1 ? "fix" : "fixes"} sent again${record.last.undone ? ", undone" : ""}` : ""}`

@@ -403,4 +403,24 @@ describe("climb wires between sections", () => {
     expect(Object.keys(layout.wires)).toEqual(["w"]);
     expect(layout.wires.w).toStartWith("w is 700 px now, a → b, not neighbours: m lies between them; it runs through m");
   });
+
+  test("a section's place is its neighbours and the side each is on: a swap or another row changes it, and a move of a few px does not", () => {
+    const places = (...sections: BoardObject[][]) => plan(board(...sections)).layout.places;
+    const [a, m, b] = [full("a", null, 0, 0, 300, 400), full("m", null, 500, 0, 300, 400), full("b", null, 1000, 0, 300, 400)];
+    const first = places(a, m, b);
+    expect(first).toEqual({ a: `["m right"]`, m: `["a left","b right"]`, b: `["m left"]` });
+    // 40 px to the right and 20 px down: the same row, the same neighbours.
+    expect(places(a, m, full("b", null, 1040, 20, 300, 400))).toEqual(first);
+    // m and b swap: each of the 3 has another neighbour, or the same one on another side.
+    expect(places(a, full("m", null, 1000, 0, 300, 400), full("b", null, 500, 0, 300, 400))).toEqual({ a: `["b right"]`, m: `["b left"]`, b: `["a left","m right"]` });
+    // b goes under m: another row for b, and m has it below.
+    expect(places(a, m, full("b", null, 500, 600, 300, 400))).toEqual({ a: `["m right"]`, m: `["a left","b below"]`, b: `["m above"]` });
+  });
+
+  test("the layout facts hold the numbers a decline is held against: each wire's length and crossings, and each wire fault's own number", () => {
+    const over = wire("w", "a-n", "b-n", [[150, 0], [150, -100], [2150, -100], [2150, 0]]);
+    const { layout, faults } = plan(row(2000), [over, { ...wire("x", "a-n", "m-n", [[300, 100], [500, 100]]), crosses: ["w"] }]);
+    expect(layout.numbers).toEqual({ length: { w: 2200, x: 200 }, crossings: { w: 0, x: 1 }, faults: { [`["long",["a","b"]]`]: 2200 } });
+    expect(faults.filter((fault) => fault.kind === "wire").map((fault) => [fault.key, fault.number])).toEqual([[`["long",["a","b"]]`, 2200]]);
+  });
 });

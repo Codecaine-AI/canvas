@@ -267,7 +267,7 @@ const MERGED_TRUNK = "Never report a merged trunk of one meaning as a fault: wir
 const MIXED_TRUNK = "Wires that differ in dash or colour differ in meaning. Report a line or a trunk that such wires share, and a label chip on it: a reader cannot tell which wire the line or the label belongs to."
   + " When such wires run in lanes too close to tell apart, the fault is the room between the lanes. Never word it so that it reads as \"merge them\".";
 const MEASURED = "A \"measured\" line is a fact the runner measured on the board file. Judge it on the images: report it when it reads as a fault, with its numbers.";
-/** The heading of the computed findings in a prompt (space.ts computedFaults): the reviewer leaves them to the runner. */
+/** The heading of the computed findings in a prompt (space.ts planOf): the reviewer leaves them to the runner. */
 const SENT_BY_RUNNER = "The runner sends the drawer each of these as its own finding. Do not report one of them again";
 
 const block = (title: string, lines: string[]) => ["", title, ...(lines.length ? lines : ["(none)"])];
@@ -279,7 +279,7 @@ const notesBlocks = (notes: UnitNotes) => [
     ...notes.declined,
   ] : []),
   ...(notes.settled.length ? ["", "These faults are settled: the drawer declined them twice. Do not report them:", ...notes.settled] : []),
-  ...(notes.returned.length ? ["", "The drawer declined these with no section move. The runner sends them again itself. Do not report them:", ...notes.returned] : []),
+  ...(notes.returned.length ? ["", "The drawer declined these, and its turn changed no section's row, column or neighbours. The runner sends them again itself. Do not report them:", ...notes.returned] : []),
 ];
 const WIRE_SHEET_KEY = "tag id · from → to · kind · ports · length · bends · route · style colour · arrow · label; then the route, the corner points, the boxes it runs through, the wires it crosses, shared trunks";
 
@@ -393,12 +393,12 @@ export function wirePrompt(text: WireText): string {
     ...notesBlocks(text.notes),
     ...block(`Wire sheet (${WIRE_SHEET_KEY}; kind is the 2 parts the wire joins):`, text.wires),
     ...block("Measured on your wires:", text.wireMeasures.map((line) => `measured: ${line}`)),
-    ...block(`${SENT_BY_RUNNER} (wires through a section that holds neither end, wires over ${FAR_WIRE_PX} px between sections that are not neighbours, bands too narrow for their wires):`, text.computed),
+    ...block(`${SENT_BY_RUNNER} (wires through a section that holds neither end, wires over ${FAR_WIRE_PX} px between sections that are not neighbours, bands too narrow for their lanes):`, text.computed),
     ...block("Board totals:", [text.totals]),
   ].join("\n");
 }
 
-/** What the space prompt prints (spaceLines). `measured` is what fails the runner's own measures of the plan (space.ts computedFaults). */
+/** What the space prompt prints (spaceLines). `measured` is what fails the runner's own measures of the plan (space.ts planOf). */
 export interface SpaceText {
   scale: number; shape: string; sections: string[]; gaps: string[]; pairs: string[]; long: string[]; sinks: string[]; measured: string[]; totals: string; notes: UnitNotes;
 }
@@ -703,7 +703,7 @@ export interface CritiqueRecord {
   gap: { chips: number; covered: number; crops: number };
   /** The reviewers' findings, merged. */
   findings: MergedFinding[];
-  /** What fails the runner's own measures of the board (space.ts computedFaults): empty space, thin sections, gaps and bands off their rule number, wires through a section, far wires. */
+  /** What fails the runner's own measures of the board (space.ts planOf): empty space, thin sections, bands too narrow or too wide, wires through a section, far wires. */
   computed: ComputedFault[];
   /** What the loop needs to judge a decline of a layout finding (space.ts layoutFacts). */
   layout: LayoutFacts;

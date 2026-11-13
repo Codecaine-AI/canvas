@@ -160,7 +160,7 @@ export interface RethinkRecord extends DrawerRun {
   moved: SectionMove[];
   /** The board's size before and after. */
   frame: { before: string; after: string };
-  /** How many measures of the board failed before and after (space.ts computedFaults). */
+  /** How many measures of the board failed before and after (space.ts planOf). */
   faults: { before: number; after: number };
 }
 

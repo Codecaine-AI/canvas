@@ -238,8 +238,8 @@ describe("climb review prompts", () => {
     expect(prompt).not.toContain("ends on a section frame and not on a node");
     expect(prompt).toContain(
       "The runner sends the drawer each of these as its own finding. Do not report one of them again"
-      + ` (wires through a section that holds neither end, wires over 1500 px between sections that are not neighbours, bands too narrow for their wires):\n${through}`);
-    expect(wirePrompt({ ...wire, computed: [] })).toContain("bands too narrow for their wires):\n(none)");
+      + ` (wires through a section that holds neither end, wires over 1500 px between sections that are not neighbours, bands too narrow for their lanes):\n${through}`);
+    expect(wirePrompt({ ...wire, computed: [] })).toContain("bands too narrow for their lanes):\n(none)");
   });
 
   test("a reviewer that reads wires reports a line that wires of different dash or colour share, and never words close lanes of such wires as a merge", () => {
@@ -324,7 +324,7 @@ describe("climb review prompts", () => {
         "Raise one again only when its reason is wrong on the current images, and say why it is wrong. Name the same ids. Else do not report it:\n"
         + "[routing] w: The wire bends twice. The drawer declined: the bend clears the label");
       expect(prompt).toContain("These faults are settled: the drawer declined them twice. Do not report them:\n[spacing] sec, far: The gap is 60 px. The drawer declined: the chips fit");
-      expect(prompt).toContain("The drawer declined these with no section move. The runner sends them again itself. Do not report them:\n[placement] sec, far: 4 wires join sec and far, and mid lies between them.");
+      expect(prompt).toContain("The drawer declined these, and its turn changed no section's row, column or neighbours. The runner sends them again itself. Do not report them:\n[placement] sec, far: 4 wires join sec and far, and mid lies between them.");
     }
     for (const prompt of prompts()) expect(prompt).not.toMatch(/Do not report them again|The drawer declined these|These faults are settled/);
   });
@@ -532,7 +532,7 @@ describe("climb review merge", () => {
     const record: CritiqueRecord = {
       board: "/b.canvas.json", model: "gpt-6.1-sol", effort: "high", count: 8, startedAt: "", durationMs: 75_000, renderMs: 9_400, lints: [],
       regions: [region("space", "space", 2), region("wires", "wire", 3), region("choices", "choices", 1), region("sec_a", "section", 4), region("sec_b", "section", 0, "timed out"), region("gap-1", "gap", 2)],
-      gap: { chips: 7, covered: 7, crops: 3 }, findings: [], computed: [], layout: { sections: {}, holders: {}, wires: {} },
+      gap: { chips: 7, covered: 7, crops: 3 }, findings: [], computed: [], layout: { sections: {}, holders: {}, wires: {}, places: {}, numbers: { length: {}, crossings: {}, faults: {} } },
     };
     expect(critiqueSummary(record)).toBe(
       "0 lints · 6 reviewers at high (2 section, 1 gap, 1 wire, 1 space, 1 choices, 0 loose) · 12 findings (section 4, gap 2, wire 3, space 2, choices 1, loose 0), 0 after merge"

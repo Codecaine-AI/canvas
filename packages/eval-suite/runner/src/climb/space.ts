@@ -8,7 +8,7 @@
  * that holds neither of its ends; a long wire between 2 sections that are
  * not neighbours.
  *
- * A measure that fails is a computed fault (computedFaults). The critic loop
+ * A measure that fails is a computed fault (planOf). The critic loop
  * sends it as a finding (critic-loop.ts), the space reviewer and the rethink
  * turn read it as a fact (critic.ts, rethink.ts).
  *
@@ -380,9 +380,18 @@ export interface LayoutFacts {
   holders: Record<string, string[]>;
   /** Each wire between 2 sections that crosses a wire or is over LONG_WIRE_PX, and each wire that runs through a section that holds neither of its ends: its line of facts (linkLine, throughLine). */
   wires: Record<string, string>;
+  /**
+   * Each section's place among the sections of its parent: its neighbours, and the side each one is on.
+   * A section that changes its row, its column or a neighbour changes its place. A move of a few px does not.
+   */
+  places: Record<string, string>;
+  /** The numbers a decline is held against, where less is better: each wire's length and crossings by id, and each wire fault's own number by key, before the cap. */
+  numbers: { length: Record<string, number>; crossings: Record<string, number>; faults: Record<string, number> };
 }
 
-export function layoutFacts(board: Board, facts: WireFact[], links: Link[], through: Through[], pageFrame: BoardObject | null): LayoutFacts {
+export function layoutFacts(
+  board: Board, facts: WireFact[], links: Link[], through: Through[], pageFrame: BoardObject | null, gaps: GapMeasure[], faults: ComputedFault[],
+): LayoutFacts {
   const byId = new Map(board.objects.map((object) => [object.id, object]));
   const holders = (id: string): string[] => {
     const ids: string[] = [];
@@ -391,8 +400,15 @@ export function layoutFacts(board: Board, facts: WireFact[], links: Link[], thro
   };
   const linkOf = new Map(links.map((link) => [link.fact.id, link]));
   const throughOf = new Map(through.map((each) => [each.fact.id, each.sections]));
+  const sections = board.objects.filter((object) => object.type === SECTION && object !== pageFrame);
+  /** Where `other` is from `id`, across the band they share. */
+  const sideOf = (gap: GapMeasure, id: string, other: string) => {
+    const [from, to] = [byId.get(id)!.geometry, byId.get(other)!.geometry];
+    return gap.side === "stacked" ? (to.y > from.y ? "below" : "above") : to.x > from.x ? "right" : "left";
+  };
+  const place = (id: string) => JSON.stringify(gaps.flatMap((gap) => gap.a === id ? [`${gap.b} ${sideOf(gap, id, gap.b)}`] : gap.b === id ? [`${gap.a} ${sideOf(gap, id, gap.a)}`] : []).sort());
   return {
-    sections: Object.fromEntries(board.objects.filter((object) => object.type === SECTION && object !== pageFrame).map((section) => [section.id, section.text ?? ""])),
+    sections: Object.fromEntries(sections.map((section) => [section.id, section.text ?? ""])),
     holders: Object.fromEntries<string[]>([
       ...board.objects.map((object): [string, string[]] => [object.id, holders(object.id)]),
       ...facts.map((fact): [string, string[]] => {
@@ -404,6 +420,12 @@ export function layoutFacts(board: Board, facts: WireFact[], links: Link[], thro
       ...through.map((each): [string, string] => [each.fact.id, throughLine(each, links, board)]),
       ...links.filter(({ fact }) => fact.crosses.length > 0 || fact.length > LONG_WIRE_PX).map((link): [string, string] => [link.fact.id, linkLine(link, links, board)]),
     ]),
+    places: Object.fromEntries(sections.filter((section) => section.geometry).map((section) => [section.id, place(section.id)])),
+    numbers: {
+      length: Object.fromEntries(facts.map((fact) => [fact.id, fact.length])),
+      crossings: Object.fromEntries(facts.map((fact) => [fact.id, fact.crosses.length])),
+      faults: Object.fromEntries(faults.flatMap((fault) => fault.number === undefined ? [] : [[fault.key, fault.number]])),
+    },
   };
 }
 
@@ -492,7 +514,8 @@ function spaceFaults({ rule, gaps, blocks, thin }: Measures): ComputedFault[] {
 /**
  * The wire faults: the bands too narrow (most px short first), the sections a
  * wire runs through (most wires first) and the far wires by section pair
- * (longest first), one of each in turn, MAX_WIRE_FAULTS at most.
+ * (longest first), one of each in turn. A board's findings hold the first
+ * MAX_WIRE_FAULTS of them (planOf).
  */
 function wireFaults({ board, rule, gaps, links, through }: Measures): ComputedFault[] {
   const byId = new Map(board.objects.map((object) => [object.id, object]));
@@ -540,12 +563,7 @@ function wireFaults({ board, rule, gaps, links, through }: Measures): ComputedFa
     });
   const kinds = [narrow, crossed, far];
   const turns = Math.max(...kinds.map((faults) => faults.length));
-  return Array.from({ length: turns }, (_, turn) => kinds.flatMap((faults) => faults[turn] ?? [])).flat().slice(0, MAX_WIRE_FAULTS);
-}
-
-/** The measures of a board that fail, as faults: the space faults, then the wire faults, each under its cap. */
-export function computedFaults(measures: Measures): ComputedFault[] {
-  return [...spaceFaults(measures), ...wireFaults(measures)];
+  return Array.from({ length: turns }, (_, turn) => kinds.flatMap((faults) => faults[turn] ?? [])).flat();
 }
 
 /** What the runner measures on the plan of a board. `blocks`, `thin` and `gaps` are whole: `faults` holds the ones under the caps. */
@@ -559,5 +577,7 @@ export function planOf(board: Board, facts: WireFact[], rule: GapRule): Plan {
   const through = facts.flatMap((fact): Through[] => { const sections = throughOf(fact); return sections.length ? [{ fact, sections }] : []; });
   const measures: Measures = { board, rule, gaps, blocks: emptyBlocks(board, pageFrame, gaps), thin: thinSections(board, pageFrame, rule.padding), links, through };
   const { board: _, rule: __, ...rest } = measures;
-  return { pageFrame, units, ...rest, faults: computedFaults(measures), layout: layoutFacts(board, facts, links, through, pageFrame) };
+  const wires = wireFaults(measures);
+  // The space faults, then the wire faults, each under its cap.
+  return { pageFrame, units, ...rest, faults: [...spaceFaults(measures), ...wires.slice(0, MAX_WIRE_FAULTS)], layout: layoutFacts(board, facts, links, through, pageFrame, gaps, wires) };
 }
