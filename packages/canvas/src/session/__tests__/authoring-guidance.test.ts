@@ -230,8 +230,8 @@ describe("shared Canvas authoring guidance", () => {
       "Call `canvas_check`, and read its whole-board PNG and its LAYOUT block.",
       "Which 3 wires are longest, and which section move shortens them?",
       "`look` at `page-frame`: MEASURES prints the gaps between its sections",
-      "Which gaps between sections are narrower than topic `rules` says for their wires, and which are 100 or more wider?",
-      "set each of those gaps to its number (`arrange` with `space` along a row, `move` with `by` for the rows below)",
+      "Which rows of sections hold a gap narrower than topic `rules` says for its wires, and which sit 100 or more wider than their widest pair needs?",
+      "give each of those rows the gap its widest pair needs (`arrange` with `space` along a row, `move` with `by` for the rows below)",
       "Does another board shape (wider, taller, a grid, a hub with spokes) shorten the wires?",
       "Move whole sections with `arrange` or `move`",
       "call `tighten_wires` again",
@@ -241,7 +241,7 @@ describe("shared Canvas authoring guidance", () => {
     expect(design).toContain("6. Rethink once, as the workflow says");
     // Room for wires beats the real-size image, and no other room does.
     expect(design).toContain("or make a gap between sections narrower than topic `rules` says");
-    expect(design).toContain("A board that keeps those gaps can pass 2576px. Never add room past them");
+    expect(design).toContain("A board that keeps those gaps can pass 2576px. Never add room past what topic `rules` gives a row");
     expect(design).toContain("page-frame is working room: resize it to hold the plan first");
   });
 

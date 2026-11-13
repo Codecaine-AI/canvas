@@ -83,7 +83,7 @@ export const DESIGN_TOPICS: readonly AuthoringTopic[] = [
         - Lay 4 or more sections out in the shape that makes the wires shortest: 2 or 3 rows that grow down, a grid, or a hub with its spokes around it. Never one long row. Rows can differ in width: the outline follows the flow, not a rectangle.
         - Size each section to its content. A section with three nodes is small, not a full-width band.
         - Center a section on the node or section it connects to, so the wire between them runs straight.
-        - To fit, stack a long row into 2 rows. Never shrink a node, cut a label, or make a gap between sections narrower than topic \`rules\` says. A board that keeps those gaps can pass ${JUDGE_PNG_MAX_EDGE}px. Never add room past them: it makes the wires long and every label small.
+        - To fit, stack a long row into 2 rows. Never shrink a node, cut a label, or make a gap between sections narrower than topic \`rules\` says. A board that keeps those gaps can pass ${JUDGE_PNG_MAX_EDGE}px. Never add room past what topic \`rules\` gives a row: it makes the wires long and every label small.
         - When a section must grow or the board gets full, make room before you add: \`arrange\` the sections in reading order with \`flow: {axis: "x" or "y", gap}\`, then call tighten_wires again.
     </board_size>
 
