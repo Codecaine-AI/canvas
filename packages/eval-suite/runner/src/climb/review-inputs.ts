@@ -178,6 +178,16 @@ export const short = (text: string | undefined, max = 60) => {
 };
 const at = (point: Point) => `(${point.x}, ${point.y})`;
 
+/**
+ * A finding's problem with each tag of the reviewer's wire sheet (W3) replaced
+ * by the wire's id. The drawer reads the problem without the sheet, and each
+ * reviewer numbers its own wires.
+ */
+export function untagWires(problem: string, rows: WireRow[]): string {
+  const idOf = new Map(rows.map((row) => [row.tag, row.fact.id]));
+  return problem.replace(/\bW\d+\b/g, (tag) => idOf.get(tag) ?? tag);
+}
+
 /** A wire sheet as text: 2 lines a wire, with every field of design 4.3. */
 export function wireSheetLines(rows: WireRow[]): string[] {
   const tagOf = new Map(rows.map((row) => [row.fact.id, row.tag]));

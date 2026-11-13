@@ -34,7 +34,7 @@ import {
   BORDER_NEAR_PX, BORDER_RUN_MIN_PX, CHOICES_UNIT, FONT, GAP_PX_PER_WIRE, LANE_NEAR_PX, LONG_WIRE_PX, LOOSE_UNIT, OWN, REVIEWER_KINDS, SPACE_UNIT, WIRE_UNIT,
   boardWireSheet, choicesLines, fadeMarks, grow, linkedSections, lookFrame, markBox, measuresOf, neighbourhoodFrame, objectLines, outline, reviewUnits,
   routesOf, rulerMarks, scaleText, sectionFrame, sectionLines, sectionMapSvg, spaceLines, touches, wholeBoardMarks, wireMarks, wireMeasureLines, wireSheet,
-  wireSheetLines,
+  untagWires, wireSheetLines,
   type Board, type Mark, type ReviewUnit, type ReviewerKind, type WireRow,
 } from "./review-inputs.ts";
 import { boardTotals, loadWireModules, sectionHeaders, wireFacts, type WireFact, type WireModules } from "./wires.ts";
@@ -60,9 +60,10 @@ export function reviewerEffort(board: { objects: unknown[]; connections: unknown
 /**
  * One answer's time, from its own start. A reviewer that runs out gives no
  * answer, and a round with a lost answer is not clean. Measured in the round
- * 5 gate runs with every reviewer of a board at once: medium (board 03, 9
- * reviewers) took 34 to 101 s, high (board h1, 19 reviewers) 60 to 247 s.
- * Each limit is over twice the slowest.
+ * 5 gate runs, 8 reviewers at once: the slowest at medium (board 03, 8
+ * reviewers) took 21 s, the slowest at high (board h1, 14 reviewers) 108 s.
+ * Each limit is over 5 times the slowest, for a reviewer that looks further
+ * (a second answer) on a loaded day.
  */
 export const CRITIC_TIMEOUT_MS: Record<Effort, number> = { medium: 300_000, high: 600_000 };
 /** The first wait after a reviewer hits a rate limit. It doubles: 20, 40, 80, 160 s. */
@@ -224,7 +225,7 @@ const KIND_LINES: Record<FindingKind, string> = {
   missing: "an object or a relation the brief names that the board lacks.",
 };
 
-/** What every prompt says about an answer. `kinds` are the kinds this reviewer mostly finds. */
+/** What every prompt says about an answer. */
 function answerRules(): string[] {
   return [
     "Kinds:",
@@ -237,7 +238,8 @@ function answerRules(): string[] {
     "- nit: polish or taste. The board can ship with it.",
     "",
     "Be strict. Report every fault you can see and measure. Do not stop at the first few.",
-    "Name items by the ids below. Put the visible text in labels when no id matches.",
+    "Name items by the ids below. Put the visible text in labels when no id matches."
+    + " In `problem`, name each wire by its id, never by a tag of an image (W3, G1) alone: the drawer does not see the tags.",
     "State each fault as a problem: what is wrong, where, and by how much, with the numbers you measured.",
     "Do not say how to fix it. Do not propose a tool call, a new position, a new size or a new route. The drawer decides the fix.",
     "`marks` highlights the fault as the board is now, in board coordinates from the text below: `box` round the items or the area at fault, `path` along the stretch of wire at fault."
@@ -759,7 +761,8 @@ export function marksOf(ids: string[], board: Board, facts: WireFact[]): Mark[] 
 }
 
 /** One reviewer's work order: its images and its first prompt. */
-interface Job { unit: ReviewUnit; dir: string; images: string[]; prompt: string; wires: number }
+/** `rows` is the wire sheet the reviewer reads, when it has one. */
+interface Job { unit: ReviewUnit; dir: string; images: string[]; prompt: string; wires: number; rows?: WireRow[] }
 
 /**
  * Lint and render `boardPath`, run every reviewer at once, and merge the
@@ -887,9 +890,10 @@ export async function critiqueBoard(options: {
       look: asked,
       lookError,
       // A mark far off the board is a slip. A finding with no mark left gets the boxes and paths of the items it names.
+      // The drawer never sees a wire sheet: a tag in the problem (W3) becomes the wire's id.
       findings: (answer?.findings ?? []).map((finding) => {
         const marks = finding.marks.filter((mark) => touches(markBox(mark), onBoard));
-        return { ...finding, marks: marks.length ? marks : marksOf(finding.ids, board, facts) };
+        return { ...finding, problem: untagWires(finding.problem, job.rows ?? []), marks: marks.length ? marks : marksOf(finding.ids, board, facts) };
       }),
     };
   };
@@ -928,7 +932,7 @@ export async function critiqueBoard(options: {
       ];
       const holds = new Set(rows.map((row) => row.fact.id));
       const prompt = wirePrompt({ scale, wires: wireSheetLines(rows), wireMeasures: wireMeasureLines(rows, wireContext), totals, notes: notes(holds, lintsAt(holds).map(lintLine)) });
-      return { unit, dir, images, prompt, wires: rows.length };
+      return { unit, dir, images, prompt, wires: rows.length, rows };
     }
     if (unit.kind === "gap") {
       const shown = unit.crops.map((crop) => wiresIn(crop, facts));
@@ -970,7 +974,7 @@ export async function critiqueBoard(options: {
       totals,
       notes: notes(holds, [...guides.legend, ...lintsAt(holds).filter((lint) => lint.rule !== NEAR_MISS_RULE).map(lintLine)]),
     });
-    return { unit, dir, images, prompt, wires: rows.length };
+    return { unit, dir, images, prompt, wires: rows.length, rows };
   };
 
   const gate = new Semaphore(options.critic.count);

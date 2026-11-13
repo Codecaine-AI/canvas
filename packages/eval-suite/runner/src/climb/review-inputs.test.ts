@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import { box, labelled, wire } from "./fixtures/review/stubs.ts";
-import { borderRuns, choicesLines, closeLanes, outerEdgeRuns, reviewUnits, sectionGaps, spaceLines, wireMeasureLines, type Board } from "./review-inputs.ts";
+import { borderRuns, choicesLines, closeLanes, outerEdgeRuns, reviewUnits, sectionGaps, spaceLines, untagWires, wireMeasureLines, type Board } from "./review-inputs.ts";
 
 describe("climb review measures of wires", () => {
   const section = [box("s", "section", null, 100, 100, 400, 300)];
@@ -74,6 +74,12 @@ describe("climb review measures of wires", () => {
     ]);
     // A clean sheet has no measure.
     expect(wireMeasureLines([{ tag: "W1", kind: "s → t", fact: wire("ok", "a", "n", [[500, 200], [800, 200]]) }], { board, pageFrame: page, headers: new Map() })).toEqual([]);
+  });
+
+  test("a finding names its wires by id: the tags of the reviewer's own wire sheet are not in the text the drawer reads", () => {
+    const rows = ["e-auth", "e-live", "e-out"].map((id, index) => ({ tag: `W${index + 1}`, kind: "s → t", fact: wire(id, "a", "b", [[0, 0], [10, 0]]) }));
+    expect(untagWires("W1 crosses W3 at (120, 740). The trunk W2+W3 runs 300 px. W30 and SW1 stay.", rows))
+      .toBe("e-auth crosses e-out at (120, 740). The trunk e-live+e-out runs 300 px. W30 and SW1 stay.");
   });
 });
 
