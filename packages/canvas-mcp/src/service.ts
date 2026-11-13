@@ -243,7 +243,7 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
     title: "Create canvas",
     description:
       "Create a new board at canvases/<id>.canvas.json holding only its page frame, and open it as canvas_open does. Refuses an id that already exists. Place, connect, and check it with the other canvas tools. "
-      + `The whole board, padding included, reads at real size up to ${JUDGE_PNG_MAX_EDGE} × ${JUDGE_PNG_MAX_EDGE}px, so lay 4 or more sections out in 2 or 3 rows that grow down, not in one long row. `
+      + `The whole board, padding included, reads at real size up to ${JUDGE_PNG_MAX_EDGE} × ${JUDGE_PNG_MAX_EDGE}px. The flow sets the board's shape, not that limit: topic diagram_design says when a board goes wide. `
       + "Build order: place_section with title and color for each section, place_shape with text and color for each node, arrange_section for each section, arrange each row of sections with space, connect every wire, tighten_wires once, then canvas_check and fix its errors.",
     inputSchema: {
       type: "object",
