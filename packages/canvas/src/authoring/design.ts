@@ -83,14 +83,14 @@ export const DESIGN_TOPICS: readonly AuthoringTopic[] = [
         - Lay 4 or more sections out in the shape that makes the wires shortest: 2 or 3 rows that grow down, a grid, or a hub with its spokes around it. Never one long row. Rows can differ in width: the outline follows the flow, not a rectangle.
         - Size each section to its content. A section with three nodes is small, not a full-width band.
         - Center a section on the node or section it connects to, so the wire between them runs straight.
-        - To fit, stack a long row into 2 rows. Never shrink a node, cut a label, or make a gap between sections narrower than topic \`rules\` says. A board with many wires can pass ${JUDGE_PNG_MAX_EDGE}px.
+        - To fit, stack a long row into 2 rows. Never shrink a node, cut a label, or make a gap between sections narrower than topic \`rules\` says. A board that keeps those gaps can pass ${JUDGE_PNG_MAX_EDGE}px. Never add room past them: it makes the wires long and every label small.
         - When a section must grow or the board gets full, make room before you add: \`arrange\` the sections in reading order with \`flow: {axis: "x" or "y", gap}\`, then call tighten_wires again.
     </board_size>
 
     <build_order>
         Write the plan first: the sections in rows, the subsections in each section, the nodes in each section as rows, the color key, and every wire.
 
-        1. place_section for each section, with its title, icon, and color in one call. Leave wide room between sections. Step 4 sets it. Place a subsection inside its section, with a color apart from it. page-frame is working room, not the board's size: resize it larger than the plan first, and call fit_section on page-frame last.
+        1. place_section for each section, with its title, icon, and color in one call. Leave room between sections. Step 4 sets it. Place a subsection inside its section, with a color apart from it. page-frame is working room: resize it to hold the plan first, and call fit_section on page-frame last.
         2. place_shape for each node inside its section, with its name, type and color in one call. For a named product, use the brand icon find_icon returns. Keep the default size: ${defaultSize("shape")} for a shape, ${defaultSize("icon")} for an icon. clone a finished node for each peer of the same role.
         3. arrange_section for each section, with its node ids as rows. It sets the gaps (${CRAFT_TARGETS.nodeGapRow} across a row, ${CRAFT_TARGETS.nodeGapColumn} down a column) and fits the frame, so you write no coordinates. For a section that holds subsections, call arrange_section on each subsection, arrange the subsections with space, then call fit_section on the section.
         4. arrange each row of sections with space, then arrange the same row with align top. The gap is ${CRAFT_TARGETS.sectionGutterSideBySide} for one plain wire, and grows with the wires and labels in it: topic \`rules\` has the numbers.
