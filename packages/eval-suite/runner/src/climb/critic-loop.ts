@@ -287,18 +287,20 @@ function faultKey(finding: Pick<LoopFinding, "kind" | "ids" | "labels">): string
  * A layout finding: where a section sits is the fault, so a section move is
  * the fix. The runner's wire findings (a narrow band, a wire through a
  * section, a far wire), the space reviewer's placement, spacing and routing
- * findings, and any reviewer's finding of those kinds on a wire between 2
- * sections that crosses a wire, runs through a section or is long (space.ts
- * LayoutFacts). An empty block is not one: no decline closes it.
+ * findings, and any reviewer's finding of those kinds on sections alone (a
+ * store before the stages that feed it) or on a wire between 2 sections that
+ * crosses a wire, runs through a section or is long (space.ts LayoutFacts).
+ * An empty block is not one: no decline closes it.
  */
 export function isLayout(finding: Pick<LoopFinding, "source" | "kind" | "ids" | "regions">, layout: LayoutFacts | undefined): boolean {
   if (finding.source === "computed") return finding.kind === "wire";
   if (finding.source !== "reviewer" || !MOVE_KINDS.has(finding.kind)) return false;
-  return finding.regions.includes(SPACE_UNIT) || finding.ids.some((id) => layout?.wires[id] !== undefined);
+  return finding.regions.includes(SPACE_UNIT) || finding.ids.some((id) => layout?.wires[id] !== undefined)
+    || (finding.ids.length > 0 && finding.ids.every((id) => layout?.sections[id] !== undefined));
 }
 
-/** A section move the answer says it made or tried. "cannot move", "was not moved" and "a swap would" say no move. */
-const MOVE_TRIED = /(?<!(?:\b(?:not|never|cannot|without|no)|n['’]t)\s+(?:\w+\s+)?)\b(tried|moved|swapped|shifted|reordered|rearranged|relocated|placed|put)\b/i;
+/** A move the answer says it made or tried. "cannot move", "was not moved", "a swap would" and "tried a route" say no move. */
+const MOVE_TRIED = /(?<!(?:\b(?:not|never|cannot|without|no)|n['’]t)\s+(?:\w+\s+)?)\b(moved|swapped|shifted|reordered|rearranged|relocated|placed|put|tried\s+(?:\w+\s+){0,2}(?:mov|swap|shift|reorder|rearrang|relocat|plac|put))/i;
 const RESULT_WORDS = /\d\s*(px|%|wires?\b|crossings?\b|bends?\b)/i;
 
 /**
@@ -307,15 +309,16 @@ const RESULT_WORDS = /\d\s*(px|%|wires?\b|crossings?\b|bends?\b)/i;
  * moved (h1 F146, h4 F34, 06 F13), and the section order stayed wrong. A
  * decline is earned when the revise pass moved a section the finding is
  * about (`moved`: the ids), or when its reason names a section, a move it
- * made or tried and what it measured. A reason why no move was tried is not
- * one. A finding that names no item of a section is about every section.
+ * made or tried in the same sentence and what it measured. A reason why no
+ * move was tried is not one, and neither is a route it tried. A finding that
+ * names no item of a section is about every section.
  */
 export function declineEarned(finding: Pick<LoopFinding, "ids">, reason: string, moved: string[], layout: LayoutFacts | undefined): boolean {
   const about = new Set(finding.ids.flatMap((id) => layout?.holders[id] ?? []));
   if (moved.some((id) => about.size === 0 || about.has(id))) return true;
-  const said = ` ${normal(reason)} `;
   const sections = Object.entries(layout?.sections ?? {}).flat().map(normal).filter((name) => name.length > 2);
-  return sections.some((name) => said.includes(` ${name} `)) && MOVE_TRIED.test(reason) && RESULT_WORDS.test(reason);
+  const moves = (sentence: string) => MOVE_TRIED.test(sentence) && sections.some((name) => ` ${normal(sentence)} `.includes(` ${name} `));
+  return reason.split(/[.;\n]\s/).some(moves) && RESULT_WORDS.test(reason);
 }
 
 /** How many revise passes turned these findings down. 2 findings one pass declined are one decline. */

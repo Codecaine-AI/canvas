@@ -143,7 +143,10 @@ describe("climb rethink turn record", () => {
     expect(sectionMoves(before, moved({ sub: [100, 0] }), "page")).toEqual([{ id: "sub", dx: 100, dy: 0 }]);
     expect(sectionMoves(before, moved({ a: [0, 600], sub: [50, 600] }), "page")).toEqual([{ id: "a", dx: 0, dy: 600 }, { id: "sub", dx: 50, dy: 600 }]);
     // The board frame grew round its sections: not a move. A section drawn in the turn is not one either.
-    expect(sectionMoves(before, moved({ page: [-100, -100], b: [-300, 0] }, [box("new", "section", "page", 0, 600, 300, 300)]), "page")).toEqual([{ id: "b", dx: -300, dy: 0 }]);
+    expect(sectionMoves(before, moved({ page: [-100, -100], b: [-300, 0], n: [-300, 0] }, [box("new", "section", "page", 0, 600, 300, 300)]), "page")).toEqual([{ id: "b", dx: -300, dy: 0 }]);
+    // `fit_section` drew the frame of b in round its node, and the node stayed: no move. A move, then the node set again inside b: a move.
+    expect(sectionMoves(before, moved({ b: [40, 40] }), "page")).toEqual([]);
+    expect(sectionMoves(before, moved({ b: [-300, 0], n: [-290, 10] }), "page")).toEqual([{ id: "b", dx: -300, dy: 0 }]);
   });
 
   test("the record keeps the answers, the tool calls by tool, the sections moved, the frame and the count of failed measures before and after", () => {

@@ -895,6 +895,9 @@ describe("critic loop decline rule for layout findings", () => {
     expect([of({ source: "computed", kind: "wire" }), of({ source: "computed", kind: "space" })]).toEqual([true, false]);
     // The space reviewer's findings on where things sit, and any reviewer's on a wire the plan lists.
     expect([of({ kind: "spacing", ids: ["sec_a", "sec_b"], regions: ["space"] }), of({}), of({ kind: "placement" })]).toEqual([true, true, true]);
+    // Any reviewer's finding on sections alone: a store before the stages that feed it. With a node in it, it is a finding on the node.
+    expect([of({ kind: "placement", ids: ["sec_c", "sec_b"], regions: ["choices"] }), of({ kind: "placement", ids: ["sec_c", "a"], regions: ["choices"] }), of({ kind: "colour", ids: ["sec_c"], regions: ["choices"] })])
+      .toEqual([true, false, false]);
     // A wire inside one section, a kind no move fixes, and a lint are none.
     expect([of({ ids: ["w1"] }), of({ kind: "label_chip", regions: ["space"] }), of({ source: "check", kind: "near-miss" })]).toEqual([false, false, false]);
     expect(isLayout({ source: "reviewer", kind: "routing", ids: ["w"], regions: ["sec_a"] }, undefined)).toBe(false);
@@ -919,7 +922,9 @@ describe("critic loop decline rule for layout findings", () => {
       earned("did not move Store, the 240 px band is needed"), earned("a swap of Store and Engine would add 2 crossings"),
     ]).toEqual([false, false, false, false]);
     // A "not" after the move, or in the sentence before it, takes nothing from it.
-    expect([earned("moved Store under Intake: w is not shorter, 2100 px"), earned("Routing alone is not enough. Tried Store left of Engine: 3 crossings")]).toEqual([true, true]);
+    expect([earned("moved Store under Intake: w is not shorter, 2100 px"), earned("Routing alone is not enough. Tried a swap of Store and Engine: 3 crossings")]).toEqual([true, true]);
+    // The move is a move of a section it names: a route it tried, or a move in a sentence with no section, is none.
+    expect([earned("Tried routing w around Intake; it remains 1800 px"), earned("Intake is full. Moved the label of w: 1800 px")]).toEqual([false, false]);
     // A section id with a hyphen reads as it is written.
     const hyphen: LayoutFacts = { sections: { "sec-runner": "Runner" }, holders: {}, wires: {} };
     expect(declineEarned({ ids: ["w"] }, "shifted sec-runner 400 px right: 2 wires cross then", [], hyphen)).toBe(true);

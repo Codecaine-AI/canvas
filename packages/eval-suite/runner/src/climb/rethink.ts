@@ -123,21 +123,29 @@ export function rethinkReask(tags: string[]): string {
 export interface SectionMove { id: string; dx: number; dy: number }
 
 /**
- * The sections whose place differs between 2 boards. A section that went
- * along with a move of its parent is not listed, and neither is `skip`, the
- * board frame: it follows what it holds.
+ * The sections whose place differs between 2 boards, with what they hold. A
+ * section that went along with a move of its parent is not listed, and
+ * neither is `skip`, the board frame: it follows what it holds. A frame that
+ * changed place round items that stayed is not one either: `fit_section`
+ * draws a frame in, and no item of the section moved.
  */
 export function sectionMoves(before: Board, after: Board, skip: string | null): SectionMove[] {
-  const placeOf = new Map(before.objects.filter((object) => object.geometry).map((object) => [object.id, object.geometry]));
+  const wasOf = new Map(before.objects.filter((object) => object.geometry).map((object) => [object.id, object]));
   const delta = (id: string | null | undefined, to: { x: number; y: number } | undefined) => {
-    const from = id ? placeOf.get(id) : undefined;
+    const from = id ? wasOf.get(id)?.geometry : undefined;
     return from && to ? { dx: to.x - from.x, dy: to.y - from.y } : { dx: 0, dy: 0 };
   };
+  const corner = (rects: Array<{ x: number; y: number }>) => ({ x: Math.min(...rects.map((rect) => rect.x)), y: Math.min(...rects.map((rect) => rect.y)) });
   const nowOf = new Map(after.objects.map((object) => [object.id, object]));
-  return after.objects.filter((object) => object.type === "section" && object.geometry && object.id !== skip && placeOf.has(object.id)).flatMap((section) => {
+  return after.objects.filter((object) => object.type === "section" && object.geometry && object.id !== skip && wasOf.has(object.id)).flatMap((section) => {
     const own = delta(section.id, section.geometry);
     const parent = delta(section.parentId === skip ? null : section.parentId, section.parentId ? nowOf.get(section.parentId)?.geometry : undefined);
-    return (own.dx !== 0 || own.dy !== 0) && (own.dx !== parent.dx || own.dy !== parent.dy) ? [{ id: section.id, ...own }] : [];
+    // What it held and holds: the top left corner of those items says whether they moved, however the turn arranged them again.
+    const held = after.objects.filter((object) => object.parentId === section.id && object.geometry && wasOf.get(object.id)?.parentId === section.id);
+    const [from, to] = [corner(held.map((object) => wasOf.get(object.id)!.geometry)), corner(held.map((object) => object.geometry))];
+    const inside = held.length ? { dx: to.x - from.x, dy: to.y - from.y } : own;
+    const moved = (shift: { dx: number; dy: number }) => (shift.dx !== 0 || shift.dy !== 0) && (shift.dx !== parent.dx || shift.dy !== parent.dy);
+    return moved(own) && moved(inside) ? [{ id: section.id, ...own }] : [];
   });
 }
 
