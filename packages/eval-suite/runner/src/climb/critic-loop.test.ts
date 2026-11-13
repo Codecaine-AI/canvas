@@ -914,6 +914,8 @@ describe("critic loop decline rule for layout findings", () => {
     // The answer names the section by id or by title, the move, and a number it measured.
     expect(earned("moved sec_c under sec_a, measured w at 2100 px")).toBe(true);
     expect(earned("swapped Store and Engine: w then had 3 crossings")).toBe(true);
+    // The number can be a word (h3 F146 in the gate loop of round 5 cycle 3: "measured one crossing" earned nothing).
+    expect([earned("moved sec_c to x 1340, measured one crossing of w with v"), earned("moved Store under Intake: no crossings then")]).toEqual([true, true]);
     // A part of that is not enough: no number, no move, or no section.
     expect([earned("moved sec_c under sec_a, and it was worse"), earned("sec_c is 900 px from sec_a"), earned("moved it left, measured 2100 px")]).toEqual([false, false, false]);
     // A reason why no move was tried names no move made: the finding comes back.

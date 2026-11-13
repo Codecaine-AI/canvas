@@ -303,7 +303,8 @@ export function isLayout(finding: Pick<LoopFinding, "source" | "kind" | "ids" | 
 const MOVE_TRIED = /(?<!(?:\b(?:not|never|cannot|without|no)|n['’]t)\s+(?:\w+\s+)?)\b(moved|swapped|shifted|reordered|rearranged|relocated|placed|put|tried\s+(?:\w+\s+){0,2}(?:mov|swap|shift|reorder|rearrang|relocat|plac|put)\w*)\b/gi;
 /** The words between a move and the section it moves: "moved the section Store", "tried a swap of Store and Engine". */
 const MOVE_FILLER = /^(?:(?:the|a|both|whole|section|sections|of) )*/;
-const RESULT_WORDS = /\d\s*(px|%|wires?\b|crossings?\b|bends?\b)/i;
+/** What a move measured: "1701 px", "4 crossings", "one crossing", "no bends". */
+const RESULT_WORDS = /(?:\d\s*|\b(?:no|zero|one|two|three|four|five|six|seven|eight|nine|ten)\s+)(px|%|wires?\b|crossings?\b|bends?\b)/i;
 
 /**
  * Whether a decline of a layout finding closes it. Round 5 cycle 2 closed

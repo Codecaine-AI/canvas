@@ -502,6 +502,12 @@ interface Measures { board: Board; rule: GapRule; gaps: GapMeasure[]; blocks: Em
 /** The space faults, most empty px² first: the thin sections and the empty blocks outside them, then the gaps too wide. */
 function spaceFaults({ gaps, blocks, thin }: Measures): ComputedFault[] {
   const limit = `The limit is ${EMPTY_BLOCK.area.toLocaleString("en-US")} px² with a short side of ${EMPTY_BLOCK.short} px.`;
+  // A block over a gap went out with no number in the gate loop of round 5 cycle 3, and the drawer kept the gap at its own count of the wires (h3: 480 px against 400, declined 3 times).
+  const gapIn = (block: EmptyBlock) => {
+    const gap = gaps.filter((each) => each.parent === block.in && covers(block.rect, each.gutter)).sort((a, b) => b.lineNeed - a.lineNeed)[0];
+    return !gap ? "" : ` The gap between ${gap.a} and ${gap.b} in it is ${gap.gap} px wide, and the gap rule asks ${gap.lineNeed} px there`
+      + ` (${count(gap.counted.length, "wire crosses it or runs", "wires cross it or run")} along its band${gap.counted.length ? `: ${gap.counted.join(", ")}` : ""}). A gap at its number is no empty block.`;
+  };
   const empty: Array<{ px: number; fault: ComputedFault }> = [
     ...thin.map((section) => {
       // The blocks of a thin section are its own fault, named once.
@@ -516,7 +522,7 @@ function spaceFaults({ gaps, blocks, thin }: Measures): ComputedFault[] {
     ...blocks.filter((block) => !thin.some((section) => section.id === block.in)).map((block) => ({ px: area(block.rect), fault: {
       kind: "space" as const, key: JSON.stringify(["empty-block", block.in ?? "board"]), block: block.local, ids: block.in ? [block.in] : [],
       problem: `An empty block of ${size(block.rect)} sits ${block.frame ? "in the board frame" : `inside section ${block.in}`} at ${span(block.rect)}:`
-        + ` ${percent(block.share)} of the ${block.frame ? "frame holds no section, node or sticky" : "section holds nothing"}. ${limit} ${SPACE_FIXES}`,
+        + ` ${percent(block.share)} of the ${block.frame ? "frame holds no section, node or sticky" : "section holds nothing"}.${gapIn(block)} ${limit} ${SPACE_FIXES}`,
       marks: [{ box: block.rect }],
     } })),
   ];
