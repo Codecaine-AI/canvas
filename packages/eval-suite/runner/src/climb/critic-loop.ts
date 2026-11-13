@@ -300,7 +300,9 @@ export function isLayout(finding: Pick<LoopFinding, "source" | "kind" | "ids" | 
 }
 
 /** A move the answer says it made or tried. "cannot move", "was not moved", "a swap would" and "tried a route" say no move. */
-const MOVE_TRIED = /(?<!(?:\b(?:not|never|cannot|without|no)|n['’]t)\s+(?:\w+\s+)?)\b(moved|swapped|shifted|reordered|rearranged|relocated|placed|put|tried\s+(?:\w+\s+){0,2}(?:mov|swap|shift|reorder|rearrang|relocat|plac|put))/i;
+const MOVE_TRIED = /(?<!(?:\b(?:not|never|cannot|without|no)|n['’]t)\s+(?:\w+\s+)?)\b(moved|swapped|shifted|reordered|rearranged|relocated|placed|put|tried\s+(?:\w+\s+){0,2}(?:mov|swap|shift|reorder|rearrang|relocat|plac|put)\w*)\b/gi;
+/** The words between a move and the section it moves: "moved the section Store", "tried a swap of Store and Engine". */
+const MOVE_FILLER = /^(?:(?:the|a|both|whole|section|sections|of) )*/;
 const RESULT_WORDS = /\d\s*(px|%|wires?\b|crossings?\b|bends?\b)/i;
 
 /**
@@ -308,16 +310,23 @@ const RESULT_WORDS = /\d\s*(px|%|wires?\b|crossings?\b|bends?\b)/i;
  * crossings and long wires on "forced" and "must cross once" with no section
  * moved (h1 F146, h4 F34, 06 F13), and the section order stayed wrong. A
  * decline is earned when the revise pass moved a section the finding is
- * about (`moved`: the ids), or when its reason names a section, a move it
- * made or tried in the same sentence and what it measured. A reason why no
- * move was tried is not one, and neither is a route it tried. A finding that
- * names no item of a section is about every section.
+ * about (`moved`: the ids), or when its reason says a move it made or tried
+ * of a section it names, and what it measured. The section is what the move
+ * moves: "moved Store under Intake", "Store was moved". A reason why no move
+ * was tried is not one, and neither is a route it tried or a move of a label
+ * near a section. A finding that names no item of a section is about every
+ * section.
  */
 export function declineEarned(finding: Pick<LoopFinding, "ids">, reason: string, moved: string[], layout: LayoutFacts | undefined): boolean {
   const about = new Set(finding.ids.flatMap((id) => layout?.holders[id] ?? []));
   if (moved.some((id) => about.size === 0 || about.has(id))) return true;
   const sections = Object.entries(layout?.sections ?? {}).flat().map(normal).filter((name) => name.length > 2);
-  const moves = (sentence: string) => MOVE_TRIED.test(sentence) && sections.some((name) => ` ${normal(sentence)} `.includes(` ${name} `));
+  const moves = (sentence: string) => [...sentence.matchAll(MOVE_TRIED)].some((move) => {
+    const after = `${normal(sentence.slice(move.index + move[0].length)).replace(MOVE_FILLER, "")} `;
+    const before = normal(sentence.slice(0, move.index)).replace(/ (?:was|were|is|got)$/, "");
+    // "Store's label" is a label, and "store s" is how it reads here.
+    return sections.some((name) => (after.startsWith(`${name} `) && !after.startsWith(`${name} s `)) || ` ${before}`.endsWith(` ${name}`));
+  });
   return reason.split(/[.;\n]\s/).some(moves) && RESULT_WORDS.test(reason);
 }
 

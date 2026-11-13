@@ -925,6 +925,9 @@ describe("critic loop decline rule for layout findings", () => {
     expect([earned("moved Store under Intake: w is not shorter, 2100 px"), earned("Routing alone is not enough. Tried a swap of Store and Engine: 3 crossings")]).toEqual([true, true]);
     // The move is a move of a section it names: a route it tried, or a move in a sentence with no section, is none.
     expect([earned("Tried routing w around Intake; it remains 1800 px"), earned("Intake is full. Moved the label of w: 1800 px")]).toEqual([false, false]);
+    // The section is what the move moves: a label moved near it, or its own label, is no section move.
+    expect([earned("Moved the label of w above Intake; the wire remains 1800 px"), earned("moved Store's label up: w is 1800 px")]).toEqual([false, false]);
+    expect([earned("Store was moved under Intake: w is 2100 px"), earned("tried to move the section Store left of Engine, measured 3 crossings")]).toEqual([true, true]);
     // A section id with a hyphen reads as it is written.
     const hyphen: LayoutFacts = { sections: { "sec-runner": "Runner" }, holders: {}, wires: {} };
     expect(declineEarned({ ids: ["w"] }, "shifted sec-runner 400 px right: 2 wires cross then", [], hyphen)).toBe(true);
