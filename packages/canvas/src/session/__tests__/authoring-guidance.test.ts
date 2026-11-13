@@ -203,9 +203,9 @@ describe("shared Canvas authoring guidance", () => {
 
   test("the gap between sections and the length of a labeled leg come from the router and the chip", () => {
     const rules = topicText("rules");
-    expect(rules).toContain(`plus ${SECTION_GAP_PER_WIRE} for each wire after the first. Never make it narrower, or more than ${SECTION_GAP_SLACK} wider.`);
-    // The maximum leaves room for the row rule: a pair may sit a few wires over its own number.
-    expect(SECTION_GAP_SLACK).toBeGreaterThanOrEqual(SECTION_GAP_PER_WIRE * 4);
+    expect(rules).toContain(`plus ${SECTION_GAP_PER_WIRE} for each wire after the first`);
+    // The maximum counts from what the row needs, labels and all, so it never asks for less than the minimum.
+    expect(rules).toContain(`give a row of sections the widest gap a pair in it needs, and never over ${SECTION_GAP_SLACK} more: a wider gap is an empty band.`);
     expect(rules).toContain(`A horizontal wire leg that carries a label is at least ${LABEL_LEG.base} plus ${LABEL_LEG.perCharacter} for each label character long`);
     expect(rules).toContain(`A vertical one is at least ${LABEL_LEG.vertical} long.`);
     expect(rules).toContain("Gaps inside a section stay as `arrange_section` sets them.");
@@ -238,7 +238,7 @@ describe("shared Canvas authoring guidance", () => {
     expect(rules).toContain("the parts go in the subsection, and no wire runs from the thing to each part");
     expect(rules).toContain("2 or more nodes that share a group name make a subsection too.");
     expect(rules).toContain("A section of 8 or more nodes holds subsections: name its groups before you place a node.");
-    expect(rules).toContain("When the source names two sides (inside and outside, existing and proposed), each side is a subsection.");
+    expect(rules).toContain("When the source names two sides (inside and outside, existing and proposed), each side of 2 or more nodes is a subsection.");
     expect(rules).toContain("Never draw a subsection for 1 node or for a group with no name.");
     expect(rules).toContain("A subsection takes a color apart from its section and from the subsections beside it.");
     expect(rules).toContain("Never call `arrange_section` on a section that holds subsections. `arrange` its subsections and loose nodes with `space`, then call `fit_section` on it.");
@@ -255,6 +255,7 @@ describe("shared Canvas authoring guidance", () => {
     expect(rules).toContain("Give them one color and one dash, and never split a trunk the board merged.");
     expect(rules).toContain("Wires that differ in color or dash never share a line or an arrowhead.");
     expect(rules).toContain("give each meaning its own side of the node, nearest its other ends: set `anchor` on that end in `connect`, or with `change_connection`");
+    expect(rules).toContain("Two wires that cross on the way in trade sides, so choose sides that keep them apart.");
     expect(rules).toContain("Never pin a wire end with `position` to place or spread arrowheads. The board centers and merges them. `anchor` only picks the side.");
     // Round 5 cycle 1: this line put two meanings on one line into a node.
     expect(rules).not.toContain("keep that junction");
@@ -299,7 +300,7 @@ describe("shared Canvas authoring guidance", () => {
       "Call `canvas_check`, and read its whole-board PNG and its LAYOUT block.",
       "`look` at `page-frame`: MEASURES prints the gaps between its sections",
       "Which section moves shorten the 3 longest wires?",
-      `Which gap is under its number in topic \`rules\`, or more than ${SECTION_GAP_SLACK} over it?`,
+      `Which gap is under its number in topic \`rules\`, or over ${SECTION_GAP_SLACK} more than its row needs?`,
       "Does another board shape (wider, taller, a grid, a hub with spokes) or section order read better and close an empty block?",
       "whole sections with `arrange` or `move`",
       "then each row's gap again (`arrange` with `space` along a row, `move` with `by` for the rows below), then `tighten_wires`",
