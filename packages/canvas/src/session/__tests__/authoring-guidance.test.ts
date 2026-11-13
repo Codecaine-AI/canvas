@@ -116,13 +116,15 @@ describe("shared Canvas authoring guidance", () => {
     const rules = topicText("rules");
     expect(rules).toContain("Never put a node or a sticky on a section of its own color.");
     expect(rules).toContain("Never nest a gray section directly in a gray section.");
-    expect(rules).toContain("Every section takes a hue that the color key gives a meaning.");
-    expect(rules).toContain("Draw a gray section only when the source asks for one.");
+    expect(rules).toContain("Every section and subsection takes a hue that the color key gives a meaning.");
+    expect(rules).toContain("Draw a gray or white section only when the source asks for one.");
+    expect(rules).toContain("When a check names gray for a section, give it a free hue.");
+    expect(topicText("color_palette")).toContain("Draw a gray or white section only when the source asks for one.");
     expect(rules).not.toContain("Gray is for a section with no role hue");
     const palette = topicText("color_palette");
     expect(palette).toContain("A section never takes the color of a node or a sticky it holds, even when all its nodes share one hue");
     for (const topic of getCanvasAuthoringGuidance().topics) {
-      expect(topic.text, topic.id).not.toMatch(/category section|gray first|may share its region's hue/i);
+      expect(topic.text, topic.id).not.toMatch(/category section|gray first|may share its region's hue|Use gray only for|violet or gray section/i);
     }
   });
 
@@ -171,14 +173,18 @@ describe("shared Canvas authoring guidance", () => {
   test("the gap between sections and the length of a labeled leg come from the router and the chip", () => {
     const rules = topicText("rules");
     expect(rules).toContain(`plus ${SECTION_GAP_PER_WIRE} for each wire after the first`);
-    expect(rules).toContain(`at least ${LABEL_LEG.base} plus ${LABEL_LEG.perCharacter} for each label character long`);
+    expect(rules).toContain(`A horizontal wire leg that carries a label is at least ${LABEL_LEG.base} plus ${LABEL_LEG.perCharacter} for each label character long`);
+    expect(rules).toContain(`A vertical one is at least ${LABEL_LEG.vertical} long.`);
     expect(rules).toContain("Gaps inside a section stay as `arrange_section` sets them.");
     // One more wire takes one router lane.
     expect(SECTION_GAP_PER_WIRE).toBeGreaterThanOrEqual(LANE_GAP_PX);
     expect(SECTION_GAP_PER_WIRE - LANE_GAP_PX).toBeLessThan(20);
     // A wire as long as the rule says draws no short-wire finding, and the rule is not far over the need.
-    const shortWire = (gap: number, label: string) => runDiagnostics(
-      makeDocument([box("a", 200, 600), box("b", 360 + gap, 600)], [{ ...connect("leg", "a", "b"), label }]),
+    const shortWire = (gap: number, label: string, axis: "x" | "y" = "x") => runDiagnostics(
+      makeDocument(
+        [box("a", 200, 600), axis === "x" ? box("b", 360 + gap, 600) : box("b", 200, 680 + gap)],
+        [{ ...connect("leg", "a", "b"), label }],
+      ),
       FINISHING_RULES,
       { canvasStyle: canvasThemePreset("schematic-light") },
     ).filter((finding) => finding.rule === "short-wire");
@@ -187,19 +193,26 @@ describe("shared Canvas authoring guidance", () => {
       const leg = LABEL_LEG.base + LABEL_LEG.perCharacter * characters;
       expect(shortWire(leg, label), `${characters} characters at ${leg}px`).toEqual([]);
       expect(shortWire(leg * 0.7, label), `${characters} characters at 0.7 of ${leg}px`).toHaveLength(1);
+      // The chip lies across a vertical leg, so its length does not grow with the label.
+      expect(shortWire(LABEL_LEG.vertical, label, "y"), `${characters} characters on a vertical leg`).toEqual([]);
+      expect(shortWire(LABEL_LEG.vertical * 0.7, label, "y"), `${characters} characters on a short vertical leg`).toHaveLength(1);
     }
   });
 
-  test("a named group of 2 or more nodes is a subsection, built from the inside out", () => {
+  test("a thing's parts and a named group of 2 or more nodes are a subsection, built from the inside out", () => {
     const rules = topicText("rules");
-    expect(rules).toContain("When the source says a thing holds parts, or 2 or more nodes in a section share a group name, draw the group as a subsection");
+    expect(rules).toContain("Draw what lives inside a thing as a subsection: `place_section` inside the section, titled for the thing.");
+    expect(rules).toContain("the parts go in the subsection, and no wire runs from the thing to each part");
+    expect(rules).toContain("2 or more nodes that share a group name make a subsection too.");
+    expect(rules).toContain("In a section of 7 or more nodes, find these groups before you place a node.");
     expect(rules).toContain("Never draw a subsection for 1 node or for a group with no name.");
     expect(rules).toContain("A subsection takes a color apart from its section and from the subsections beside it.");
-    expect(rules).toContain("Never call `arrange_section` on a section that holds subsections. `arrange` its subsections with `space`, then call `fit_section` on it.");
+    expect(rules).toContain("Never call `arrange_section` on a section that holds subsections. `arrange` its subsections and loose nodes with `space`, then call `fit_section` on it.");
     const design = topicText("diagram_design");
     expect(design).toContain("a named group inside it is a subsection with its own title");
     expect(design).toContain("call arrange_section on each subsection, arrange the subsections with space, then call fit_section on the section");
-    expect(topicText("workflow")).toContain("make each named group inside a section a subsection");
+    expect(design).toContain("or a part inside the subsection of the thing that holds it");
+    expect(topicText("workflow")).toContain("make each thing that holds parts and each named group inside a section a subsection");
   });
 
   test("wires of one meaning run as one trunk, and the board's merge stays", () => {
@@ -215,13 +228,19 @@ describe("shared Canvas authoring guidance", () => {
     for (const part of [
       "Call `canvas_check`, and read its whole-board PNG and its LAYOUT block.",
       "Which 3 wires are longest, and which section move shortens them?",
-      "Which gap between sections is most crowded?",
+      "`look` at `page-frame`: MEASURES prints each gap between sections",
+      "Which gaps between sections are narrower than topic `rules` says for their wires?",
+      "set each narrow gap to its number (`arrange` with `space` along a row, `move` with `by` for the rows below)",
       "Does another board shape (wider, taller, a grid, a hub with spokes) shorten the wires?",
-      "move whole sections with `arrange` or `move`",
+      "Move whole sections with `arrange` or `move`",
       "call `tighten_wires` again",
       "Moving sections after the first draft is normal.",
     ]) expect(rethink, part).toContain(part);
-    expect(topicText("diagram_design")).toContain("6. Rethink once, as the workflow says");
+    const design = topicText("diagram_design");
+    expect(design).toContain("6. Rethink once, as the workflow says");
+    // Room for wires beats the real-size image, and page-frame is not the board's size.
+    expect(design).toContain("or make a gap between sections narrower than topic `rules` says");
+    expect(design).toContain("page-frame is working room, not the board's size");
   });
 
   test("the state grammar keys only blocks the MCP tools print", () => {

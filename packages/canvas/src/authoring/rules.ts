@@ -35,9 +35,12 @@ export const SECTION_GAP_PER_WIRE = onGrid(LANE_GAP_PX);
  * The length a labelled leg needs, as a base plus a step for each label
  * character. The base is the air `labelledGapPx` keeps around a chip plus one
  * grid step for the chip's padding. The step covers one character of the
- * label font (authoring-guidance.test.ts measures real chips against both).
+ * label font. The chip lies across a vertical leg, so that leg needs the air,
+ * the chip's height and the wire's two end gaps, whatever the label
+ * (authoring-guidance.test.ts measures real chips against all three).
  */
-export const LABEL_LEG = { base: onGrid(LABELLED_GAP_AIR_PX) + AGENT_GRID, perCharacter: 10 } as const;
+const LABEL_LEG_BASE = onGrid(LABELLED_GAP_AIR_PX) + AGENT_GRID;
+export const LABEL_LEG = { base: LABEL_LEG_BASE, perCharacter: 10, vertical: LABEL_LEG_BASE + AGENT_GRID } as const;
 
 /**
  * The Layout section, one rule a line. A rule a layout tool needs the drawer
@@ -51,10 +54,10 @@ const LAYOUT_RULES: readonly string[] = [
   "When the board gets full or a section must grow, make room: `arrange` the sections in reading order with `flow: {axis: \"x\" or \"y\", gap}`.",
   "Put the two sections with the most wires between them side by side. A store, a sink or a check sits beside the section that uses it. Never put a section between two sections that wire to each other.",
   `The gap between two sections grows with the wires in it: ${CRAFT_TARGETS.sectionGutterSideBySide}, plus ${SECTION_GAP_PER_WIRE} for each wire after the first. Count each wire that crosses the gap or runs along it. Gaps inside a section stay as \`arrange_section\` sets them.`,
-  `A wire leg that carries a label is at least ${LABEL_LEG.base} plus ${LABEL_LEG.perCharacter} for each label character long: the chip, and ${LABELLED_GAP_AIR_PX / 2} clear on each side. A gap a labeled wire crosses is at least that wide before you add for its other wires.`,
+  `A horizontal wire leg that carries a label is at least ${LABEL_LEG.base} plus ${LABEL_LEG.perCharacter} for each label character long: the chip, and ${LABELLED_GAP_AIR_PX / 2} clear on each side. A vertical one is at least ${LABEL_LEG.vertical} long. A gap between side-by-side sections that a labeled wire crosses is at least the horizontal length before you add for its other wires.`,
   "One `arrange` call sets one gap, so give a row of sections the gap of its busiest pair. After `connect`, call `arrange_section` again on a section that holds a labeled wire: it widens the gap under the label.",
-  "When the source says a thing holds parts, or 2 or more nodes in a section share a group name, draw the group as a subsection: `place_section` inside the section, with its own title. Never draw a subsection for 1 node or for a group with no name.",
-  "Never call `arrange_section` on a section that holds subsections. `arrange` its subsections with `space`, then call `fit_section` on it.",
+  "Draw what lives inside a thing as a subsection: `place_section` inside the section, titled for the thing. A host and its loop, a mode and its knobs, a pool and its servers: the parts go in the subsection, and no wire runs from the thing to each part. 2 or more nodes that share a group name make a subsection too. In a section of 7 or more nodes, find these groups before you place a node. Never draw a subsection for 1 node or for a group with no name.",
+  "Never call `arrange_section` on a section that holds subsections. `arrange` its subsections and loose nodes with `space`, then call `fit_section` on it.",
   "The board's outline follows the flow, not a rectangle. Choose the shape that makes the wires shortest (wider, taller, a grid, a hub with spokes), and move whole sections to get it.",
   "A section keeps the size of its content. Never stretch a section or a node to fill a row.",
   "Center a section on the node or section it connects to.",
@@ -75,7 +78,7 @@ export function canvasRules(): AuthoringTopic {
       "## Color and Theme",
       "",
       "- Color encodes kind, never decoration. Give each section and node its role's hue.",
-      "- Every section takes a hue that the color key gives a meaning. Vary the hues across the board. Draw a gray section only when the source asks for one.",
+      "- Every section and subsection takes a hue that the color key gives a meaning. Vary the hues across the board. Draw a gray or white section only when the source asks for one. When a check names gray for a section, give it a free hue.",
       "- A subsection takes a color apart from its section and from the subsections beside it.",
       "- Never put a node or a sticky on a section of its own color.",
       "- Never nest a gray section directly in a gray section.",
