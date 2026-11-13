@@ -196,7 +196,7 @@ export interface GapMeasure extends SectionGap {
    * on both sides. Every pair along a row of sections shares the band under it.
    */
   band: WorldRect;
-  /** The wires that cross the gutter or run along the band: the ones the rule counts. */
+  /** The wires that cross the band or run along it: the ones the rule counts. */
   counted: string[];
   /** How many of them carry a label. */
   labelled: number;
@@ -215,8 +215,9 @@ export interface GapMeasure extends SectionGap {
 /**
  * Each gap between neighbour sections against the gap rule: the base, plus
  * the step for each wire after the first, plus the room of each label. The
- * count is every wire that
- * crosses the gutter or runs along its band, whichever sections it joins:
+ * count is every wire that crosses the band or runs along it, whichever
+ * sections it joins and at whichever pair it crosses (topic `rules`: "every
+ * wire that crosses it or runs along it, from every pair of sections"):
  * round 5 cycle 2 counted one pair's wires, and a band between 2 rows held
  * the wires of every pair (h1: 9 wires in 200 px). A side-by-side gap that a
  * labelled wire crosses starts from the length its label leg needs. The rule
@@ -253,8 +254,10 @@ export function gapMeasures(board: Board, units: ReviewUnit[], facts: WireFact[]
     const band = bandOf(gap, parent);
     const stacked = gap.side === "stacked";
     const [low, high, from, to] = stacked ? [band.y, band.y + band.height, band.x, band.x + band.width] : [band.x, band.x + band.width, band.y, band.y + band.height];
+    // A run from one side of the band into it crosses it, at this pair or at another one. A run the other way runs along it.
     const counted = facts.filter((fact) => segmentsOf(fact.points).some((segment) => runsThrough(segment, gap.gutter))
-      || runsOf(fact.points).some((run) => run.axis === (stacked ? "h" : "v") && run.fixed > low && run.fixed < high && Math.min(run.to, to) - Math.max(run.from, from) >= ALONG_MIN_PX));
+      || runsOf(fact.points).some((run) => run.axis === (stacked ? "v" : "h") ? run.fixed > from && run.fixed < to && run.from < high - 1 && run.to > low + 1
+        : run.fixed > low && run.fixed < high && Math.min(run.to, to) - Math.max(run.from, from) >= ALONG_MIN_PX));
     // A labelled wire crosses a side-by-side gap when one horizontal run of it spans the gutter and its chip sits in it.
     const labels = stacked ? [] : counted.filter((fact) => fact.label && fact.chip && touches(fact.chip, gap.gutter)
       && runsOf(fact.points).some((run) => run.axis === "h" && run.from <= low && run.to >= high));
@@ -308,24 +311,48 @@ export interface Link {
   neighbours: boolean;
   /** The sections beside `a` and `b` that lie on the line between their centres. */
   between: string[];
-  /** The sections it runs through that hold neither of its ends, outermost only. */
+  /** The sections it runs through that hold neither of its ends, outermost only (sectionsThrough). */
   through: string[];
 }
 
+/** An object's id, then the ids of the sections that hold it, innermost first. */
+const chainIn = (byId: Map<string, BoardObject>) => (id: string): string[] => {
+  const ids: string[] = [];
+  for (let at = byId.get(id); at && !ids.includes(at.id); at = at.parentId ? byId.get(at.parentId) : undefined) ids.push(at.id);
+  return ids;
+};
+
+/**
+ * The sections a wire runs through that hold neither of its ends, outermost
+ * only. It reads any wire: one between 2 sections, one with a loose end, one
+ * inside a section. The engine's own run of the wire against each section's
+ * frame: wires.ts lists the boxes a wire breaks the routing rule on, and a
+ * routed wire through a foreign section breaks none (h1 w-treespend).
+ */
+export function sectionsThrough(board: Board, pageFrame: BoardObject | null): (fact: WireFact) => string[] {
+  const byId = new Map(board.objects.map((object) => [object.id, object]));
+  const chain = chainIn(byId);
+  const sections = board.objects.filter((object) => object.type === SECTION && object.geometry && object !== pageFrame);
+  return (fact) => {
+    // An end that is no object of the board: the sections that hold it are unknown.
+    if (!byId.has(fact.from) || !byId.has(fact.to)) return [];
+    const held = new Set([...chain(fact.from), ...chain(fact.to)]);
+    const crossed = sections.filter((section) => !held.has(section.id) && segmentsOf(fact.points).some((segment) => runsThrough(segment, section.geometry)));
+    return crossed.filter((section) => !crossed.some((outer) => outer.id === section.parentId)).map((section) => section.id);
+  };
+}
+
+/** A wire that runs through one section or more that hold neither of its ends. */
+export interface Through { fact: WireFact; sections: string[] }
+
 /**
  * Every wire that joins 2 sections. A wire with a loose end, or between a
- * section and one it holds, joins none. `through` is the engine's own run of
- * the wire against each section's frame: wires.ts lists the boxes a wire
- * breaks the routing rule on, and a routed wire through a foreign section
- * breaks none (h1 w-treespend).
+ * section and one it holds, joins none.
  */
 export function sectionLinks(board: Board, facts: WireFact[], gaps: GapMeasure[], pageFrame: BoardObject | null): Link[] {
   const byId = new Map(board.objects.map((object) => [object.id, object]));
-  const chain = (id: string): string[] => {
-    const ids: string[] = [];
-    for (let at = byId.get(id); at && !ids.includes(at.id); at = at.parentId ? byId.get(at.parentId) : undefined) ids.push(at.id);
-    return ids;
-  };
+  const chain = chainIn(byId);
+  const through = sectionsThrough(board, pageFrame);
   const sections = board.objects.filter((object) => object.type === SECTION && object.geometry && object !== pageFrame);
   const pair = (a: string, b: string) => [a, b].sort().join("\n");
   const facing = new Set(gaps.map((gap) => pair(gap.a, gap.b)));
@@ -337,12 +364,10 @@ export function sectionLinks(board: Board, facts: WireFact[], gaps: GapMeasure[]
     if (a?.type !== SECTION || b?.type !== SECTION || !a.geometry || !b.geometry) return [];
     const parent = from[i + 1] ?? null;
     const line = { a: centre(a.geometry), b: centre(b.geometry) };
-    const held = new Set([...from, ...to]);
-    const crossed = sections.filter((section) => !held.has(section.id) && segmentsOf(fact.points).some((segment) => runsThrough(segment, section.geometry)));
     return [{
       fact, a: a.id, b: b.id, parent, neighbours: facing.has(pair(a.id, b.id)),
       between: sections.filter((section) => section !== a && section !== b && (section.parentId ?? null) === parent && runsThrough(line, section.geometry)).map((section) => section.id),
-      through: crossed.filter((section) => !crossed.some((outer) => outer.id === section.parentId)).map((section) => section.id),
+      through: through(fact),
     }];
   });
 }
@@ -383,6 +408,12 @@ export function linkLine(link: Link, links: Link[], board: Board): string {
     + (swap ? `; by section centres, a swap of ${swap.a} and ${swap.b} saves about ${swap.saves} px of wire between sections` : "");
 }
 
+/** A wire through a section as one line of facts: linkLine when it joins 2 sections, and its 2 ends when it joins none. */
+function throughLine({ fact, sections }: Through, links: Link[], board: Board): string {
+  const link = links.find((each) => each.fact === fact);
+  return link ? linkLine(link, links, board) : `${fact.id} is ${fact.length} px now, ${fact.from} → ${fact.to}; it runs through ${list(sections)}`;
+}
+
 /**
  * What the loop needs to judge a decline of a layout finding (critic-loop.ts):
  * which sections a finding's items sit in, and the facts of each wire whose
@@ -393,11 +424,11 @@ export interface LayoutFacts {
   sections: Record<string, string>;
   /** Each object and wire on the board: the sections that hold it. A wire's are the sections that hold its ends, that lie between them and that it runs through. The board frame is none. */
   holders: Record<string, string[]>;
-  /** Each wire between 2 sections that crosses a wire, runs through a third section or is over LONG_WIRE_PX: its line of facts (linkLine). */
+  /** Each wire between 2 sections that crosses a wire or is over LONG_WIRE_PX, and each wire that runs through a section that holds neither of its ends: its line of facts (linkLine, throughLine). */
   wires: Record<string, string>;
 }
 
-export function layoutFacts(board: Board, facts: WireFact[], links: Link[], pageFrame: BoardObject | null): LayoutFacts {
+export function layoutFacts(board: Board, facts: WireFact[], links: Link[], through: Through[], pageFrame: BoardObject | null): LayoutFacts {
   const byId = new Map(board.objects.map((object) => [object.id, object]));
   const holders = (id: string): string[] => {
     const ids: string[] = [];
@@ -405,17 +436,20 @@ export function layoutFacts(board: Board, facts: WireFact[], links: Link[], page
     return ids;
   };
   const linkOf = new Map(links.map((link) => [link.fact.id, link]));
+  const throughOf = new Map(through.map((each) => [each.fact.id, each.sections]));
   return {
     sections: Object.fromEntries(board.objects.filter((object) => object.type === SECTION && object !== pageFrame).map((section) => [section.id, section.text ?? ""])),
     holders: Object.fromEntries<string[]>([
       ...board.objects.map((object): [string, string[]] => [object.id, holders(object.id)]),
       ...facts.map((fact): [string, string[]] => {
         const link = linkOf.get(fact.id);
-        return [fact.id, [...new Set([...holders(fact.from), ...holders(fact.to), ...(link?.between ?? []), ...(link?.through ?? [])])]];
+        return [fact.id, [...new Set([...holders(fact.from), ...holders(fact.to), ...(link?.between ?? []), ...(throughOf.get(fact.id) ?? [])])]];
       }),
     ]),
-    wires: Object.fromEntries(links.filter(({ fact, through }) => fact.crosses.length > 0 || through.length > 0 || fact.length > LONG_WIRE_PX)
-      .map((link) => [link.fact.id, linkLine(link, links, board)])),
+    wires: Object.fromEntries([
+      ...through.map((each): [string, string] => [each.fact.id, throughLine(each, links, board)]),
+      ...links.filter(({ fact }) => fact.crosses.length > 0 || fact.length > LONG_WIRE_PX).map((link): [string, string] => [link.fact.id, linkLine(link, links, board)]),
+    ]),
   };
 }
 
@@ -463,7 +497,7 @@ export function gapLine(gap: GapMeasure): string {
 }
 
 /** What the runner measured on a board, before the caps. */
-interface Measures { board: Board; rule: GapRule; gaps: GapMeasure[]; blocks: EmptyBlock[]; thin: ThinSection[]; bands: NarrowBand[]; links: Link[] }
+interface Measures { board: Board; rule: GapRule; gaps: GapMeasure[]; blocks: EmptyBlock[]; thin: ThinSection[]; bands: NarrowBand[]; links: Link[]; through: Through[] }
 
 /** The space faults, most empty px² first: the thin sections and the empty blocks outside them, then the gaps too wide. */
 function spaceFaults({ gaps, blocks, thin }: Measures): ComputedFault[] {
@@ -503,10 +537,10 @@ function spaceFaults({ gaps, blocks, thin }: Measures): ComputedFault[] {
  * wire runs through (most wires first) and the far wires by section pair
  * (longest first), one of each in turn, MAX_WIRE_FAULTS at most.
  */
-function wireFaults({ board, rule, bands, links }: Measures): ComputedFault[] {
+function wireFaults({ board, rule, bands, links, through }: Measures): ComputedFault[] {
   const byId = new Map(board.objects.map((object) => [object.id, object]));
   const factOf = new Map(links.map((link) => [link.fact.id, link]));
-  const longest = (a: Link, b: Link) => b.fact.length - a.fact.length;
+  const longest = (a: { fact: WireFact }, b: { fact: WireFact }) => b.fact.length - a.fact.length;
   const narrow = bands.map(({ worst, sections }): ComputedFault => {
     const stacked = worst.side === "stacked";
     const holder = worst.parent ? byId.get(worst.parent)?.geometry : undefined;
@@ -525,23 +559,21 @@ function wireFaults({ board, rule, bands, links }: Measures): ComputedFault[] {
       marks: [{ box: worst.band }],
     };
   });
-  const group = (key: (link: Link) => string[], among: Link[]) => {
-    const groups = new Map<string, Link[]>();
-    for (const link of among) for (const id of key(link)) groups.set(id, [...(groups.get(id) ?? []), link]);
-    return [...groups.values()].map((group) => group.sort(longest));
+  // Each key's items, longest wire first: a wire through 2 sections is under both.
+  const group = <T extends { fact: WireFact }>(among: T[], keys: (item: T) => string[]): Array<[string, T[]]> => {
+    const groups = new Map<string, T[]>();
+    for (const item of among) for (const key of keys(item)) groups.set(key, [...(groups.get(key) ?? []), item]);
+    return [...groups].map(([key, items]) => [key, items.sort(longest)]);
   };
-  const wire = (link: Link) => `${link.fact.id} (${link.a} → ${link.b}, ${link.fact.length} px)`;
-  const through = group((link) => link.through, links).sort((a, b) => b.length - a.length || longest(a[0]!, b[0]!)).map((group): ComputedFault => {
-    const section = group[0]!.through.find((id) => group.every((link) => link.through.includes(id)))!;
-    return {
-      kind: "wire", key: JSON.stringify(["through", section]), ids: [section, ...group.map((link) => link.fact.id)],
-      problem: `${count(group.length, "wire runs", "wires run")} through section ${section}, which holds neither end of ${group.length === 1 ? "it" : "them"}: ${group.map(wire).join(", ")}`,
-      facts: linkLine(group[0]!, links, board),
-      marks: [{ box: byId.get(section)!.geometry }, ...group.slice(0, MAX_MARKED).map((link) => pathOf(link.fact))],
-    };
-  });
-  const far = group((link) => [[link.a, link.b].sort().join("\n")], links.filter((link) => link.fact.length > FAR_WIRE_PX && !link.neighbours))
-    .sort((a, b) => longest(a[0]!, b[0]!)).map((group): ComputedFault => {
+  const wire = ({ fact }: Through) => { const link = factOf.get(fact.id); return `${fact.id} (${link ? `${link.a} → ${link.b}` : `${fact.from} → ${fact.to}`}, ${fact.length} px)`; };
+  const crossed = group(through, (each) => each.sections).sort(([, a], [, b]) => b.length - a.length || longest(a[0]!, b[0]!)).map(([section, group]): ComputedFault => ({
+    kind: "wire", key: JSON.stringify(["through", section]), ids: [section, ...group.map(({ fact }) => fact.id)],
+    problem: `${count(group.length, "wire runs", "wires run")} through section ${section}, which holds neither end of ${group.length === 1 ? "it" : "them"}: ${group.map(wire).join(", ")}`,
+    facts: throughLine(group[0]!, links, board),
+    marks: [{ box: byId.get(section)!.geometry }, ...group.slice(0, MAX_MARKED).map(({ fact }) => pathOf(fact))],
+  }));
+  const far = group(links.filter((link) => link.fact.length > FAR_WIRE_PX && !link.neighbours), (link) => [[link.a, link.b].sort().join("\n")])
+    .sort(([, a], [, b]) => longest(a[0]!, b[0]!)).map(([, group]): ComputedFault => {
       const { a, b, between } = group[0]!;
       return {
         kind: "wire", key: JSON.stringify(["long", [a, b].sort()]), ids: [...[a, b].sort(), ...group.map((link) => link.fact.id)],
@@ -551,7 +583,7 @@ function wireFaults({ board, rule, bands, links }: Measures): ComputedFault[] {
         marks: group.slice(0, MAX_MARKED).map((link) => pathOf(link.fact)),
       };
     });
-  const kinds = [narrow, through, far];
+  const kinds = [narrow, crossed, far];
   const turns = Math.max(...kinds.map((faults) => faults.length));
   return Array.from({ length: turns }, (_, turn) => kinds.flatMap((faults) => faults[turn] ?? [])).flat().slice(0, MAX_WIRE_FAULTS);
 }
@@ -568,7 +600,9 @@ export function planOf(board: Board, facts: WireFact[], rule: GapRule): Plan {
   const { pageFrame, units } = reviewUnits(board);
   const gaps = gapMeasures(board, units, facts, rule, pageFrame?.id ?? null);
   const links = sectionLinks(board, facts, gaps, pageFrame);
-  const measures: Measures = { board, rule, gaps, blocks: emptyBlocks(board, pageFrame, gaps), thin: thinSections(board, pageFrame, rule.padding), bands: narrowBands(gaps), links };
+  const throughOf = sectionsThrough(board, pageFrame);
+  const through = facts.flatMap((fact): Through[] => { const sections = throughOf(fact); return sections.length ? [{ fact, sections }] : []; });
+  const measures: Measures = { board, rule, gaps, blocks: emptyBlocks(board, pageFrame, gaps), thin: thinSections(board, pageFrame, rule.padding), bands: narrowBands(gaps), links, through };
   const { board: _, rule: __, ...rest } = measures;
-  return { pageFrame, units, ...rest, faults: computedFaults(measures), layout: layoutFacts(board, facts, links, pageFrame) };
+  return { pageFrame, units, ...rest, faults: computedFaults(measures), layout: layoutFacts(board, facts, links, through, pageFrame) };
 }

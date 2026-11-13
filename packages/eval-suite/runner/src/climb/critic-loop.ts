@@ -297,7 +297,8 @@ export function isLayout(finding: Pick<LoopFinding, "source" | "kind" | "ids" | 
   return finding.regions.includes(SPACE_UNIT) || finding.ids.some((id) => layout?.wires[id] !== undefined);
 }
 
-const MOVE_WORDS = /\b(mov|swap|shift|reorder|rearrang|arrang|plac|put|relocat)/i;
+/** A section move the answer says it made or tried. "cannot move", "was not moved" and "a swap would" say no move. */
+const MOVE_TRIED = /(?<!(?:\b(?:not|never|cannot|without|no)|n['’]t)\s+(?:\w+\s+)?)\b(tried|moved|swapped|shifted|reordered|rearranged|relocated|placed|put)\b/i;
 const RESULT_WORDS = /\d\s*(px|%|wires?\b|crossings?\b|bends?\b)/i;
 
 /**
@@ -305,16 +306,16 @@ const RESULT_WORDS = /\d\s*(px|%|wires?\b|crossings?\b|bends?\b)/i;
  * crossings and long wires on "forced" and "must cross once" with no section
  * moved (h1 F146, h4 F34, 06 F13), and the section order stayed wrong. A
  * decline is earned when the revise pass moved a section the finding is
- * about (`moved`: the ids), or when its reason names a section, the move
- * tried and what it measured. A finding that names no item of a section is
- * about every section.
+ * about (`moved`: the ids), or when its reason names a section, a move it
+ * made or tried and what it measured. A reason why no move was tried is not
+ * one. A finding that names no item of a section is about every section.
  */
 export function declineEarned(finding: Pick<LoopFinding, "ids">, reason: string, moved: string[], layout: LayoutFacts | undefined): boolean {
   const about = new Set(finding.ids.flatMap((id) => layout?.holders[id] ?? []));
   if (moved.some((id) => about.size === 0 || about.has(id))) return true;
   const said = ` ${normal(reason)} `;
   const sections = Object.entries(layout?.sections ?? {}).flat().map(normal).filter((name) => name.length > 2);
-  return sections.some((name) => said.includes(` ${name} `)) && MOVE_WORDS.test(reason) && RESULT_WORDS.test(reason);
+  return sections.some((name) => said.includes(` ${name} `)) && MOVE_TRIED.test(reason) && RESULT_WORDS.test(reason);
 }
 
 /** How many revise passes turned these findings down. 2 findings one pass declined are one decline. */
@@ -817,10 +818,11 @@ export async function reviewLoop(options: {
 /**
  * The fixes a restore of round `kept` loses: the findings the drawer answered
  * `fixed` in that round's revise pass or a later one, each once. Round 5 cycle
- * 2 went back to round 10 on h4 and lost a later fix of a label chip. A later
- * round's finding counts only when the kept board can have it: a lint or a
- * computed finding that the kept round had under the same id. A reviewer's
- * finding of a later round is on a board the restore dropped, so it is left out.
+ * 2 went back to round 10 on h4 and lost a later fix of a label chip. A lint
+ * or a computed finding of a later round counts only when the kept round had
+ * it under the same id. A reviewer's finding of a later round counts: no
+ * reviewer read the kept board for it, the fault can be on that board, and the
+ * last turn declines one that is not (lastMessage).
  */
 export function lostFixes(rounds: RoundRecord[], kept: number): LoopFinding[] {
   const on = rounds.find((round) => round.round === kept);
@@ -828,7 +830,7 @@ export function lostFixes(rounds: RoundRecord[], kept: number): LoopFinding[] {
   const lost = new Map<string, LoopFinding>();
   for (const round of rounds) for (const finding of round.findings) {
     if (finding.answer?.verdict !== "fixed" || finding.answer.round < kept) continue;
-    if (round.round > kept && (finding.source === "reviewer" || !had.has(finding.id))) continue;
+    if (round.round > kept && finding.source !== "reviewer" && !had.has(finding.id)) continue;
     lost.set(finding.id, finding);
   }
   return [...lost.values()];

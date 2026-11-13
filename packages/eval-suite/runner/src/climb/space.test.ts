@@ -39,7 +39,7 @@ describe("climb computed checks on the boards of round 5 cycle 2", () => {
       "1288 × 320 px empty at x 2292 to 3580, y 580 to 900, in the board frame (5% of it)",
     ]);
     expect(bands(found)).toEqual([
-      ["stacked", "sec-control sec-runner sec-client", 320, 7, 460],
+      ["stacked", "sec-client sec-runner sec-control", 320, 7, 460],
       ["stacked", "sec-runner sec-tree", 368, 9, 480],
       ["side by side", "sec-client sec-control", 420, 3, 460],
       ["side by side", "sec-control sec-life", 420, 7, 460],
@@ -55,7 +55,7 @@ describe("climb computed checks on the boards of round 5 cycle 2", () => {
     ]);
     const wires = found.faults.filter((fault) => fault.kind === "wire");
     expect(wires[0]!.problem).toBe(
-      "The band between sec-control and sec-client (above) and sec-runner (below), y 460 to 780, is 320 px wide and 7 wires cross it or run along it:"
+      "The band between sec-client and sec-control (above) and sec-runner (below), y 460 to 780, is 320 px wide and 7 wires cross it or run along it:"
       + " w-place, w-ceilhit, w-done, w-intrelease, w-treespend, w-continue, w-crash."
       + " The gap rule asks 460 px for them (200 px, plus 20 px for each wire after the first, plus 20 px for each of the 7 with a label), so the band is 140 px too narrow");
     expect(wires[0]!.facts).toBe(
@@ -89,8 +89,8 @@ describe("climb computed checks on the boards of round 5 cycle 2", () => {
     const { plan: found } = await measured("r5b-02");
     expect(found.blocks.map(blockLine)[0]).toBe("1304 × 276 px empty at x 920 to 2224, y 1704 to 1980, inside section pack (12% of it)");
     expect(found.faults[0]!.problem).toBe(`An empty block of 1304 × 276 px sits inside section pack at x 920 to 2224, y 1704 to 1980: 12% of the section holds nothing. ${LIMIT} ${SPACE_FIXES}`);
-    expect(found.bands.map(({ worst }) => [worst.a, worst.b, worst.gap, worst.counted, worst.need])).toEqual([
-      ["pack", "stores", 240, ["e-tag-coderabbit", "e-events", "e-spans-extract", "e-spans-ctx"], 340],
+    expect(found.bands.map(({ worst, sections }) => [sections, worst.gap, worst.counted, worst.need])).toEqual([
+      [["pack", "outside", "stores"], 240, ["e-tag-coderabbit", "e-events", "e-spans-extract", "e-spans-ctx"], 340],
     ]);
   });
 
@@ -226,33 +226,38 @@ describe("climb gap rule", () => {
       .toEqual([["a", "b", 280, 3, 280, null]]);
   });
 
-  test("a band between 2 rows counts every wire that runs along it, whichever pair of sections it joins", () => {
-    // a and b in a row over c: a wire from a to b that drops into the band over c runs along the gaps of both pairs.
+  test("a band between 2 rows counts every wire that crosses it or runs along it, whichever pair of sections it joins", () => {
+    // a and b in a row over c: w1 crosses the band under a and w2 under b, and a wire from a to b that drops into the band runs along it.
     const file = board(full("a", null, 0, 0, 300, 400), full("b", null, 500, 0, 300, 400), full("c", null, 0, 600, 800, 400));
     const down = (id: string, from: string, x: number) => wire(id, from, "c-n", [[x, 400], [x, 600]]);
     const round = (id: string, y: number) => wire(id, "a-n", "b-n", [[150, 400], [150, y], [650, y], [650, 400]]);
     const found = plan(file, [down("w1", "a-n", 100), down("w2", "b-n", 600), round("w3", 500), round("w4", 540)]);
     expect(found.gaps.map((gap) => [gap.a, gap.b, gap.side, gap.band, gap.counted, gap.need, gap.fault])).toEqual([
       ["a", "b", "side by side", { x: 300, y: 0, width: 200, height: 400 }, [], 200, null],
-      ["a", "c", "stacked", { x: 0, y: 400, width: 800, height: 200 }, ["w1", "w3", "w4"], 240, "under"],
-      ["b", "c", "stacked", { x: 0, y: 400, width: 800, height: 200 }, ["w2", "w3", "w4"], 240, "under"],
+      ["a", "c", "stacked", { x: 0, y: 400, width: 800, height: 200 }, ["w1", "w2", "w3", "w4"], 260, "under"],
+      ["b", "c", "stacked", { x: 0, y: 400, width: 800, height: 200 }, ["w1", "w2", "w3", "w4"], 260, "under"],
     ]);
     // The 2 gaps under their number share the band: one fault, with the sections of both.
     expect(found.bands.map(({ worst, sections }) => [worst.a, worst.b, sections])).toEqual([["a", "c", ["a", "c", "b"]]]);
     expect(found.faults).toEqual([{
-      kind: "wire", key: `["band","stacked","board"]`, block: { x: 0, y: 400, width: 800, height: 200 }, ids: ["a", "c", "b", "w1", "w3", "w4"],
-      problem: "The band between a and b (above) and c (below), y 400 to 600, is 200 px wide and 3 wires cross it or run along it: w1, w3, w4."
-        + " The gap rule asks 240 px for them (200 px, plus 20 px for each wire after the first), so the band is 40 px too narrow",
-      facts: "the band is 200 px wide now with 3 wires, and it needs 240 px",
+      kind: "wire", key: `["band","stacked","board"]`, block: { x: 0, y: 400, width: 800, height: 200 }, ids: ["a", "c", "b", "w1", "w2", "w3", "w4"],
+      problem: "The band between a and b (above) and c (below), y 400 to 600, is 200 px wide and 4 wires cross it or run along it: w1, w2, w3, w4."
+        + " The gap rule asks 260 px for them (200 px, plus 20 px for each wire after the first), so the band is 60 px too narrow",
+      facts: "the band is 200 px wide now with 4 wires, and it needs 260 px",
       marks: [{ box: { x: 0, y: 400, width: 800, height: 200 } }],
     }]);
-    // The drawer widens the band by 20 px: the same fault, with new numbers. At 240 px it is gone.
+    // The drawer widens the band by 20 px: the same fault, with new numbers. At 260 px it is gone.
     const lower = (gap: number) => plan(
       board(full("a", null, 0, 0, 300, 400), full("b", null, 500, 0, 300, 400), full("c", null, 0, 400 + gap, 800, 400)),
       [wire("w1", "a-n", "c-n", [[100, 400], [100, 400 + gap]]), wire("w2", "b-n", "c-n", [[600, 400], [600, 400 + gap]]), round("w3", 500), round("w4", 540)],
     );
-    expect(lower(220).faults.map((fault) => [fault.key, fault.facts])).toEqual([[`["band","stacked","board"]`, "the band is 220 px wide now with 3 wires, and it needs 240 px"]]);
-    expect(lower(240).faults).toEqual([]);
+    expect(lower(220).faults.map((fault) => [fault.key, fault.facts])).toEqual([[`["band","stacked","board"]`, "the band is 220 px wide now with 4 wires, and it needs 260 px"]]);
+    expect(lower(260).faults).toEqual([]);
+    // 2 wires that cross one band at 2 pairs are 2 wires of the band: each pair alone would pass at 200 px.
+    const rows = board(full("a", null, 0, 0, 300, 400), full("b", null, 500, 0, 300, 400), full("c", null, 0, 600, 300, 400), full("d", null, 500, 600, 300, 400));
+    const straight = [wire("w1", "a-n", "c-n", [[100, 400], [100, 600]]), wire("w2", "b-n", "d-n", [[600, 400], [600, 600]])];
+    expect(plan(rows, straight).gaps.filter((gap) => gap.side === "stacked").map((gap) => [gap.a, gap.b, gap.counted, gap.need, gap.fault]))
+      .toEqual([["a", "c", ["w1", "w2"], 220, "under"], ["b", "d", ["w1", "w2"], 220, "under"]]);
   });
 
   test("a gap is too wide past its number + 120 px when nothing sits in it", () => {
@@ -321,6 +326,33 @@ describe("climb wires between sections", () => {
     }]);
     // A wire that ends in the section, or in a subsection of it, runs through nothing.
     expect(plan(row(1000), [wire("w", "a-n", "m-n", [[300, 200], [650, 200]])]).faults).toEqual([]);
+  });
+
+  test("a wire through 2 sections is a fault of each, and a wire that joins no 2 sections is read as well", () => {
+    const through = (file: Board, facts: WireFact[]) => plan(file, facts).faults.filter((fault) => fault.key.startsWith(`["through"`)).map((fault) => [fault.key, fault.ids, fault.problem]);
+    const two = board(full("a", null, 0, 0, 300, 400), full("m1", null, 500, 0, 300, 400), full("m2", null, 1000, 0, 300, 400), full("b", null, 1500, 0, 300, 400));
+    expect(through(two, [wire("w", "a-n", "b-n", [[300, 200], [1500, 200]])])).toEqual([
+      [`["through","m1"]`, ["m1", "w"], "1 wire runs through section m1, which holds neither end of it: w (a → b, 1200 px)"],
+      [`["through","m2"]`, ["m2", "w"], "1 wire runs through section m2, which holds neither end of it: w (a → b, 1200 px)"],
+    ]);
+    // A loose node past m: the wire from a to it joins no 2 sections, and it runs through m.
+    const loose = board(row(1300).objects, box("note", "rectangle", null, 1000, 100, 200, 200));
+    const found = plan(loose, [wire("w", "a-n", "note", [[300, 200], [1000, 200]])]);
+    expect(found.links).toEqual([]);
+    expect(found.faults.filter((fault) => fault.kind === "wire")).toEqual([{
+      kind: "wire", key: `["through","m"]`, ids: ["m", "w"],
+      problem: "1 wire runs through section m, which holds neither end of it: w (a-n → note, 700 px)",
+      facts: "w is 700 px now, a-n → note; it runs through m",
+      marks: [{ box: { x: 500, y: 0, width: 300, height: 400 } }, { path: [[300, 200], [1000, 200]] }],
+    }]);
+    // The loop reads it as a wire of m: a move of m earns a decline of a finding on it.
+    expect(found.layout.holders.w).toEqual(["a", "m"]);
+    expect(found.layout.wires.w).toBe("w is 700 px now, a-n → note; it runs through m");
+    // 2 nodes of one section, and the wire between them leaves it and runs through m.
+    const inside = board(row(1000).objects, box("a-2", "rectangle", "a", 100, 300, 100, 60));
+    expect(through(inside, [wire("w", "a-n", "a-2", [[300, 200], [650, 200], [650, 330], [200, 330]])])).toEqual([
+      [`["through","m"]`, ["m", "w"], expect.stringContaining("w (a-n → a-2, ")],
+    ]);
   });
 
   test("a wire over 1500 px between sections that are not neighbours is a wire fault, and a long wire between neighbours is not", () => {

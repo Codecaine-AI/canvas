@@ -777,10 +777,10 @@ describe("critic loop keeps its best board", () => {
     const { state, loop } = drawing({ "first pass": 5, "revise 1": 1, "revise 2": 4, "revise 3": 3 });
     const record = await reviewLoop({ budget: 4, ...loop });
     expect(record.rounds.map((round) => round.score)).toEqual([5, 1, 4, 3]);
-    // The restore loses the fix of round 2's finding, which the drawer made in revise 2.
-    expect(record.kept).toEqual({ round: 2, restored: true, reason: "round 2 scored 1, and the last board (round 4) scored 3", lost: ["F6"] });
+    // The restore loses the fix of round 2's finding, which the drawer made in revise 2, and the fixes of round 3's findings.
+    expect(record.kept).toEqual({ round: 2, restored: true, reason: "round 2 scored 1, and the last board (round 4) scored 3", lost: ["F6", "F7", "F8", "F9", "F10"] });
     expect([state.board, state.restored]).toEqual(["revise 1", [2]]);
-    expect(ledgerText(record)).toEndWith("Stop: budget\nKept: round 2, restored. round 2 scored 1, and the last board (round 4) scored 3.\nFixes the restore lost: F6\n");
+    expect(ledgerText(record)).toEndWith("Stop: budget\nKept: round 2, restored. round 2 scored 1, and the last board (round 4) scored 3.\nFixes the restore lost: F6, F7, F8, F9, F10\n");
     expect(loopSummary(record)).toContain("kept round 2 (restored)");
   });
 
@@ -913,6 +913,13 @@ describe("critic loop decline rule for layout findings", () => {
     expect(earned("swapped Store and Engine: w then had 3 crossings")).toBe(true);
     // A part of that is not enough: no number, no move, or no section.
     expect([earned("moved sec_c under sec_a, and it was worse"), earned("sec_c is 900 px from sec_a"), earned("moved it left, measured 2100 px")]).toEqual([false, false, false]);
+    // A reason why no move was tried names no move made: the finding comes back.
+    expect([
+      earned("I cannot move Intake because the 200 px gap is required"), earned("sec_c was not moved: w is 1800 px either way"),
+      earned("did not move Store, the 240 px band is needed"), earned("a swap of Store and Engine would add 2 crossings"),
+    ]).toEqual([false, false, false, false]);
+    // A "not" after the move, or in the sentence before it, takes nothing from it.
+    expect([earned("moved Store under Intake: w is not shorter, 2100 px"), earned("Routing alone is not enough. Tried Store left of Engine: 3 crossings")]).toEqual([true, true]);
     // A section id with a hyphen reads as it is written.
     const hyphen: LayoutFacts = { sections: { "sec-runner": "Runner" }, holders: {}, wires: {} };
     expect(declineEarned({ ids: ["w"] }, "shifted sec-runner 400 px right: 2 wires cross then", [], hyphen)).toBe(true);
@@ -1050,7 +1057,7 @@ describe("critic loop last turn after a restore", () => {
     expect(lostFixes(rounds, 2)).toEqual([]);
   });
 
-  test("a later round's fix counts as lost only when the kept board has that fault: a lint or a measure under the same id", () => {
+  test("a later round's fix of a lint or a measure counts as lost only when the kept round had it under the same id, and a reviewer's later fix counts", () => {
     const round = (number: number, findings: LoopFinding[]) => ({ ...roundFindings([], { lints: [], findings: [] }), round: number, findings }) as Parameters<typeof lostFixes>[0][number];
     const fixed = (id: string, source: LoopFinding["source"], at: number): LoopFinding =>
       ({ ...roundFindings([], { lints: [lint()], findings: [] }).findings[0]!, id, source, answer: { verdict: "fixed", reason: "", round: at } });
@@ -1060,8 +1067,8 @@ describe("critic loop last turn after a restore", () => {
       round(2, [{ ...fixed("F2", "check", 2), answer: null }, fixed("F3", "reviewer", 2)]),
       round(3, [fixed("F2", "check", 3), fixed("F4", "reviewer", 3), fixed("F5", "check", 3)]),
     ];
-    // F4 is a reviewer's finding on a board the restore dropped, and F5 is a lint the kept board did not have.
-    expect(lostFixes(rounds, 2).map((finding) => finding.id)).toEqual(["F3", "F2"]);
+    // F5 is a lint the kept board did not have. F4 is a reviewer's finding of round 3: the fault can be on the kept board, as the chip fix h4 lost was.
+    expect(lostFixes(rounds, 2).map((finding) => finding.id)).toEqual(["F3", "F2", "F4"]);
   });
 
   test("the lost fixes go to the drawer once more in one last turn, and only the lints and the computed checks run after it", async () => {
