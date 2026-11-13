@@ -57,6 +57,19 @@ export function briefPath(brief: string, briefDir?: string): string {
   return path;
 }
 
+/**
+ * The canvas id a drawer makes a brief's board under. The brief key names
+ * what the brief tests ("h3-gateway-stickies"), so no drawer and no reviewer
+ * sees it: a brief folder's index.json gives each board a neutral `canvasId`.
+ * A key the index does not list goes without its ordinal. A frozen scenario
+ * brief's id is its canvas id.
+ */
+export function canvasIdOf(brief: string, briefDir?: string): string {
+  if (!briefDir) return brief;
+  const index = JSON.parse(readFileSync(resolve(briefDir, "index.json"), "utf8")) as { boards?: Record<string, { canvasId?: string }> };
+  return index.boards?.[brief]?.canvasId || brief.replace(/^[a-z]?\d+-/, "");
+}
+
 export function roundNumber(value: string | undefined, flag = "--round"): number {
   const round = Number(value);
   if (value === undefined || !Number.isInteger(round) || round < 0) {

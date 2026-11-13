@@ -2,6 +2,11 @@
  * `climb draw`: the fixed drawer (drawer.ts). One drawer per brief draws the
  * brief on a new board in `round-<n>/<brief>/`.
  *
+ * The drawer and the reviewers never see the brief key: it names what the
+ * brief tests. The board has a neutral canvas id (paths.ts canvasIdOf), and
+ * the run works in `round-<n>/.drawing/<canvas id>/` until it ends. Then the
+ * folder gets its name, `round-<n>/<brief>/`.
+ *
  * `--critic on` adds the critic loop (critic-loop.ts) after the first pass:
  * the canvas_check lints and the reviewers review the board, the drawer
  * revises in the same session (`--resume`), and the review runs again, until
@@ -19,10 +24,11 @@ import { resolve } from "node:path";
 import { Semaphore } from "../semaphore.ts";
 import { failedLoop, loopSummary, reviewBoard, type LoopRecord } from "./critic-loop.ts";
 import { CRITIC_FLAGS, loadReviewCanvas, parseCritic, type CriticOptions, type ReviewCanvas } from "./critic.ts";
-import { DRAWER_EFFORT, DRAWER_MODEL, drawerFlags, drawerPass, sessionIdOf } from "./drawer.ts";
+import { DRAWER_EFFORT, DRAWER_MODEL, drawerFlags, drawerPass, sessionIdOf, type runDrawer } from "./drawer.ts";
 import {
   DEFAULT_CLIMB_ROOT,
   briefPath,
+  canvasIdOf,
   parseFlags,
   readSets,
   roundDir,
@@ -50,10 +56,11 @@ export interface DrawRecord {
   critic: LoopRecord | null;
 }
 
-export function drawerPrompt(brief: string, briefText: string): string {
+/** `canvasId`: the board's neutral id (paths.ts canvasIdOf), never the brief key. */
+export function drawerPrompt(canvasId: string, briefText: string): string {
   return [
     "Draw the diagram this brief asks for as a new Codecaine Canvas board.",
-    `Create the board with canvas_create, canvas id "${brief}". Every edit saves to the board file by itself.`,
+    `Create the board with canvas_create, canvas id "${canvasId}". Every edit saves to the board file by itself.`,
     "Stop when the board is finished.",
     "",
     "<brief>",
@@ -62,7 +69,7 @@ export function drawerPrompt(brief: string, briefText: string): string {
   ].join("\n");
 }
 
-async function drawOne(options: {
+export async function drawOne(options: {
   brief: string;
   round: number;
   climbRoot: string;
@@ -72,18 +79,24 @@ async function drawOne(options: {
   briefDir?: string;
   /** The critic's settings and the canvas modules it reviews with, or undefined when the critic is off. */
   critic?: { options: CriticOptions; canvas: ReviewCanvas };
+  /** The drawer process of the first draw (drawer.ts runDrawer), for a test. */
+  run?: typeof runDrawer;
 }): Promise<DrawRecord> {
   const { brief, round } = options;
-  const dir = resolve(roundDir(options.climbRoot, round), brief);
+  const kept = resolve(roundDir(options.climbRoot, round), brief);
   // A rerun of a round redraws only the briefs that have no finished board.
-  const recordPath = resolve(dir, "draw.json");
-  if (existsSync(recordPath)) {
-    const previous = JSON.parse(readFileSync(recordPath, "utf8")) as DrawRecord;
+  if (existsSync(resolve(kept, "draw.json"))) {
+    const previous = JSON.parse(readFileSync(resolve(kept, "draw.json"), "utf8")) as DrawRecord;
     if (previous.exitCode === 0 && previous.board) {
       process.stdout.write(`${brief}: already drawn in round ${round}, skipped\n`);
       return previous;
     }
   }
+  rmSync(kept, { recursive: true, force: true });
+  // The drawer's working folder and the reviewers' are under `dir`, and each reads its own path: `dir` has the canvas id for its name until the run ends.
+  const canvasId = canvasIdOf(brief, options.briefDir);
+  const drawing = resolve(roundDir(options.climbRoot, round), ".drawing");
+  const dir = resolve(drawing, canvasId);
   rmSync(dir, { recursive: true, force: true });
   const canvasesDir = resolve(dir, "canvases");
   mkdirSync(canvasesDir, { recursive: true });
@@ -92,19 +105,19 @@ async function drawOne(options: {
   const startedAt = new Date();
   const first = await drawerPass({
     dir, settingsPath: options.settingsPath, session: { persist: options.critic !== undefined },
-    message: [drawerPrompt(brief, briefText)], transcriptPath: resolve(dir, "transcript.jsonl"), timeoutMs: options.timeoutMs,
+    message: [drawerPrompt(canvasId, briefText)], transcriptPath: resolve(dir, "transcript.jsonl"), timeoutMs: options.timeoutMs, run: options.run,
   });
   const { exitCode, signal, timedOut, tries } = first.run;
 
   // The critics and the revise passes work on the board where the drawer's canvas server keeps it.
-  const created = resolve(canvasesDir, `${brief}.canvas.json`);
+  const created = resolve(canvasesDir, `${canvasId}.canvas.json`);
   let critic: LoopRecord | null = null;
   if (options.critic && exitCode === 0 && existsSync(created)) {
     try {
       const session = sessionIdOf(first.transcript);
       if (!session) throw new Error("the first pass's transcript names no session to resume");
       critic = await reviewBoard({
-        canvas: options.critic.canvas, board: brief, boardPath: created, outDir: resolve(dir, "critic"), critic: options.critic.options, brief: briefText,
+        canvas: options.critic.canvas, board: canvasId, label: brief, boardPath: created, outDir: resolve(dir, "critic"), critic: options.critic.options, brief: briefText,
         drawer: { dir, settingsPath: options.settingsPath, session },
       });
     } catch (error) {
@@ -134,7 +147,10 @@ async function drawOne(options: {
     board: hasBoard ? board : null,
     critic,
   };
-  writeFileSync(recordPath, `${JSON.stringify(record, null, 2)}\n`);
+  writeFileSync(resolve(dir, "draw.json"), `${JSON.stringify(record, null, 2)}\n`);
+  // The run is over: the folder gets the brief key for its name.
+  renameSync(dir, kept);
+  try { rmdirSync(drawing); } catch { /* other briefs still draw */ }
   const seconds = Math.round(record.durationMs / 1000);
   process.stdout.write(`${brief}: exit ${exitCode ?? signal}${timedOut ? " (timed out)" : ""} · ${seconds} s · board ${hasBoard ? "saved" : "missing"}\n`);
   return record;
@@ -157,6 +173,9 @@ export async function runDraw(argv: string[]): Promise<void> {
   }
   if (briefs.length === 0) throw new Error("No briefs to draw");
   for (const brief of briefs) briefPath(brief, briefDir);
+  const ids = briefs.map((brief) => canvasIdOf(brief, briefDir));
+  const twice = ids.find((id, index) => ids.indexOf(id) !== index);
+  if (twice) throw new Error(`2 briefs share the canvas id ${twice}: each needs its own working folder`);
 
   const { settingsPath, timeoutMs } = drawerFlags(flags);
   const climbRoot = resolve(flags.get("--climb-root") ?? DEFAULT_CLIMB_ROOT);

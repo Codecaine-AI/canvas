@@ -966,6 +966,8 @@ export async function reviewBoard(options: {
   canvas: ReviewCanvas;
   /** The canvas id the drawer opens the board by. */
   board: string;
+  /** The name of the board in the runner's own log lines, when it is not the canvas id: the brief key, which no drawer and no reviewer reads. */
+  label?: string;
   boardPath: string;
   outDir: string;
   critic: CriticOptions;
@@ -979,12 +981,13 @@ export async function reviewBoard(options: {
   drawer?: { dir: string; settingsPath: string; session?: string };
 }): Promise<LoopRecord> {
   const { canvas, board, boardPath, outDir, drawer, critic } = options;
+  const label = options.label ?? board;
   const started = Date.now();
   const roundDir = (round: number) => resolve(outDir, `round-${round}`);
   const reviewed = (round: number) => resolve(roundDir(round), "board.canvas.json");
   const pass = drawer && drawerSession({ ...drawer, timeoutMs: critic.reviseTimeoutMs });
   const passed = (name: string, run: DrawerRun) =>
-    process.stdout.write(`${board}: ${name} · exit ${run.exitCode ?? run.signal}${run.timedOut ? " (timed out)" : ""}${run.tries > 1 ? ` · ${run.tries} tries` : ""} · ${Math.round(run.durationMs / 1000)} s\n`);
+    process.stdout.write(`${label}: ${name} · exit ${run.exitCode ?? run.signal}${run.timedOut ? " (timed out)" : ""}${run.tries > 1 ? ` · ${run.tries} tries` : ""} · ${Math.round(run.durationMs / 1000)} s\n`);
   /** The review of the round the loop is in. */
   let critique: CritiqueRecord | null = null;
   /** What the runner measures on the board file as it stands. */
@@ -1017,7 +1020,7 @@ export async function reviewBoard(options: {
       mkdirSync(roundDir(round), { recursive: true });
       copyFileSync(boardPath, reviewed(round));
       critique = await critiqueBoard({ canvas, boardPath, outDir: roundDir(round), critic, brief: options.brief, earlier });
-      process.stdout.write(`${board}: review ${round} · ${critiqueSummary(critique)}\n`);
+      process.stdout.write(`${label}: review ${round} · ${critiqueSummary(critique)}\n`);
       return reviewOf(critique);
     },
     revise: pass && (async (round, findings, notes) => {
