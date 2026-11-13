@@ -53,6 +53,9 @@ export interface WireModules {
     /** `box` is in section-local px. */
     titleChipLayout(section: unknown, canvasStyle: unknown): { box: WorldRect };
   };
+  /** The numbers of the gap rule, as topic `rules` prints them. */
+  rules: { SECTION_GAP_PER_WIRE: number; LABEL_LEG: { base: number; perCharacter: number } };
+  craft: { CRAFT_TARGETS: { sectionGutterSideBySide: number } };
 }
 
 export async function loadWireModules(root = CANVAS_REPO_ROOT): Promise<WireModules> {
@@ -65,6 +68,8 @@ export async function loadWireModules(root = CANVAS_REPO_ROOT): Promise<WireModu
     layout: (await source("board/layout-numbers.ts")) as WireModules["layout"],
     labelChip: (await source("connectors/label-chip.ts")) as WireModules["labelChip"],
     titleChip: (await source("objects/section/title-chip-layout.ts")) as WireModules["titleChip"],
+    rules: (await source("authoring/rules.ts")) as WireModules["rules"],
+    craft: (await source("authoring/style-guide/craft-targets.ts")) as WireModules["craft"],
   };
 }
 
