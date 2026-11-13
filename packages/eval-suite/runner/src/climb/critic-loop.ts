@@ -58,8 +58,6 @@ export interface Answer { verdict: Verdict; reason: string }
 export interface LoopFinding {
   /** F1, F2, ...: one id for the whole loop. */
   id: string;
-  /** The round that found it. A lint still on the board is found again each round, under its id. */
-  round: number;
   /** check: a canvas_check lint. reviewer: one of the 6 kinds of reviewer. */
   source: "check" | "reviewer";
   severity: Severity;
@@ -77,8 +75,11 @@ export interface LoopFinding {
   marks: Array<{ unit: string; marks: Mark[] }>;
   /** A lint: the state of the items it names when the round reviewed them (critic.ts ReviewLint). "" for a reviewer's finding. */
   state: string;
-  /** The drawer's answer, or null while it has given none: in its round's revise pass, the re-ask, or a later round's pass. */
-  answer: Answer | null;
+  /**
+   * The drawer's answer and the round whose revise pass gave it, or null while
+   * it has given none: in its round's revise pass, the re-ask, or a later round's pass.
+   */
+  answer: (Answer & { round: number }) | null;
 }
 
 /** A fault a round found and did not send the drawer. */
@@ -210,18 +211,20 @@ function faultKey(finding: Pick<LoopFinding, "kind" | "ids" | "labels">): string
   return null;
 }
 
+/** How many revise passes turned these findings down. 2 findings one pass declined are one decline. */
+const declines = (findings: LoopFinding[]) => new Set(findings.filter(turnedDown).map((finding) => finding.answer!.round)).size;
 /**
- * The rounds in which the drawer turned down each reviewer fault. A fault
- * counts once a round: a reviewer can report 2 faults of one kind on the same
- * items, and the drawer that declines both has declined the fault once.
+ * The findings of each reviewer fault the drawer turned down. A reviewer can
+ * report 2 faults of one kind on the same items: they are one fault here.
  */
-function declinedRounds(ledger: LoopFinding[]): Map<string, Set<number>> {
-  const rounds = new Map<string, Set<number>>();
+function declinedFaults(ledger: LoopFinding[]): Map<string, LoopFinding[]> {
+  const faults = new Map<string, LoopFinding[]>();
   for (const finding of ledger) {
-    const fault = finding.source === "reviewer" && turnedDown(finding) ? faultKey(finding) : null;
-    if (fault) rounds.set(fault, (rounds.get(fault) ?? new Set()).add(finding.round));
+    if (finding.source !== "reviewer" || !turnedDown(finding)) continue;
+    const fault = faultKey(finding) ?? finding.id;
+    faults.set(fault, [...(faults.get(fault) ?? []), finding]);
   }
-  return rounds;
+  return faults;
 }
 
 /**
@@ -250,31 +253,31 @@ export function roundFindings(ledger: LoopFinding[], review: Pick<Review, "lints
   const items = (finding: Pick<LoopFinding, "kind" | "ids">) => JSON.stringify([finding.kind, [...finding.ids].sort()]);
   const checks = ledger.filter((finding) => finding.source === "check");
   const knownItems = new Set(checks.map(items));
-  const declined = declinedRounds(ledger);
+  const declined = declinedFaults(ledger);
   let next = 1 + Math.max(0, ...ledger.map((finding) => Number(finding.id.slice(1))));
   let [score, grace] = [0, 0];
   const findings: LoopFinding[] = [];
   const withheld: Withheld[] = [];
   for (const lint of review.lints) {
     const fresh: Omit<LoopFinding, "id"> = {
-      round, source: "check", severity: LINT_SEVERITY[lint.severity] ?? "should", kind: lint.rule,
+      source: "check", severity: LINT_SEVERITY[lint.severity] ?? "should", kind: lint.rule,
       ids: lint.at, labels: [], problem: lint.message, suggestion: lint.suggestion ?? "", regions: [], marks: [], state: lint.state, answer: null,
     };
     const before = checks.filter((finding) => key(finding) === key(fresh));
     const last = before.at(-1);
     score += SCORE_WEIGHT[fresh.severity];
     if (round > 1 && fresh.severity === "should" && !knownItems.has(items(fresh))) grace += SCORE_WEIGHT[fresh.severity];
-    const why = before.filter(withReason).length >= SETTLED_AFTER ? "settled" : last && withReason(last) && last.state === lint.state ? "held" : null;
+    const why = declines(before.filter(withReason)) >= SETTLED_AFTER ? "settled" : last && withReason(last) && last.state === lint.state ? "held" : null;
     if (why && last) withheld.push({ id: last.id, source: "check", severity: fresh.severity, kind: fresh.kind, ids: fresh.ids, problem: fresh.problem, why });
     else findings.push({ id: last?.id ?? `F${next++}`, ...fresh });
   }
   for (const finding of review.findings) {
     const fresh: Omit<LoopFinding, "id"> = {
-      round, source: "reviewer", severity: finding.severity, kind: finding.kind,
+      source: "reviewer", severity: finding.severity, kind: finding.kind,
       ids: finding.ids, labels: finding.labels, problem: finding.problem, suggestion: "", regions: finding.regions, marks: finding.marks, state: "", answer: null,
     };
     const fault = faultKey(fresh);
-    if (fault && (declined.get(fault)?.size ?? 0) >= SETTLED_AFTER) {
+    if (fault && declines(declined.get(fault) ?? []) >= SETTLED_AFTER) {
       withheld.push({ id: null, source: "reviewer", severity: fresh.severity, kind: fresh.kind, ids: fresh.ids, problem: fresh.problem, why: "settled" });
       continue;
     }
@@ -297,26 +300,25 @@ export function findingLine(finding: LoopFinding): string {
 
 /**
  * The reviewers' findings the drawer turned down, as the next round's
- * reviewers read them: one line a fault, with the drawer's last reason. A
+ * reviewers read them: a fault as the last revise pass that declined it read
+ * it, with the drawer's reason. A
  * reviewer raises such a fault again only when the reason is wrong on the
  * board as it is then. A fault turned down twice is settled.
  */
 export function declinedFindings(ledger: LoopFinding[]): EarlierFinding[] {
-  const faults = new Map<string, LoopFinding[]>();
-  for (const finding of ledger) {
-    if (finding.source !== "reviewer" || !turnedDown(finding)) continue;
-    const fault = faultKey(finding) ?? finding.id;
-    faults.set(fault, [...(faults.get(fault) ?? []), finding]);
-  }
-  return [...faults.values()].map((same) => {
-    const last = same.at(-1)!;
-    const { verdict, reason } = last.answer!;
-    return {
-      ids: last.ids,
-      regions: [...new Set(same.flatMap((finding) => finding.regions))],
-      line: `[${last.kind}] ${names(last) ? `${names(last)}: ` : ""}${sentence(last.problem)} The drawer ${verdict === "disagree" ? "disagreed" : "declined"}: ${reason.trim() || "it gave no reason"}`,
-      settled: new Set(same.map((finding) => finding.round)).size >= SETTLED_AFTER,
-    };
+  return [...declinedFaults(ledger).values()].flatMap((same) => {
+    const lastPass = Math.max(...same.map((finding) => finding.answer!.round));
+    const regions = [...new Set(same.flatMap((finding) => finding.regions))];
+    // What the last pass turned down: 2 lines when it declined 2 faults of one kind on the same items.
+    return same.filter((finding) => finding.answer!.round === lastPass).map((last) => {
+      const { verdict, reason } = last.answer!;
+      return {
+        ids: last.ids,
+        regions,
+        line: `[${last.kind}] ${names(last) ? `${names(last)}: ` : ""}${sentence(last.problem)} The drawer ${verdict === "disagree" ? "disagreed" : "declined"}: ${reason.trim() || "it gave no reason"}`,
+        settled: declines(same) >= SETTLED_AFTER,
+      };
+    });
   });
 }
 
@@ -495,7 +497,7 @@ export async function reviewLoop(options: {
         const sent = [...findings, ...carried];
         const take = (reply: string) => {
           const answers = parseAnswers(reply);
-          for (const finding of sent) finding.answer ??= answers.get(finding.id) ?? null;
+          for (const finding of sent) finding.answer ??= answers.has(finding.id) ? { ...answers.get(finding.id)!, round } : null;
         };
         const tally = () => ({ answered: findings.filter((finding) => finding.answer).length, unanswered: idsOf(sent.filter((finding) => !finding.answer)) });
         const { run, reply, images = 0 } = await options.revise(round, findings, notes);

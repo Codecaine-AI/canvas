@@ -22,7 +22,7 @@ const answered = (findings: LoopFinding[], verdict: string) => findings.map((fin
 const answeredRound = (ledger: LoopFinding[], input: Pick<Review, "lints" | "findings">, reply: string, round = 1) => {
   const { findings } = roundFindings(ledger, input, round);
   const answers = parseAnswers(reply);
-  for (const finding of findings) finding.answer = answers.get(finding.id) ?? null;
+  for (const finding of findings) finding.answer = answers.has(finding.id) ? { ...answers.get(finding.id)!, round } : null;
   return [...ledger, ...findings];
 };
 
@@ -97,7 +97,16 @@ describe("critic loop findings", () => {
     // 2 faults of one kind on one wire, declined in one round, are one decline: the wire's next fault is still sent.
     const pair = answeredRound([], { lints: [], findings: [seen(), seen({ problem: "The wire runs along the border." })] }, "F1 declined: the bend clears a label\nF2 declined: the border is 30 px off");
     expect(roundFindings(pair, { lints: [], findings: [seen()] }, 2)).toMatchObject({ findings: [{ id: "F3" }], withheld: [] });
-    expect(declinedFindings(pair).map((fault) => fault.settled)).toEqual([false]);
+    // The reviewers read both problems, each with its reason.
+    expect(declinedFindings(pair).map((fault) => [fault.line, fault.settled])).toEqual([
+      [`[routing] w, "ghost": The wire bends twice. The drawer declined: the bend clears a label`, false],
+      [`[routing] w, "ghost": The wire runs along the border. The drawer declined: the border is 30 px off`, false],
+    ]);
+    // A finding with no answer until the next round's pass, declined there with that round's report of the fault: one pass, one decline.
+    const late = roundFindings([], { lints: [], findings: [seen()] }).findings;
+    const both = answeredRound(late, { lints: [], findings: [seen()] }, "F2 declined: the bend clears a label", 2);
+    both[0]!.answer = { verdict: "declined", reason: "the bend clears a label", round: 2 };
+    expect(roundFindings(both, { lints: [], findings: [seen()] }, 3)).toMatchObject({ findings: [{ id: "F3" }], withheld: [] });
     // A fault the drawer fixed and that came back is not settled, however often.
     const fixed = answeredRound(answeredRound([], { lints: [], findings: [seen()] }, "F1 fixed"), { lints: [], findings: [seen()] }, "F2 fixed", 2);
     expect(roundFindings(fixed, { lints: [], findings: [seen()] }, 3).withheld).toEqual([]);
@@ -250,8 +259,8 @@ describe("critic loop answer check", () => {
     expect(messages[1]).toContain("You gave no answer to the findings in <no_answer_yet>");
     expect(messages[1]).toContain(`<findings>\n</findings>\n\n<no_answer_yet>\nF2 [should, routing] v, "ghost": The wire bends twice.\n</no_answer_yet>`);
     expect(record.rounds.map((round) => [round.score, round.revise?.unanswered ?? null])).toEqual([[2, ["F2"]], [0, []], [0, null]]);
-    // The answer lands on the finding where round 1 raised it.
-    expect(record.rounds[0]!.findings[1]!.answer).toEqual({ verdict: "declined", reason: "it reads well" });
+    // The answer lands on the finding where round 1 raised it, with the round whose pass gave it.
+    expect(record.rounds[0]!.findings[1]!.answer).toEqual({ verdict: "declined", reason: "it reads well", round: 2 });
     expect([record.stop, record.unanswered]).toEqual(["clean", []]);
   });
 
