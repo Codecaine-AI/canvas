@@ -114,6 +114,8 @@ export interface Withheld {
   why: "held" | "settled" | "stuck";
   /** stuck: the drawer's last answer to it, or null when it gave none. */
   answer?: Answer | null;
+  /** A stuck empty block's place this round (LoopFinding `block`). */
+  block?: WorldRect;
 }
 
 /** What a revise pass carries besides its round's findings. */
@@ -289,7 +291,7 @@ function historyOf(ledger: LoopFinding[], fresh: Pick<LoopFinding, "kind" | "ids
  * the same lints, declined each round (h1: 9 of them, to round 11).
  *
  * A computed finding keeps its id while its measure fails, from round to
- * round: `last` is the round before. A measure that passes closes it, and
+ * round: `previous` is the round before. A measure that passes closes it, and
  * the same fault back on the board is a new finding. No answer settles
  * or holds it: round 5 closed real faults on a decline (h1: 8 wires in a
  * 280 px gap that the rule gives 340). It is sent MEASURED_SENDS times, so it
@@ -309,7 +311,7 @@ function historyOf(ledger: LoopFinding[], fresh: Pick<LoopFinding, "kind" | "ids
  */
 export function roundFindings(
   ledger: LoopFinding[], review: Pick<Review, "lints" | "findings"> & Partial<Pick<Review, "computed">>, round = 1,
-  last: Pick<RoundRecord, "findings" | "withheld"> | null = null,
+  previous: Pick<RoundRecord, "findings" | "withheld"> | null = null,
 ): { findings: LoopFinding[]; withheld: Withheld[]; score: number; grace: number } {
   const key = (finding: Pick<LoopFinding, "kind" | "ids" | "problem">) => JSON.stringify([finding.kind, finding.ids, finding.problem]);
   const items = (finding: Pick<LoopFinding, "kind" | "ids">) => JSON.stringify([finding.kind, [...finding.ids].sort()]);
@@ -340,7 +342,7 @@ export function roundFindings(
   /** The ids of this round's empty blocks: 2 blocks of one frame or section never share one. */
   const placed = new Set<string>();
   /** Whether the round before had this finding on the board, sent or stuck. */
-  const onBoard = (id: string) => !last || [...last.findings, ...last.withheld].some((finding) => finding.id === id);
+  const onBoard = (id: string) => !previous || [...previous.findings, ...previous.withheld].some((finding) => finding.id === id);
   for (const fault of review.computed ?? []) {
     const fresh: Omit<LoopFinding, "id"> = {
       source: "computed", severity: "should", kind: "space",
@@ -350,14 +352,17 @@ export function roundFindings(
     // A measure that passed closed its finding: the same fault back on the board is a new one, with its history.
     const measured = ledger.filter((finding) => finding.source === "computed" && finding.state === fault.key && onBoard(finding.id));
     // An empty block is the fault of the earlier block at its place, not of the block that had its rank.
-    const same = fault.block && measured.findLast((finding) => !placed.has(finding.id) && sameBlock(finding.block!, fault.block!));
-    const before = fault.block ? measured.filter((finding) => finding.id === same?.id) : measured;
+    // The place of each is the latest: the last one sent, or the one the round before held as stuck.
+    const places = new Map(measured.map((finding) => [finding.id, finding.block]));
+    for (const stuck of previous?.withheld ?? []) if (stuck.id && stuck.block && places.has(stuck.id)) places.set(stuck.id, stuck.block);
+    const same = fault.block && [...places].find(([id, block]) => !placed.has(id) && block && sameBlock(block, fault.block!))?.[0];
+    const before = fault.block ? measured.filter((finding) => finding.id === same) : measured;
     const last = before.at(-1);
     if (last) placed.add(last.id);
     score += SCORE_WEIGHT[fresh.severity];
     if (last && before.length >= MEASURED_SENDS) {
       const answer = last.answer && { verdict: last.answer.verdict, reason: last.answer.reason };
-      withheld.push({ id: last.id, source: "computed", severity: fresh.severity, kind: fresh.kind, ids: fresh.ids, problem: fresh.problem, why: "stuck", answer });
+      withheld.push({ id: last.id, source: "computed", severity: fresh.severity, kind: fresh.kind, ids: fresh.ids, problem: fresh.problem, why: "stuck", answer, ...(fault.block ? { block: fault.block } : {}) });
     // A finding that keeps its id was on the board before the fix of any other: it is no reversal.
     } else findings.push(last ? { id: last.id, ...fresh } : { id: `F${next++}`, ...fresh, ...history(fresh) });
   }

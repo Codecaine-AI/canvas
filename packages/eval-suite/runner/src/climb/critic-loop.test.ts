@@ -277,6 +277,21 @@ describe("critic loop computed findings", () => {
     expect(cut.findings.map((finding) => finding.id)).toEqual(["F1", "F2"]);
   });
 
+  test("a block that drifts is matched at its latest place, sent or stuck: a new block at its first place is a new finding", () => {
+    const at = (x: number) => hole(x, 0, 1000, 600);
+    // The block moves 500 px a round: each round's block holds half of the one before.
+    let ledger: LoopFinding[] = [];
+    for (const [index, x] of [0, 500, 1000].entries()) ledger = answeredRound(ledger, only([at(x)]), "F1 declined: the room is for the legend", index + 1);
+    expect(ledger.map((finding) => finding.id)).toEqual(["F1", "F1", "F1"]);
+    const fourth = roundFindings(ledger, only([at(1500), at(0)]), 4, { findings: ledger.slice(2), withheld: [] });
+    expect(fourth.findings.map((finding) => [finding.id, finding.block?.x])).toEqual([["F2", 0]]);
+    expect(fourth.withheld.map((fault) => [fault.id, fault.why, fault.block?.x])).toEqual([["F1", "stuck", 1500]]);
+    // The stuck block moves on: its place is the one round 4 held, not the last one sent.
+    const fifth = roundFindings(ledger, only([at(2000)]), 5, fourth);
+    expect(fifth.withheld.map((fault) => [fault.id, fault.block?.x])).toEqual([["F1", 2000]]);
+    expect(fifth.findings).toEqual([]);
+  });
+
   test("a measure that passed closed its finding: the same fault back on the board is a new finding, with the fix that may have caused it", async () => {
     const moved = seen({ kind: "placement", ids: ["sec_b"], labels: [], problem: "sec_b sits under the legend.", regions: ["space"] });
     const record = await reviewLoop({
