@@ -315,9 +315,28 @@ export function isLayout(finding: Pick<LoopFinding, "source" | "kind" | "ids" | 
     || (finding.ids.length > 0 && finding.ids.every((id) => layout?.sections[id] !== undefined));
 }
 
-/** The sections whose row, column or neighbours differ between 2 readings of a board (space.ts LayoutFacts `places`). A move of a few px changes none. */
-export const placedSections = (before: LayoutFacts, after: LayoutFacts): string[] =>
-  Object.keys(before.places).filter((id) => after.places[id] !== undefined && after.places[id] !== before.places[id]);
+/** A section whose centre moved less than this did not move: half the base band. A 20 px nudge closed findings in round 5 cycle 3. */
+const PLACE_MOVE_PX = 100;
+
+/**
+ * The sections whose row, column or neighbours differ between 2 readings of a
+ * board (space.ts LayoutFacts `places`). A move of a few px changes none: 2
+ * sections that share a short span stop being neighbours on a 20 px nudge, so
+ * a change counts only when the section, or a neighbour it lost or got, moved.
+ */
+export function placedSections(before: LayoutFacts, after: LayoutFacts): string[] {
+  const moved = (id: string) => {
+    const [was, now] = [before.centres[id], after.centres[id]];
+    return !was || !now || Math.max(Math.abs(now[0] - was[0]), Math.abs(now[1] - was[1])) >= PLACE_MOVE_PX;
+  };
+  return Object.keys(before.places).filter((id) => {
+    const [was, now] = [before.places[id]!, after.places[id]];
+    if (now === undefined || now === was) return false;
+    const [old, next] = [JSON.parse(was) as string[], JSON.parse(now) as string[]];
+    const changed = [...old.filter((entry) => !next.includes(entry)), ...next.filter((entry) => !old.includes(entry))].map((entry) => entry.slice(0, entry.lastIndexOf(" ")));
+    return [id, ...changed].some(moved);
+  });
+}
 
 /** A finding's number is better at this part of what it was, or less: 20% better. */
 const BETTER = 0.8;

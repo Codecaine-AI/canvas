@@ -32,11 +32,16 @@ const LAYOUT: LayoutFacts = {
   holders: { sec_a: ["sec_a"], sec_b: ["sec_b"], sec_c: ["sec_c"], a: ["sec_a"], b: ["sec_b"], c: ["sec_c"], w: ["sec_a", "sec_c", "sec_b"], w1: ["sec_a", "sec_b"], w2: ["sec_a", "sec_b"], w3: ["sec_a", "sec_b"] },
   wires: { w: "w is 1800 px now, sec_a → sec_c, not neighbours: sec_b lies between them; by section centres, a swap of sec_b and sec_c saves about 700 px of wire between sections" },
   places: { sec_a: `["sec_b right"]`, sec_b: `["sec_a left","sec_c right"]`, sec_c: `["sec_b left"]` },
+  centres: { sec_a: [200, 200], sec_b: [800, 200], sec_c: [1400, 200] },
   numbers: { length: { w: 1800, w1: 300, w2: 300, w3: 300 }, crossings: { w: 2, w1: 0, w2: 0, w3: 0 }, faults: { [`["band","stacked","page"]`]: 40 } },
 };
-/** LAYOUT after a pass that changed the row, the column or a neighbour of these sections. */
-const placed = (...ids: string[]): LayoutFacts => ({ ...LAYOUT, places: { ...LAYOUT.places, ...Object.fromEntries(ids.map((id) => [id, `["sec_a above"]`])) } });
-const NO_LAYOUT: LayoutFacts = { sections: {}, holders: {}, wires: {}, places: {}, numbers: { length: {}, crossings: {}, faults: {} } };
+/** LAYOUT after a pass that changed the row, the column or a neighbour of these sections: each went `by` px down, under sec_a. */
+const placed = (ids: string[], by = 600): LayoutFacts => ({
+  ...LAYOUT,
+  places: { ...LAYOUT.places, ...Object.fromEntries(ids.map((id) => [id, `["sec_a above"]`])) },
+  centres: { ...LAYOUT.centres, ...Object.fromEntries(ids.map((id) => [id, [LAYOUT.centres[id]![0], LAYOUT.centres[id]![1] + by]])) },
+});
+const NO_LAYOUT: LayoutFacts = { sections: {}, holders: {}, wires: {}, places: {}, centres: {}, numbers: { length: {}, crossings: {}, faults: {} } };
 /** An empty block of the board frame (space.ts): 2 of them share the key, and the place tells them apart. */
 const hole = (x: number, y: number, width: number, height: number): ComputedFault => ({
   kind: "space", key: `["empty-block","page"]`, ids: ["page"], block: { x, y, width, height }, marks: [{ box: { x, y, width, height } }],
@@ -914,9 +919,13 @@ describe("critic loop decline rule for layout findings", () => {
     // The pass changed no section's place and no number, or the runner has no reading of the board it left.
     expect([earned(LAYOUT), earned(undefined)]).toEqual([false, false]);
     // A section of the wire changed place: an end, or the section between.
-    expect([earned(placed("sec_c")), earned(placed("sec_b"))]).toEqual([true, true]);
+    expect([earned(placed(["sec_c"])), earned(placed(["sec_b"]))]).toEqual([true, true]);
+    // 2 sections that share a short span stop being neighbours on a nudge: under 100 px is no move, of the section or of the neighbour it lost.
+    expect([earned(placed(["sec_c"], 20)), earned(placed(["sec_c"], 99)), earned(placed(["sec_c"], 100))]).toEqual([false, false, true]);
+    const lost: LayoutFacts = { ...LAYOUT, places: { ...LAYOUT.places, sec_b: `["sec_a left"]`, sec_c: "[]" }, centres: { ...LAYOUT.centres, sec_c: [1400, 220] } };
+    expect([earned(lost), earned({ ...lost, centres: { ...lost.centres, sec_c: [1400, 800] } }), earned({ ...lost, centres: { ...lost.centres, sec_a: [200, 800] } })]).toEqual([false, true, false]);
     // A section the finding is not about earns nothing. A finding that names no item of a section is about each one.
-    expect([earned(placed("sec_c"), { ...wire, ids: ["a", "b"] }), earned(placed("sec_c"), { ...wire, ids: ["page"] })]).toEqual([false, true]);
+    expect([earned(placed(["sec_c"]), { ...wire, ids: ["a", "b"] }), earned(placed(["sec_c"]), { ...wire, ids: ["page"] })]).toEqual([false, true]);
     // The number of a reviewer's finding on wires that cross: their crossings. w crosses 2 wires, and half as long with 2 crossings closes nothing.
     const now = (id: string, length: number, crossings: number): LayoutFacts =>
       ({ ...LAYOUT, numbers: { ...LAYOUT.numbers, length: { ...LAYOUT.numbers.length, [id]: length }, crossings: { ...LAYOUT.numbers.crossings, [id]: crossings } } });
@@ -931,7 +940,7 @@ describe("critic loop decline rule for layout findings", () => {
     const tight = { source: "computed" as const, ids: band().ids, state: band().key };
     const short = (px?: number): LayoutFacts => ({ ...LAYOUT, numbers: { ...LAYOUT.numbers, length: {}, faults: px === undefined ? {} : { [band().key]: px } } });
     expect([earned(short(40), tight), earned(short(33), tight), earned(short(32), tight), earned(short(), tight)]).toEqual([false, false, true, true]);
-    expect([earned(placed("sec_c"), tight), earned(placed("sec_b"), tight)]).toEqual([false, true]);
+    expect([earned(placed(["sec_c"]), tight), earned(placed(["sec_b"]), tight)]).toEqual([false, true]);
   });
 
   test("the words of an answer and a move of a few px close nothing", async () => {
@@ -944,7 +953,7 @@ describe("critic loop decline rule for layout findings", () => {
   });
 
   test("a layout finding declined with no section change comes back in the next round under its id, with one line of facts", async () => {
-    const { earlier, sent, record } = declining([{ reply: "F1 declined: the route is forced" }, { reply: "F1 declined: sec_c is under sec_a now", after: placed("sec_c") }]);
+    const { earlier, sent, record } = declining([{ reply: "F1 declined: the route is forced" }, { reply: "F1 declined: sec_c is under sec_a now", after: placed(["sec_c"]) }]);
     const { rounds, stop, settled } = await record;
     // The reviewers of round 3 do not raise the fault again: the earned decline closed it, and the stop is clean.
     expect([stop, settled, sent]).toEqual(["clean", [], [["F1"], ["F1"]]]);
@@ -1019,7 +1028,7 @@ describe("critic loop decline rule for layout findings", () => {
 
   test("a computed wire finding follows the rule: an unearned decline brings it back with its numbers, and an earned one settles it", async () => {
     const tight = () => ({ computed: [band()] });
-    const unearned = await declining([{ reply: "F1 declined: the 3 wires fit" }, { reply: "F1 declined: sec_b is under sec_c now", after: placed("sec_b") }, { reply: "" }], tight).record;
+    const unearned = await declining([{ reply: "F1 declined: the 3 wires fit" }, { reply: "F1 declined: sec_b is under sec_c now", after: placed(["sec_b"]) }, { reply: "" }], tight).record;
     expect(unearned.rounds.map((round) => round.findings.map((finding) => [finding.id, finding.facts]))).toEqual([
       [["F1", undefined]], [["F1", `${BACK} the band is 200 px wide now with 3 wires, and it needs 240 px.`]], [],
     ]);
@@ -1037,7 +1046,7 @@ describe("critic loop decline rule for layout findings", () => {
 
   test("no section move closes a measured space finding: an empty block or a wide gap comes back until its number passes", async () => {
     const both = () => ({ computed: [measure(), band()] });
-    const { rounds } = await declining([{ reply: "F1 declined: moved sec_b\nF2 declined: moved sec_b", after: placed("sec_b") }, { reply: "" }], both).record;
+    const { rounds } = await declining([{ reply: "F1 declined: moved sec_b\nF2 declined: moved sec_b", after: placed(["sec_b"]) }, { reply: "" }], both).record;
     expect(rounds[0]!.findings.map((finding) => [finding.id, finding.kind, finding.layout, finding.answer!.earned])).toEqual([["F1", "space", undefined, undefined], ["F2", "wire", true, true]]);
     expect([rounds[1]!.findings.map((finding) => [finding.id, finding.facts]), rounds[1]!.withheld.map((fault) => [fault.id, fault.why])]).toEqual([[["F1", undefined]], [["F2", "settled"]]]);
   });

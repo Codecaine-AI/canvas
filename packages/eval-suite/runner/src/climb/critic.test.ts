@@ -248,12 +248,14 @@ describe("climb review prompts", () => {
       "- a detour, a wire that wraps round a section, or a wire along the board's outer edge;",
       "- a wire through a section it does not belong to, or through a section's header or header chip;",
       "- a wire within 24 px of a section border along 100 px or more;",
-      "- wires of one dash and one colour that share a source or a target and run side by side in separate lanes, 40 px apart or less: they must read as one trunk.",
+      "- wires of one dash and one colour that share a source or a target and run side by side in separate lanes, 40 px apart or less: they must read as one trunk."
+      + " Not a fault when 2 of them have a label and end on one node: those keep their own lanes.",
     ]) expect(prompt).toContain(fault);
-    // Ford kept merged junctions. The reviewer must not ask the drawer to split one of one meaning.
+    // Ford kept merged junctions. The reviewer must not ask the drawer to split one of one meaning, and the pass ends where 2 labels share the entry.
     expect(prompt).toContain(
       "Never report a merged trunk of one meaning as a fault: wires of one dash and one colour that share a source or a target and run on one line into one port, with one arrowhead, read as one trunk."
-      + ` Ford kept them: "The lines just appear more aesthetic."`);
+      + ` Ford kept them: "The lines just appear more aesthetic."`
+      + " The pass does not cover 2 wires that each have a label and end on one port: report those.");
     expect(prompt).toContain("W1 w · a → b · sec → loose");
     expect(prompt).toContain("Measured on your wires:\n(none)");
     expect(prompt).not.toContain("ends on a section frame and not on a node");
@@ -553,7 +555,7 @@ describe("climb review merge", () => {
     const record: CritiqueRecord = {
       board: "/b.canvas.json", model: "gpt-6.1-sol", effort: "high", count: 8, startedAt: "", durationMs: 75_000, renderMs: 9_400, lints: [],
       regions: [region("space", "space", 2), region("wires", "wire", 3), region("choices", "choices", 1), region("sec_a", "section", 4), region("sec_b", "section", 0, "timed out"), region("gap-1", "gap", 2)],
-      gap: { chips: 7, covered: 7, crops: 3 }, findings: [], computed: [], layout: { sections: {}, holders: {}, wires: {}, places: {}, numbers: { length: {}, crossings: {}, faults: {} } },
+      gap: { chips: 7, covered: 7, crops: 3 }, findings: [], computed: [], layout: { sections: {}, holders: {}, wires: {}, places: {}, centres: {}, numbers: { length: {}, crossings: {}, faults: {} } },
     };
     expect(critiqueSummary(record)).toBe(
       "0 lints · 6 reviewers at high (2 section, 1 gap, 1 wire, 1 space, 1 choices, 0 loose) · 12 findings (section 4, gap 2, wire 3, space 2, choices 1, loose 0), 0 after merge"

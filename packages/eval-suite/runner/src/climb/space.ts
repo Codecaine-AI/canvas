@@ -386,6 +386,8 @@ export interface LayoutFacts {
    * A section that changes its row, its column or a neighbour changes its place. A move of a few px does not.
    */
   places: Record<string, string>;
+  /** Each section's centre, to tell a section that moved from one a few px off. */
+  centres: Record<string, [number, number]>;
   /** The numbers a decline is held against, where less is better: each wire's length and crossings by id, and each wire fault's own number by key, before the cap. */
   numbers: { length: Record<string, number>; crossings: Record<string, number>; faults: Record<string, number> };
 }
@@ -422,6 +424,7 @@ export function layoutFacts(
       ...links.filter(({ fact }) => fact.crosses.length > 0 || fact.length > LONG_WIRE_PX).map((link): [string, string] => [link.fact.id, linkLine(link, links, board)]),
     ]),
     places: Object.fromEntries(sections.filter((section) => section.geometry).map((section) => [section.id, place(section.id)])),
+    centres: Object.fromEntries(sections.filter((section) => section.geometry).map(({ id, geometry: at }) => [id, [at.x + at.width / 2, at.y + at.height / 2]])),
     numbers: {
       length: Object.fromEntries(facts.map((fact) => [fact.id, fact.length])),
       crossings: Object.fromEntries(facts.map((fact) => [fact.id, fact.crosses.length])),

@@ -283,7 +283,8 @@ function answerRules(brief = false): string[] {
  * cycle 1 faulted wires of different dash or colour on one line into a node.
  */
 const MERGED_TRUNK = "Never report a merged trunk of one meaning as a fault: wires of one dash and one colour that share a source or a target and run on one line into one port, with one arrowhead, read as one trunk."
-  + ` Ford kept them: "The lines just appear more aesthetic."`;
+  + ` Ford kept them: "The lines just appear more aesthetic."`
+  + " The pass does not cover 2 wires that each have a label and end on one port: report those.";
 const MIXED_TRUNK = "Wires that differ in dash or colour differ in meaning. Report a line or a trunk that such wires share, and a label chip on it: a reader cannot tell which wire the line or the label belongs to."
   + " When such wires run in lanes too close to tell apart, the fault is the room between the lanes. Never word it so that it reads as \"merge them\".";
 const MEASURED = "A \"measured\" line is a fact the runner measured on the board file. Judge it on the images: report it when it reads as a fault, with its numbers.";
@@ -404,7 +405,7 @@ export function wirePrompt(text: WireText): string {
     "- a wire through a section it does not belong to, or through a section's header or header chip;",
     `- a wire within ${BORDER_NEAR_PX} px of a section border along ${BORDER_RUN_MIN_PX} px or more;`,
     "- many wires into one node from different sides;",
-    `- wires of one dash and one colour that share a source or a target and run side by side in separate lanes, ${LANE_NEAR_PX} px apart or less: they must read as one trunk.`,
+    `- wires of one dash and one colour that share a source or a target and run side by side in separate lanes, ${LANE_NEAR_PX} px apart or less: they must read as one trunk. Not a fault when 2 of them have a label and end on one node: those keep their own lanes.`,
     MERGED_TRUNK,
     MIXED_TRUNK,
     MEASURED,

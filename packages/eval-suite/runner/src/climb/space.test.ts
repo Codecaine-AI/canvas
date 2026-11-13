@@ -414,6 +414,8 @@ describe("climb wires between sections", () => {
     expect(first).toEqual({ a: `["m right"]`, m: `["a left","b right"]`, b: `["m left"]` });
     // 40 px to the right and 20 px down: the same row, the same neighbours.
     expect(places(a, m, full("b", null, 1040, 20, 300, 400))).toEqual(first);
+    // The centre of each section says how far it went.
+    expect(plan(board(a, m, full("b", null, 1040, 20, 300, 400))).layout.centres).toEqual({ a: [150, 200], m: [650, 200], b: [1190, 220] });
     // m and b swap: each of the 3 has another neighbour, or the same one on another side.
     expect(places(a, full("m", null, 1000, 0, 300, 400), full("b", null, 500, 0, 300, 400))).toEqual({ a: `["b right"]`, m: `["b left"]`, b: `["a left","m right"]` });
     // b goes under m: another row for b, and m has it below.
