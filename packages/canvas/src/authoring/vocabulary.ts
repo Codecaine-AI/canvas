@@ -89,8 +89,8 @@ export function colorPalette(): AuthoringTopic {
     Color encodes kind, not decoration. Give each kind of thing one hue, such as one for every data store and another for every agent.
 
     - Before you place nodes, write the board's color key: three to five roles, one hue each.
-    - Give the sections hues too, and vary them across the board. Use gray only for a section with no role hue. A board of gray frames reads as one flat template.
-    - A section never takes the color of a node or a sticky it holds, even when all its nodes share one hue: a blue node sits in a violet or gray section, never a blue one. A sticky is yellow by default, so a section that holds one is not yellow.
+    - Give the sections and subsections hues too, and vary them across the board. Draw a gray or white section only when the source asks for one. A board of gray frames reads as one flat template.
+    - A section never takes the color of a node or a sticky it holds, even when all its nodes share one hue: a blue node sits in a violet section, never a blue one. A sticky is yellow by default, so a section that holds one is not yellow.
     - A nested section never shares its parent's color, and a gray section never sits directly in a gray section. Two sibling sections closer than one gutter (${TOUCH_GUTTER}px) never share a color.
     - A node takes its role's hue, whatever its icon. Use the preferred color a catalog entry lists only when its role has no hue in the key.
     - Red means failure, reject, or error, and nothing else. Keep orange, yellow and pink for emphasis you choose.
