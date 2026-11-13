@@ -26,19 +26,28 @@
  * it names stay as they are.
  *
  * Ford: "this is done, like, a programmatic way". The runner measures the
- * plan of the board itself (space.ts): the empty blocks, and each gap between
- * sections against the gap rule. A measure that fails is a computed finding.
- * No decline settles it: it stays, and counts in the score, until the measure
+ * plan of the board itself (space.ts): the empty space, each gap and each band
+ * between sections against the gap rule, each wire through a section that
+ * holds neither of its ends, and each far wire. A measure that fails is a
+ * computed finding. It stays, and counts in the score, until the measure
  * passes. The drawer gets it 3 times at most (MEASURED_SENDS), and the loop
  * lists it after that. Before round 1, the drawer gets one rethink turn on the
  * same measures (rethink.ts).
+ *
+ * A layout finding is one that a section move fixes (isLayout). A decline
+ * closes it only when earned (declineEarned): the revise pass moved a section
+ * it is about, or the answer names the section move tried and what it
+ * measured. Any other decline brings it back the next round under its id,
+ * with one line of facts, MEASURED_SENDS sends at most.
  *
  * The review starts by code each time a revise pass ends. The loop stops at
  * the first round where every reviewer answered, none found a blocker or a
  * should, and no id is without an answer, or at round 20 (`--critic-rounds`).
  * The last round only reviews: nothing revises after it, so every board the
  * loop leaves has a score, and the loop keeps the board that scored best
- * (bestRound).
+ * (bestRound). When that is an earlier round, the fixes of the later revise
+ * passes are lost: the drawer gets them once more in one last turn, and only
+ * the lints and the computed checks run after it (lostFixes, LastTurn).
  *
  * `climb draw --critic on` runs the loop after the drawer's first pass
  * (draw.ts). `climb critic --board <path> --out <dir>` runs one review of a
@@ -49,17 +58,16 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from
 import { basename, dirname, resolve } from "node:path";
 
 import {
-  CRITIC_FLAGS, SEVERITIES, critiqueBoard, critiqueSummary, loadReviewCanvas, parseCritic,
+  CRITIC_FLAGS, SEVERITIES, checkBoard, critiqueBoard, critiqueSummary, loadReviewCanvas, parseCritic,
   type CriticOptions, type CritiqueRecord, type EarlierFinding, type Effort, type MergedFinding, type ReviewCanvas, type ReviewLint, type Severity,
 } from "./critic.ts";
 import { drawerFlags, drawerSession, type DrawerPart, type DrawerRun } from "./drawer.ts";
 import { renderHighlights, type HighlightImage } from "./highlights.ts";
 import { parseFlags } from "./paths.ts";
 import { renderBoardPng, type WorldRect } from "./render.ts";
-import { rethinkAnswers, rethinkMessage, rethinkReask, rethinkRecord, unanswered as rethinkUnanswered, type RethinkRecord } from "./rethink.ts";
+import { rethinkAnswers, rethinkMessage, rethinkReask, rethinkRecord, sectionMoves, unanswered as rethinkUnanswered, type RethinkRecord, type SectionMove } from "./rethink.ts";
 import { REVIEWER_KINDS, SPACE_UNIT, short, type Board, type Mark, type ReviewerKind } from "./review-inputs.ts";
-import { gapRule, planOf, sameBlock, type ComputedFault } from "./space.ts";
-import { wireFacts } from "./wires.ts";
+import { gapRule, sameBlock, type ComputedFault, type LayoutFacts } from "./space.ts";
 
 export const VERDICTS = ["fixed", "disagree", "declined"] as const;
 export type Verdict = (typeof VERDICTS)[number];
@@ -72,7 +80,7 @@ export interface LoopFinding {
   /** check: a canvas_check lint. reviewer: one of the 6 kinds of reviewer. computed: a measure of the runner that fails (space.ts). */
   source: "check" | "reviewer" | "computed";
   severity: Severity;
-  /** The lint's rule, the reviewer's finding kind, or `space` for a computed finding. */
+  /** The lint's rule, the reviewer's finding kind, or `space` or `wire` for a computed finding (space.ts ComputedFault). */
   kind: string;
   ids: string[];
   labels: string[];
@@ -86,15 +94,20 @@ export interface LoopFinding {
   marks: Array<{ unit: string; marks: Mark[] }>;
   /** A lint: the state of the items it names when the round reviewed them (critic.ts ReviewLint). A computed finding: its key (space.ts ComputedFault). "" for a reviewer's finding. */
   state: string;
-  /** An empty block's place in its frame or section (space.ts ComputedFault). */
+  /** An empty block's or a band's place in its frame or section (space.ts ComputedFault). */
   block?: WorldRect;
   /** The earlier fix this finding may undo, in one line (historyOf). The drawer reads it under the finding. */
   history?: string;
+  /** True for a layout finding (isLayout): a decline closes it only when earned. */
+  layout?: true;
+  /** The fault as it stands now, in one line, on a layout finding that came back after a decline that closed nothing. The drawer reads it under the finding. */
+  facts?: string;
   /**
    * The drawer's answer and the round whose revise pass gave it, or null while
    * it has given none: in its round's revise pass, the re-ask, or a later round's pass.
+   * `earned` is set when it turned a layout finding down: whether that closes it (declineEarned).
    */
-  answer: (Answer & { round: number }) | null;
+  answer: (Answer & { round: number; earned?: boolean }) | null;
 }
 
 /** A fault a round found and did not send the drawer. */
@@ -108,8 +121,10 @@ export interface Withheld {
   problem: string;
   /**
    * held: a lint the drawer turned down with a reason, on items that have not
-   * changed since. settled: turned down twice. stuck: a computed finding the
-   * drawer got MEASURED_SENDS times, and the measure still fails.
+   * changed since. settled: turned down twice, or a computed wire finding
+   * closed by an earned decline. stuck: a computed finding the drawer got
+   * MEASURED_SENDS times, and the measure still fails, or a reviewer's layout
+   * finding that came back that many times.
    */
   why: "held" | "settled" | "stuck";
   /** stuck: the drawer's last answer to it, or null when it gave none. */
@@ -134,6 +149,8 @@ export interface ReviseRecord extends DrawerRun {
   reask: (DrawerRun & { ids: string[] }) | null;
   /** The ids this pass sent that still have no answer, earlier rounds' among them. */
   unanswered: string[];
+  /** The sections the pass moved as a whole (rethink.ts sectionMoves). */
+  moved: SectionMove[];
 }
 
 /** What one review found (critic.ts), as the loop reads it. */
@@ -151,6 +168,8 @@ export interface Review {
   findings: MergedFinding[];
   /** The measures of the board that fail (space.ts). */
   computed: ComputedFault[];
+  /** What the decline rule reads of the board (space.ts LayoutFacts). */
+  layout: LayoutFacts;
 }
 
 export interface RoundRecord {
@@ -182,6 +201,22 @@ export interface Kept {
   /** True when that round is not the last: the loop put its snapshot back over the board file. */
   restored: boolean;
   reason: string;
+  /** On a restore: the ids of the findings whose fixes it lost (lostFixes). */
+  lost?: string[];
+}
+
+/** The one revise turn after a restore, for the fixes the restore lost. No reviewer runs after it. */
+export interface LastTurn extends DrawerRun {
+  /** The round whose board it revised. */
+  round: number;
+  /** The ids it sent, and the drawer's answer to each one it answered. */
+  sent: string[];
+  answers: Record<string, Answer>;
+  moved: SectionMove[];
+  /** What the lints and the computed checks weigh on the kept board and on the board the turn left: 3 a blocker, 1 a should. */
+  checks: { before: number; after: number };
+  /** True when the turn failed or left the checks worse: the loop put the kept board back once more. */
+  undone: boolean;
 }
 
 export interface LoopRecord {
@@ -209,12 +244,14 @@ export interface LoopRecord {
   unanswered: string[];
   /** Null when the loop could not choose: no drawer, or no review of the last board. */
   kept: Kept | null;
+  /** Null when the loop restored no round, the restore lost no fix a last turn can make, or the loop had no time or no working drawer left. */
+  last: LastTurn | null;
   durationMs: number;
 }
 
 /** A loop that broke before its first review. */
 export const failedLoop = (budget: number, error: string): LoopRecord =>
-  ({ budget, effort: null, rethink: null, rounds: [], stop: "failed", error, unanswered: [], kept: null, durationMs: 0 });
+  ({ budget, effort: null, rethink: null, rounds: [], stop: "failed", error, unanswered: [], kept: null, last: null, durationMs: 0 });
 
 const LINT_SEVERITY: Record<string, Severity> = { error: "blocker", warning: "should", note: "nit" };
 const rank = (finding: { severity: Severity }) => SEVERITIES.indexOf(finding.severity);
@@ -226,7 +263,9 @@ const SETTLED_AFTER = 2;
 /** A computed finding goes to the drawer this many times. After that the loop lists it and sends it no more. */
 export const MEASURED_SENDS = 3;
 /** The finding kinds a drawer fixes by moving or resizing things. */
-const LAYOUT_KINDS: ReadonlySet<string> = new Set(["placement", "spacing", "space"]);
+const LAYOUT_KINDS: ReadonlySet<string> = new Set(["placement", "spacing", "space", "wire"]);
+/** The kinds of a reviewer's finding that a section move can fix. */
+const MOVE_KINDS: ReadonlySet<string> = new Set(["placement", "spacing", "routing"]);
 
 const normal = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 /** disagree and declined both turn a finding down. */
@@ -244,6 +283,40 @@ function faultKey(finding: Pick<LoopFinding, "kind" | "ids" | "labels">): string
   return null;
 }
 
+/**
+ * A layout finding: where a section sits is the fault, so a section move is
+ * the fix. The runner's wire findings (a narrow band, a wire through a
+ * section, a far wire), the space reviewer's placement, spacing and routing
+ * findings, and any reviewer's finding of those kinds on a wire between 2
+ * sections that crosses a wire, runs through a section or is long (space.ts
+ * LayoutFacts). An empty block is not one: no decline closes it.
+ */
+export function isLayout(finding: Pick<LoopFinding, "source" | "kind" | "ids" | "regions">, layout: LayoutFacts | undefined): boolean {
+  if (finding.source === "computed") return finding.kind === "wire";
+  if (finding.source !== "reviewer" || !MOVE_KINDS.has(finding.kind)) return false;
+  return finding.regions.includes(SPACE_UNIT) || finding.ids.some((id) => layout?.wires[id] !== undefined);
+}
+
+const MOVE_WORDS = /\b(mov|swap|shift|reorder|rearrang|arrang|plac|put|relocat)/i;
+const RESULT_WORDS = /\d\s*(px|%|wires?\b|crossings?\b|bends?\b)/i;
+
+/**
+ * Whether a decline of a layout finding closes it. Round 5 cycle 2 closed
+ * crossings and long wires on "forced" and "must cross once" with no section
+ * moved (h1 F146, h4 F34, 06 F13), and the section order stayed wrong. A
+ * decline is earned when the revise pass moved a section the finding is
+ * about (`moved`: the ids), or when its reason names a section, the move
+ * tried and what it measured. A finding that names no item of a section is
+ * about every section.
+ */
+export function declineEarned(finding: Pick<LoopFinding, "ids">, reason: string, moved: string[], layout: LayoutFacts | undefined): boolean {
+  const about = new Set(finding.ids.flatMap((id) => layout?.holders[id] ?? []));
+  if (moved.some((id) => about.size === 0 || about.has(id))) return true;
+  const said = ` ${normal(reason)} `;
+  const sections = Object.entries(layout?.sections ?? {}).flat().map(normal).filter((name) => name.length > 2);
+  return sections.some((name) => said.includes(` ${name} `)) && MOVE_WORDS.test(reason) && RESULT_WORDS.test(reason);
+}
+
 /** How many revise passes turned these findings down. 2 findings one pass declined are one decline. */
 const declines = (findings: LoopFinding[]) => new Set(findings.filter(turnedDown).map((finding) => finding.answer!.round)).size;
 /**
@@ -253,12 +326,29 @@ const declines = (findings: LoopFinding[]) => new Set(findings.filter(turnedDown
 function declinedFaults(ledger: LoopFinding[]): Map<string, LoopFinding[]> {
   const faults = new Map<string, LoopFinding[]>();
   for (const finding of ledger) {
-    if (finding.source !== "reviewer" || !turnedDown(finding)) continue;
+    // A decline that closed nothing is no decline here: the loop sends that finding again itself (returningOf).
+    if (finding.source !== "reviewer" || !turnedDown(finding) || finding.answer!.earned === false) continue;
     const fault = faultKey(finding) ?? finding.id;
     faults.set(fault, [...(faults.get(fault) ?? []), finding]);
   }
   return faults;
 }
+
+/**
+ * The reviewers' layout findings whose last decline closed nothing: each as
+ * the drawer last got it. `previous` is the round before: it sent the finding,
+ * or listed it as stuck.
+ */
+function returningOf(ledger: LoopFinding[], previous: Pick<RoundRecord, "findings" | "withheld"> | null): LoopFinding[] {
+  const ids = new Set([...(previous?.findings ?? []), ...(previous?.withheld ?? [])].flatMap((finding) => finding.source === "reviewer" && finding.id ? [finding.id] : []));
+  return [...ids].flatMap((id) => {
+    const last = ledger.findLast((finding) => finding.id === id);
+    return last?.answer?.earned === false ? [last] : [];
+  });
+}
+
+/** The line of facts under a layout finding that came back. */
+const returnLine = (last: LoopFinding, facts: string) => `your decline in round ${last.answer!.round} moved no section of this finding, and named no section move with what it measured. ${sentence(facts)}`;
 
 /**
  * The reversal guard. A layout finding on the items of a layout finding the
@@ -293,24 +383,30 @@ function historyOf(ledger: LoopFinding[], fresh: Pick<LoopFinding, "kind" | "ids
  * A computed finding keeps its id while its measure fails, from round to
  * round: `previous` is the round before. A measure that passes closes it, and
  * the same fault back on the board is a new finding. No answer settles
- * or holds it: round 5 closed real faults on a decline (h1: 8 wires in a
- * 280 px gap that the rule gives 340). It is sent MEASURED_SENDS times, so it
- * cannot run the loop to its last round alone. After that it is stuck: listed
- * in `withheld` with the drawer's last answer, and not sent.
+ * or holds a `space` one: round 5 closed real faults on a decline (h1: 8 wires
+ * in a 280 px gap that the rule gives 340). An earned decline settles a `wire`
+ * one (declineEarned). After a decline that closed nothing it comes back with
+ * its line of facts. It is sent MEASURED_SENDS times, so it cannot run the
+ * loop to its last round alone. After that it is stuck: listed in `withheld`
+ * with the drawer's last answer, and not sent.
  *
  * A reviewer's finding is new each round. One that names the kind and the
  * items of a fault the drawer turned down twice is settled, and not sent.
+ * A layout finding the drawer declined with no section move is the exception:
+ * it comes back under its id with a line of facts, while its items are on the
+ * board and it still is a layout finding there, and a new finding on the same
+ * items is dropped. After MEASURED_SENDS sends it is stuck.
  *
  * The score counts what the board has, sent or not: 3 for each blocker and 1
- * for each should, over every lint on the board, every computed finding and
- * the reviewers' findings sent. `grace` is the part of it from lint warnings on items no earlier lint
+ * for each should, over every lint on the board, every computed finding, the
+ * reviewers' findings sent and the ones that are stuck. `grace` is the part of it from lint warnings on items no earlier lint
  * of its rule named, in a round after the first. A revise pass that moves
  * whole sections can leave such warnings for one round, and keep-best must
  * not go back to the old board for that alone: it takes the grace off the
  * last round's score, and off no earlier round's (bestRound).
  */
 export function roundFindings(
-  ledger: LoopFinding[], review: Pick<Review, "lints" | "findings"> & Partial<Pick<Review, "computed">>, round = 1,
+  ledger: LoopFinding[], review: Pick<Review, "lints" | "findings"> & Partial<Pick<Review, "computed" | "layout">>, round = 1,
   previous: Pick<RoundRecord, "findings" | "withheld"> | null = null,
 ): { findings: LoopFinding[]; withheld: Withheld[]; score: number; grace: number } {
   const key = (finding: Pick<LoopFinding, "kind" | "ids" | "problem">) => JSON.stringify([finding.kind, finding.ids, finding.problem]);
@@ -345,9 +441,9 @@ export function roundFindings(
   const onBoard = (id: string) => !previous || [...previous.findings, ...previous.withheld].some((finding) => finding.id === id);
   for (const fault of review.computed ?? []) {
     const fresh: Omit<LoopFinding, "id"> = {
-      source: "computed", severity: "should", kind: "space",
+      source: "computed", severity: "should", kind: fault.kind,
       ids: fault.ids, labels: [], problem: fault.problem, suggestion: "", regions: [SPACE_UNIT], marks: [{ unit: SPACE_UNIT, marks: fault.marks }], state: fault.key,
-      ...(fault.block ? { block: fault.block } : {}), answer: null,
+      ...(fault.block ? { block: fault.block } : {}), ...(fault.kind === "wire" ? { layout: true } : {}), answer: null,
     };
     // A measure that passed closed its finding: the same fault back on the board is a new one, with its history.
     const measured = ledger.filter((finding) => finding.source === "computed" && finding.state === fault.key && onBoard(finding.id));
@@ -360,18 +456,43 @@ export function roundFindings(
     const last = before.at(-1);
     if (last) placed.add(last.id);
     score += SCORE_WEIGHT[fresh.severity];
-    if (last && before.length >= MEASURED_SENDS) {
+    const earned = last?.answer?.earned;
+    if (last && (earned || before.length >= MEASURED_SENDS)) {
       const answer = last.answer && { verdict: last.answer.verdict, reason: last.answer.reason };
-      withheld.push({ id: last.id, source: "computed", severity: fresh.severity, kind: fresh.kind, ids: fresh.ids, problem: fresh.problem, why: "stuck", answer, ...(fault.block ? { block: fault.block } : {}) });
+      withheld.push({
+        id: last.id, source: "computed", severity: fresh.severity, kind: fresh.kind, ids: fresh.ids, problem: fresh.problem, why: earned ? "settled" : "stuck", answer,
+        ...(fault.block ? { block: fault.block } : {}),
+      });
     // A finding that keeps its id was on the board before the fix of any other: it is no reversal.
-    } else findings.push(last ? { id: last.id, ...fresh } : { id: `F${next++}`, ...fresh, ...history(fresh) });
+    } else findings.push(last ? { id: last.id, ...fresh, ...(earned === false && fault.facts ? { facts: returnLine(last, fault.facts) } : {}) } : { id: `F${next++}`, ...fresh, ...history(fresh) });
+  }
+  const { layout } = review;
+  /** The faults that came back, by fault key: a reviewer's new finding of one is the same fault. */
+  const back = new Set<string>();
+  for (const last of returningOf(ledger, previous)) {
+    // The fault left with its items, or with the crossing, the run through a section or the length that made its wire a layout fault.
+    if (layout && !(last.ids.every((id) => layout.holders[id] !== undefined) && isLayout(last, layout))) continue;
+    const fault = faultKey(last);
+    if (fault) back.add(fault);
+    score += SCORE_WEIGHT[last.severity];
+    if (ledger.filter((finding) => finding.id === last.id).length >= MEASURED_SENDS) {
+      withheld.push({ id: last.id, source: "reviewer", severity: last.severity, kind: last.kind, ids: last.ids, problem: last.problem, why: "stuck", answer: { verdict: last.answer!.verdict, reason: last.answer!.reason } });
+      continue;
+    }
+    const about = new Set(last.ids.flatMap((id) => layout?.holders[id] ?? []));
+    // Its own wire's line, or the line of a wire of one of its sections.
+    const wire = last.ids.find((id) => layout?.wires[id] !== undefined) ?? Object.keys(layout?.wires ?? {}).find((id) => layout!.holders[id]?.some((section) => about.has(section)));
+    const { history: _, facts: __, ...same } = last;
+    findings.push({ ...same, facts: returnLine(last, wire ? layout!.wires[wire]! : "No wire of its sections crosses a wire, runs through a section or is long now"), answer: null });
   }
   for (const finding of review.findings) {
     const fresh: Omit<LoopFinding, "id"> = {
       source: "reviewer", severity: finding.severity, kind: finding.kind,
       ids: finding.ids, labels: finding.labels, problem: finding.problem, suggestion: "", regions: finding.regions, marks: finding.marks, state: "", answer: null,
     };
+    if (isLayout(fresh, layout)) fresh.layout = true;
     const fault = faultKey(fresh);
+    if (fault && back.has(fault)) continue;
     if (fault && declines(declined.get(fault) ?? []) >= SETTLED_AFTER) {
       withheld.push({ id: null, source: "reviewer", severity: fresh.severity, kind: fresh.kind, ids: fresh.ids, problem: fresh.problem, why: "settled" });
       continue;
@@ -403,8 +524,11 @@ export function findingLine(finding: LoopFinding): string {
  * reviewer raises such a fault again only when the reason is wrong on the
  * board as it is then. A fault turned down twice is settled.
  */
-export function declinedFindings(ledger: LoopFinding[]): EarlierFinding[] {
-  return [...declinedFaults(ledger).values()].flatMap((same) => {
+export function declinedFindings(ledger: LoopFinding[], previous: Pick<RoundRecord, "findings" | "withheld"> | null = null): EarlierFinding[] {
+  const returned = returningOf(ledger, previous).map((last): EarlierFinding => ({
+    ids: last.ids, regions: last.regions, line: `[${last.kind}] ${names(last) ? `${names(last)}: ` : ""}${sentence(last.problem)}`, settled: false, returned: true,
+  }));
+  return [...returned, ...[...declinedFaults(ledger).values()].flatMap((same) => {
     const lastPass = Math.max(...same.map((finding) => finding.answer!.round));
     const regions = [...new Set(same.flatMap((finding) => finding.regions))];
     // What the last pass turned down: 2 lines when it declined 2 faults of one kind on the same items.
@@ -417,10 +541,12 @@ export function declinedFindings(ledger: LoopFinding[]): EarlierFinding[] {
         settled: declines(same) >= SETTLED_AFTER,
       };
     });
-  });
+  })];
 }
 
 const ANSWER_LINES = ["<id> fixed", "<id> disagree: <why the finding is wrong>", "<id> declined: <why you left it>"];
+/** How a decline of a layout finding must read to close it (declineEarned). */
+const MOVE_ANSWER = "<id> declined: moved <section> <where>, measured <the wire length, the crossings or the gap in px after the move>";
 
 /**
  * The drawer's revise turn, in its own session, after a review: the text,
@@ -436,8 +562,9 @@ export function reviseMessage(board: string, findings: LoopFinding[], notes: Par
     const shown = images.flatMap((image, index) => image.findings.includes(finding.id) ? [`image ${index + 1}`] : []);
     return [
       findingLine(finding),
-      `  ${finding.source === "computed" ? "measured by the runner on the board file" : `from ${finding.regions.join(", ")}`}${shown.length ? ` · ${shown.join(", ")}` : ""}`,
+      `  ${finding.source === "computed" ? "measured by the runner on the board file" : `from ${finding.regions.join(", ")}`}${finding.layout ? " · layout finding" : ""}${shown.length ? ` · ${shown.join(", ")}` : ""}`,
       ...(finding.history ? [`  history: ${finding.history}`] : []),
+      ...(finding.facts ? [`  facts: ${finding.facts}`] : []),
     ];
   });
   const text = [
@@ -449,8 +576,18 @@ export function reviseMessage(board: string, findings: LoopFinding[], notes: Par
     "Decline a finding that is wrong, or that you cannot fix without breaking something else, and give the reason. The reviewers read your reason in the next round.",
     "A fix must not resize a section past its content, merge nodes, or grow an empty block. After you move a section, close the space it left.",
     ...(ordered.some((finding) => finding.source === "computed") ? [
-      "A `measured` finding is a number the runner computed on the board file: an empty block, or a gap between sections off its gap rule number."
-      + " A decline does not close it: it comes back until the number passes.",
+      "A `measured` finding is a number the runner computed on the board file: an empty block, a section that is mostly empty, a gap or a band between sections off its gap rule number,"
+      + " a wire through a section that holds neither of its ends, a far wire. A decline does not close a `measured space` finding: it comes back until the number passes.",
+    ] : []),
+    ...(ordered.some((finding) => finding.layout) ? [
+      "A `layout finding` is a fault of where the sections sit: a crossing or a long wire between sections, a wire through a section, a band too narrow for its wires."
+      + " Move a section before you route or decline: swap 2 neighbours, or change the row or the column of one."
+      + " A decline closes such a finding only when this turn moved a whole section it is about, or when your answer names the section move you tried and what it measured:",
+      MOVE_ANSWER,
+      "Any other decline brings the finding back in the next round, with its facts.",
+    ] : []),
+    ...(ordered.some((finding) => finding.facts) ? [
+      "A `facts` line under a finding says why it is back, and how the fault stands now: the wire's length, the sections between its ends, and a swap of 2 sections that would shorten it when the runner found one.",
     ] : []),
     ...(ordered.some(space) ? [
       "The `measured` findings and the findings from the `space` reviewer come first. They are fixed by moving or resizing whole sections: `arrange`, `move`, `place_section`, `fit_section`."
@@ -563,9 +700,11 @@ export async function reviewLoop(options: {
   /** The drawer's rethink turn, before round 1. */
   rethink?(): Promise<RethinkRecord>;
   review(round: number, earlier: EarlierFinding[]): Promise<Review>;
-  revise?(round: number, findings: LoopFinding[], notes: ReviseNotes): Promise<{ run: DrawerRun; reply: string; images?: number }>;
+  revise?(round: number, findings: LoopFinding[], notes: ReviseNotes): Promise<{ run: DrawerRun; reply: string; images?: number; moved?: SectionMove[] }>;
   reask?(round: number, ids: string[]): Promise<{ run: DrawerRun; reply: string }>;
   restore?(round: number): void;
+  /** One more revise turn on the restored board, for the fixes the restore lost, and what the code checks find on the board it leaves. */
+  last?(kept: Kept, findings: LoopFinding[]): Promise<{ run: DrawerRun; reply: string; moved?: SectionMove[]; lints: ReviewLint[]; computed: ComputedFault[] }>;
   timeUp?(): boolean;
 }): Promise<LoopRecord> {
   const started = Date.now();
@@ -585,7 +724,7 @@ export async function reviewLoop(options: {
       }
       for (let round = 1; ; round += 1) {
         const asked = unansweredOf(rounds);
-        const review = await options.review(round, declinedFindings(ledger()));
+        const review = await options.review(round, declinedFindings(ledger(), rounds.at(-1)));
         const record: RoundRecord = {
           round, check: round >= options.budget || broken !== null, ...roundFindings(ledger(), review, round, rounds.at(-1)),
           reviewMs: review.reviewMs, renderMs: review.renderMs, effort: review.effort, reviewers: review.reviewers, regions: review.regions, unparsed: review.unparsed,
@@ -616,15 +755,21 @@ export async function reviewLoop(options: {
         };
         unreviewed = true;
         const sent = [...findings, ...carried];
+        const tally = () => ({ answered: findings.filter((finding) => finding.answer).length, unanswered: idsOf(sent.filter((finding) => !finding.answer)) });
+        const { run, reply, images = 0, moved = [] } = await options.revise(round, findings, notes);
         const take = (reply: string) => {
           const answers = parseAnswers(reply);
-          for (const finding of sent) finding.answer ??= answers.has(finding.id) ? { ...answers.get(finding.id)!, round } : null;
+          for (const finding of sent) {
+            const answer = answers.get(finding.id);
+            if (finding.answer || !answer) continue;
+            // A decline of a layout finding closes it only when earned.
+            const earned = finding.layout && answer.verdict !== "fixed" ? { earned: declineEarned(finding, answer.reason, moved.map((move) => move.id), review.layout) } : {};
+            finding.answer = { ...answer, round, ...earned };
+          }
         };
-        const tally = () => ({ answered: findings.filter((finding) => finding.answer).length, unanswered: idsOf(sent.filter((finding) => !finding.answer)) });
-        const { run, reply, images = 0 } = await options.revise(round, findings, notes);
         take(reply);
         // The record stands before the second ask, so a second ask that throws does not lose the ids.
-        const revise: ReviseRecord = record.revise = { ...run, ...tally(), images, reask: null };
+        const revise: ReviseRecord = record.revise = { ...run, ...tally(), images, reask: null, moved };
         if (revise.unanswered.length > 0 && run.exitCode === 0 && options.reask) {
           const ids = revise.unanswered;
           const second = await options.reask(round, ids);
@@ -640,8 +785,71 @@ export async function reviewLoop(options: {
   };
   const outcome = await loop();
   const kept = options.restore && !unreviewed ? bestRound(rounds) : null;
-  if (kept?.restored) options.restore!(kept.round);
-  return { budget: options.budget, effort: rounds[0]?.effort ?? null, rethink, rounds, ...outcome, unanswered: idsOf(unansweredOf(rounds)), kept, durationMs: Date.now() - started };
+  let last: LastTurn | null = null;
+  if (kept?.restored) {
+    options.restore!(kept.round);
+    const lost = lostFixes(rounds, kept.round);
+    kept.lost = lost.map((finding) => finding.id);
+    // A layout finding and a computed one need a section move, and no reviewer reads the board after this turn.
+    const local = lost.filter((finding) => finding.source !== "computed" && !finding.layout);
+    const working = outcome.stop !== "failed" && outcome.stop !== "rate-limited" && !options.timeUp?.();
+    if (options.last && local.length > 0 && working) {
+      const on = rounds.find((round) => round.round === kept.round)!;
+      const before = [...on.findings, ...on.withheld].filter((finding) => finding.source !== "reviewer").reduce((sum, finding) => sum + SCORE_WEIGHT[finding.severity], 0);
+      try {
+        const { run, reply, moved = [], lints, computed } = await options.last(kept, local);
+        const after = lints.reduce((sum, lint) => sum + SCORE_WEIGHT[LINT_SEVERITY[lint.severity] ?? "should"], 0) + computed.length * SCORE_WEIGHT.should;
+        const answers = parseAnswers(reply);
+        last = {
+          ...run, round: kept.round, sent: local.map((finding) => finding.id), answers: Object.fromEntries(local.flatMap((finding) => answers.has(finding.id) ? [[finding.id, answers.get(finding.id)!]] : [])),
+          moved, checks: { before, after }, undone: run.exitCode !== 0 || after > before,
+        };
+      } catch (error) {
+        outcome.error = `${outcome.error ? `${outcome.error}; ` : ""}the last turn failed: ${message(error)}`;
+        options.restore!(kept.round);
+      }
+      if (last?.undone) options.restore!(kept.round);
+    }
+  }
+  return { budget: options.budget, effort: rounds[0]?.effort ?? null, rethink, rounds, ...outcome, unanswered: idsOf(unansweredOf(rounds)), kept, last, durationMs: Date.now() - started };
+}
+
+/**
+ * The fixes a restore of round `kept` loses: the findings the drawer answered
+ * `fixed` in that round's revise pass or a later one, each once. Round 5 cycle
+ * 2 went back to round 10 on h4 and lost a later fix of a label chip. A later
+ * round's finding counts only when the kept board can have it: a lint or a
+ * computed finding that the kept round had under the same id. A reviewer's
+ * finding of a later round is on a board the restore dropped, so it is left out.
+ */
+export function lostFixes(rounds: RoundRecord[], kept: number): LoopFinding[] {
+  const on = rounds.find((round) => round.round === kept);
+  const had = new Set([...(on?.findings ?? []), ...(on?.withheld ?? [])].map((finding) => finding.id));
+  const lost = new Map<string, LoopFinding>();
+  for (const round of rounds) for (const finding of round.findings) {
+    if (finding.answer?.verdict !== "fixed" || finding.answer.round < kept) continue;
+    if (round.round > kept && (finding.source === "reviewer" || !had.has(finding.id))) continue;
+    lost.set(finding.id, finding);
+  }
+  return [...lost.values()];
+}
+
+/** The drawer's last turn: the board is back at an earlier round, and these fixes of later turns are not on it. */
+export function lastMessage(board: string, kept: Kept, findings: LoopFinding[]): string {
+  return [
+    `The review loop ended. It keeps the board that scored best, and that is the board of round ${kept.round}: ${sentence(kept.reason)}`,
+    `The board file is that board again. The fixes you made after it are gone. The findings below are the ones you answered \`fixed\` from round ${kept.round} on.`,
+    "Look at each one on the board as it is now. Make the fix again when it is local: a label chip, a port, a route, a colour, an icon, a text, one node.",
+    "Do not move or resize a section in this turn: no reviewer reads the board after it. Decline a finding that needs that, and one that is not on this board.",
+    `The canvas server restarted. Open the board again with canvas_open, canvas id "${board}", and read any guidance topic it asks for.`,
+    "Run canvas_check when you are done. The runner then runs the lints and its measures once more, and puts this board back when they come out worse.",
+    "End your reply with one line per finding, and nothing after them:",
+    ...ANSWER_LINES,
+    "",
+    "<findings>",
+    ...findings.map(findingLine),
+    "</findings>",
+  ].join("\n");
 }
 
 /** The whole loop's ledger as text: each round's findings, the drawer's answer under each, and what the round did not send. */
@@ -659,13 +867,19 @@ export function ledgerText(record: LoopRecord): string {
     ...(round.findings.length ? [] : ["No findings."]),
     ...round.findings.flatMap((finding) => [
       findingLine(finding),
-      ...(finding.answer ? [`  → ${finding.answer.verdict}${finding.answer.reason ? `: ${finding.answer.reason}` : ""}`] : round.revise ? ["  → no answer"] : []),
+      ...(finding.facts ? [`  facts: ${finding.facts}`] : []),
+      ...(finding.answer ? [`  → ${finding.answer.verdict}${finding.answer.reason ? `: ${finding.answer.reason}` : ""}${finding.answer.earned === false ? " (closes nothing: no section move)" : ""}`] : round.revise ? ["  → no answer"] : []),
     ]),
+    ...(round.revise?.moved.length ? [`Sections moved in the revise pass: ${round.revise.moved.map((move) => `${move.id} (${move.dx}, ${move.dy})`).join(", ")}`] : []),
     ...round.withheld.map((fault) => `Not sent (${fault.why}): ${fault.id ? `${fault.id} ` : ""}[${fault.severity}, ${tagOf(fault)}] ${fault.ids.join(", ")}: ${sentence(fault.problem)}`
       + `${fault.why === "stuck" ? ` The drawer's last answer: ${fault.answer ? `${fault.answer.verdict}${fault.answer.reason ? `: ${fault.answer.reason}` : ""}` : "none"}` : ""}`),
     "",
   ]);
-  const kept = record.kept ? `Kept: round ${record.kept.round}${record.kept.restored ? ", restored" : ""}. ${sentence(record.kept.reason)}\n` : "";
+  const { last } = record;
+  const kept = record.kept ? `Kept: round ${record.kept.round}${record.kept.restored ? ", restored" : ""}. ${sentence(record.kept.reason)}\n`
+    + `${record.kept.lost?.length ? `Fixes the restore lost: ${record.kept.lost.join(", ")}\n` : ""}`
+    + `${last ? `Last turn on round ${last.round}: sent ${last.sent.join(", ")} · ${Object.entries(last.answers).map(([id, answer]) => `${id} ${answer.verdict}`).join(", ") || "no answer"}`
+      + ` · lints and computed checks ${last.checks.before} → ${last.checks.after}${last.undone ? " · undone: the kept board is back" : ""}\n` : ""}` : "";
   const unanswered = record.unanswered.length ? `No answer: ${record.unanswered.join(", ")}\n` : "";
   return `${[...turn, ...lines].join("\n")}Stop: ${record.stop}${record.error ? ` (${record.error})` : ""}\n${unanswered}${kept}`;
 }
@@ -683,6 +897,7 @@ export function reviewOf(critique: CritiqueRecord): Review {
     lints: critique.lints,
     findings: critique.findings,
     computed: critique.computed,
+    layout: critique.layout,
   };
 }
 
@@ -693,13 +908,14 @@ export function reviewOf(critique: CritiqueRecord): Review {
  * (board.canvas.json and overview.png: the board as that round reviewed it;
  * guides.png, units/ and critique.json from critic.ts; highlights/ from
  * highlights.ts; revise-transcript.jsonl; and revise-reask-transcript.jsonl
- * when the reply left an id without an answer), after.png (the board the loop
- * kept), loop.json (a LoopRecord) and findings.md (the ledger as text). A
- * transcript holds the message the drawer got, its images too, and its reply.
+ * when the reply left an id without an answer), last-transcript.jsonl (the
+ * last turn after a restore), after.png (the board the loop kept), loop.json
+ * (a LoopRecord) and findings.md (the ledger as text). A transcript holds the
+ * message the drawer got, its images too, and its reply.
  *
- * The board file ends as the kept round's board. Each revise pass has exited
- * by then, and the canvas server saves inside a tool call, so nothing writes
- * the file after a restore.
+ * The board file ends as the kept round's board, with the last turn's fixes
+ * when it had one. Each drawer pass has exited by then, and the canvas server
+ * saves inside a tool call, so nothing writes the file after a restore.
  */
 export async function reviewBoard(options: {
   canvas: ReviewCanvas;
@@ -727,11 +943,10 @@ export async function reviewBoard(options: {
   /** The review of the round the loop is in. */
   let critique: CritiqueRecord | null = null;
   /** What the runner measures on the board file as it stands. */
-  const measured = () => {
-    const file = canvas.toolkit.openCanvasFile(boardPath);
-    const facts = wireFacts(canvas.wires, file);
-    return { board: file.persisted as Board, facts, plan: planOf(file.persisted as Board, facts, gapRule(canvas.wires)) };
-  };
+  const measured = () => checkBoard(canvas, canvas.toolkit.openCanvasFile(boardPath));
+  /** The sections a drawer pass moved, from the board `round` reviewed to the board file as it stands. */
+  const movedSince = (round: number, now = measured()) =>
+    sectionMoves(canvas.toolkit.openCanvasFile(reviewed(round)).persisted as Board, now.board, now.plan.pageFrame?.id ?? null);
   const record = await reviewLoop({
     budget: critic.rounds,
     rethink: pass && (async () => {
@@ -769,7 +984,7 @@ export async function reviewBoard(options: {
       });
       const revise = await pass(reviseMessage(board, findings, { ...notes, images }), resolve(roundDir(round), "revise-transcript.jsonl"));
       passed(`revise ${round}`, revise.run);
-      return { ...revise, images: images.length };
+      return { ...revise, images: images.length, moved: movedSince(round) };
     }),
     reask: pass && (async (round, ids) => {
       const reask = await pass([reaskPrompt(ids)], resolve(roundDir(round), "revise-reask-transcript.jsonl"));
@@ -777,6 +992,12 @@ export async function reviewBoard(options: {
       return reask;
     }),
     restore: drawer && ((round) => copyFileSync(reviewed(round), boardPath)),
+    last: pass && (async (kept, findings) => {
+      const turn = await pass([lastMessage(board, kept, findings)], resolve(outDir, "last-transcript.jsonl"));
+      passed(`last turn on the board of round ${kept.round}`, turn.run);
+      const now = measured();
+      return { ...turn, moved: movedSince(kept.round, now), lints: now.lints, computed: now.plan.faults };
+    }),
     timeUp: () => Date.now() - started > critic.loopTimeoutMs,
   });
   if (record.rethink || record.rounds.some((round) => round.revise)) {
@@ -798,6 +1019,7 @@ export function loopSummary(record: LoopRecord): string {
     + `${withheld ? ` · ${withheld} not sent (held, settled or stuck)` : ""}`
     + `${record.unanswered.length ? ` · no answer: ${record.unanswered.join(", ")}` : ""}`
     + `${record.kept ? ` · kept round ${record.kept.round}${record.kept.restored ? " (restored)" : ""}` : ""}`
+    + `${record.last ? ` · last turn: ${record.last.sent.length} lost ${record.last.sent.length === 1 ? "fix" : "fixes"} sent again${record.last.undone ? ", undone" : ""}` : ""}`
     + ` · ${Math.round(record.durationMs / 1000)} s${record.error ? ` · ${record.error}` : ""}`;
 }
 
