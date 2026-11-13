@@ -277,6 +277,42 @@ describe("critic loop computed findings", () => {
     expect(cut.findings.map((finding) => finding.id)).toEqual(["F1", "F2"]);
   });
 
+  test("a measure that passed closed its finding: the same fault back on the board is a new finding, with the fix that may have caused it", async () => {
+    const moved = seen({ kind: "placement", ids: ["sec_b"], labels: [], problem: "sec_b sits under the legend.", regions: ["space"] });
+    const record = await reviewLoop({
+      budget: 3,
+      // The gap is too narrow, the drawer widens it, and its fix of the round 2 finding closes it again.
+      review: async (round) => review(round === 2 ? { findings: [moved] } : { computed: [measure()] }),
+      revise: async (_round, findings) => ran(answered(findings, "fixed")),
+    });
+    const after = (round: number, id: string, on: string, problem: string) =>
+      `in round ${round} you fixed ${id} on ${on}: ${JSON.stringify(problem)}. This finding is on the same items, so that fix may have caused it. Fix it in a way that keeps ${id} fixed.`;
+    expect(record.rounds.map((round) => round.findings.map((finding) => [finding.id, finding.history]))).toEqual([
+      [["F1", undefined]], [["F2", after(1, "F1", "sec_a, sec_b", NARROW)]], [["F3", after(2, "F2", "sec_b", "sec_b sits under the legend.")]],
+    ]);
+    // With no other fix between, it is new all the same, and its own earlier fix is no history.
+    const ledger = answeredRound([], only([measure()]), "F1 fixed");
+    expect(roundFindings(ledger, only([measure()]), 3, { findings: [], withheld: [] }).findings.map((finding) => [finding.id, finding.history])).toEqual([["F2", undefined]]);
+    // On the board in the round before, it keeps its id.
+    expect(roundFindings(ledger, only([measure()]), 2, { findings: ledger, withheld: [] }).findings.map((finding) => finding.id)).toEqual(["F1"]);
+  });
+
+  test("a finding that was stuck is not asked for when its measure passes later", async () => {
+    const asked: string[][] = [];
+    const record = await reviewLoop({
+      budget: 8,
+      // The gap fails for 4 rounds, with one reviewer finding a round. Round 5 has neither.
+      review: async (round) => review(round < 5 ? { computed: [measure()], findings: [seen()] } : {}),
+      // The drawer answers each finding but F1.
+      revise: async (_round, findings, notes) => {
+        asked.push([...findings, ...notes.unanswered].map((finding) => finding.id));
+        return ran(answered(findings.filter((finding) => finding.id !== "F1"), "fixed"));
+      },
+    });
+    expect(asked).toEqual([["F1", "F2"], ["F1", "F3"], ["F1", "F4"], ["F5"]]);
+    expect([record.stop, record.rounds.length, record.unanswered]).toEqual(["clean", 5, ["F1"]]);
+  });
+
   test("a stuck finding the drawer never answered is not asked for again: the loop stops stuck", async () => {
     const asked: string[][] = [];
     const record = await reviewLoop({

@@ -55,9 +55,9 @@ import {
 import { drawerFlags, drawerSession, type DrawerPart, type DrawerRun } from "./drawer.ts";
 import { renderHighlights, type HighlightImage } from "./highlights.ts";
 import { parseFlags } from "./paths.ts";
-import { renderBoardPng } from "./render.ts";
+import { renderBoardPng, type WorldRect } from "./render.ts";
 import { rethinkAnswers, rethinkMessage, rethinkReask, rethinkRecord, unanswered as rethinkUnanswered, type RethinkRecord } from "./rethink.ts";
-import { REVIEWER_KINDS, SPACE_UNIT, markBox, short, type Board, type Mark, type ReviewerKind } from "./review-inputs.ts";
+import { REVIEWER_KINDS, SPACE_UNIT, short, type Board, type Mark, type ReviewerKind } from "./review-inputs.ts";
 import { gapRule, planOf, sameBlock, type ComputedFault } from "./space.ts";
 import { wireFacts } from "./wires.ts";
 
@@ -86,6 +86,8 @@ export interface LoopFinding {
   marks: Array<{ unit: string; marks: Mark[] }>;
   /** A lint: the state of the items it names when the round reviewed them (critic.ts ReviewLint). A computed finding: its key (space.ts ComputedFault). "" for a reviewer's finding. */
   state: string;
+  /** An empty block's place in its frame or section (space.ts ComputedFault). */
+  block?: WorldRect;
   /** The earlier fix this finding may undo, in one line (historyOf). The drawer reads it under the finding. */
   history?: string;
   /**
@@ -256,9 +258,6 @@ function declinedFaults(ledger: LoopFinding[]): Map<string, LoopFinding[]> {
   return faults;
 }
 
-/** The place of an empty block an earlier round sent: the box the runner marked. */
-const blockOf = (finding: LoopFinding) => markBox(finding.marks[0]!.marks[0]!);
-
 /**
  * The reversal guard. A layout finding on the items of a layout finding the
  * drawer fixed in an earlier round may ask to undo that fix: round 5 moved a
@@ -266,10 +265,12 @@ const blockOf = (finding: LoopFinding) => markBox(finding.marks[0]!.marks[0]!);
  * is sent with that fix in one line, so the drawer sees both. "The same
  * items": one finding names every id of the other. Null when no fix matches.
  */
-function historyOf(ledger: LoopFinding[], fresh: Pick<LoopFinding, "kind" | "ids">): string | null {
+function historyOf(ledger: LoopFinding[], fresh: Pick<LoopFinding, "kind" | "ids" | "state" | "block">): string | null {
   if (!LAYOUT_KINDS.has(fresh.kind) || fresh.ids.length === 0) return null;
   const within = (inner: string[], outer: string[]) => inner.every((id) => outer.includes(id));
   const cause = ledger.findLast((old) => old.source !== "check" && LAYOUT_KINDS.has(old.kind) && old.answer?.verdict === "fixed" && old.ids.length > 0
+    // The same measure, passed and back on the board, did not cause itself.
+    && !(fresh.state && old.state === fresh.state && (!fresh.block || sameBlock(old.block!, fresh.block)))
     && (within(old.ids, fresh.ids) || within(fresh.ids, old.ids)));
   if (!cause) return null;
   return `in round ${cause.answer!.round} you fixed ${cause.id} on ${cause.ids.join(", ")}: ${JSON.stringify(short(cause.problem, 160))}.`
@@ -287,7 +288,9 @@ function historyOf(ledger: LoopFinding[], fresh: Pick<LoopFinding, "kind" | "ids
  * turned it down with a reason twice: it is settled. Round 4 spent rounds on
  * the same lints, declined each round (h1: 9 of them, to round 11).
  *
- * A computed finding keeps its id while its measure fails. No answer settles
+ * A computed finding keeps its id while its measure fails, from round to
+ * round: `last` is the round before. A measure that passes closes it, and
+ * the same fault back on the board is a new finding. No answer settles
  * or holds it: round 5 closed real faults on a decline (h1: 8 wires in a
  * 280 px gap that the rule gives 340). It is sent MEASURED_SENDS times, so it
  * cannot run the loop to its last round alone. After that it is stuck: listed
@@ -306,6 +309,7 @@ function historyOf(ledger: LoopFinding[], fresh: Pick<LoopFinding, "kind" | "ids
  */
 export function roundFindings(
   ledger: LoopFinding[], review: Pick<Review, "lints" | "findings"> & Partial<Pick<Review, "computed">>, round = 1,
+  last: Pick<RoundRecord, "findings" | "withheld"> | null = null,
 ): { findings: LoopFinding[]; withheld: Withheld[]; score: number; grace: number } {
   const key = (finding: Pick<LoopFinding, "kind" | "ids" | "problem">) => JSON.stringify([finding.kind, finding.ids, finding.problem]);
   const items = (finding: Pick<LoopFinding, "kind" | "ids">) => JSON.stringify([finding.kind, [...finding.ids].sort()]);
@@ -335,14 +339,18 @@ export function roundFindings(
   };
   /** The ids of this round's empty blocks: 2 blocks of one frame or section never share one. */
   const placed = new Set<string>();
+  /** Whether the round before had this finding on the board, sent or stuck. */
+  const onBoard = (id: string) => !last || [...last.findings, ...last.withheld].some((finding) => finding.id === id);
   for (const fault of review.computed ?? []) {
     const fresh: Omit<LoopFinding, "id"> = {
       source: "computed", severity: "should", kind: "space",
-      ids: fault.ids, labels: [], problem: fault.problem, suggestion: "", regions: [SPACE_UNIT], marks: [{ unit: SPACE_UNIT, marks: fault.marks }], state: fault.key, answer: null,
+      ids: fault.ids, labels: [], problem: fault.problem, suggestion: "", regions: [SPACE_UNIT], marks: [{ unit: SPACE_UNIT, marks: fault.marks }], state: fault.key,
+      ...(fault.block ? { block: fault.block } : {}), answer: null,
     };
-    const measured = ledger.filter((finding) => finding.source === "computed" && finding.state === fault.key);
+    // A measure that passed closed its finding: the same fault back on the board is a new one, with its history.
+    const measured = ledger.filter((finding) => finding.source === "computed" && finding.state === fault.key && onBoard(finding.id));
     // An empty block is the fault of the earlier block at its place, not of the block that had its rank.
-    const same = fault.block && measured.findLast((finding) => !placed.has(finding.id) && sameBlock(blockOf(finding), fault.block!));
+    const same = fault.block && measured.findLast((finding) => !placed.has(finding.id) && sameBlock(finding.block!, fault.block!));
     const before = fault.block ? measured.filter((finding) => finding.id === same?.id) : measured;
     const last = before.at(-1);
     if (last) placed.add(last.id);
@@ -574,14 +582,15 @@ export async function reviewLoop(options: {
         const asked = unansweredOf(rounds);
         const review = await options.review(round, declinedFindings(ledger()));
         const record: RoundRecord = {
-          round, check: round >= options.budget || broken !== null, ...roundFindings(ledger(), review, round),
+          round, check: round >= options.budget || broken !== null, ...roundFindings(ledger(), review, round, rounds.at(-1)),
           reviewMs: review.reviewMs, renderMs: review.renderMs, effort: review.effort, reviewers: review.reviewers, regions: review.regions, unparsed: review.unparsed,
           revise: null,
         };
         const { findings } = record;
-        // A stuck finding is not sent again, so the loop does not wait for its answer.
-        const carried = asked.filter((finding) => !record.withheld.some((fault) => fault.why === "stuck" && fault.id === finding.id));
         rounds.push(record);
+        // A finding that was stuck is not sent again, so the loop does not wait for its answer.
+        const stuck = new Set(rounds.flatMap((each) => each.withheld).filter((fault) => fault.why === "stuck").map((fault) => fault.id));
+        const carried = asked.filter((finding) => !stuck.has(finding.id));
         unreviewed = false;
         if (broken !== null) return done(broken.stop, broken.error);
         /** Nothing to send the drawer: only a reviewer that gave no answer keeps the loop going. */

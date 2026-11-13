@@ -78,9 +78,13 @@ export interface EmptyBlock {
   in: string | null;
   frame: boolean;
   rect: WorldRect;
+  /** `rect` from the corner of the frame or section that holds it: a section that moves takes its block along. */
+  local: WorldRect;
   /** Its share of the frame or section that holds it. */
   share: number;
 }
+
+const blockIn = (holder: WorldRect, rect: WorldRect) => ({ rect, local: { ...rect, x: rect.x - holder.x, y: rect.y - holder.y }, share: area(rect) / area(holder) });
 
 /**
  * The empty blocks of a board over the limits. In the board frame, the
@@ -100,11 +104,11 @@ export function emptyBlocks(board: Board, pageFrame: BoardObject | null, gaps: G
   const inFrame = emptyRects(frame, [...top.map((object) => object.geometry), ...gutters(pageFrame?.id ?? null)], (rect) =>
     (rect.width > FRAME_BLOCK.width && rect.height > FRAME_BLOCK.height)
     || (area(rect) > FRAME_BLOCK.share * area(frame) && Math.min(rect.width, rect.height) > strip))
-    .map((rect): EmptyBlock => ({ in: pageFrame?.id ?? null, frame: true, rect, share: area(rect) / area(frame) }));
+    .map((rect): EmptyBlock => ({ in: pageFrame?.id ?? null, frame: true, ...blockIn(frame, rect) }));
   const inSections = placed.filter((object) => object.type === SECTION && object !== pageFrame).flatMap((section) =>
     emptyRects(section.geometry, [...placed.filter((object) => object.parentId === section.id).map((object) => object.geometry), ...gutters(section.id)], (rect) =>
       Math.max(rect.width, rect.height) > SECTION_BLOCK.long && Math.min(rect.width, rect.height) > SECTION_BLOCK.short)
-      .map((rect): EmptyBlock => ({ in: section.id, frame: false, rect, share: area(rect) / area(section.geometry) })));
+      .map((rect): EmptyBlock => ({ in: section.id, frame: false, ...blockIn(section.geometry, rect) })));
   return [...inFrame, ...inSections.sort((a, b) => area(b.rect) - area(a.rect))].slice(0, MAX_BOARD_BLOCKS);
 }
 
@@ -177,7 +181,7 @@ export function gapMeasures(board: Board, units: ReviewUnit[], facts: WireFact[]
 export interface ComputedFault {
   /** What makes it the same fault in a later round: the measure and the items, never the numbers. 2 empty blocks of one frame or section share it: `block` tells them apart. */
   key: string;
-  /** An empty block's place. A later round's block is the same fault when one of the 2 holds half of the other (critic-loop.ts). */
+  /** An empty block's place in its frame or section (EmptyBlock `local`). A later round's block is the same fault when one of the 2 holds half of the other (critic-loop.ts). */
   block?: WorldRect;
   /** The sections it names. */
   ids: string[];
@@ -212,7 +216,7 @@ export function computedFaults(blocks: EmptyBlock[], gaps: GapMeasure[]): Comput
   return [
     ...blocks.map((block): ComputedFault => ({
       key: JSON.stringify(["empty-block", block.in ?? "board"]),
-      block: block.rect,
+      block: block.local,
       ids: block.in ? [block.in] : [],
       problem: block.frame
         ? `An empty block of ${size(block.rect)} sits in the board frame at ${span(block.rect)}: ${percent(block.share)} of the frame holds no section, node or sticky.`

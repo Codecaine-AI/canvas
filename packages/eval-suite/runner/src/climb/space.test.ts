@@ -113,6 +113,10 @@ describe("climb empty blocks", () => {
     // 300 px on its short side, and 400 px on its long side.
     expect(section(box("n", "rectangle", "s", 0, 0, 700, 800))).toEqual([]);
     expect(section(box("n", "rectangle", "s", 0, 0, 600, 800), box("m", "rectangle", "s", 600, 400, 400, 400))).toEqual([]);
+    // A section that moves takes its block along: the block's place in the section is the same.
+    const moved = (x: number, y: number) => plan(board(box("s", "section", null, x, y, 1000, 800), box("n", "rectangle", "s", x, y, 500, 800))).faults.map((fault) => fault.block);
+    expect(moved(900, 300)).toEqual([{ x: 500, y: 0, width: 500, height: 800 }]);
+    expect(moved(900, 300)).toEqual(moved(0, 0));
     // A subsection fills its parent, and its own inside is measured too.
     expect(section(box("n", "rectangle", "s", 0, 0, 500, 800), box("sub", "section", "s", 500, 0, 500, 800)))
       .toEqual(["500 × 800 px empty at x 500 to 1000, y 0 to 800, inside section sub (100% of it)"]);
