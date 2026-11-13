@@ -2,11 +2,12 @@ import { describe, expect, test } from "bun:test";
 import { CANVAS_COLORS, CANVAS_ICON_GLYPHS, type CanvasIconGlyph } from "../../state/schema";
 import { CANVAS_THEME_IDS, canvasThemePreset } from "../../theme/canvas-style";
 import { getCanvasAuthoringGuidance } from "../../authoring";
-import { LABEL_LEG, SECTION_GAP_PER_WIRE } from "../../authoring/rules";
+import { EMPTY_BLOCK, LABEL_LEG, SECTION_GAP_PER_WIRE, SECTION_GAP_SLACK } from "../../authoring/rules";
 import { FINISHING_RULES } from "../../board/lints";
 import { runDiagnostics } from "../../board/lints/run";
 import { NAME_MAX_CHARS, NAME_MAX_WORDS, NAME_TARGET_WORDS } from "../../board/text-rules";
 import { LANE_GAP_PX } from "../../connectors/lanes";
+import { routeConnectionOnBoard } from "../../connectors/routing";
 import { OBJECT_PREFERENCES } from "../../objects/registry";
 import { ICON_GLYPH_CATEGORIES, resolveIconGlyph } from "../../objects/shapes/icon/icon-glyphs";
 import { box, connect, makeDocument } from "./synthetic";
@@ -114,7 +115,7 @@ describe("shared Canvas authoring guidance", () => {
 
   test("the color rules ban a node on its own section color and gray in gray, with no category exemption or gray-first order", () => {
     const rules = topicText("rules");
-    expect(rules).toContain("Never put a node or a sticky on a section of its own color.");
+    expect(rules).toContain("Never put a node or a sticky on a section of its own color. Draw a gray node only when the color key gives gray a meaning.");
     expect(rules).toContain("Never nest a gray section directly in a gray section.");
     expect(rules).toContain("Every section and subsection takes a hue that the color key gives a meaning.");
     expect(rules).toContain("Draw a gray or white section only when the source asks for one.");
@@ -130,7 +131,7 @@ describe("shared Canvas authoring guidance", () => {
 
   test("a named product takes its brand icon from find_icon, and a step takes a specific shape", () => {
     expect(topicText("rules")).toContain("uses its brand icon. Find it with `find_icon` and a `query`");
-    expect(topicText("rules")).toContain("A plain `rectangle` is only a payload or a message.");
+    expect(topicText("rules")).toContain("A plain `rectangle` is only a payload or a message. Among icon nodes, a step is an icon node too, with the glyph for its role.");
     expect(topicText("rules")).toContain("Each kind of thing the source names takes its own shape or icon. Never repeat one icon across nodes of different kinds.");
     expect(topicText("visual_vocabulary")).toContain("find_icon searches every brand by name");
     expect(topicText("diagram_design")).toContain("use the brand icon find_icon returns");
@@ -139,27 +140,57 @@ describe("shared Canvas authoring guidance", () => {
   test("facts go in a name, a wire label or a sticky beside the node, and a wire label names its cargo", () => {
     const rules = topicText("rules");
     expect(rules).toContain("Put a fact a reader needs (a size, a tool name) in the name, a wire label or a sticky.");
-    expect(rules).toContain("Put each sticky beside the node it explains.");
+    expect(rules).toContain("Put each sticky beside the node it explains, and the color key beside the title or the first section, never alone in a corner.");
+    expect(topicText("color_palette")).toContain("as a short note beside the title or the first section");
     expect(rules).toContain("A wire label says what the wire carries. It never repeats a node or section name.");
   });
 
-  test("a full board makes room with arrange flow, and its outline follows the flow, not a rectangle", () => {
+  test("a full board makes room with arrange flow, and a section keeps the size of its content", () => {
     for (const id of ["rules", "diagram_design"]) {
       const text = topicText(id);
       expect(text, id).toContain('`flow: {axis: "x" or "y", gap}`');
-      expect(text, id).toContain("outline follows the flow, not a rectangle");
       expect(text, id).toContain("Center a section on the node or section it connects to");
       expect(text, id).not.toContain("Leave no empty column or band");
     }
-    expect(topicText("rules")).toContain("Never stretch a section or a node to fill a row.");
+    const rules = topicText("rules");
+    expect(rules).toContain("A section keeps the size of its content: `fit_section` sets it.");
+    expect(rules).toContain("Never stretch a section or a node to fill a row, align an edge or make room for a wire.");
+    expect(rules).toContain("and a hub on the row it fans out to");
   });
 
-  test("the outline rule asks for the shape with the shortest wires, and no rule excuses a far section", () => {
-    expect(topicText("rules")).toContain("Choose the shape that makes the wires shortest (wider, taller, a grid, a hub with spokes), and move whole sections to get it.");
-    expect(topicText("diagram_design")).toContain("a hub with its spokes around it");
+  test("the shape rule asks for the shortest wires, and no rule excuses an empty block or a far section", () => {
+    const rules = topicText("rules");
+    expect(rules).toContain("Choose the board shape that makes the wires shortest (wider, taller, a grid, a hub with spokes), and move whole sections to get it.");
+    expect(rules).toContain(`Keep no empty block over ${EMPTY_BLOCK.frame.width} by ${EMPTY_BLOCK.frame.height} in the frame, or over ${EMPTY_BLOCK.section.width} by ${EMPTY_BLOCK.section.height} in a section.`);
+    expect(rules).toContain("Bend or lengthen a wire before you keep an empty block.");
+    expect(rules).toContain("After you move a section, close the space it left.");
+    const design = topicText("diagram_design");
+    expect(design).toContain("a hub with its spokes around it");
+    expect(design).toContain(`Rows can differ in width, but no empty block passes ${EMPTY_BLOCK.frame.width} × ${EMPTY_BLOCK.frame.height}px.`);
     for (const topic of getCanvasAuthoringGuidance().topics) {
-      expect(topic.text, topic.id).not.toMatch(/An empty corner is fine|Every move after the board is wired is rework|move sections closer/);
+      // The round 1 outline line excused the empty blocks the round 5 judges faulted.
+      expect(topic.text, topic.id).not.toMatch(/not a rectangle|An empty corner is fine|Every move after the board is wired is rework|move sections closer/);
     }
+  });
+
+  test("the board reads one way from the top or the left, and a row of targets follows its sources", () => {
+    const rules = topicText("rules");
+    expect(rules).toContain("The board reads one way, left to right or top to bottom, and the story starts at the top or the left.");
+    expect(rules).toContain("Steps inside a section run the same way.");
+    expect(rules).toContain("Order a row of targets in the order of their sources.");
+    expect(topicText("diagram_design")).toContain("so the main path runs one way: left to right or top to bottom, from the top or the left");
+  });
+
+  test("the plan is a wire table by pair of sections, written before the first place_section", () => {
+    const workflow = topicText("workflow");
+    const understand = workflow.slice(workflow.indexOf("1. Understand."), workflow.indexOf("2. Build."));
+    expect(understand).toContain("Before the first `place_section`, write a wire table: one row for each pair of sections, with its wires and the gap that count needs.");
+    expect(understand).toContain("choose one reading direction, and order each row of targets as their sources");
+    expect(topicText("diagram_design")).toContain("the color key, and the wire table: every wire, by pair of sections.");
+  });
+
+  test("a fix never stretches a section, merges nodes or grows an empty block", () => {
+    expect(topicText("rules")).toContain("Fix a finding without stretching a section, merging nodes or growing an empty block.");
   });
 
   test("sections that wire to each other sit side by side, in the plan and in the rules", () => {
@@ -167,12 +198,14 @@ describe("shared Canvas authoring guidance", () => {
     expect(rules).toContain("Put the two sections with the most wires between them side by side.");
     expect(rules).toContain("A store, a sink or a check sits beside the section that uses it.");
     expect(rules).toContain("Never put a section between two sections that wire to each other.");
-    expect(topicText("workflow")).toContain("count the wires between each pair of sections, put the pairs with the most wires next to each other");
+    expect(topicText("workflow")).toContain("Put the pairs with the most wires next to each other");
   });
 
   test("the gap between sections and the length of a labeled leg come from the router and the chip", () => {
     const rules = topicText("rules");
     expect(rules).toContain(`plus ${SECTION_GAP_PER_WIRE} for each wire after the first`);
+    // The maximum counts from what the row needs, labels and all, so it never asks for less than the minimum.
+    expect(rules).toContain(`give a row of sections the widest gap a pair in it needs, and never over ${SECTION_GAP_SLACK} more: a wider gap is an empty band.`);
     expect(rules).toContain(`A horizontal wire leg that carries a label is at least ${LABEL_LEG.base} plus ${LABEL_LEG.perCharacter} for each label character long`);
     expect(rules).toContain(`A vertical one is at least ${LABEL_LEG.vertical} long.`);
     expect(rules).toContain("Gaps inside a section stay as `arrange_section` sets them.");
@@ -204,7 +237,8 @@ describe("shared Canvas authoring guidance", () => {
     expect(rules).toContain("Draw what lives inside a thing as a subsection: `place_section` inside the section, titled for the thing.");
     expect(rules).toContain("the parts go in the subsection, and no wire runs from the thing to each part");
     expect(rules).toContain("2 or more nodes that share a group name make a subsection too.");
-    expect(rules).toContain("In a section of 7 or more nodes, find these groups before you place a node.");
+    expect(rules).toContain("A section of 8 or more nodes holds subsections: name its groups before you place a node.");
+    expect(rules).toContain("When the source names two sides (inside and outside, existing and proposed), each side of 2 or more nodes is a subsection.");
     expect(rules).toContain("Never draw a subsection for 1 node or for a group with no name.");
     expect(rules).toContain("A subsection takes a color apart from its section and from the subsections beside it.");
     expect(rules).toContain("Never call `arrange_section` on a section that holds subsections. `arrange` its subsections and loose nodes with `space`, then call `fit_section` on it.");
@@ -212,15 +246,53 @@ describe("shared Canvas authoring guidance", () => {
     expect(design).toContain("a named group inside it is a subsection with its own title");
     expect(design).toContain("call arrange_section on each subsection, arrange the subsections with space, then call fit_section on the section");
     expect(design).toContain("or a part inside the subsection of the thing that holds it");
-    expect(topicText("workflow")).toContain("make each thing that holds parts and each named group inside a section a subsection");
+    expect(topicText("workflow")).toContain("Make each thing that holds parts and each named group inside a section a subsection");
   });
 
-  test("wires of one meaning run as one trunk, and the board's merge stays", () => {
+  test("wires of one meaning run as one trunk, and wires that differ in color or dash take their own side", () => {
     const rules = topicText("rules");
     expect(rules).toContain("Wires that share a source or a target and one meaning run as one trunk and split at the end.");
-    expect(rules).toContain("never split a trunk the board merged");
-    expect(rules).toContain("Wires with different meanings take different colors, so they run in separate lanes.");
-    expect(rules).toContain("The board still joins wires that end at one node: keep that junction.");
+    expect(rules).toContain("Give them one color and one dash, and never split a trunk the board merged.");
+    expect(rules).toContain("Wires that differ in color or dash never share a line or an arrowhead.");
+    expect(rules).toContain("give each meaning its own side of the node, nearest its other ends: set `anchor` on that end in `connect`, or with `change_connection`");
+    expect(rules).toContain("Two wires that cross on the way in trade sides, so choose sides that keep them apart.");
+    expect(rules).toContain("Never pin a wire end with `position` to place or spread arrowheads. The board centers and merges them. `anchor` only picks the side.");
+    // Round 5 cycle 1: this line put two meanings on one line into a node.
+    expect(rules).not.toContain("keep that junction");
+    // The build step names the call at the point the drawer connects.
+    expect(topicText("workflow")).toContain("Where wires of two meanings end at one node, set `anchor` in `connect`: each meaning gets its own side.");
+  });
+
+  test("`anchor` gives each meaning its own side of a node, and each side still merges its wires", () => {
+    const objects = [
+      box("a1", 0, 0, 280, 100), box("a2", 0, 240, 280, 100),
+      box("b1", 0, 800, 280, 100), box("b2", 0, 1040, 280, 100),
+      box("x", 1000, 300, 280, 100),
+    ];
+    const byId = new Map(objects.map((object) => [object.id, object]));
+    const target = byId.get("x")!.geometry;
+    const side = ({ x, y }: { x: number; y: number }) => x <= target.x ? "left" : y >= target.y + target.height ? "bottom" : y <= target.y ? "top" : "right";
+    /** Where each wire's arrowhead lands, with the dashed pair anchored or not. */
+    const heads = (anchor?: "bottom") => {
+      const to = { objectId: "x", ...(anchor ? { anchor } : {}) };
+      const connections = [
+        { ...connect("w1", "a1", "x"), color: "blue" as const },
+        { ...connect("w2", "a2", "x"), color: "blue" as const },
+        { ...connect("w3", "b1", "x"), to, color: "orange" as const, style: "dashed" as const },
+        { ...connect("w4", "b2", "x"), to, color: "orange" as const, style: "dashed" as const },
+      ];
+      const board = { objects, connections };
+      return connections.map((connection) => {
+        const end = routeConnectionOnBoard(board, connection, byId.get(connection.from.objectId)!, byId.get("x")!, canvasThemePreset("schematic-light")).points.at(-1)!;
+        return { side: side(end), end: `${end.x},${end.y}` };
+      });
+    };
+    // With no anchor, the two meanings land on one side of the node.
+    expect(new Set(heads().map((head) => head.side)).size).toBe(1);
+    const [solid1, solid2, dashed1, dashed2] = heads("bottom");
+    expect([solid1!.side, solid2!.side, dashed1!.side, dashed2!.side]).toEqual(["left", "left", "bottom", "bottom"]);
+    expect(solid1!.end).toBe(solid2!.end);
+    expect(dashed1!.end).toBe(dashed2!.end);
   });
 
   test("the workflow rethinks the board once after the first draft, with three written answers", () => {
@@ -228,20 +300,22 @@ describe("shared Canvas authoring guidance", () => {
     const rethink = workflow.slice(workflow.indexOf("3. Rethink, once"), workflow.indexOf("4. Finish."));
     for (const part of [
       "Call `canvas_check`, and read its whole-board PNG and its LAYOUT block.",
-      "Which 3 wires are longest, and which section move shortens them?",
       "`look` at `page-frame`: MEASURES prints the gaps between its sections",
-      "Which rows of sections hold a gap narrower than topic `rules` says for its wires, and which sit 100 or more wider than their widest pair needs?",
-      "give each of those rows the gap its widest pair needs (`arrange` with `space` along a row, `move` with `by` for the rows below)",
-      "Does another board shape (wider, taller, a grid, a hub with spokes) shorten the wires?",
-      "Move whole sections with `arrange` or `move`",
-      "call `tighten_wires` again",
+      "Which section moves shorten the 3 longest wires and open no empty block?",
+      `Which gap is under its number in topic \`rules\`, or over ${SECTION_GAP_SLACK} more than its row needs?`,
+      "Does another board shape (wider, taller, a grid, a hub with spokes) or section order read better and close an empty block?",
+      "whole sections with `arrange` or `move`",
+      "then each row's gap again (`arrange` with `space` along a row, `move` with `by` for the rows below), then `tighten_wires`",
       "Moving sections after the first draft is normal.",
     ]) expect(rethink, part).toContain(part);
+    // The runner sends this step as its own turn with the numbers, so the step stays short.
+    expect(Buffer.byteLength(rethink)).toBeLessThan(900);
     const design = topicText("diagram_design");
     expect(design).toContain("6. Rethink once, as the workflow says");
     // Room for wires beats the real-size image, and no other room does.
     expect(design).toContain("or make a gap between sections narrower than topic `rules` says");
     expect(design).toContain("A board that keeps those gaps can pass 2576px. Never add room past what topic `rules` gives a row");
+    expect(design).toContain("The longer edge sets the scale, so past it grow the shorter edge first.");
     expect(design).toContain("page-frame is working room: resize it to hold the plan first");
   });
 
