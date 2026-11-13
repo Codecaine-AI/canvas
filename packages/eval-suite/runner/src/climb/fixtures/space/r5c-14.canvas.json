@@ -1,0 +1,1468 @@
+{
+  "schemaVersion": 1,
+  "id": "14-trace-inventory-map-v2",
+  "title": "Where every trace lives · 2026-11-05",
+  "description": "Inventory of every agent trace source on Ford's machines on 2026-11-05, with sizes, and the planned path each takes to nas-01. Nothing moves today.\n\n**Layout (left → right):** source machines (command-center with its two writer groups, dev-01 and recording-01 stacked below it; Daytona sandboxes sit above services-01 and feed trace-ingest from the top) → services-01 (Collectors: Backfill job, trace-ingest, Raw feed spool, ClickHouse; Local trace stores in two columns below, feeding up into the collectors) → nas-01 destination folders. The key and the nas-01 paths note sit top-right, above the services-01 → nas-01 band.\n\n**Frame colours:** violet = source machine; teal = services-01 (Mac mini), the only NAS writer; orange = its Collectors group; pink = its local trace stores; blue = nas-01, unreachable today.\n\n**Wire key:** violet = one-time backfill via the Backfill job; green = live collection via trace-ingest and the Raw feed spool; pink dashed = waits on the Archon fork; gray = Token Gateway nightly sqlite copy. Every wire into nas-01 starts on services-01.\n\n**Node key:** blue = trace source; orange = store at risk now (T3 span logs on dev-01 and recording-01, Token Gateway, Budget kernel + Pi, T3 logs + sessions); yellow key glyph = codex-lb proxy store, which holds account tokens; teal = services-01 mover; green = nas-01 copy.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Where every trace lives · 2026-11-05",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 20,
+        "y": 20,
+        "width": 3480,
+        "height": 2680
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "cc",
+      "type": "section",
+      "text": "command-center · MacBook Pro · 349.3 GB",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 60,
+        "y": 100,
+        "width": 900,
+        "height": 1520
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "laptop"
+    },
+    {
+      "id": "dev01",
+      "type": "section",
+      "text": "dev-01 · Linux · 142 MB",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 180,
+        "y": 1820,
+        "width": 780,
+        "height": 320
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "rec01",
+      "type": "section",
+      "text": "recording-01 · Mac · 125 MB",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 180,
+        "y": 2340,
+        "width": 780,
+        "height": 320
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "desktop"
+    },
+    {
+      "id": "daytona",
+      "type": "section",
+      "text": "Daytona sandboxes · one per node",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1360,
+        "y": 200,
+        "width": 788,
+        "height": 260
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "brand-daytona"
+    },
+    {
+      "id": "svc",
+      "type": "section",
+      "text": "services-01",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1500,
+        "y": 800,
+        "width": 900,
+        "height": 1860
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "nas",
+      "type": "section",
+      "text": "nas-01 · unreachable",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 3120,
+        "y": 900,
+        "width": 340,
+        "height": 1620
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "cc_bo",
+      "type": "section",
+      "text": "Backfill only · writers stopped · 269.9 GB",
+      "color": "pink",
+      "parentId": "cc",
+      "geometry": {
+        "x": 100,
+        "y": 180,
+        "width": 820,
+        "height": 552
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "cc_bl",
+      "type": "section",
+      "text": "Backfill, then live · writers run · 79.4 GB",
+      "color": "teal",
+      "parentId": "cc",
+      "geometry": {
+        "x": 100,
+        "y": 804,
+        "width": 820,
+        "height": 772
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "svc_mv",
+      "type": "section",
+      "text": "Collectors",
+      "color": "orange",
+      "parentId": "svc",
+      "geometry": {
+        "x": 1540,
+        "y": 880,
+        "width": 772,
+        "height": 780
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "svc_st",
+      "type": "section",
+      "text": "Local trace stores",
+      "color": "pink",
+      "parentId": "svc",
+      "geometry": {
+        "x": 1540,
+        "y": 1840,
+        "width": 820,
+        "height": 780
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "lb",
+      "type": "icon",
+      "text": "codex-lb proxy · 155.9 GB",
+      "color": "yellow",
+      "parentId": "cc_bo",
+      "geometry": {
+        "x": 140,
+        "y": 228,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "key"
+    },
+    {
+      "id": "gc",
+      "type": "icon",
+      "text": "GC decomp harness · 67.0 GB",
+      "color": "blue",
+      "parentId": "cc_bo",
+      "geometry": {
+        "x": 580,
+        "y": 228,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "eval"
+    },
+    {
+      "id": "kurate",
+      "type": "icon",
+      "text": "Kurate catalog · 44.9 GB",
+      "color": "blue",
+      "parentId": "cc_bo",
+      "geometry": {
+        "x": 140,
+        "y": 428,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "knowledge"
+    },
+    {
+      "id": "other",
+      "type": "icon",
+      "text": "Other runs and apps · 1.9 GB",
+      "color": "blue",
+      "parentId": "cc_bo",
+      "geometry": {
+        "x": 580,
+        "y": 428,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "documents"
+    },
+    {
+      "id": "t3",
+      "type": "icon",
+      "text": "T3 Code · 43.1 GB",
+      "color": "blue",
+      "parentId": "cc_bl",
+      "geometry": {
+        "x": 140,
+        "y": 852,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "claude",
+      "type": "icon",
+      "text": "Claude Code · 22.9 GB",
+      "color": "blue",
+      "parentId": "cc_bl",
+      "geometry": {
+        "x": 572,
+        "y": 852,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "brand-claude-code"
+    },
+    {
+      "id": "codex",
+      "type": "icon",
+      "text": "Codex · 11.6 GB",
+      "color": "blue",
+      "parentId": "cc_bl",
+      "geometry": {
+        "x": 140,
+        "y": 1052,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "brand-codex"
+    },
+    {
+      "id": "pi",
+      "type": "icon",
+      "text": "Pi · 0.5 GB",
+      "color": "blue",
+      "parentId": "cc_bl",
+      "geometry": {
+        "x": 572,
+        "y": 1052,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "kernel",
+      "type": "icon",
+      "text": "Kernel trace.dbs · 0.9 GB",
+      "color": "blue",
+      "parentId": "cc_bl",
+      "geometry": {
+        "x": 140,
+        "y": 1252,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "muse",
+      "type": "icon",
+      "text": "Muse + Antigravity · 0.4 GB",
+      "color": "blue",
+      "parentId": "cc_bl",
+      "geometry": {
+        "x": 572,
+        "y": 1252,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "message"
+    },
+    {
+      "id": "d_sess",
+      "type": "icon",
+      "text": "Session files · 28 MB",
+      "color": "blue",
+      "parentId": "dev01",
+      "geometry": {
+        "x": 220,
+        "y": 1868,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "documents"
+    },
+    {
+      "id": "d_span",
+      "type": "icon",
+      "text": "T3 span logs · 114 MB",
+      "color": "orange",
+      "parentId": "dev01",
+      "geometry": {
+        "x": 612,
+        "y": 1868,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "r_sess",
+      "type": "icon",
+      "text": "Session files · 10 MB",
+      "color": "blue",
+      "parentId": "rec01",
+      "geometry": {
+        "x": 220,
+        "y": 2388,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "documents"
+    },
+    {
+      "id": "r_span",
+      "type": "icon",
+      "text": "T3 span logs · 115 MB",
+      "color": "orange",
+      "parentId": "rec01",
+      "geometry": {
+        "x": 612,
+        "y": 2388,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "sbx",
+      "type": "icon",
+      "text": "Sandbox harness folders",
+      "color": "blue",
+      "parentId": "daytona",
+      "geometry": {
+        "x": 1380,
+        "y": 296,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "folder"
+    },
+    {
+      "id": "backfill",
+      "type": "icon",
+      "text": "Backfill job · one-time",
+      "color": "teal",
+      "parentId": "svc_mv",
+      "geometry": {
+        "x": 1732,
+        "y": 928,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "function"
+    },
+    {
+      "id": "ingest",
+      "type": "icon",
+      "text": "trace-ingest · proposed",
+      "color": "teal",
+      "parentId": "svc_mv",
+      "geometry": {
+        "x": 1560,
+        "y": 1112,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "api"
+    },
+    {
+      "id": "spool",
+      "type": "icon",
+      "text": "Raw feed spool",
+      "color": "teal",
+      "parentId": "svc_mv",
+      "geometry": {
+        "x": 1940,
+        "y": 1112,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "queue"
+    },
+    {
+      "id": "ch",
+      "type": "icon",
+      "text": "ClickHouse agents · not installed",
+      "color": "teal",
+      "parentId": "svc_mv",
+      "geometry": {
+        "x": 1940,
+        "y": 1312,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "brand-clickhouse"
+    },
+    {
+      "id": "gw",
+      "type": "icon",
+      "text": "Token Gateway · 1.44 + 0.44 GB",
+      "color": "orange",
+      "parentId": "svc_st",
+      "geometry": {
+        "x": 2020,
+        "y": 2088,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "gauge"
+    },
+    {
+      "id": "bevals",
+      "type": "icon",
+      "text": "Budget evals · 1.1 GB",
+      "color": "blue",
+      "parentId": "svc_st",
+      "geometry": {
+        "x": 1800,
+        "y": 2296,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "eval"
+    },
+    {
+      "id": "bkernel",
+      "type": "icon",
+      "text": "Budget kernel + Pi · 14 MB",
+      "color": "orange",
+      "parentId": "svc_st",
+      "geometry": {
+        "x": 1560,
+        "y": 1888,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "t3svc",
+      "type": "icon",
+      "text": "T3 logs + sessions · 109 MB",
+      "color": "orange",
+      "parentId": "svc_st",
+      "geometry": {
+        "x": 1560,
+        "y": 2088,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "archon",
+      "type": "icon",
+      "text": "Archon run traces",
+      "color": "blue",
+      "parentId": "svc_st",
+      "geometry": {
+        "x": 2020,
+        "y": 1888,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "branch"
+    },
+    {
+      "id": "n_db",
+      "type": "icon",
+      "text": "Services DB copies",
+      "color": "green",
+      "parentId": "nas",
+      "geometry": {
+        "x": 3140,
+        "y": 2356,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "n_lb",
+      "type": "icon",
+      "text": "codex-lb exports",
+      "color": "green",
+      "parentId": "nas",
+      "geometry": {
+        "x": 3140,
+        "y": 956,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "n_runs",
+      "type": "icon",
+      "text": "Run outputs",
+      "color": "green",
+      "parentId": "nas",
+      "geometry": {
+        "x": 3140,
+        "y": 1156,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "n_harn",
+      "type": "icon",
+      "text": "Harness sessions",
+      "color": "green",
+      "parentId": "nas",
+      "geometry": {
+        "x": 3140,
+        "y": 1356,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "n_t3",
+      "type": "icon",
+      "text": "T3 Code copies",
+      "color": "green",
+      "parentId": "nas",
+      "geometry": {
+        "x": 3140,
+        "y": 1556,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "n_gw",
+      "type": "icon",
+      "text": "Gateway traces",
+      "color": "green",
+      "parentId": "nas",
+      "geometry": {
+        "x": 3140,
+        "y": 1756,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "n_sbx",
+      "type": "icon",
+      "text": "Sandbox pulls",
+      "color": "green",
+      "parentId": "nas",
+      "geometry": {
+        "x": 3140,
+        "y": 1956,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "n_arch",
+      "type": "icon",
+      "text": "Archon and links",
+      "color": "green",
+      "parentId": "nas",
+      "geometry": {
+        "x": 3140,
+        "y": 2156,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "s_bo",
+      "type": "sticky",
+      "text": "codex-lb holds **account tokens**. GC decomp: 67.0 GB of 115.5 GB moves. curate = Kurate (assumed). Other: ai-age, evals, spectre.",
+      "color": "yellow",
+      "parentId": "cc_bo",
+      "geometry": {
+        "x": 140,
+        "y": 612,
+        "width": 740,
+        "height": 80
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_bl",
+      "type": "sticky",
+      "text": "T3: statev2 41.4 GB · Claude: main sessions from Sep 3 · Codex: 18,126 rollouts · Pi: ~/.pi/agent/sessions · Kernel: canvas, budget, others · Muse + Antigravity: from Oct 30",
+      "color": "yellow",
+      "parentId": "cc_bl",
+      "geometry": {
+        "x": 140,
+        "y": 1456,
+        "width": 740,
+        "height": 80
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_dev",
+      "type": "sticky",
+      "text": "Sessions: kernel, Muse, Codex, Claude. Spans kept about 1 day.",
+      "color": "yellow",
+      "parentId": "dev01",
+      "geometry": {
+        "x": 220,
+        "y": 2032,
+        "width": 700,
+        "height": 60
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_rec",
+      "type": "sticky",
+      "text": "Sessions: Codex, Claude, T3 state. Spans kept about 2 days.",
+      "color": "yellow",
+      "parentId": "rec01",
+      "geometry": {
+        "x": 220,
+        "y": 2552,
+        "width": 700,
+        "height": 60
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_sbx",
+      "type": "sticky",
+      "text": "~/.claude ~/.codex trace.db. Destroyed at end. **No collector runs here**: hooks push live, the executor pulls at teardown.",
+      "color": "yellow",
+      "parentId": "daytona",
+      "geometry": {
+        "x": 1740,
+        "y": 280,
+        "width": 340,
+        "height": 140
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_mv",
+      "type": "sticky",
+      "text": "Backfill: VACUUM, zst, sha256 · trace-ingest: tailnet HTTPS · Spool: Services SSD, zst per day · ClickHouse: not installed yet",
+      "color": "yellow",
+      "parentId": "svc_mv",
+      "geometry": {
+        "x": 1940,
+        "y": 1480,
+        "width": 300,
+        "height": 140
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_st",
+      "type": "sticky",
+      "text": "Gateway: 1.44 GB DB + 0.44 GB traces · Budget evals: eval runs and caches · Kernel + Pi: **not in nightly backup** · T3 spans kept 1 to 2 days · Archon: workflow_events, spans, links",
+      "color": "yellow",
+      "parentId": "svc_st",
+      "geometry": {
+        "x": 1660,
+        "y": 2480,
+        "width": 560,
+        "height": 100
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_nas",
+      "type": "sticky",
+      "text": "**Paths on nas-01**\n- codex-lb: `agents/raw/codex-lb/`\n- runs: `agents/raw/runs/<project>/`\n- harness: `agents/raw/<harness>/<machine>/`\n- T3: `agents/raw/t3-code/<machine>/`\n- gateway: `agents/raw/gateway/`\n- sandbox: `agents/raw/sandbox/<run>/<node>/`\n- Archon: `agents/raw/archon/` · `agents/links/`\n- DB copies: `backups/services/<db>/`",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2320,
+        "y": 460,
+        "width": 1140,
+        "height": 260
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_key",
+      "type": "sticky",
+      "text": "**Key** · 2026-11-05 · nothing moves today\n- violet wire: one-time backfill by the Backfill job · green wire: live collection via trace-ingest + spool\n- pink dashed wire: waits on the Archon fork · gray wire: nightly sqlite copy\n- yellow key node: holds secrets (account tokens) · orange node: store at risk now\n- blue node: trace source · green node: nas-01 copy\n- violet frame: source machine · teal frame: services-01 (Mac mini), the only NAS writer · orange frame: its collectors · blue frame: nas-01, unreachable today\n- every path into nas-01 starts on services-01",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2320,
+        "y": 200,
+        "width": 1140,
+        "height": 220
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "w_bo",
+      "from": {
+        "objectId": "cc_bo"
+      },
+      "to": {
+        "objectId": "backfill",
+        "anchor": "left"
+      },
+      "label": "backfill · 269.9 GB",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          1180,
+          460
+        ],
+        [
+          1180,
+          980
+        ]
+      ]
+    },
+    {
+      "id": "w_bl_bf",
+      "from": {
+        "objectId": "cc_bl",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "backfill",
+        "anchor": "left"
+      },
+      "label": "backfill · 79.4 GB",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          520,
+          760
+        ],
+        [
+          1180,
+          760
+        ],
+        [
+          1180,
+          980
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.45
+      }
+    },
+    {
+      "id": "w_bl_live",
+      "from": {
+        "objectId": "cc_bl",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "ingest",
+        "anchor": "left"
+      },
+      "label": "live · hooks + reconciler",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "w_dev",
+      "from": {
+        "objectId": "dev01",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "ingest",
+        "anchor": "left"
+      },
+      "label": "first pass, then live",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "waypoints": [
+        [
+          1340,
+          1980
+        ],
+        [
+          1340,
+          1180
+        ]
+      ]
+    },
+    {
+      "id": "w_rec",
+      "from": {
+        "objectId": "rec01",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "ingest",
+        "anchor": "left"
+      },
+      "label": "first pass, then live",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "waypoints": [
+        [
+          1340,
+          2500
+        ],
+        [
+          1340,
+          1180
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.12
+      }
+    },
+    {
+      "id": "w_sbx",
+      "from": {
+        "objectId": "daytona"
+      },
+      "to": {
+        "objectId": "ingest",
+        "anchor": "top"
+      },
+      "label": "live · hooks + teardown pull",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "pink",
+      "waypoints": [
+        [
+          1760,
+          520
+        ],
+        [
+          1720,
+          520
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.35
+      }
+    },
+    {
+      "id": "w_append",
+      "from": {
+        "objectId": "ingest"
+      },
+      "to": {
+        "objectId": "spool"
+      },
+      "label": "RawRecord append",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "labelPosition": {
+        "along": 0.25
+      }
+    },
+    {
+      "id": "w_rows",
+      "from": {
+        "objectId": "spool"
+      },
+      "to": {
+        "objectId": "ch"
+      },
+      "label": "rows",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "w_gw_live",
+      "from": {
+        "objectId": "gw",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "ingest",
+        "anchor": "bottom"
+      },
+      "label": "daily trace · first pass, then live",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "waypoints": [
+        [
+          1940,
+          2140
+        ],
+        [
+          1940,
+          1800
+        ],
+        [
+          1720,
+          1800
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.86,
+        "offset": -20
+      }
+    },
+    {
+      "id": "w_bk",
+      "from": {
+        "objectId": "bkernel"
+      },
+      "to": {
+        "objectId": "ingest",
+        "anchor": "bottom"
+      },
+      "label": "live · reconciler",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "labelPosition": {
+        "along": 0.6
+      }
+    },
+    {
+      "id": "w_t3svc",
+      "from": {
+        "objectId": "t3svc",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "ingest",
+        "anchor": "bottom"
+      },
+      "label": "live · reconciler",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "waypoints": [
+        [
+          1940,
+          2140
+        ],
+        [
+          1940,
+          1800
+        ],
+        [
+          1720,
+          1800
+        ]
+      ]
+    },
+    {
+      "id": "w_archon",
+      "from": {
+        "objectId": "archon",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "ingest",
+        "anchor": "top"
+      },
+      "label": "run log + spans + link rows",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "pink",
+      "waypoints": [
+        [
+          2180,
+          1740
+        ],
+        [
+          1920,
+          1740
+        ],
+        [
+          1920,
+          1080
+        ],
+        [
+          1720,
+          1080
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.08
+      }
+    },
+    {
+      "id": "w_bevals",
+      "from": {
+        "objectId": "bevals",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "backfill",
+        "anchor": "left"
+      },
+      "label": "backfill · 1.1 GB",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          1440,
+          2360
+        ],
+        [
+          1440,
+          980
+        ]
+      ]
+    },
+    {
+      "id": "w_gw_db",
+      "from": {
+        "objectId": "gw"
+      },
+      "to": {
+        "objectId": "n_db"
+      },
+      "label": "nightly sqlite copy",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray",
+      "waypoints": [
+        [
+          2460,
+          2140
+        ],
+        [
+          2460,
+          2420
+        ]
+      ]
+    },
+    {
+      "id": "w_b_lb",
+      "from": {
+        "objectId": "backfill"
+      },
+      "to": {
+        "objectId": "n_lb"
+      },
+      "label": "backfill · 156.1 GB",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          2820,
+          980
+        ],
+        [
+          2820,
+          1020
+        ]
+      ]
+    },
+    {
+      "id": "w_b_runs",
+      "from": {
+        "objectId": "backfill"
+      },
+      "to": {
+        "objectId": "n_runs"
+      },
+      "label": "backfill · 45.6 GB",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          2820,
+          980
+        ],
+        [
+          2820,
+          1220
+        ]
+      ]
+    },
+    {
+      "id": "w_b_harn",
+      "from": {
+        "objectId": "backfill"
+      },
+      "to": {
+        "objectId": "n_harn",
+        "anchor": "left"
+      },
+      "label": "backfill · 105.6 GB",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          2820,
+          980
+        ],
+        [
+          2820,
+          1420
+        ]
+      ]
+    },
+    {
+      "id": "w_b_t3",
+      "from": {
+        "objectId": "backfill"
+      },
+      "to": {
+        "objectId": "n_t3",
+        "anchor": "left"
+      },
+      "label": "backfill · 43.1 GB",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          2820,
+          980
+        ],
+        [
+          2820,
+          1620
+        ]
+      ]
+    },
+    {
+      "id": "w_s_harn",
+      "from": {
+        "objectId": "spool"
+      },
+      "to": {
+        "objectId": "n_harn",
+        "anchor": "top"
+      },
+      "label": "live · session lines",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "waypoints": [
+        [
+          2600,
+          1180
+        ],
+        [
+          2600,
+          1320
+        ],
+        [
+          3300,
+          1320
+        ]
+      ]
+    },
+    {
+      "id": "w_s_t3",
+      "from": {
+        "objectId": "spool"
+      },
+      "to": {
+        "objectId": "n_t3",
+        "anchor": "top"
+      },
+      "label": "live · weekly VACUUM INTO",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "waypoints": [
+        [
+          2600,
+          1180
+        ],
+        [
+          2600,
+          1520
+        ],
+        [
+          3300,
+          1520
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.75
+      }
+    },
+    {
+      "id": "w_s_gw",
+      "from": {
+        "objectId": "spool"
+      },
+      "to": {
+        "objectId": "n_gw"
+      },
+      "label": "live · daily zst",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "waypoints": [
+        [
+          2600,
+          1180
+        ],
+        [
+          2600,
+          1820
+        ]
+      ]
+    },
+    {
+      "id": "w_s_sbx",
+      "from": {
+        "objectId": "spool"
+      },
+      "to": {
+        "objectId": "n_sbx"
+      },
+      "label": "live · teardown pull",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "pink",
+      "waypoints": [
+        [
+          2280,
+          1180
+        ],
+        [
+          2280,
+          1700
+        ],
+        [
+          2540,
+          1700
+        ],
+        [
+          2540,
+          2020
+        ]
+      ]
+    },
+    {
+      "id": "w_s_arch",
+      "from": {
+        "objectId": "spool"
+      },
+      "to": {
+        "objectId": "n_arch"
+      },
+      "label": "live · run log + links",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "pink",
+      "waypoints": [
+        [
+          2280,
+          1180
+        ],
+        [
+          2280,
+          1700
+        ],
+        [
+          2540,
+          1700
+        ],
+        [
+          2540,
+          2220
+        ]
+      ]
+    }
+  ],
+  "annotations": []
+}

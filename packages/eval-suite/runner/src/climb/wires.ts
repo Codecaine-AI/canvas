@@ -56,7 +56,7 @@ export interface WireModules {
     titleChipLayout(section: unknown, canvasStyle: unknown): { box: WorldRect };
   };
   /** The numbers of the gap rule, as topic `rules` prints them. */
-  rules: { SECTION_GAP_PER_WIRE: number; LABEL_LEG: { base: number; perCharacter: number } };
+  rules: { SECTION_GAP_PER_WIRE: number; LABEL_LEG: { base: number; perCharacter: number; vertical: number }; SECTION_GAP_SLACK: number; BAND_NEED_MAX?: number; LONG_WIRE: number; EMPTY_BLOCK: { area: number; side: number } };
   craft: { CRAFT_TARGETS: { sectionGutterSideBySide: number; framePadding: number } };
   /** The grid a drawer's numbers land on. */
   grid: { AGENT_GRID: number };

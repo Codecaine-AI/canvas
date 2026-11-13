@@ -6,7 +6,7 @@ import type { Board, BoardObject } from "./review-inputs.ts";
 import { planOf, type GapRule } from "./space.ts";
 import type { WireFact } from "./wires.ts";
 
-const RULE: GapRule = { base: 200, perWire: 20, labelBase: 100, labelPerCharacter: 10, perLabel: 20, padding: 40 };
+const RULE: GapRule = { base: 200, perWire: 20, labelBase: 100, labelPerCharacter: 10, labelVertical: 120, slack: 120, needMax: 400, padding: 40 };
 const measured = (objects: BoardObject[], facts: WireFact[] = []): Measured => {
   const board: Board = { objects, connections: [] };
   return { board, facts, plan: planOf(board, facts, RULE) };
@@ -16,8 +16,10 @@ const full = (id: string, node: string, parent: string | null, x: number, y: num
   [box(id, "section", parent, x, y, width, height), box(node, "rectangle", id, x, y, width, height)];
 /** 3 sections in a 1700 × 1000 frame: a and b side by side over c, and nothing right of b. */
 const draft = (bX = 500) => [box("page", "section", null, 0, 0, 1700, 1000), ...full("a", "p", "page", 0, 0, 300, 400), ...full("b", "q", "page", bX, 0, 300, 400), ...full("c", "r", "page", 0, 600, 1700, 400)];
+/** A wire from p to q that runs down the band between a and b at `x`: a lane of that band. */
+const lane = (id: string, x: number, toX = 500) => wire(id, "p", "q", [[300, 100], [x, 100], [x, 300], [toX, 300]]);
 const wires = [
-  wire("w1", "p", "q", [[300, 100], [500, 100]]), wire("w2", "p", "q", [[300, 200], [500, 200]]), wire("w3", "p", "q", [[300, 300], [500, 300]]),
+  lane("w1", 340), lane("w2", 360), lane("w3", 380),
   wire("w4", "q", "r", [[650, 400], [650, 500], [1500, 500], [1500, 600]]),
 ];
 /** A drawer pass as its stream-json transcript: each text is one assistant message, each tool one call. */
@@ -35,48 +37,49 @@ describe("climb rethink turn message", () => {
     expect(message).toContain([
       "Write 3 answers before your first edit, each on a line that starts with its tag:",
       "A1: which section moves shorten the longest wires?",
-      "A2: which gap is over or under its rule number?",
+      "A2: which band is too narrow or too wide?",
       "A3: would another board shape (aspect ratio) or another order of the sections read better?",
       `An answer can be "no change", but only with its reason from the numbers below. "No change" alone is no answer.`,
     ].join("\n"));
     expect(message).toContain("Move whole sections (`arrange`, `move`, `place_section`, `fit_section`)");
     expect(message).toContain("After you move a section, close the space it left, then route the wires again.");
     expect(message).toContain("Do not spread the nodes inside a section, and do not resize a section past its content.");
-    expect(message).toContain("Never narrow a gap below its rule number: the number counts every wire of its band, from every pair of sections.");
+    expect(message).toContain("Never narrow a band below its need, and never move a note or the key into a band.");
     expect(message).toContain(`canvas_open, canvas id "b1"`);
   });
 
-  test("it gives the facts the runner measured: the board's size, the wires of each section pair, each gap against its rule number by band, the 5 longest wires and the computed findings", () => {
+  test("it gives the facts the runner measured: the board's size, the wires of each section pair, each band against the band rule, the 5 longest wires and the computed findings", () => {
     expect(message.slice(message.indexOf("\nBoard:"))).toBe([
       "",
       "Board:",
       "1700 × 1000 px, aspect ratio 1.70 : 1",
       "",
       "Wires between sections (the 2 sections · wires · their total length · whether the 2 are neighbours), most wires first:",
-      "a ↔ b · 3 wires · 600 px of wire in total · neighbours, side by side, gap 200 px",
+      "a ↔ b · 3 wires · 1200 px of wire in total · neighbours, side by side, gap 200 px",
       "b ↔ c · 1 wire · 1050 px of wire in total · neighbours, stacked, gap 200 px",
       "",
-      "Gaps between neighbour sections, each against the gap rule. A gap's band is the gap drawn out along its row or column of sections, and the rule counts every wire that crosses the gap or runs along the band:"
-      + " 200 px, plus 20 px for each wire after the first, plus 20 px more for each of them with a label."
-      + " A labelled wire that crosses a side-by-side gap needs 100 px plus 10 px a character of its label."
-      + " A gap is off its number when it is under it, or over it by more than 120 px with nothing in it:",
-      "a ↔ b · side by side · gap 200 px · gutter x 300 to 500, y 0 to 400 · band y 0 to 400 · 3 wires cross it or run along its band · 0 label chips in it · rule number 240 px · UNDER its number by 40 px",
-      // w4 leaves b and runs along the band over c: the gap of a and c counts it too.
-      "a ↔ c · stacked · gap 200 px · gutter x 0 to 300, y 400 to 600 · band x 0 to 800 · 1 wire crosses it or runs along its band · 0 label chips in it · rule number 200 px · within its number",
-      "b ↔ c · stacked · gap 200 px · gutter x 500 to 800, y 400 to 600 · band x 0 to 800 · 1 wire crosses it or runs along its band · 0 label chips in it · rule number 200 px · within its number",
+      "Bands, each against the band rule. A band is the gap between 2 neighbour sections, over the span the 2 share."
+      + " Its lanes are the wires that run along it for 40 px or more inside that span: a wire that only crosses it straight is no lane."
+      + " A band needs 200 px, or the longest label leg of a chip that sits in it when that is more (100 px plus 10 px a character on a horizontal leg), plus 20 px for each lane after the first."
+      + " From its need to 120 px over, a band is right, and it is never empty space. A band that needs over 400 px is a section-order fault: reorder the sections, do not widen it:",
+      "a ↔ b · side by side · gap 200 px · band x 300 to 500, y 0 to 400 · 3 wires run along it (w1, w2, w3) · 0 label chips in it · needs 240 px, legal to 360 px · TOO NARROW by 40 px",
+      "a ↔ c · stacked · gap 200 px · band x 0 to 300, y 400 to 600 · 0 wires run along it · 0 label chips in it · needs 200 px, legal to 320 px · inside its legal width",
+      // w4 leaves b and runs along the band over c for 150 px inside the span b and c share.
+      "b ↔ c · stacked · gap 200 px · band x 500 to 800, y 400 to 600 · 1 wire runs along it (w4) · 0 label chips in it · needs 200 px, legal to 320 px · inside its legal width",
       "",
       "The 5 longest wires (id · from (its section) → to (its section) · length · bends):",
       "w4 · q (b) → r (c) · 1050 px · 2 bends",
-      "w1 · p (a) → q (b) · 200 px · 0 bends",
-      "w2 · p (a) → q (b) · 200 px · 0 bends",
-      "w3 · p (a) → q (b) · 200 px · 0 bends",
+      "w1 · p (a) → q (b) · 400 px · 2 bends",
+      "w2 · p (a) → q (b) · 400 px · 2 bends",
+      "w3 · p (a) → q (b) · 400 px · 2 bends",
       "",
       "Computed findings: the measures of the board that fail now. The review loop sends you each one that still fails after this turn, until it passes:",
-      "- An empty block of 900 × 600 px sits in the board frame at x 800 to 1700, y 0 to 600: 32% of the frame holds no section, node or sticky."
-      + " The limit is 120,000 px² with a short side of 200 px. The allowed fixes: shrink the section or the frame, or move a neighbour in. Not a fix: widen a section, add a sticky, reverse a chain.",
-      "- The band between a (left) and b (right), x 300 to 500, is 200 px wide and 3 wires cross it or run along it: w1, w2, w3."
-      + " The gap rule asks 240 px for them (200 px, plus 20 px for each wire after the first), so the band is 40 px too narrow."
-      + " Facts: the band is 200 px wide now with 3 wires, and it needs 240 px.",
+      "- An empty block of 900 × 600 px sits in the board frame at x 800 to 1700, y 0 to 600: 32% of the frame holds no section or node."
+      + " The limit is 120,000 px² with a short side of 200 px. The allowed fixes: shrink the section or the frame, or move a neighbour in. Not a fix: widen a section, add a sticky, reverse a chain."
+      + " Never move a note or the key into a gap.",
+      "- The band between a and b (side by side), x 300 to 500, y 0 to 400, is 200 px wide and 3 wires run along it (w1, w2, w3):"
+      + " it needs 240 px (200 px, plus 20 px for each lane after the first), so it is 40 px too narrow. Move the 2 sections apart to 240 px, and no more than 360 px."
+      + " Facts: the band is 200 px wide now with 3 lanes, and it needs 240 px.",
     ].join("\n"));
   });
 
@@ -84,7 +87,7 @@ describe("climb rethink turn message", () => {
     const six = [1, 2, 3, 4, 5, 6].map((n) => wire(`w${n}`, "p", "p", [[0, 0], [n * 10, 0]]));
     const text = rethinkMessage("b1", measured(full("a", "p", null, 0, 0, 300, 400), six), RULE);
     expect(text).toContain("most wires first:\n(none)\n");
-    expect(text).toContain("with nothing in it:\n(none)\n");
+    expect(text).toContain("do not widen it:\n(none)\n");
     expect(text).toContain("bends):\nw6 · p (a) → p (a) · 60 px · 0 bends\nw5 ");
     expect(text).not.toContain("\nw1 · ");
     expect(text).toEndWith("until it passes:\n(none)");
@@ -156,14 +159,14 @@ describe("climb rethink turn record", () => {
       run, answers, reask: null, transcript: transcript(["A1: move b beside a"], ["canvas_open", "arrange", "route", "route", "canvas_check"]),
       before: measured(draft(), wires),
       // The drawer widened the a ↔ b gap to 240 px.
-      after: measured(draft(540), [wire("w1", "p", "q", [[300, 100], [540, 100]]), wire("w2", "p", "q", [[300, 200], [540, 200]]), wire("w3", "p", "q", [[300, 300], [540, 300]]), wires[3]!]),
+      after: measured(draft(540), [lane("w1", 340, 540), lane("w2", 360, 540), lane("w3", 380, 540), wires[3]!]),
     });
     expect(record).toEqual({
       ...run, answers, reask: null,
       toolCalls: { total: 5, byTool: { canvas_open: 1, arrange: 1, route: 2, canvas_check: 1 } },
       moved: [{ id: "b", dx: 40, dy: 0 }],
       frame: { before: "1700 × 1000 px", after: "1700 × 1000 px" },
-      // Before: the gap under its number and the empty block. After: the block.
+      // Before: the band too narrow and the empty block. After: the block.
       faults: { before: 2, after: 1 },
     });
   });

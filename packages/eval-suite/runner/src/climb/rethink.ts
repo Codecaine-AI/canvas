@@ -8,7 +8,7 @@
  * Round 5 cycle 1 left the rethink to the drawer's guidance, and the drawer
  * skipped it on 5 of 8 boards. So the runner asks, with the numbers it
  * measured on the board file (space.ts): the wires between each pair of
- * sections, each gap against the gap rule by its band, the longest wires,
+ * sections, each band against the band rule, the longest wires,
  * the computed findings and the board's size. The drawer writes 3 answers, then edits. An
  * answer can be "no change" only with its reason. The loop record keeps the
  * answers, the tool calls and the sections that moved.
@@ -16,7 +16,7 @@
 import type { DrawerRun } from "./drawer.ts";
 import { transcriptMetrics } from "./render.ts";
 import { SPACE_UNIT, ownerUnits, spaceLines, type Board } from "./review-inputs.ts";
-import { GAP_SLACK_PX, gapLine, type GapRule, type Plan } from "./space.ts";
+import { gapLine, type GapRule, type Plan } from "./space.ts";
 import type { WireFact } from "./wires.ts";
 
 /** A board file as the runner measured it. */
@@ -24,7 +24,7 @@ export interface Measured { board: Board; facts: WireFact[]; plan: Plan }
 
 const QUESTIONS = {
   A1: "which section moves shorten the longest wires?",
-  A2: "which gap is over or under its rule number?",
+  A2: "which band is too narrow or too wide?",
   A3: "would another board shape (aspect ratio) or another order of the sections read better?",
 } as const;
 type Tag = keyof typeof QUESTIONS;
@@ -53,17 +53,16 @@ export function rethinkMessage(board: string, { board: file, facts, plan }: Meas
     "Then make the edits your answers ask for. Move whole sections (`arrange`, `move`, `place_section`, `fit_section`): a section takes everything it holds with it."
     + " After you move a section, close the space it left, then route the wires again.",
     "The room goes between sections, for the wires there. Do not spread the nodes inside a section, and do not resize a section past its content.",
-    "Never narrow a gap below its rule number: the number counts every wire of its band, from every pair of sections. Round 5 cycle 2: a rethink turn cut a band of 13 wires from 560 px to 280 px.",
+    "Never narrow a band below its need, and never move a note or the key into a band.",
     `The canvas server restarted. Open the board again with canvas_open, canvas id "${board}", and read any guidance topic it asks for.`,
     "Run canvas_check when you are done.",
     ...block("Board:", [lines.shape]),
     ...block("Wires between sections (the 2 sections · wires · their total length · whether the 2 are neighbours), most wires first:", lines.pairs),
     ...block(
-      `Gaps between neighbour sections, each against the gap rule. A gap's band is the gap drawn out along its row or column of sections, and the rule counts every wire that crosses the gap or runs along the band:`
-      + ` ${rule.base} px, plus ${rule.perWire} px for each wire after the first, plus ${rule.perLabel} px more for each of them with a label.`
-      + ` A labelled wire that crosses a side-by-side gap needs ${rule.labelBase} px plus ${rule.labelPerCharacter} px a character of its label.`
-      + ` A gap is off its number when it is under it, or over it by more than ${GAP_SLACK_PX} px with nothing in it:`,
-      plan.gaps.map(gapLine),
+      `Bands, each against the band rule. A band is the gap between 2 neighbour sections, over the span the 2 share. Its lanes are the wires that run along it for 40 px or more inside that span: a wire that only crosses it straight is no lane.`
+      + ` A band needs ${rule.base} px, or the longest label leg of a chip that sits in it when that is more (${rule.labelBase} px plus ${rule.labelPerCharacter} px a character on a horizontal leg), plus ${rule.perWire} px for each lane after the first.`
+      + ` From its need to ${rule.slack} px over, a band is right, and it is never empty space. A band that needs over ${rule.needMax} px is a section-order fault: reorder the sections, do not widen it:`,
+      plan.gaps.map((gap) => gapLine(gap, rule)),
     ),
     ...block(`The ${LONGEST} longest wires (id · from (its section) → to (its section) · length · bends):`, longest),
     ...block(

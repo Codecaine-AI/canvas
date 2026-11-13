@@ -1,0 +1,470 @@
+{
+  "schemaVersion": 1,
+  "id": "03-three-pieces",
+  "title": "The three pieces",
+  "description": "The three stacked pieces of work Ford named on 2026-11-03, drawn bottom-up in one column. Piece 1 · Internal review is at the bottom, with a green solid frame because This Session builds it. It holds packages/workflows, the Review chain · 5 nodes subsection (Four review nodes in blue, plus one pink Coding-agent node) and pr-label binding. Piece 2 · Background dispatch is in the middle, with a dashed frame because a Later Session builds it. It holds Remote run locations (dev-01, Sandbox) stacked over Trace sync home (StateSink, TraceWriterSink). On the right are the Scheduler · services-01 and, beside it, Token Gateway · services-01, which is context the scheduler runs next to. Piece 3 · Non-coding runtime is at the top, also dashed. It holds Defined workflows (Email and transactions, Daily checklist, in blue as workflow node kinds) and the schedule/webhook Triggers. The two needs run as one straight blue dashed column on the right: pr-label binding → Scheduler (\"binding carries run location\") and Scheduler → Triggers (\"scheduler and triggers\"). The key and the notes sit in the bands between the pieces.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "The three pieces",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 28,
+        "y": 172,
+        "width": 1392,
+        "height": 2028
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "piece3",
+      "type": "section",
+      "text": "Piece 3 · Non-coding runtime",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 76,
+        "y": 252,
+        "width": 1304,
+        "height": 324
+      },
+      "style": {
+        "shape": "section",
+        "strokeStyle": "dashed"
+      },
+      "icon": "layers"
+    },
+    {
+      "id": "piece2",
+      "type": "section",
+      "text": "Piece 2 · Background dispatch",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 68,
+        "y": 800,
+        "width": 1312,
+        "height": 604
+      },
+      "style": {
+        "shape": "section",
+        "strokeStyle": "dashed"
+      },
+      "icon": "schedule"
+    },
+    {
+      "id": "piece1",
+      "type": "section",
+      "text": "Piece 1 · Internal review",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 116,
+        "y": 1620,
+        "width": 1264,
+        "height": 540
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "pull-request"
+    },
+    {
+      "id": "runlocs",
+      "type": "section",
+      "text": "Remote run locations",
+      "color": "yellow",
+      "parentId": "piece2",
+      "geometry": {
+        "x": 140,
+        "y": 880,
+        "width": 700,
+        "height": 204
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "cloud"
+    },
+    {
+      "id": "tracesync",
+      "type": "section",
+      "text": "Trace sync home",
+      "color": "orange",
+      "parentId": "piece2",
+      "geometry": {
+        "x": 140,
+        "y": 1160,
+        "width": 700,
+        "height": 204
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "defwf",
+      "type": "section",
+      "text": "Defined workflows",
+      "color": "pink",
+      "parentId": "piece3",
+      "geometry": {
+        "x": 124,
+        "y": 332,
+        "width": 736,
+        "height": 204
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "route"
+    },
+    {
+      "id": "triggers",
+      "type": "icon",
+      "text": "Triggers: schedule · webhook",
+      "color": "yellow",
+      "parentId": "piece3",
+      "geometry": {
+        "x": 1060,
+        "y": 380,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "event"
+    },
+    {
+      "id": "email",
+      "type": "icon",
+      "text": "Email and transactions",
+      "color": "blue",
+      "parentId": "defwf",
+      "geometry": {
+        "x": 160,
+        "y": 380,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "mail"
+    },
+    {
+      "id": "checklist",
+      "type": "icon",
+      "text": "Daily checklist",
+      "color": "blue",
+      "parentId": "defwf",
+      "geometry": {
+        "x": 520,
+        "y": 380,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "scheduler",
+      "type": "icon",
+      "text": "Scheduler · services-01",
+      "color": "violet",
+      "parentId": "piece2",
+      "geometry": {
+        "x": 1060,
+        "y": 920,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "schedule"
+    },
+    {
+      "id": "dev01",
+      "type": "icon",
+      "text": "dev-01",
+      "color": "green",
+      "parentId": "runlocs",
+      "geometry": {
+        "x": 180,
+        "y": 920,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "sandbox",
+      "type": "icon",
+      "text": "Sandbox",
+      "color": "green",
+      "parentId": "runlocs",
+      "geometry": {
+        "x": 500,
+        "y": 920,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "container"
+    },
+    {
+      "id": "statesink",
+      "type": "icon",
+      "text": "StateSink",
+      "color": "teal",
+      "parentId": "tracesync",
+      "geometry": {
+        "x": 180,
+        "y": 1200,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "tracewriter",
+      "type": "icon",
+      "text": "TraceWriterSink",
+      "color": "teal",
+      "parentId": "tracesync",
+      "geometry": {
+        "x": 500,
+        "y": 1200,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "workflowspkg",
+      "type": "icon",
+      "text": "packages/workflows",
+      "color": "orange",
+      "parentId": "piece1",
+      "geometry": {
+        "x": 160,
+        "y": 1840,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "package"
+    },
+    {
+      "id": "prlabel",
+      "type": "icon",
+      "text": "pr-label binding",
+      "color": "violet",
+      "parentId": "piece1",
+      "geometry": {
+        "x": 1060,
+        "y": 1840,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "pull-request"
+    },
+    {
+      "id": "reviewchain",
+      "type": "icon",
+      "text": "Four review nodes",
+      "color": "blue",
+      "parentId": "reviewsub",
+      "geometry": {
+        "x": 604,
+        "y": 1756,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "judge"
+    },
+    {
+      "id": "key",
+      "type": "sticky",
+      "text": "**Key** · Ford's 2026-11-03 plan; each piece builds on the one below.\n- **Green, solid frame**: This Session builds it (Piece 1)\n- **Dashed frame**: a Later Session builds it (Pieces 2, 3)\n- **Blue dashed wire**: a need between pieces, built by later Sessions\n- **Blue node**: a workflow node kind",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 600,
+        "width": 620,
+        "height": 160
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "note3",
+      "type": "sticky",
+      "text": "The kernel as a runtime for defined non-coding workflows. Reuses the Piece 1 node kinds, without the coding-agent node.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 760,
+        "y": 600,
+        "width": 300,
+        "height": 140
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "note1",
+      "type": "sticky",
+      "text": "Internal review that runs before Greptile and CodeRabbit. The pr-label binding is a local daemon on command-center.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 420,
+        "y": 1520,
+        "width": 640,
+        "height": 80
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "codingagent",
+      "type": "icon",
+      "text": "Coding-agent node",
+      "color": "pink",
+      "parentId": "reviewsub",
+      "geometry": {
+        "x": 604,
+        "y": 1956,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "reviewsub",
+      "type": "section",
+      "text": "Review chain · 5 nodes",
+      "color": "yellow",
+      "parentId": "piece1",
+      "geometry": {
+        "x": 584,
+        "y": 1700,
+        "width": 340,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "judge"
+    },
+    {
+      "id": "tokengw",
+      "type": "icon",
+      "text": "Token Gateway · services-01",
+      "color": "orange",
+      "parentId": "piece2",
+      "geometry": {
+        "x": 880,
+        "y": 1200,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "api"
+    }
+  ],
+  "connections": [
+    {
+      "id": "need1",
+      "from": {
+        "objectId": "prlabel",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "scheduler",
+        "anchor": "bottom"
+      },
+      "label": "binding carries run location",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue",
+      "labelPosition": {
+        "along": 0.42
+      }
+    },
+    {
+      "id": "need2",
+      "from": {
+        "objectId": "scheduler",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "triggers",
+        "anchor": "bottom"
+      },
+      "label": "scheduler and triggers",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "dispatch",
+      "from": {
+        "objectId": "scheduler",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "runlocs"
+      },
+      "label": "runs by load",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet"
+    }
+  ],
+  "annotations": []
+}

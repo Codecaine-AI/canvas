@@ -1,0 +1,918 @@
+{
+  "schemaVersion": 1,
+  "id": "10-container-tree",
+  "title": "Container tree for one Archon run",
+  "description": "Container tree that one Archon review run (run-7f3a19c2) leaves in trace.db, and what Archon records for the same run.\n\n- **Top: Archon side · Archon DB** (violet), a 2×2 square reading right and down: workflow_runs row → run_id → review-codex (codex · gpt-6.1-sol) and review-claude (claude · claude-fable-5-1) node rows → workflow_events rows. All four Archon DB rows share one pink tile. These nodes get no kernel container. The workflow_runs row links down (leaving on its left, outside the frame) to the root container's top by `key [archonRunId]`. Stickies: stateFilePath() and the color key on the left; the Archon-only note on the right; \"why one container per invocation\" just above the parallel bundle.\n- **Bottom: Kernel side · trace.db + state tree** (green). Root archon-run container (proposed kind) sits just under the header. Five archon-node child containers in one row below; each child's `parent_container_id` wire leaves its container to the side, rises past the subsection's title chip, and joins one of two trunks entering root from left (round 1, round 2) or right (extract-findings, pack-context-a/-b). Each invocation is a yellow subsection holding its container row, pi_agent_sessions row → agent_runs row (pi_session_id · container_id), and its state.json path. pack-context-a/-b sit in the pink \"Parallel bundle\" subsection.\n- Color key (record kinds): blue container row, teal other trace.db row, orange state file, pink Archon DB row. All invocation subsections share yellow because they are one kind.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Container tree for one Archon run",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 60,
+        "y": 140,
+        "width": 2640,
+        "height": 1956
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "archon",
+      "type": "section",
+      "text": "Archon side · Archon DB",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1320,
+        "y": 220,
+        "width": 820,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "kernel",
+      "type": "section",
+      "text": "Kernel side · trace.db + state tree",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 860,
+        "width": 2560,
+        "height": 1196
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "inv-pc1",
+      "type": "section",
+      "text": "pack-context · round 1",
+      "color": "yellow",
+      "parentId": "kernel",
+      "geometry": {
+        "x": 140,
+        "y": 1056,
+        "width": 380,
+        "height": 840
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "inv-pc2",
+      "type": "section",
+      "text": "pack-context · round 2",
+      "color": "yellow",
+      "parentId": "kernel",
+      "geometry": {
+        "x": 640,
+        "y": 1056,
+        "width": 380,
+        "height": 840
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "inv-ef1",
+      "type": "section",
+      "text": "extract-findings · round 1",
+      "color": "yellow",
+      "parentId": "kernel",
+      "geometry": {
+        "x": 1140,
+        "y": 1056,
+        "width": 400,
+        "height": 840
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "bundle",
+      "type": "section",
+      "text": "Parallel bundle · two containers",
+      "color": "pink",
+      "parentId": "kernel",
+      "geometry": {
+        "x": 1660,
+        "y": 1056,
+        "width": 960,
+        "height": 960
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "inv-pca",
+      "type": "section",
+      "text": "pack-context-a",
+      "color": "yellow",
+      "parentId": "bundle",
+      "geometry": {
+        "x": 1700,
+        "y": 1136,
+        "width": 380,
+        "height": 840
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "inv-pcb",
+      "type": "section",
+      "text": "pack-context-b",
+      "color": "yellow",
+      "parentId": "bundle",
+      "geometry": {
+        "x": 2200,
+        "y": 1136,
+        "width": 380,
+        "height": 840
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "root",
+      "type": "icon",
+      "text": "archon-run [run-7f3a19c2] · proposed kind",
+      "color": "blue",
+      "parentId": "kernel",
+      "geometry": {
+        "x": 1020,
+        "y": 908,
+        "width": 400,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "container"
+    },
+    {
+      "id": "c-pc1",
+      "type": "icon",
+      "text": "archon-node container",
+      "color": "blue",
+      "parentId": "inv-pc1",
+      "geometry": {
+        "x": 180,
+        "y": 1112,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "container"
+    },
+    {
+      "id": "pi-pc1",
+      "type": "icon",
+      "text": "pi_agent_sessions · pack-context",
+      "color": "teal",
+      "parentId": "inv-pc1",
+      "geometry": {
+        "x": 180,
+        "y": 1312,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "table"
+    },
+    {
+      "id": "ar-pc1",
+      "type": "icon",
+      "text": "agent_runs row",
+      "color": "teal",
+      "parentId": "inv-pc1",
+      "geometry": {
+        "x": 180,
+        "y": 1512,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "table"
+    },
+    {
+      "id": "st-pc1",
+      "type": "icon",
+      "text": "state/1d9b…/pack-context/state.json",
+      "color": "orange",
+      "parentId": "inv-pc1",
+      "geometry": {
+        "x": 180,
+        "y": 1712,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "c-pc2",
+      "type": "icon",
+      "text": "archon-node container",
+      "color": "blue",
+      "parentId": "inv-pc2",
+      "geometry": {
+        "x": 680,
+        "y": 1112,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "container"
+    },
+    {
+      "id": "pi-pc2",
+      "type": "icon",
+      "text": "pi_agent_sessions · pack-context",
+      "color": "teal",
+      "parentId": "inv-pc2",
+      "geometry": {
+        "x": 680,
+        "y": 1312,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "table"
+    },
+    {
+      "id": "ar-pc2",
+      "type": "icon",
+      "text": "agent_runs row",
+      "color": "teal",
+      "parentId": "inv-pc2",
+      "geometry": {
+        "x": 680,
+        "y": 1512,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "table"
+    },
+    {
+      "id": "st-pc2",
+      "type": "icon",
+      "text": "state/5f0c…/pack-context/state.json",
+      "color": "orange",
+      "parentId": "inv-pc2",
+      "geometry": {
+        "x": 680,
+        "y": 1712,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "c-ef1",
+      "type": "icon",
+      "text": "key [run, extract-findings, 1, 1]",
+      "color": "blue",
+      "parentId": "inv-ef1",
+      "geometry": {
+        "x": 1192,
+        "y": 1112,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "container"
+    },
+    {
+      "id": "pi-ef1",
+      "type": "icon",
+      "text": "pi_agent_sessions · extract-findings",
+      "color": "teal",
+      "parentId": "inv-ef1",
+      "geometry": {
+        "x": 1160,
+        "y": 1312,
+        "width": 360,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "table"
+    },
+    {
+      "id": "ar-ef1",
+      "type": "icon",
+      "text": "agent_runs row",
+      "color": "teal",
+      "parentId": "inv-ef1",
+      "geometry": {
+        "x": 1192,
+        "y": 1512,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "table"
+    },
+    {
+      "id": "st-ef1",
+      "type": "icon",
+      "text": "state/e3a7…/extract-findings/state.json",
+      "color": "orange",
+      "parentId": "inv-ef1",
+      "geometry": {
+        "x": 1192,
+        "y": 1712,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "c-pca",
+      "type": "icon",
+      "text": "key [run, pack-context-a, 1, 1]",
+      "color": "blue",
+      "parentId": "inv-pca",
+      "geometry": {
+        "x": 1740,
+        "y": 1192,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "container"
+    },
+    {
+      "id": "pi-pca",
+      "type": "icon",
+      "text": "pi_agent_sessions · pack-context",
+      "color": "teal",
+      "parentId": "inv-pca",
+      "geometry": {
+        "x": 1740,
+        "y": 1392,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "table"
+    },
+    {
+      "id": "ar-pca",
+      "type": "icon",
+      "text": "agent_runs row",
+      "color": "teal",
+      "parentId": "inv-pca",
+      "geometry": {
+        "x": 1740,
+        "y": 1592,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "table"
+    },
+    {
+      "id": "st-pca",
+      "type": "icon",
+      "text": "state/9a41…/pack-context/state.json",
+      "color": "orange",
+      "parentId": "inv-pca",
+      "geometry": {
+        "x": 1740,
+        "y": 1792,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "c-pcb",
+      "type": "icon",
+      "text": "key [run, pack-context-b, 1, 1]",
+      "color": "blue",
+      "parentId": "inv-pcb",
+      "geometry": {
+        "x": 2240,
+        "y": 1192,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "container"
+    },
+    {
+      "id": "pi-pcb",
+      "type": "icon",
+      "text": "pi_agent_sessions · pack-context",
+      "color": "teal",
+      "parentId": "inv-pcb",
+      "geometry": {
+        "x": 2240,
+        "y": 1392,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "table"
+    },
+    {
+      "id": "ar-pcb",
+      "type": "icon",
+      "text": "agent_runs row",
+      "color": "teal",
+      "parentId": "inv-pcb",
+      "geometry": {
+        "x": 2240,
+        "y": 1592,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "table"
+    },
+    {
+      "id": "st-pcb",
+      "type": "icon",
+      "text": "state/c27e…/pack-context/state.json",
+      "color": "orange",
+      "parentId": "inv-pcb",
+      "geometry": {
+        "x": 2240,
+        "y": 1792,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "wf-runs",
+      "type": "icon",
+      "text": "workflow_runs row",
+      "color": "pink",
+      "parentId": "archon",
+      "geometry": {
+        "x": 1360,
+        "y": 276,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "n-codex",
+      "type": "icon",
+      "text": "review-codex · gpt-6.1-sol",
+      "color": "pink",
+      "parentId": "archon",
+      "geometry": {
+        "x": 1820,
+        "y": 276,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "n-claude",
+      "type": "icon",
+      "text": "review-claude · claude-fable-5-1",
+      "color": "pink",
+      "parentId": "archon",
+      "geometry": {
+        "x": 1360,
+        "y": 476,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "wf-events",
+      "type": "icon",
+      "text": "workflow_events rows",
+      "color": "pink",
+      "parentId": "archon",
+      "geometry": {
+        "x": 1820,
+        "y": 476,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "event"
+    },
+    {
+      "id": "s-path",
+      "type": "sticky",
+      "text": "**stateFilePath()**\n`<stateRoot>/.agent-kernel/state/<containerId>/<agentName>/state.json`\n\nEach state file shows its `<containerId>/<agentName>`. A round 2 run gets a new container, so it never reads round 1 state.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 140,
+        "y": 300,
+        "width": 520,
+        "height": 200
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s-why",
+      "type": "sticky",
+      "text": "**Why one container per invocation**\nKernel keys agent state by container id + agent name (`packages/kernel/src/state/store.ts:31`). Both parallel instances run agent pack-context: one shared container would write the same state.json. Two containers give two paths.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2240,
+        "y": 640,
+        "width": 400,
+        "height": 200
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s-archon",
+      "type": "sticky",
+      "text": "**No kernel container: Archon events only.** review-codex (provider codex) and review-claude (provider claude) run through Archon's own providers, write workflow_events rows, and write nothing to trace.db.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2240,
+        "y": 300,
+        "width": 400,
+        "height": 160
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s-key",
+      "type": "sticky",
+      "text": "**Record kinds**\nblue · container row (trace.db)\nteal · other trace.db row\norange · state file\npink · Archon DB row",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 700,
+        "y": 300,
+        "width": 440,
+        "height": 160
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-pi-pc1",
+      "from": {
+        "objectId": "pi-pc1"
+      },
+      "to": {
+        "objectId": "ar-pc1"
+      },
+      "label": "pi_session_id · container_id",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-pi-pc2",
+      "from": {
+        "objectId": "pi-pc2"
+      },
+      "to": {
+        "objectId": "ar-pc2"
+      },
+      "label": "pi_session_id · container_id",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-pi-ef1",
+      "from": {
+        "objectId": "pi-ef1"
+      },
+      "to": {
+        "objectId": "ar-ef1"
+      },
+      "label": "pi_session_id · container_id",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-pi-pca",
+      "from": {
+        "objectId": "pi-pca"
+      },
+      "to": {
+        "objectId": "ar-pca"
+      },
+      "label": "pi_session_id · container_id",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-pi-pcb",
+      "from": {
+        "objectId": "pi-pcb"
+      },
+      "to": {
+        "objectId": "ar-pcb"
+      },
+      "label": "pi_session_id · container_id",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-par-pc1",
+      "from": {
+        "objectId": "c-pc1",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "root",
+        "anchor": "left"
+      },
+      "label": "parent_container_id",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          440,
+          1180
+        ],
+        [
+          440,
+          960
+        ]
+      ]
+    },
+    {
+      "id": "e-par-pc2",
+      "from": {
+        "objectId": "c-pc2",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "root",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          940,
+          1180
+        ],
+        [
+          940,
+          960
+        ]
+      ]
+    },
+    {
+      "id": "e-par-ef1",
+      "from": {
+        "objectId": "c-ef1",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "root",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          1460,
+          1180
+        ],
+        [
+          1460,
+          960
+        ]
+      ]
+    },
+    {
+      "id": "e-par-pca",
+      "from": {
+        "objectId": "c-pca",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "root",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          2040,
+          1260
+        ],
+        [
+          2040,
+          960
+        ]
+      ]
+    },
+    {
+      "id": "e-par-pcb",
+      "from": {
+        "objectId": "c-pcb",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "root",
+        "anchor": "right"
+      },
+      "label": "parent_container_id",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          2160,
+          1260
+        ],
+        [
+          2160,
+          960
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.255
+      }
+    },
+    {
+      "id": "e-key",
+      "from": {
+        "objectId": "wf-runs",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "root",
+        "anchor": "top"
+      },
+      "label": "key [archonRunId]",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "labelPosition": {
+        "along": 0.8
+      }
+    },
+    {
+      "id": "e-run-codex",
+      "from": {
+        "objectId": "wf-runs",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "n-codex",
+        "anchor": "left"
+      },
+      "label": "run_id",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "pink"
+    },
+    {
+      "id": "e-run-claude",
+      "from": {
+        "objectId": "wf-runs",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "n-claude",
+        "anchor": "top"
+      },
+      "label": "run_id",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "pink"
+    },
+    {
+      "id": "e-codex-ev",
+      "from": {
+        "objectId": "n-codex",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "wf-events",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "pink"
+    },
+    {
+      "id": "e-claude-ev",
+      "from": {
+        "objectId": "n-claude",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "wf-events",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "pink"
+    }
+  ],
+  "annotations": []
+}

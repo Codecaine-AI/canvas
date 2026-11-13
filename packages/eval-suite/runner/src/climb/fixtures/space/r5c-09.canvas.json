@@ -1,0 +1,783 @@
+{
+  "schemaVersion": 1,
+  "id": "09-kernel-in-archon",
+  "title": "Kernel concepts mapped onto Archon",
+  "description": "Maps the agent kernel's ten concepts (left, teal section, grouped into Definition and execution / Run records / Read and route surfaces) onto Archon's seven concepts (middle, pink section), per the page \"Where the Kernel Fits in Archon\". Each wire runs from a kernel concept to its nearest Archon counterpart and is colored and labeled with its verdict: green = same idea, orange = partial, blue = kernel has it/Archon does not, violet = Archon has it/kernel does not. Token Gateway (gray) has no link; its note sits level with it, right of the kernel section. The kernel source note runs along the bottom from the kernel section's edge. The right column holds the key, the Gaps neither side has section (gray nodes) and the Archon source note. The kernel–Archon band is kept at its 820 px rule number for its 11 labelled wires.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Kernel concepts mapped onto Archon",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 60,
+        "y": 112,
+        "width": 2300,
+        "height": 2472
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-kernel",
+      "type": "section",
+      "text": "Agent kernel today",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 192,
+        "width": 420,
+        "height": 2352
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "cpu"
+    },
+    {
+      "id": "sec-archon",
+      "type": "section",
+      "text": "Archon today",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1340,
+        "y": 280,
+        "width": 380,
+        "height": 2024
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "layers"
+    },
+    {
+      "id": "sub-exec",
+      "type": "section",
+      "text": "Definition and execution",
+      "color": "yellow",
+      "parentId": "sec-kernel",
+      "geometry": {
+        "x": 140,
+        "y": 280,
+        "width": 340,
+        "height": 880
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sub-records",
+      "type": "section",
+      "text": "Run records",
+      "color": "green",
+      "parentId": "sec-kernel",
+      "geometry": {
+        "x": 140,
+        "y": 1220,
+        "width": 340,
+        "height": 820
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sub-surf",
+      "type": "section",
+      "text": "Read and route surfaces",
+      "color": "violet",
+      "parentId": "sec-kernel",
+      "geometry": {
+        "x": 140,
+        "y": 2100,
+        "width": 340,
+        "height": 404
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-gaps",
+      "type": "section",
+      "text": "Gaps neither side has",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1920,
+        "y": 740,
+        "width": 372,
+        "height": 1004
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "search"
+    },
+    {
+      "id": "k-bundle",
+      "type": "icon",
+      "text": "Agent bundle · agent.json",
+      "color": "blue",
+      "parentId": "sub-exec",
+      "geometry": {
+        "x": 160,
+        "y": 328,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "package"
+    },
+    {
+      "id": "k-model",
+      "type": "icon",
+      "text": "Model nodes: call/decide/step/gate",
+      "color": "blue",
+      "parentId": "sub-exec",
+      "geometry": {
+        "x": 160,
+        "y": 544,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "model"
+    },
+    {
+      "id": "k-manager",
+      "type": "icon",
+      "text": "AgentManager subagents · manager.ts:18",
+      "color": "blue",
+      "parentId": "sub-exec",
+      "geometry": {
+        "x": 160,
+        "y": 764,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "k-spawn",
+      "type": "icon",
+      "text": "spawnAgent · spawn-agent.ts:242-367",
+      "color": "blue",
+      "parentId": "sub-exec",
+      "geometry": {
+        "x": 160,
+        "y": 984,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "k-runs",
+      "type": "icon",
+      "text": "agent_runs table",
+      "color": "blue",
+      "parentId": "sub-records",
+      "geometry": {
+        "x": 160,
+        "y": 1276,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "table"
+    },
+    {
+      "id": "k-trace",
+      "type": "icon",
+      "text": "trace_events with spans",
+      "color": "blue",
+      "parentId": "sub-records",
+      "geometry": {
+        "x": 160,
+        "y": 1476,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "k-state",
+      "type": "icon",
+      "text": "State sidecar · state.json",
+      "color": "blue",
+      "parentId": "sub-records",
+      "geometry": {
+        "x": 160,
+        "y": 1676,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "k-tree",
+      "type": "icon",
+      "text": "Container tree · uuidv5 ids",
+      "color": "blue",
+      "parentId": "sub-records",
+      "geometry": {
+        "x": 160,
+        "y": 1876,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "container"
+    },
+    {
+      "id": "k-readapi",
+      "type": "icon",
+      "text": "Read API · read-api.ts:90",
+      "color": "blue",
+      "parentId": "sub-surf",
+      "geometry": {
+        "x": 160,
+        "y": 2148,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "api"
+    },
+    {
+      "id": "k-gateway",
+      "type": "icon",
+      "text": "Token Gateway · unmatched",
+      "color": "gray",
+      "parentId": "sub-surf",
+      "geometry": {
+        "x": 160,
+        "y": 2348,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "network"
+    },
+    {
+      "id": "a-yaml",
+      "type": "icon",
+      "text": "Workflow YAML · .archon/workflows/*.yaml",
+      "color": "violet",
+      "parentId": "sec-archon",
+      "geometry": {
+        "x": 1380,
+        "y": 328,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "a-modes",
+      "type": "icon",
+      "text": "Node modes · dag-node.ts:164-191",
+      "color": "violet",
+      "parentId": "sec-archon",
+      "geometry": {
+        "x": 1380,
+        "y": 632,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "branch"
+    },
+    {
+      "id": "a-provider",
+      "type": "icon",
+      "text": "Provider contract · sendQuery",
+      "color": "violet",
+      "parentId": "sec-archon",
+      "geometry": {
+        "x": 1380,
+        "y": 984,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "plug"
+    },
+    {
+      "id": "a-triggers",
+      "type": "icon",
+      "text": "Trigger bindings",
+      "color": "violet",
+      "parentId": "sec-archon",
+      "geometry": {
+        "x": 1380,
+        "y": 1268,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "webhook"
+    },
+    {
+      "id": "a-events",
+      "type": "icon",
+      "text": "workflow_events and resume",
+      "color": "violet",
+      "parentId": "sec-archon",
+      "geometry": {
+        "x": 1380,
+        "y": 1568,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "event"
+    },
+    {
+      "id": "a-isolation",
+      "type": "icon",
+      "text": "Isolation · worktree or docker",
+      "color": "violet",
+      "parentId": "sec-archon",
+      "geometry": {
+        "x": 1380,
+        "y": 1868,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "lock"
+    },
+    {
+      "id": "a-console",
+      "type": "icon",
+      "text": "Console and CLI",
+      "color": "violet",
+      "parentId": "sec-archon",
+      "geometry": {
+        "x": 1380,
+        "y": 2148,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "terminal"
+    },
+    {
+      "id": "g-classify",
+      "type": "icon",
+      "text": "Typed-extraction or classify node",
+      "color": "gray",
+      "parentId": "sec-gaps",
+      "geometry": {
+        "x": 1956,
+        "y": 788,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "filter"
+    },
+    {
+      "id": "g-idem",
+      "type": "icon",
+      "text": "Idempotency key on effect nodes",
+      "color": "gray",
+      "parentId": "sec-gaps",
+      "geometry": {
+        "x": 1956,
+        "y": 988,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "key"
+    },
+    {
+      "id": "g-spans",
+      "type": "icon",
+      "text": "Span traces: Claude Code, Codex",
+      "color": "gray",
+      "parentId": "sec-gaps",
+      "geometry": {
+        "x": 1956,
+        "y": 1188,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "monitor"
+    },
+    {
+      "id": "g-remote",
+      "type": "icon",
+      "text": "Remote execution · declared, not built",
+      "color": "gray",
+      "parentId": "sec-gaps",
+      "geometry": {
+        "x": 1956,
+        "y": 1388,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "cloud"
+    },
+    {
+      "id": "g-gateway",
+      "type": "icon",
+      "text": "Token Gateway routing in code",
+      "color": "gray",
+      "parentId": "sec-gaps",
+      "geometry": {
+        "x": 1956,
+        "y": 1588,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "route"
+    },
+    {
+      "id": "note-key",
+      "type": "sticky",
+      "text": "**Key** · source: page \"Where the Kernel Fits in Archon\"\n- Blue node: kernel concept\n- Violet node: Archon concept\n- Gray node: no counterpart / gap\n- Green wire: same idea\n- Orange wire: partial\n- Blue wire: kernel has it, Archon does not\n- Violet wire: Archon has it, kernel does not",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1900,
+        "y": 300,
+        "width": 420,
+        "height": 260
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "note-kernel",
+      "type": "sticky",
+      "text": "**core/agent-kernel** (/Users/Ford/workspace/codebases/codecaine/core/agent-kernel) · Bundle: agent.json, prompt, context, tools, state · Subagents: background cap 4 · agent_runs: trigger, status, usage · Spans: span_id, parent_event_id · state.json per container and agent · parent_container_id links · Viewer: buildTraceSpans",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 560,
+        "y": 2340,
+        "width": 1760,
+        "height": 80
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "note-gateway",
+      "type": "sticky",
+      "text": "**Token Gateway** is not named in kernel code, and Archon has nothing like it, so it carries no link.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 560,
+        "y": 2460,
+        "width": 1140,
+        "height": 60
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "note-archon",
+      "type": "sticky",
+      "text": "**Archon**\nSource: /tmp/repo-study/archon\n- 11 node mode keys\n- Providers: claude, codex, pi\n- Triggers: webhook, schedule, admission\n- Events: random UUIDs, no span links\n- One worktree or docker per run\n- @archon/web, @archon/cli",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1900,
+        "y": 1940,
+        "width": 420,
+        "height": 220
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "w-bundle",
+      "from": {
+        "objectId": "k-bundle"
+      },
+      "to": {
+        "objectId": "a-yaml"
+      },
+      "label": "partial",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "w-model",
+      "from": {
+        "objectId": "k-model"
+      },
+      "to": {
+        "objectId": "a-modes"
+      },
+      "label": "partial",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange",
+      "waypoints": [
+        [
+          1100,
+          604
+        ],
+        [
+          1100,
+          692
+        ]
+      ]
+    },
+    {
+      "id": "w-manager",
+      "from": {
+        "objectId": "k-manager"
+      },
+      "to": {
+        "objectId": "a-modes"
+      },
+      "label": "partial",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange",
+      "waypoints": [
+        [
+          1100,
+          824
+        ],
+        [
+          1100,
+          692
+        ]
+      ]
+    },
+    {
+      "id": "w-spawn",
+      "from": {
+        "objectId": "k-spawn"
+      },
+      "to": {
+        "objectId": "a-provider"
+      },
+      "label": "same idea",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "w-runs-trig",
+      "from": {
+        "objectId": "k-runs"
+      },
+      "to": {
+        "objectId": "a-triggers"
+      },
+      "label": "Archon has it, kernel does not",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "w-runs-events",
+      "from": {
+        "objectId": "k-runs",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "a-events",
+        "anchor": "top"
+      },
+      "label": "same idea",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "waypoints": [
+        [
+          320,
+          1440
+        ],
+        [
+          1540,
+          1440
+        ]
+      ]
+    },
+    {
+      "id": "w-trace",
+      "from": {
+        "objectId": "k-trace"
+      },
+      "to": {
+        "objectId": "a-events"
+      },
+      "label": "kernel has it, Archon does not",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          1100,
+          1536
+        ],
+        [
+          1100,
+          1628
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.35
+      }
+    },
+    {
+      "id": "w-state",
+      "from": {
+        "objectId": "k-state"
+      },
+      "to": {
+        "objectId": "a-events"
+      },
+      "label": "kernel has it, Archon does not",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          1100,
+          1736
+        ],
+        [
+          1100,
+          1628
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.35
+      }
+    },
+    {
+      "id": "w-tree-events",
+      "from": {
+        "objectId": "k-tree",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "a-events",
+        "anchor": "bottom"
+      },
+      "label": "partial",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange",
+      "waypoints": [
+        [
+          320,
+          1840
+        ],
+        [
+          1540,
+          1840
+        ]
+      ]
+    },
+    {
+      "id": "w-tree-iso",
+      "from": {
+        "objectId": "k-tree"
+      },
+      "to": {
+        "objectId": "a-isolation"
+      },
+      "label": "Archon has it, kernel does not",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "w-read",
+      "from": {
+        "objectId": "k-readapi"
+      },
+      "to": {
+        "objectId": "a-console"
+      },
+      "label": "partial",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    }
+  ],
+  "annotations": []
+}
