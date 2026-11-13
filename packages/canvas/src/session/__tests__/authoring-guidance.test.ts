@@ -219,7 +219,8 @@ describe("shared Canvas authoring guidance", () => {
     const rules = topicText("rules");
     expect(rules).toContain("Wires that share a source or a target and one meaning run as one trunk and split at the end.");
     expect(rules).toContain("never split a trunk the board merged");
-    expect(rules).toContain("Wires with different meanings take different colors and stay apart.");
+    expect(rules).toContain("Wires with different meanings take different colors, so they run in separate lanes.");
+    expect(rules).toContain("The board still joins wires that end at one node: keep that junction.");
   });
 
   test("the workflow rethinks the board once after the first draft, with three written answers", () => {
@@ -228,7 +229,7 @@ describe("shared Canvas authoring guidance", () => {
     for (const part of [
       "Call `canvas_check`, and read its whole-board PNG and its LAYOUT block.",
       "Which 3 wires are longest, and which section move shortens them?",
-      "`look` at `page-frame`: MEASURES prints each gap between sections",
+      "`look` at `page-frame`: MEASURES prints the gaps between its sections",
       "Which gaps between sections are narrower than topic `rules` says for their wires?",
       "set each narrow gap to its number (`arrange` with `space` along a row, `move` with `by` for the rows below)",
       "Does another board shape (wider, taller, a grid, a hub with spokes) shorten the wires?",

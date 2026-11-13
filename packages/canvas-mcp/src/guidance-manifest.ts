@@ -117,7 +117,7 @@ const UNITS: readonly ManifestUnit[] = [
       "2. Build. Place everything, then connect",
       "`place_section` for every section with its title, icon and color",
       "`place_shape` for every node inside its section with its name and color",
-      "`arrange_section` for every section with its node rows, then `arrange` the sections with `space`",
+      "`arrange_section` for every section of nodes with its node rows, then `arrange` the sections with `space`",
       "Then `connect` every wire and call `tighten_wires` once",
     ],
     behavior: { tools: ["place_section", "place_shape", "arrange_section", "arrange", "connect", "tighten_wires"] },
