@@ -152,11 +152,14 @@ describe("climb empty blocks", () => {
     expect(blocks(row(200))).toEqual([]);
     // Round 5 cycle 2 took a gutter up to 120 px over its number out as filled.
     expect(plan(row(220)).faults.map((fault) => fault.problem)).toEqual([
-      `An empty block of 220 × 800 px sits in the board frame at x 800 to 1020, y 0 to 800: 12% of the frame holds no section, node or sticky. ${LIMIT} ${SPACE_FIXES}`,
+      "An empty block of 220 × 800 px sits in the board frame at x 800 to 1020, y 0 to 800: 12% of the frame holds no section, node or sticky."
+        + ` The gap between a and b in it is 220 px wide, and the gap rule asks 200 px there (0 wires cross it or run along its band). A gap at its number is no empty block. ${LIMIT} ${SPACE_FIXES}`,
     ]);
     // 3 wires across it give the band a number of 240 px: the same 220 px is their room.
     expect(blocks(row(220), [wire("w1", "p", "q", [[750, 100], [1070, 100]]), wire("w2", "p", "q", [[750, 200], [1070, 200]]), wire("w3", "p", "q", [[750, 300], [1070, 300]])])).toEqual([]);
-    // A band runs as far as sections lie on both sides of it: the corner of the frame past the shorter section is empty.
+    // A wider band is a block again, and the finding says the number the band may keep and the wires it counts.
+    expect(plan(row(300), [wire("w1", "p", "q", [[750, 100], [1150, 100]]), wire("w2", "p", "q", [[750, 200], [1150, 200]]), wire("w3", "p", "q", [[750, 300], [1150, 300]])]).faults[0]!.problem)
+      .toContain("The gap between a and b in it is 300 px wide, and the gap rule asks 240 px there (3 wires cross it or run along its band: w1, w2, w3). A gap at its number is no empty block.");
     const corner = board(box("page", "section", null, 0, 0, 1800, 1200), full("a", "page", 0, 0, 800, 1200), full("b", "page", 1000, 0, 800, 500));
     expect(blocks(corner)).toEqual(["1000 × 700 px empty at x 800 to 1800, y 500 to 1200, in the board frame (32% of it)"]);
   });
