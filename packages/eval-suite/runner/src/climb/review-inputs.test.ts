@@ -145,10 +145,6 @@ describe("climb review measures of space", () => {
     ];
     expect(spaceLines(reviewUnits(board).units, facts, board)).toEqual({
       shape: "1020 × 700 px, aspect ratio 1.46 : 1",
-      gaps: [
-        "a ↔ m · side by side · gap 60 px · gutter x 300 to 360, y 0 to 400 · 0 wires run along it · 0 label chips in it",
-        "m ↔ b · side by side · gap 60 px · gutter x 660 to 720, y 0 to 400 · 0 wires run along it · 0 label chips in it",
-      ],
       // Most wires first: a and b talk most, and m sits between them.
       pairs: [
         "a ↔ b · 2 wires · 1850 px of wire in total · NOT neighbours: m lies between them",
@@ -159,12 +155,6 @@ describe("climb review measures of space", () => {
       long: ["w5 · k (loose) → b1 (b) · 1000 px · 0 bends", "w2 · a2 (a) → b1 (b) · 950 px · 0 bends", "w1 · a1 (a) → b1 (b) · 900 px · 2 bends"],
       sinks: [`b1 "Store" in b · 4 wires in from a, m, loose · mean 763 px · longest 1000 px`],
     });
-  });
-
-  test("a gap line carries the count of its wires and no verdict: the band check of the runner measures a gap against its wires (space.ts)", () => {
-    const board = sections(["a", 0, 0, 300, 400], ["b", 360, 0, 300, 400]);
-    expect(spaceLines(reviewUnits(board).units, [along("w1", 320), along("w2", 340)], board).gaps)
-      .toEqual(["a ↔ b · side by side · gap 60 px · gutter x 300 to 360, y 0 to 400 · 2 wires run along it · 0 label chips in it"]);
   });
 });
 

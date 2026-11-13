@@ -158,7 +158,7 @@ describe("climb review prompts", () => {
   const wire = { scale: 0.4, wires: ["W1 w · a → b · sec → loose"], wireMeasures: [], computed: [through], totals: "LAYOUT", notes: none };
   const space = {
     scale: 0.4, shape: "2400 × 1200 px, aspect ratio 2.00 : 1", sections: ["sec · in board · x 100"],
-    gaps: ["sec ↔ far · side by side · gap 60 px · gutter x 900 to 960, y 200 to 600 · 3 wires run along it · 0 label chips in it"],
+    bands: ["sec ↔ far · side by side · gap 260 px · band x 900 to 1160, y 200 to 600 · 3 wires run along it (w, x, y) · 0 label chips in it · needs 240 px, legal to 360 px · inside its legal width"],
     pairs: ["sec ↔ far · 4 wires · 3200 px of wire in total · NOT neighbours: mid lies between them"],
     long: ["w · a (sec) → z (far) · 1200 px · 2 bends"], sinks: [`z "Store" in far · 3 wires in from sec · mean 900 px · longest 1200 px`],
     measured: ["An empty block of 900 × 500 px sits in the board frame at x 1500 to 2400, y 700 to 1200: 16% of the frame holds no section, node or sticky"], totals: "LAYOUT", notes: none,
@@ -293,19 +293,21 @@ describe("climb review prompts", () => {
     expect(prompt).not.toMatch(/Never report an empty corner|ragged section edges/);
     expect(prompt).toContain("a blue box for each section, a yellow box for each sticky");
     expect(prompt).toContain(
-      "The runner measures the empty blocks, how full each section is, each gap and each band of gaps against the gap rule, each wire through a section that holds neither of its ends,"
+      "The runner measures the empty blocks, how full each section is, each band against the band rule, each wire through a section that holds neither of its ends,"
       + " and each wire over 1500 px between sections that are not neighbours. Use their numbers in your findings, and report what the measures miss.");
+    // Round 5 cycle 4, board 10: this reviewer reported a band of 220 px as empty, and the finding came back until it was stuck.
+    expect(prompt).toContain("A band inside its legal width is the room of its wires, whatever its area: never report it as empty, as a hole or as too wide, and never count it into an empty area.");
+    expect(prompt).toContain("Bands between neighbour sections, each against the band rule:\nsec ↔ far · side by side · gap 260 px · band x 900 to 1160, y 200 to 600 · 3 wires run along it (w, x, y) · 0 label chips in it · needs 240 px, legal to 360 px · inside its legal width");
     expect(prompt).toContain(
       "The runner sends the drawer each of these as its own finding. Do not report one of them again:\n"
       + "An empty block of 900 × 500 px sits in the board frame at x 1500 to 2400, y 700 to 1200: 16% of the frame holds no section, node or sticky");
     expect(spacePrompt({ ...space, measured: [] })).toContain("Do not report one of them again:\n(none)");
     expect(prompt).toContain("most wires first:\nsec ↔ far · 4 wires · 3200 px of wire in total · NOT neighbours: mid lies between them");
-    expect(prompt).toContain("Gaps between neighbour sections:\nsec ↔ far · side by side · gap 60 px");
     expect(prompt).toContain("Wires longer than 800 px (id · from (its section) → to (its section) · length · bends):\nw · a (sec) → z (far) · 1200 px · 2 bends");
     expect(prompt).toContain(`(sinks and stores):\nz "Store" in far · 3 wires in from sec`);
     expect(prompt).toContain("Board:\n2400 × 1200 px, aspect ratio 2.00 : 1");
     // The adjacency block comes ahead of the gaps and the long wires.
-    expect(prompt.indexOf("Wires between sections (")).toBeLessThan(prompt.indexOf("Gaps between neighbour sections:"));
+    expect(prompt.indexOf("Wires between sections (")).toBeLessThan(prompt.indexOf("Bands between neighbour sections"));
   });
 
   test("the choices reviewer reads the brief beside the object list, and with no brief reports nothing as missing", () => {

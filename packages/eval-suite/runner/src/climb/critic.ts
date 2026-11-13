@@ -37,7 +37,7 @@ import {
   untagWires, wireSheetLines,
   type Board, type Mark, type ReviewUnit, type ReviewerKind, type WireRow,
 } from "./review-inputs.ts";
-import { FAR_WIRE_PX, gapRule, planOf, type ComputedFault, type LayoutFacts, type Plan } from "./space.ts";
+import { FAR_WIRE_PX, gapLine, gapRule, planOf, type ComputedFault, type LayoutFacts, type Plan } from "./space.ts";
 import { boardTotals, loadWireModules, sectionHeaders, wireFacts, type WireFact, type WireModules } from "./wires.ts";
 
 export const CRITIC_MODEL = "gpt-6.1-sol";
@@ -419,9 +419,9 @@ export function wirePrompt(text: WireText): string {
   ].join("\n");
 }
 
-/** What the space prompt prints (spaceLines). `measured` is what fails the runner's own measures of the plan (space.ts planOf). */
+/** What the space prompt prints (spaceLines). `bands` is each band against the band rule (space.ts gapLine), and `measured` is what fails the runner's own measures of the plan (space.ts planOf). */
 export interface SpaceText {
-  scale: number; shape: string; sections: string[]; gaps: string[]; pairs: string[]; long: string[]; sinks: string[]; measured: string[]; totals: string; notes: UnitNotes;
+  scale: number; shape: string; sections: string[]; bands: string[]; pairs: string[]; long: string[]; sinks: string[]; measured: string[]; totals: string; notes: UnitNotes;
 }
 
 export function spacePrompt(text: SpaceText): string {
@@ -442,15 +442,16 @@ export function spacePrompt(text: SpaceText): string {
     "- a board shape (aspect ratio) that forces long wires;",
     "- an empty area the board does not need: a hole between sections, or a corner that no section fills;",
     "- a flat section whose nodes form clear sub-groups with no subsection, or a subsection that adds nothing.",
-    "The runner measures the empty blocks, how full each section is, each gap and each band of gaps against the gap rule, each wire through a section that holds neither of its ends,"
+    "The runner measures the empty blocks, how full each section is, each band against the band rule, each wire through a section that holds neither of its ends,"
     + ` and each wire over ${FAR_WIRE_PX} px between sections that are not neighbours. Use their numbers in your findings, and report what the measures miss.`,
+    "A band is the gap between 2 neighbour sections. A band inside its legal width is the room of its wires, whatever its area: never report it as empty, as a hole or as too wide, and never count it into an empty area.",
     "",
     ...answerRules(),
     ...notesBlocks(text.notes),
     ...block("Board:", [text.shape]),
     ...block("Sections (id · parent · x · y of the top-left corner · width · height · items · subsections · title):", text.sections),
     ...block("Wires between sections (the 2 sections · wires · their total length · whether the 2 are neighbours), most wires first:", text.pairs),
-    ...block("Gaps between neighbour sections:", text.gaps),
+    ...block("Bands between neighbour sections, each against the band rule:", text.bands),
     ...block(`${SENT_BY_RUNNER}:`, text.measured),
     ...block(`Wires longer than ${LONG_WIRE_PX} px (id · from (its section) → to (its section) · length · bends):`, text.long),
     ...block("Nodes that 3 or more wires from other sections end on (sinks and stores):", text.sinks),
@@ -991,7 +992,7 @@ export async function critiqueBoard(options: {
       const stickies = board.objects.filter((object) => object.type === "sticky" && object.geometry);
       const images = [save("1-board.png", overview.png), save("2-map.png", png(sectionMapSvg(units, facts, camera, overview.size.width, stickies)))];
       const prompt = spacePrompt({
-        scale, ...spaceLines(units, facts, board), sections: sectionLines(units), measured: plan.faults.map((fault) => fault.problem), totals, notes: notes(new Set(), []),
+        scale, ...spaceLines(units, facts, board), sections: sectionLines(units), bands: plan.gaps.map((gap) => gapLine(gap, gapRule(canvas.wires))), measured: plan.faults.map((fault) => fault.problem), totals, notes: notes(new Set(), []),
       });
       return { unit, dir, images, prompt, wires: facts.length };
     }

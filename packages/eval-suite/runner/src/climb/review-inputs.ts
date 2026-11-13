@@ -764,7 +764,7 @@ export function sectionGaps(units: ReviewUnit[], facts: WireFact[]): SectionGap[
 }
 
 /** The text blocks of the space reviewer. Adjacency comes first: which sections talk, and how far apart they sit. */
-export function spaceLines(units: ReviewUnit[], facts: WireFact[], board: Board): { shape: string; gaps: string[]; pairs: string[]; long: string[]; sinks: string[] } {
+export function spaceLines(units: ReviewUnit[], facts: WireFact[], board: Board): { shape: string; pairs: string[]; long: string[]; sinks: string[] } {
   const owner = ownerUnits(units);
   const byUnit = new Map(units.map((unit) => [unit.id, unit]));
   const byId = new Map(board.objects.map((object) => [object.id, object]));
@@ -803,10 +803,6 @@ export function spaceLines(units: ReviewUnit[], facts: WireFact[], board: Board)
   const named = (id: string) => `${id} (${owner.get(id) ?? "board"})`;
   return {
     shape: `${Math.round(whole.width)} × ${Math.round(whole.height)} px, aspect ratio ${(whole.width / whole.height).toFixed(2)} : 1`,
-    gaps: gaps.map((gap) => [
-      `${gap.a} ↔ ${gap.b}`, gap.side, `gap ${gap.gap} px`, `gutter ${span(gap.gutter)}`,
-      `${gap.wires.length} ${gap.wires.length === 1 ? "wire runs" : "wires run"} along it`, `${gap.chips} ${gap.chips === 1 ? "label chip" : "label chips"} in it`,
-    ].join(" · ")),
     pairs: [...pairs.values()].sort((a, b) => b.wires - a.wires || b.length - a.length)
       .map((pair) => `${pair.a} ↔ ${pair.b} · ${pair.wires} ${pair.wires === 1 ? "wire" : "wires"} · ${pair.length} px of wire in total · ${where(pair)}`),
     long: facts.filter((fact) => fact.length > LONG_WIRE_PX).sort((a, b) => b.length - a.length)
