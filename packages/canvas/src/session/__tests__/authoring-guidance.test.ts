@@ -216,7 +216,7 @@ describe("shared Canvas authoring guidance", () => {
 
   test("a wire starts on a node, and ends on a frame only for a subsection of 2 or more nodes that all receive it", () => {
     const rules = topicText("rules");
-    expect(rules).toContain("A wire always starts on a node.");
+    expect(rules).toContain("A wire always starts on a node: where every node of a subsection sends, start one wire at each.");
     expect(rules).toContain("It ends on a frame only when the frame is a subsection of 2 or more nodes, drawn round exactly the group that receives it: `connect` that frame once.");
     expect(rules).toContain("Any other wire ends on a node: a section with one node wires to the node.");
     const design = topicText("diagram_design");
@@ -239,8 +239,8 @@ describe("shared Canvas authoring guidance", () => {
     const rules = topicText("rules");
     expect(rules).toContain("Sections stacked in a column share one left edge and one width, from rows of nodes that match, not from a stretch.");
     expect(rules).toContain("Sections side by side keep their rows of nodes level.");
-    expect(rules).toContain(`A hub over a row of children keeps one band of ${bandNeed(1)} under it, where the wires to the children run as one bus.`);
-    expect(rules).toContain("3 or more wires into one node enter one side as one bus, the side that faces their sources: never turn a wire back to reach another side.");
+    expect(rules).toContain(`A hub over a row of children keeps one band at its need under it, where the wires to the children run as one bus.`);
+    expect(rules).toContain("3 or more wires that reach one node from one direction enter the side that faces them as one bus: never turn a wire back to reach another side.");
   });
 
   test("the board reads one way from the top or the left, and a row of targets follows its sources", () => {
@@ -258,7 +258,7 @@ describe("shared Canvas authoring guidance", () => {
     expect(workflow).toContain("Size each band between sections from the wires that run along it: topic `rules` has the numbers.");
     const design = topicText("diagram_design");
     expect(design).toContain("the color key, and the wire table: every wire by pair of sections, then the lanes in each band between neighbour sections.");
-    expect(design).toContain("A band needs 200, and more only for a long label or wires that run along it: topic `rules` has the numbers.");
+    expect(design).toContain("A band needs 200 or more: topic `rules` has the numbers.");
   });
 
   test("a fix never stretches a section, merges nodes, deletes a subsection or grows an empty block", () => {
@@ -343,14 +343,14 @@ describe("shared Canvas authoring guidance", () => {
     const rules = topicText("rules");
     expect(rules).toContain("Wires that share a source or a target and one meaning run as one trunk and split at the end.");
     expect(rules).toContain("Give them one color and one dash, and never split a trunk the board merged.");
-    expect(rules).toContain("Wires that differ in color or dash never share a line or an arrowhead.");
-    expect(rules).toContain("Where two meanings meet one node, give each its own side of the node, nearest its other ends: set `anchor` on that end in `connect`, or with `change_connection`");
+    expect(rules).toContain("Wires that differ in color or dash never share a line or an arrowhead, except in a bus.");
+    expect(rules).toContain("Where two meanings meet one node from two directions, give each the side that faces its other end: set `anchor` on that end in `connect`, or with `change_connection`");
     expect(rules).toContain("Two wires that cross on the way in trade sides, so choose sides that keep them apart.");
     expect(rules).toContain("Never pin a wire end with `position` to place or spread arrowheads. The board centers and merges them. `anchor` only picks the side.");
     // Round 5 cycle 1: this line put two meanings on one line into a node.
     expect(rules).not.toContain("keep that junction");
     // The build step names the call at the point the drawer connects.
-    expect(topicText("workflow")).toContain("Where wires of two meanings end at one node, set `anchor` in `connect`: each meaning gets its own side.");
+    expect(topicText("workflow")).toContain("Where wires of two meanings end at one node from two directions, set `anchor` in `connect`: each meaning gets its own side.");
   });
 
   test("`anchor` gives each meaning its own side of a node, and each side still merges its wires", () => {
@@ -394,7 +394,6 @@ describe("shared Canvas authoring guidance", () => {
       `Which section move (swap two neighbours, change a row) removes each wire over ${LONG_WIRE}, each wire through a section that holds neither end and each crossing between sections?`,
       `Which band is under its need in topic \`rules\`, over ${SECTION_GAP_SLACK} more, or needs over ${BAND_NEED_MAX}?`,
       "Does another board shape (wider, taller, a grid, a hub with spokes) fit the flow better and close an empty block?",
-      "Never narrow a band below its need.",
       "whole sections with `arrange` or `move`",
       "then each row's gap again (`arrange` with `space` along a row, `move` with `by` for the rows below), then `tighten_wires`",
       "Moving sections after the first draft is normal.",
