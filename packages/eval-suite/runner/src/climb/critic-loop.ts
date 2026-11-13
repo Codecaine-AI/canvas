@@ -57,8 +57,8 @@ import { renderHighlights, type HighlightImage } from "./highlights.ts";
 import { parseFlags } from "./paths.ts";
 import { renderBoardPng } from "./render.ts";
 import { rethinkAnswers, rethinkMessage, rethinkReask, rethinkRecord, unanswered as rethinkUnanswered, type RethinkRecord } from "./rethink.ts";
-import { REVIEWER_KINDS, SPACE_UNIT, short, type Board, type Mark, type ReviewerKind } from "./review-inputs.ts";
-import { gapRule, planOf, type ComputedFault } from "./space.ts";
+import { REVIEWER_KINDS, SPACE_UNIT, markBox, short, type Board, type Mark, type ReviewerKind } from "./review-inputs.ts";
+import { gapRule, planOf, sameBlock, type ComputedFault } from "./space.ts";
 import { wireFacts } from "./wires.ts";
 
 export const VERDICTS = ["fixed", "disagree", "declined"] as const;
@@ -256,6 +256,9 @@ function declinedFaults(ledger: LoopFinding[]): Map<string, LoopFinding[]> {
   return faults;
 }
 
+/** The place of an empty block an earlier round sent: the box the runner marked. */
+const blockOf = (finding: LoopFinding) => markBox(finding.marks[0]!.marks[0]!);
+
 /**
  * The reversal guard. A layout finding on the items of a layout finding the
  * drawer fixed in an earlier round may ask to undo that fix: round 5 moved a
@@ -263,12 +266,10 @@ function declinedFaults(ledger: LoopFinding[]): Map<string, LoopFinding[]> {
  * is sent with that fix in one line, so the drawer sees both. "The same
  * items": one finding names every id of the other. Null when no fix matches.
  */
-function historyOf(ledger: LoopFinding[], fresh: Pick<LoopFinding, "source" | "kind" | "ids" | "state">): string | null {
+function historyOf(ledger: LoopFinding[], fresh: Pick<LoopFinding, "kind" | "ids">): string | null {
   if (!LAYOUT_KINDS.has(fresh.kind) || fresh.ids.length === 0) return null;
   const within = (inner: string[], outer: string[]) => inner.every((id) => outer.includes(id));
   const cause = ledger.findLast((old) => old.source !== "check" && LAYOUT_KINDS.has(old.kind) && old.answer?.verdict === "fixed" && old.ids.length > 0
-    // A computed finding the drawer called fixed that is still on the board is the same finding, not a reversal.
-    && !(fresh.source === "computed" && old.source === "computed" && old.state === fresh.state)
     && (within(old.ids, fresh.ids) || within(fresh.ids, old.ids)));
   if (!cause) return null;
   return `in round ${cause.answer!.round} you fixed ${cause.id} on ${cause.ids.join(", ")}: ${JSON.stringify(short(cause.problem, 160))}.`
@@ -332,18 +333,25 @@ export function roundFindings(
     const line = historyOf(ledger, fresh);
     return line ? { history: line } : {};
   };
+  /** The ids of this round's empty blocks: 2 blocks of one frame or section never share one. */
+  const placed = new Set<string>();
   for (const fault of review.computed ?? []) {
     const fresh: Omit<LoopFinding, "id"> = {
       source: "computed", severity: "should", kind: "space",
       ids: fault.ids, labels: [], problem: fault.problem, suggestion: "", regions: [SPACE_UNIT], marks: [{ unit: SPACE_UNIT, marks: fault.marks }], state: fault.key, answer: null,
     };
-    const before = ledger.filter((finding) => finding.source === "computed" && finding.state === fault.key);
+    const measured = ledger.filter((finding) => finding.source === "computed" && finding.state === fault.key);
+    // An empty block is the fault of the earlier block at its place, not of the block that had its rank.
+    const same = fault.block && measured.findLast((finding) => !placed.has(finding.id) && sameBlock(blockOf(finding), fault.block!));
+    const before = fault.block ? measured.filter((finding) => finding.id === same?.id) : measured;
     const last = before.at(-1);
+    if (last) placed.add(last.id);
     score += SCORE_WEIGHT[fresh.severity];
     if (last && before.length >= MEASURED_SENDS) {
       const answer = last.answer && { verdict: last.answer.verdict, reason: last.answer.reason };
       withheld.push({ id: last.id, source: "computed", severity: fresh.severity, kind: fresh.kind, ids: fresh.ids, problem: fresh.problem, why: "stuck", answer });
-    } else findings.push({ id: last?.id ?? `F${next++}`, ...fresh, ...history(fresh) });
+    // A finding that keeps its id was on the board before the fix of any other: it is no reversal.
+    } else findings.push(last ? { id: last.id, ...fresh } : { id: `F${next++}`, ...fresh, ...history(fresh) });
   }
   for (const finding of review.findings) {
     const fresh: Omit<LoopFinding, "id"> = {
@@ -563,7 +571,7 @@ export async function reviewLoop(options: {
         rethink = await options.rethink();
       }
       for (let round = 1; ; round += 1) {
-        const carried = unansweredOf(rounds);
+        const asked = unansweredOf(rounds);
         const review = await options.review(round, declinedFindings(ledger()));
         const record: RoundRecord = {
           round, check: round >= options.budget || broken !== null, ...roundFindings(ledger(), review, round),
@@ -571,6 +579,8 @@ export async function reviewLoop(options: {
           revise: null,
         };
         const { findings } = record;
+        // A stuck finding is not sent again, so the loop does not wait for its answer.
+        const carried = asked.filter((finding) => !record.withheld.some((fault) => fault.why === "stuck" && fault.id === finding.id));
         rounds.push(record);
         unreviewed = false;
         if (broken !== null) return done(broken.stop, broken.error);

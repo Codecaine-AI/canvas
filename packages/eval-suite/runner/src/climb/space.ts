@@ -10,9 +10,9 @@
  * faulted an empty block on every weak board, and no reviewer was allowed to
  * report one.
  *
- * A gutter within its rule number is not empty: it is the room of its wires.
- * So a board that spreads its sections to the rule gets no block for it, and
- * a gap too wide shows up once, as the block that covers it.
+ * A gutter no wider than its rule number allows is not empty: it is the room
+ * of its wires. So a board that spreads its sections to the rule gets no
+ * block for it, and a gap too wide shows up once, as the block that covers it.
  */
 import type { WorldRect } from "./render.ts";
 import { reviewUnits, runsOf, runsThrough, sectionGaps, segmentsOf, touches, type Board, type BoardObject, type Mark, type ReviewUnit, type SectionGap } from "./review-inputs.ts";
@@ -30,9 +30,13 @@ const MAX_BLOCKS = 2;
 export const MAX_BOARD_BLOCKS = 4;
 
 const area = (rect: WorldRect) => rect.width * rect.height;
+/** The area 2 rectangles share. */
+const shared = (a: WorldRect, b: WorldRect) =>
+  Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
 /** Whether `rect` holds half of `other` or more. */
-const covers = (rect: WorldRect, other: WorldRect) =>
-  Math.max(0, Math.min(rect.x + rect.width, other.x + other.width) - Math.max(rect.x, other.x)) * Math.max(0, Math.min(rect.y + rect.height, other.y + other.height) - Math.max(rect.y, other.y)) >= area(other) / 2;
+const covers = (rect: WorldRect, other: WorldRect) => shared(rect, other) >= area(other) / 2;
+/** Whether 2 empty blocks of different rounds are one fault: one holds half of the other. */
+export const sameBlock = (a: WorldRect, b: WorldRect) => shared(a, b) >= Math.min(area(a), area(b)) / 2;
 const SECTION = "section";
 
 /** The largest rectangle of `region` that touches none of `filled` and that `big` accepts, or null. */
@@ -86,8 +90,8 @@ export interface EmptyBlock {
  */
 export function emptyBlocks(board: Board, pageFrame: BoardObject | null, gaps: GapMeasure[], strip: number = FRAME_BLOCK.strip): EmptyBlock[] {
   const placed = board.objects.filter((object) => object.geometry);
-  // A gutter within its number is the room of its wires, not an empty block.
-  const gutters = (holder: string | null) => gaps.filter((gap) => gap.parent === holder && gap.fault !== "over").map((gap) => gap.gutter);
+  // A gutter no wider than the rule allows is the room of its wires, not an empty block. A wider one is empty, whatever sits in it.
+  const gutters = (holder: string | null) => gaps.filter((gap) => gap.parent === holder && gap.gap <= gap.lineNeed + GAP_SLACK_PX).map((gap) => gap.gutter);
   const top = placed.filter((object) => object !== pageFrame && (!object.parentId || object.parentId === pageFrame?.id));
   if (top.length === 0) return [];
   const xs = top.flatMap((object) => [object.geometry.x, object.geometry.x + object.geometry.width]);
@@ -128,7 +132,9 @@ export interface GapMeasure extends SectionGap {
   need: number;
   /** The widest need of the gaps in its row (side by side) or column (stacked): one `arrange` call sets one gap for them all. */
   lineNeed: number;
-  /** under: a wire is in it and it is narrower than `need`. over: nothing sits in it and it is wider than `lineNeed` + GAP_SLACK_PX. */
+  /** Whether the gap rule sets this gap: the pair sits in the board frame. `arrange_section` sets a gap inside a section. */
+  ruled: boolean;
+  /** under: it is narrower than `need`. over: nothing sits in it and it is wider than `lineNeed` + GAP_SLACK_PX. Null for a gap the rule does not set. */
   fault: "under" | "over" | null;
 }
 
@@ -136,9 +142,11 @@ export interface GapMeasure extends SectionGap {
  * Each gap between neighbour sections against the gap rule: the base, plus
  * the step for each wire after the first, counting each wire that crosses the
  * gutter or runs along it. A side-by-side gap that a labelled wire crosses
- * starts from the length its label leg needs.
+ * starts from the length its label leg needs. The rule sets the gaps of the
+ * sections in the board frame (`pageFrame`, or the root): topic `rules` leaves
+ * a gap inside a section to `arrange_section`.
  */
-export function gapMeasures(board: Board, units: ReviewUnit[], facts: WireFact[], rule: GapRule): GapMeasure[] {
+export function gapMeasures(board: Board, units: ReviewUnit[], facts: WireFact[], rule: GapRule, pageFrame: string | null): GapMeasure[] {
   const parentOf = new Map(board.objects.map((object) => [object.id, object.parentId ?? null]));
   // The rule is for sections that share a parent: a subsection and a section outside its parent are not a row.
   const measured = sectionGaps(units, facts).filter((gap) => parentOf.get(gap.a) === parentOf.get(gap.b)).map((gap) => {
@@ -160,14 +168,17 @@ export function gapMeasures(board: Board, units: ReviewUnit[], facts: WireFact[]
       : other.gutter.x < gap.gutter.x + gap.gutter.width && other.gutter.x + other.gutter.width > gap.gutter.x));
     const lineNeed = Math.max(...line.map((other) => other.need));
     const { clear, ...rest } = gap;
-    return { ...rest, lineNeed, fault: gap.counted.length > 0 && gap.gap < gap.need ? "under" : clear && gap.gap > lineNeed + GAP_SLACK_PX ? "over" : null };
+    const ruled = gap.parent === pageFrame;
+    return { ...rest, lineNeed, ruled, fault: !ruled ? null : gap.gap < gap.need ? "under" : clear && gap.gap > lineNeed + GAP_SLACK_PX ? "over" : null };
   });
 }
 
 /** A measure of the board that fails: a finding the loop holds until the measure passes. */
 export interface ComputedFault {
-  /** What makes it the same fault in a later round: the measure and the items, never the numbers. */
+  /** What makes it the same fault in a later round: the measure and the items, never the numbers. 2 empty blocks of one frame or section share it: `block` tells them apart. */
   key: string;
+  /** An empty block's place. A later round's block is the same fault when one of the 2 holds half of the other (critic-loop.ts). */
+  block?: WorldRect;
   /** The sections it names. */
   ids: string[];
   problem: string;
@@ -190,30 +201,26 @@ export function gapLine(gap: GapMeasure): string {
   return [
     `${gap.a} ↔ ${gap.b}`, gap.side, `gap ${gap.gap} px`, `gutter ${span(gap.gutter)}`,
     `${gap.counted.length} ${gap.counted.length === 1 ? "wire crosses it or runs" : "wires cross it or run"} along it`, `${gap.chips} ${gap.chips === 1 ? "label chip" : "label chips"} in it`,
-    `rule number ${gap.need} px${gap.lineNeed > gap.need ? ` (its ${gap.side === "side by side" ? "row" : "column"}'s widest pair: ${gap.lineNeed} px)` : ""}`, verdict,
+    ...(gap.ruled
+      ? [`rule number ${gap.need} px${gap.lineNeed > gap.need ? ` (its ${gap.side === "side by side" ? "row" : "column"}'s widest pair: ${gap.lineNeed} px)` : ""}`, verdict]
+      : [`inside section ${gap.parent}: \`arrange_section\` sets it, not the gap rule`]),
   ].join(" · ");
 }
 
 /** The measures of a board that fail, as faults: the empty blocks, then the gaps off their rule number. */
 export function computedFaults(blocks: EmptyBlock[], gaps: GapMeasure[]): ComputedFault[] {
-  // 2 blocks of one frame or section are 2 faults: the larger is the first.
-  const nth = new Map<string, number>();
   return [
-    ...blocks.map((block): ComputedFault => {
-      const holder = block.in ?? "board";
-      const index = nth.get(holder) ?? 0;
-      nth.set(holder, index + 1);
-      return {
-        key: JSON.stringify(["empty-block", holder, index]),
-        ids: block.in ? [block.in] : [],
-        problem: block.frame
-          ? `An empty block of ${size(block.rect)} sits in the board frame at ${span(block.rect)}: ${percent(block.share)} of the frame holds no section, node or sticky.`
-            + ` The limit is ${FRAME_BLOCK.width} × ${FRAME_BLOCK.height} px, or ${percent(FRAME_BLOCK.share)} of the frame`
-          : `An empty block of ${size(block.rect)} sits inside section ${block.in} at ${span(block.rect)}: ${percent(block.share)} of the section holds nothing.`
-            + ` The limit inside a section is ${SECTION_BLOCK.long} × ${SECTION_BLOCK.short} px`,
-        marks: [{ box: block.rect }],
-      };
-    }),
+    ...blocks.map((block): ComputedFault => ({
+      key: JSON.stringify(["empty-block", block.in ?? "board"]),
+      block: block.rect,
+      ids: block.in ? [block.in] : [],
+      problem: block.frame
+        ? `An empty block of ${size(block.rect)} sits in the board frame at ${span(block.rect)}: ${percent(block.share)} of the frame holds no section, node or sticky.`
+          + ` The limit is ${FRAME_BLOCK.width} × ${FRAME_BLOCK.height} px, or ${percent(FRAME_BLOCK.share)} of the frame`
+        : `An empty block of ${size(block.rect)} sits inside section ${block.in} at ${span(block.rect)}: ${percent(block.share)} of the section holds nothing.`
+          + ` The limit inside a section is ${SECTION_BLOCK.long} × ${SECTION_BLOCK.short} px`,
+      marks: [{ box: block.rect }],
+    })),
     // An empty block that covers a gap too wide says it: the gap is not a second fault.
     ...gaps.filter((gap) => gap.fault === "under" || (gap.fault === "over" && !blocks.some((block) => covers(block.rect, gap.gutter)))).map((gap): ComputedFault => {
       const wires = `${gap.counted.length} ${gap.counted.length === 1 ? "wire crosses it or runs" : "wires cross it or run"} along it`;
@@ -235,7 +242,7 @@ export interface Plan { pageFrame: BoardObject | null; units: ReviewUnit[]; gaps
 
 export function planOf(board: Board, facts: WireFact[], rule: GapRule): Plan {
   const { pageFrame, units } = reviewUnits(board);
-  const gaps = gapMeasures(board, units, facts, rule);
+  const gaps = gapMeasures(board, units, facts, rule, pageFrame?.id ?? null);
   const blocks = emptyBlocks(board, pageFrame, gaps);
   return { pageFrame, units, gaps, blocks, faults: computedFaults(blocks, gaps) };
 }

@@ -19,6 +19,11 @@ const NARROW = "The gap between sec_a and sec_b (side by side) is 200 px wide an
 const measure = (overrides: Partial<ComputedFault> = {}): ComputedFault => ({
   key: `["gap","under",["sec_a","sec_b"]]`, ids: ["sec_a", "sec_b"], problem: NARROW, marks: [{ box: { x: 300, y: 0, width: 200, height: 400 } }], ...overrides,
 });
+/** An empty block of the board frame (space.ts): 2 of them share the key, and the place tells them apart. */
+const hole = (x: number, y: number, width: number, height: number): ComputedFault => ({
+  key: `["empty-block","page"]`, ids: ["page"], block: { x, y, width, height }, marks: [{ box: { x, y, width, height } }],
+  problem: `An empty block of ${width} × ${height} px sits in the board frame`,
+});
 const review = (overrides: Partial<Review> = {}): Review => ({
   reviewMs: 40, renderMs: 4, effort: "medium", reviewers: { section: 1, gap: 0, wire: 1, space: 1, choices: 1, loose: 0 }, regions: 4, unparsed: 0, lints: [], findings: [], computed: [], ...overrides,
 });
@@ -248,9 +253,39 @@ describe("critic loop computed findings", () => {
     }]);
     expect(fourth.score).toBe(1);
     // Another measure that fails in round 4 is new: it is sent.
-    const block = measure({ key: `["empty-block","page",0]`, ids: ["page"], problem: "An empty block of 900 × 600 px sits in the board frame" });
+    const block = hole(0, 0, 900, 600);
     expect(roundFindings(ledger, only([measure(), block]), 4)).toMatchObject({ findings: [{ id: "F2", state: block.key }], withheld: [{ id: "F1" }], score: 2 });
     expect(roundFindings(ledger, only([]), 4)).toEqual({ findings: [], withheld: [], score: 0, grace: 0 });
+  });
+
+  test("an empty block is the fault of the earlier block at its place, not of the block that had its rank", () => {
+    const [large, small] = [hole(0, 0, 1000, 600), hole(2000, 0, 500, 500)];
+    let ledger = answeredRound([], only([large, small]), "F1 fixed\nF2 declined: the legend goes there");
+    // The drawer filled the large block. The small one is now the first of the frame, 50 px narrower: it is still F2.
+    const left = hole(2050, 0, 450, 500);
+    expect(roundFindings(ledger, only([left]), 2).findings.map((finding) => [finding.id, finding.problem, finding.history])).toEqual([["F2", left.problem, undefined]]);
+    ledger = answeredRound(ledger, only([left]), "F2 declined: the legend goes there", 2);
+    ledger = answeredRound(ledger, only([left]), "F2 declined: the legend goes there", 3);
+    // A new block, larger than the one that is stuck, is a new finding: the 3 sends of F2 are not its own. It may come from the fix of F1.
+    const fresh = hole(0, 1000, 800, 800);
+    const fourth = roundFindings(ledger, only([fresh, left]), 4);
+    expect(fourth.findings.map((finding) => [finding.id, finding.problem])).toEqual([["F3", fresh.problem]]);
+    expect(fourth.findings[0]!.history).toStartWith("in round 1 you fixed F1 on page:");
+    expect(fourth.withheld.map((fault) => [fault.id, fault.why, fault.answer])).toEqual([["F2", "stuck", { verdict: "declined", reason: "the legend goes there" }]]);
+    // A node cuts one block in 2: the larger part keeps the id, and the other part is a new finding.
+    const cut = roundFindings(answeredRound([], only([large]), "F1 fixed"), only([hole(0, 0, 600, 600), hole(700, 0, 300, 600)]), 2);
+    expect(cut.findings.map((finding) => finding.id)).toEqual(["F1", "F2"]);
+  });
+
+  test("a stuck finding the drawer never answered is not asked for again: the loop stops stuck", async () => {
+    const asked: string[][] = [];
+    const record = await reviewLoop({
+      budget: 7,
+      review: async () => review({ computed: [measure()] }),
+      revise: async (_round, findings, notes) => { asked.push([...findings, ...notes.unanswered].map((finding) => finding.id)); return ran(""); },
+    });
+    expect([record.stop, record.rounds.length, asked]).toEqual(["stuck", 4, [["F1"], ["F1"], ["F1"]]]);
+    expect(record.unanswered).toEqual(["F1"]);
   });
 
   test("a measure that never passes goes to the drawer in 3 revise passes, then the loop stops stuck and its record lists the finding", async () => {
@@ -284,7 +319,7 @@ describe("critic loop computed findings", () => {
       revise: async (_round, findings) => ran(answered(findings, "fixed")),
       restore: (round) => restored.push(round),
     });
-    const block = measure({ key: `["empty-block","page",0]`, ids: ["page"], problem: "An empty block of 900 × 600 px sits in the board frame" });
+    const block = hole(0, 0, 900, 600);
     // The first board fails 2 measures, and the last one has 1 fault a reviewer saw: the last one is better.
     expect((await boards({ computed: [measure(), block] }, { findings: [seen()] })).kept).toMatchObject({ round: 2, restored: false });
     // The last board fails 2 measures, and the first one had 1 fault a reviewer saw: the first one goes back.

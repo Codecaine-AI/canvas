@@ -55,9 +55,9 @@ describe("climb empty blocks on the boards of round 5", () => {
     ]);
     // 4 findings: the 3 blocks and the gap too narrow. The 840 px gap is the 720 × 840 block.
     expect(found.faults.map((fault) => [fault.key, fault.ids])).toEqual([
-      [`["empty-block","page-frame",0]`, ["page-frame"]],
-      [`["empty-block","page-frame",1]`, ["page-frame"]],
-      [`["empty-block","sec-contract",0]`, ["sec-contract"]],
+      [`["empty-block","page-frame"]`, ["page-frame"]],
+      [`["empty-block","page-frame"]`, ["page-frame"]],
+      [`["empty-block","sec-contract"]`, ["sec-contract"]],
       [`["gap","under",["sec-contract","sec-engine"]]`, ["sec-engine", "sec-contract"]],
     ]);
     expect(found.faults[3]!.problem).toStartWith("The gap between sec-engine and sec-contract (side by side) is 340 px wide and 2 wires cross it or run along it: the gap rule asks 370 px, so it is 30 px too narrow");
@@ -99,6 +99,10 @@ describe("climb empty blocks", () => {
     expect(plan(row(420)).faults.map((fault) => fault.problem)).toEqual([
       "An empty block of 420 × 800 px sits in the board frame at x 800 to 1220, y 0 to 800: 21% of the frame holds no section, node or sticky. The limit is 400 × 400 px, or 5% of the frame",
     ]);
+    // A sticky in a gap too wide fills its own box, not the gutter: the rest of the gap is a block.
+    const noted = board(row(700).objects, box("note", "sticky", "page", 900, 0, 200, 100));
+    expect(plan(noted).gaps.map((gap) => gap.fault)).toEqual([null]);
+    expect(blocks(noted)).toEqual(["700 × 700 px empty at x 800 to 1500, y 100 to 800, in the board frame (27% of it)"]);
   });
 
   test("a block inside a section is found past 400 × 300 px, either way up", () => {
@@ -120,19 +124,20 @@ describe("climb empty blocks", () => {
     expect(found.blocks.map((block) => [block.in, `${block.rect.width} × ${block.rect.height}`])).toEqual([
       ["page", "800 × 1400"], ["b", "600 × 600"], ["b", "600 × 600"], ["a", "600 × 500"],
     ]);
-    expect(found.faults.map((fault) => fault.key)).toEqual([`["empty-block","page",0]`, `["empty-block","b",0]`, `["empty-block","b",1]`, `["empty-block","a",0]`]);
+    // 2 blocks of one holder share a key: the place of each tells them apart from round to round.
+    expect(found.faults.map((fault) => [fault.key, fault.block?.y])).toEqual([[`["empty-block","page"]`, 700], [`["empty-block","b"]`, 0], [`["empty-block","b"]`, 700], [`["empty-block","a"]`, 0]]);
   });
 
   test("a board with no frame is measured inside the box round its sections", () => {
     const file = board(full("a", null, 0, 0, 1000, 500), full("b", null, 0, 700, 400, 600));
-    expect(emptyBlocks(file, null, gapMeasures(file, reviewUnits(file).units, [], RULE)).map((block) => [block.in, blockLine(block)]))
+    expect(emptyBlocks(file, null, gapMeasures(file, reviewUnits(file).units, [], RULE, null)).map((block) => [block.in, blockLine(block)]))
       .toEqual([[null, "600 × 800 px empty at x 400 to 1000, y 500 to 1300, in the board frame (37% of it)"]]);
   });
 });
 
 describe("climb gap rule", () => {
   const pair = (gap: number, ...more: BoardObject[]) => board(full("a", null, 0, 0, 300, 400), full("b", null, 300 + gap, 0, 300, 400), more);
-  const measure = (file: Board, facts: WireFact[] = []) => gapMeasures(file, reviewUnits(file).units, facts, RULE);
+  const measure = (file: Board, facts: WireFact[] = []) => gapMeasures(file, reviewUnits(file).units, facts, RULE, null);
   const faults = (file: Board, facts: WireFact[] = []) => measure(file, facts).map((gap) => [gap.a, gap.b, gap.gap, gap.counted.length, gap.need, gap.fault]);
 
   test("a gap needs 200 px, and 20 px more for each wire after the first that crosses it or runs along it", () => {
@@ -141,8 +146,8 @@ describe("climb gap rule", () => {
     expect(faults(pair(240), [across("w1", 100), across("w2", 200, 790), across("w3", 300, 790)])).toEqual([["a", "b", 240, 3, 240, null]]);
     // A wire along the gutter counts as one that crosses it.
     expect(faults(pair(200), [across("w1", 100), wire("along", "p", "q", [[250, 50], [400, 50], [400, 350], [250, 350]])])).toEqual([["a", "b", 200, 2, 220, "under"]]);
-    // A gap no wire uses is not too narrow.
-    expect(faults(pair(150))).toEqual([["a", "b", 150, 0, 200, null]]);
+    // A gap no wire uses needs the 200 px too.
+    expect(faults(pair(150))).toEqual([["a", "b", 150, 0, 200, "under"]]);
   });
 
   test("a labelled wire across a side-by-side gap needs 100 px and 10 px a character of its label", () => {
@@ -175,6 +180,18 @@ describe("climb gap rule", () => {
     expect(faults(file, [across("w1", 100, 500)])).toEqual([["outer", "c", 50, 1, 200, "under"]]);
   });
 
+  test("the rule sets the gaps of the sections in the board frame: a gap inside a section is listed with no fault", () => {
+    // 2 subsections 80 px apart with a wire between them, as `arrange_section` leaves them.
+    const nested = plan(board(
+      box("page", "section", null, 0, 0, 1180, 400), box("group", "section", "page", 0, 0, 680, 400),
+      full("s1", "group", 0, 0, 300, 400), full("s2", "group", 380, 0, 300, 400), full("c", "page", 880, 0, 300, 400),
+    ), [across("w1", 100, 430)]);
+    expect(nested.gaps.map((gap) => [gap.a, gap.b, gap.gap, gap.ruled, gap.fault])).toEqual([["group", "c", 200, true, null], ["s1", "s2", 80, false, null]]);
+    expect(gapLine(nested.gaps[1]!)).toBe(
+      "s1 ↔ s2 · side by side · gap 80 px · gutter x 300 to 380, y 0 to 400 · 1 wire crosses it or runs along it · 0 label chips in it · inside section group: `arrange_section` sets it, not the gap rule");
+    expect(nested.faults).toEqual([]);
+  });
+
   test("a gap off its number is a fault with its numbers, and its key holds no number", () => {
     const narrow = plan(pair(200), [across("w1", 100), across("w2", 200), across("w3", 300)]);
     expect(narrow.faults).toEqual([{
@@ -182,6 +199,7 @@ describe("climb gap rule", () => {
       problem: "The gap between a and b (side by side) is 200 px wide and 3 wires cross it or run along it: the gap rule asks 240 px, so it is 40 px too narrow",
       marks: [{ box: { x: 300, y: 0, width: 200, height: 400 } }],
     }]);
+    expect(narrow.faults[0]!.block).toBeUndefined();
     // The drawer widens it by 20 px: the same fault, with new numbers.
     const wider = plan(pair(220), [across("w1", 100, 570), across("w2", 200, 570), across("w3", 300, 570)]);
     expect(wider.faults.map((fault) => [fault.key, fault.problem])).toEqual([
@@ -200,6 +218,6 @@ describe("climb gap rule", () => {
     ]]);
     // 800 px high, the same gap is an empty block, and that is the one fault.
     const high = board(full("a", null, 0, 0, 1000, 800), full("b", null, 1330, 0, 1000, 800));
-    expect(computedFaults(plan(high).blocks, plan(high).gaps).map((fault) => fault.key)).toEqual([`["empty-block","board",0]`]);
+    expect(computedFaults(plan(high).blocks, plan(high).gaps).map((fault) => fault.key)).toEqual([`["empty-block","board"]`]);
   });
 });
