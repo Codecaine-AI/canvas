@@ -282,11 +282,16 @@ function nearTwins(a: CanvasColor, b: CanvasColor): boolean {
   return (a === "teal" && (b === "blue" || b === "green")) || (b === "teal" && (a === "blue" || a === "green"));
 }
 
+/** A teal node on a green section, or a green one on teal, keeps as little figure as on its own color. */
+function oneFamily(a: CanvasColor, b: CanvasColor): boolean {
+  return a === b || (a === "teal" && b === "green") || (a === "green" && b === "teal");
+}
+
 /**
  * The color for section `id` when its call names none, judged on a document
  * whose membership is already reconciled. Hard rules: it looks like neither
  * its parent section, a section it holds, nor a sibling it touches, and it
- * takes no color of a node or sticky it holds directly. A copy keeps its
+ * takes no color, nor the family, of a node or sticky it holds directly. A copy keeps its
  * `source` color whenever that keeps the hard rules: the drawer chose it.
  * Otherwise the first of CHOOSER_HUES the board's nodes and wires leave free,
  * then gray while gray stays at most half the board's sections, then a cool
@@ -313,10 +318,10 @@ export function pickSectionColor(
   const children = document.objects.filter((object) => kindOf(object) === "section" && object.parentId === id);
   const siblings = siblingSectionsOf(document, byId, section);
   const near = touchingSiblingsOf(section, siblings);
-  const held = new Set(heldObjects(document, id).map((object) => object.color!));
+  const held = [...new Set(heldObjects(document, id).map((object) => object.color!))];
   const neighbors = [...(parent ? [parent] : []), ...children, ...near];
   const keeps = (color: CanvasColor) =>
-    !held.has(sectionHue({ color }, style))
+    !held.some((other) => oneFamily(other, sectionHue({ color }, style)))
     && neighbors.every((other) => !looksAlike({ color, depth }, paintedOf(other, depths), style));
   if (source && keeps(source)) return source;
 
@@ -422,13 +427,15 @@ export function siblingClashes(
   });
 }
 
-/** A section painted the color of nodes or stickies it holds directly. */
+/** A section painted the color, or the color family, of nodes or stickies it holds directly. */
 export interface HeldNodeClash {
   section: string;
-  /** The first object it holds in that color. */
+  /** The first of `held`. */
   node: string;
-  /** Every node and sticky it holds directly in that color. */
+  /** Every node and sticky it holds directly in that color, then each in its family. */
   held: string[];
+  /** Those of `held` in another color of its family: teal on green, or green on teal. */
+  near: string[];
   color: CanvasColor;
   /** A color that keeps the section apart from its parent, children, touching siblings and what it holds. */
   suggestion: CanvasColor;
@@ -436,7 +443,9 @@ export interface HeldNodeClash {
 
 /**
  * Every section (the page exempt) that paints the color of a node or sticky
- * it holds directly, gray included: that object keeps only its border.
+ * it holds directly, gray included: that object keeps only its border. Teal
+ * and green are one family (round 5 cycle 4, board 04: teal nodes on green
+ * sections passed the check, and both judges faulted them).
  */
 export function heldNodeClashes(
   document: InteractiveCanvasDocument,
@@ -446,12 +455,15 @@ export function heldNodeClashes(
   for (const section of document.objects) {
     if (kindOf(section) !== "section" || isPageSection(section)) continue;
     const hue = sectionHue(section, style);
-    const held = heldObjects(document, section.id).filter((object) => object.color === hue).map((object) => object.id);
-    if (held.length === 0) continue;
+    const family = heldObjects(document, section.id).filter((object) => oneFamily(object.color!, hue));
+    if (family.length === 0) continue;
+    const near = family.filter((object) => object.color !== hue).map((object) => object.id);
+    const held = [...family.filter((object) => object.color === hue).map((object) => object.id), ...near];
     clashes.push({
       section: section.id,
       node: held[0]!,
       held,
+      near,
       color: hue,
       suggestion: pickSectionColor(document, section.id, style),
     });
