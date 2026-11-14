@@ -142,7 +142,7 @@ describe("shared Canvas authoring guidance", () => {
     const rules = topicText("rules");
     expect(rules).toContain("Put a fact a reader needs (a size, a tool name) in the name, a wire label or a sticky.");
     // Round 5 cycle 4: a section move on board 14 left its note 1000 px away.
-    expect(rules).toContain(`Put each sticky within ${NOTE_REACH} of the node it explains, and move it when its section moves. Put the color key under the title. Neither sits in a band between sections.`);
+    expect(rules).toContain(`Put each sticky within ${NOTE_REACH} of what it explains, and move it when its section moves. Put the color key under the title. Neither sits in a band between sections.`);
     expect(NOTE_REACH).toBe(400);
     expect(topicText("color_palette")).toContain("as a short note under the title");
     // Round 5 cycle 3: board 03 moved its notes and its key into the gaps between sections.
@@ -214,7 +214,7 @@ describe("shared Canvas authoring guidance", () => {
     expect(rules).toContain("A store or an outcome that several stages feed sits after the last of them, never before or above the first.");
     // A return or a retry runs against the main path, so the rule holds on the main path only.
     expect(rules).toContain("On the main path, a section sits after its source.");
-    expect(rules).toContain("Steps inside a section run one way along a row or a column, and no row turns back.");
+    expect(rules).toContain("Steps inside a section run one way along a row or a column.");
     expect(rules).toContain("A chain too long for one row turns at the row end, as a snake: the next row starts under the last step and runs the other way.");
     expect(rules).toContain("The turn is one short straight wire, the only wire between the two rows.");
     // Round 5 cycle 4: a next row that starts at the same side gave board r3 a 2182 px wrap wire and 3 wires that
@@ -252,19 +252,19 @@ describe("shared Canvas authoring guidance", () => {
     expect(rules).toContain("3 or more wires that reach one node from one direction enter the side that faces them as one bus: never turn a wire back to reach another side.");
   });
 
-  test("the board reads one way from the start node in the first row, and a decision sits beside or before the groups it fans out to", () => {
+  test("the board reads one way from the start node in the first row, and a node sits beside or before the groups it fans out to", () => {
     const rules = topicText("rules");
-    expect(rules).toContain("The board reads one way, left to right or top to bottom, and the story starts at the top or the left: the start node sits in the first row.");
-    // Round 5 cycle 4: board 04 drew its decision above a 2 by 2 grid of the 4 groups it fans out to.
-    expect(rules).toContain("A decision that fans out to several groups sits beside or before them, never above a 2 by 2 block of them.");
+    expect(rules).toContain("The board reads one way, left to right or top to bottom, and the story starts at the top or the left: the start node comes first in the first row.");
+    // Round 5 cycle 4: board 04 drew its decision above a 2 by 2 grid of the 4 groups it fans out to. Cycle 5 draft 1 did the same from a plain node.
+    expect(rules).toContain("A node that fans out to several groups sits beside or before them, or at the center of a 2 by 2 block, never above it.");
     expect(rules).toContain("Order a row of targets in the order of their sources.");
   });
 
   test("a node sits in the section its wires go to, and an empty block never blocks the move", () => {
     const rules = topicText("rules");
     // Round 5 cycle 4: 3 drawers declined such a move because it opened an empty block (h3: wires of 2820 and 1940 px).
-    expect(rules).toContain("A node sits in the section where most of its wires go.");
-    expect(rules).toContain("When all its wires go to one other section, move it there or beside that section's edge.");
+    expect(rules).toContain("A node sits in the section that holds most of its wires' other ends, in or out.");
+    expect(rules).toContain("When one other section holds them all, move it there or beside that section's edge.");
     expect(rules).toContain("An empty block the move opens never blocks it: shrink the section after.");
   });
 
