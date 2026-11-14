@@ -1131,13 +1131,13 @@ describe("critic loop node findings", () => {
 
 describe("critic loop deleted wires", () => {
   const far = lint({ at: ["n_vfail"], message: "n_vfail sits 20px off the line of n_started" });
-  const gone: DeletedWire = { id: "e1", from: "n_vfail", to: "client", names: ["e1", "n_vfail", "client", "w1"] };
-  const REOPENED = "the revise pass of round 2 deleted wire e1. Your decline stood on the board that had that wire, so it stands no more. Look at this finding on the board as it is now.";
+  const gone: DeletedWire = { id: "e1", from: "n_vfail", to: "client" };
+  const reopenedBy = (wire: string) => `the revise pass of round 2 deleted wire ${wire}. Your decline stood on the board that had that wire, so it stands no more. Look at this finding on the board as it is now.`;
 
-  test("the wires a pass deleted are those the board has no more, by id or by their 2 ends, each with the other wires of its end nodes", () => {
+  test("the wires a pass deleted are those the board has no more, by id or by their 2 ends, each with its 2 end nodes", () => {
     const before = [wire("e1", "n_vfail", "client", []), wire("e2", "n_started", "n_vfail", []), wire("e3", "a", "b", []), wire("e4", "b", "c", [])];
     // e3 came back under a new id, between the same 2 nodes: it is no deleted wire.
-    expect(deletedWires(before, [before[1]!, wire("e9", "a", "b", []), before[3]!])).toEqual([{ id: "e1", from: "n_vfail", to: "client", names: ["e1", "n_vfail", "client", "e2"] }]);
+    expect(deletedWires(before, [before[1]!, wire("e9", "a", "b", []), before[3]!])).toEqual([{ id: "e1", from: "n_vfail", to: "client" }]);
     expect(deletedWires(before, before)).toEqual([]);
     // One of 2 wires between the same 2 nodes is a deleted wire, and a new wire stands for one old wire only.
     const twin = [wire("t1", "a", "b", []), wire("t2", "a", "b", [])];
@@ -1145,11 +1145,13 @@ describe("critic loop deleted wires", () => {
     expect(deletedWires(twin, [wire("t9", "a", "b", [])]).map((gone) => gone.id)).toEqual(["t2"]);
   });
 
-  test("a deleted wire reopens each decline on the wire, its end nodes or their other wires: a held lint and a settled finding go to the drawer again", async () => {
+  test("a deleted wire reopens each decline on the wire or its end nodes: a held lint and a settled finding go to the drawer again", async () => {
     // Round 5 cycle 4, h3: round 1 deleted the 2 wires from the failure nodes, and its decline of the far wires into them stood to the end.
     const earlier: unknown[][] = [];
     const sent: string[][] = [];
     const replies = ["F1 declined: the node sits by the client\nF2 declined: moved sec_b\nF3 declined: the bend clears a label", "F4 fixed", "F1 fixed\nF2 fixed"];
+    // The pass deletes e1, which ends on the lint's node, and w1, a wire of the band finding.
+    const deleted = [gone, { id: "w1", from: "a1", to: "b1" }];
     const record = await reviewLoop({
       budget: 20,
       review: async (round, notes) => {
@@ -1158,23 +1160,23 @@ describe("critic loop deleted wires", () => {
       },
       revise: async (round, findings) => {
         sent.push(findings.map((finding) => finding.id));
-        return { ...ran(replies[round - 1]!), layout: round === 1 ? placed(["sec_b"]) : LAYOUT, deleted: round === 2 ? [gone] : [] };
+        return { ...ran(replies[round - 1]!), layout: round === 1 ? placed(["sec_b"]) : LAYOUT, deleted: round === 2 ? deleted : [] };
       },
     });
     // Round 2 holds the lint and the wire finding is settled. Round 3 sends both again, each with why it is back.
     expect(sent).toEqual([["F1", "F2", "F3"], ["F4"], ["F1", "F2"]]);
     expect(record.rounds[1]!.withheld.map((fault) => [fault.id, fault.why])).toEqual([["F1", "held"], ["F2", "settled"]]);
-    expect([record.rounds[1]!.revise!.deleted, record.rounds[1]!.revise!.reopened, record.rounds[0]!.revise!.reopened]).toEqual([["e1"], ["F1", "F2"], []]);
-    expect(record.rounds[2]!.findings.map((finding) => [finding.id, finding.facts])).toEqual([["F1", REOPENED], ["F2", REOPENED]]);
+    expect([record.rounds[1]!.revise!.deleted, record.rounds[1]!.revise!.reopened, record.rounds[0]!.revise!.reopened]).toEqual([["e1", "w1"], ["F1", "F2"], []]);
+    expect(record.rounds[2]!.findings.map((finding) => [finding.id, finding.facts])).toEqual([["F1", reopenedBy("e1")], ["F2", reopenedBy("w1")]]);
     expect(record.rounds[2]!.withheld).toEqual([]);
-    expect(record.rounds[0]!.findings.map((finding) => finding.answer!.reopened)).toEqual([{ round: 2, wire: "e1" }, { round: 2, wire: "e1" }, undefined]);
+    expect(record.rounds[0]!.findings.map((finding) => finding.answer!.reopened)).toEqual([{ round: 2, wire: "e1" }, { round: 2, wire: "w1" }, undefined]);
     // The decline of F3 names none of them: the reviewers of round 3 still read it.
     expect(earlier[2]).toEqual([{ ids: ["x"], regions: ["sec_a"], line: "[routing] x: The wire bends twice. The drawer declined: the bend clears a label", settled: false }]);
     expect(record.stop).toBe("clean");
     const text = ledgerText(record);
     expect(text).toContain("  → declined: the node sits by the client (reopened: round 2 deleted wire e1)\n");
-    expect(text).toContain("\nWires the revise pass deleted: e1 · declines reopened: F1, F2\n");
-    expect(reviseMessage("b1", record.rounds[2]!.findings)[0]).toContain(`F1 [should, check near-miss] n_vfail sits 20px off the line of n_started. Fix: move b by dy -20\n  facts: ${REOPENED}\n`);
+    expect(text).toContain("\nWires the revise pass deleted: e1, w1 · declines reopened: F1, F2\n");
+    expect(reviseMessage("b1", record.rounds[2]!.findings)[0]).toContain(`F1 [should, check near-miss] n_vfail sits 20px off the line of n_started. Fix: move b by dy -20\n  facts: ${reopenedBy("e1")}\n`);
   });
 
   test("a reviewer's fault that a deleted wire reopened is no declined fault for the next reviewers, and a decline of the pass that deleted the wire is reopened too", async () => {
