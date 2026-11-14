@@ -489,7 +489,7 @@ export function choicesPrompt(text: ChoicesText): string {
     "- colour that carries no meaning: nodes of one kind in several colours, or unlike kinds in one colour;",
     "- a node with the colour of its section: it does not stand out from it;",
     "- 4 or more gray nodes in one section;",
-    "- a section whose steps run against the reading direction of the board, or a chain that reverses direction inside a section (kind `placement`);",
+    "- a section whose steps run against the reading direction of the board, or a chain that reverses direction inside a section (kind `placement`); a chain too long for one row that turns at the row end as a snake, the next row under the last step and running the other way, is legal;",
     ...(text.brief === null ? [] : [
       "- an object or a relation in the brief that the board lacks (kind `missing`);",
       "- a board that starts where the story of the brief does not: say what a reader meets first at the top or the left of the board, and where the brief's story starts (kind `placement`);",

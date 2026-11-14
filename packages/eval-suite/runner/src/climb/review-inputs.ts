@@ -912,7 +912,7 @@ export function choicesLines(board: Board, facts: WireFact[]): { objects: string
             ? [`${against.length} of the ${steps.length} wires between nodes of section ${section.id} point ${AGAINST[reading]}, and ${count(headings, reading)} of the board's ${headings.length} wires point ${reading}: ${against.map((step) => step.fact.id).join(", ")}`]
             : []),
           ...(back.length
-            ? [`The wires between nodes of section ${section.id} that close no loop point both ways: ${count(chain, most(chain))} point ${most(chain)} and ${back.length} point ${AGAINST[most(chain)]} (${back.map((step) => step.fact.id).join(", ")})`]
+            ? [`The wires between nodes of section ${section.id} that close no loop point both ways: ${count(chain, most(chain))} point ${most(chain)} and ${back.length} point ${AGAINST[most(chain)]} (${back.map((step) => step.fact.id).join(", ")}); rows that turn at the row end as a snake are legal`]
             : []),
         ];
       }),

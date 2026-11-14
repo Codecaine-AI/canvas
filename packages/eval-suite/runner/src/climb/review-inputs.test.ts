@@ -243,7 +243,7 @@ describe("climb review measures of choices", () => {
     };
     const line = (id: string, from: string, to: string) => wire(id, from, to, [[0, 0], [10, 0]]);
     const both = (wires: ReturnType<typeof wire>[]) => choicesLines(snake, wires).counts.filter((count) => /both ways/.test(count));
-    expect(both([line("a", "s1", "s2"), line("b", "s2", "s3"), line("c", "s3", "s4")])).toEqual(["The wires between nodes of section p that close no loop point both ways: 1 point right and 1 point left (c)"]);
+    expect(both([line("a", "s1", "s2"), line("b", "s2", "s3"), line("c", "s3", "s4")])).toEqual(["The wires between nodes of section p that close no loop point both ways: 1 point right and 1 point left (c); rows that turn at the row end as a snake are legal"]);
     // With s4 → s1 the 4 steps are one loop.
     expect(both([line("a", "s1", "s2"), line("b", "s2", "s3"), line("c", "s3", "s4"), line("d", "s4", "s1")])).toEqual([]);
   });
