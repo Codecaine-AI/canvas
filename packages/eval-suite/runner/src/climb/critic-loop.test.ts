@@ -1,10 +1,12 @@
 import { describe, expect, test } from "bun:test";
 
 import {
-  declinedFindings, declineEarned, findingLine, isLayout, lastMessage, ledgerText, loopSummary, lostFixes, parseAnswers, reaskPrompt, reviewLoop, reviseMessage, roundFindings,
-  type LoopFinding, type Review,
+  declinedFindings, declineEarned, deletedWires, findingLine, isLayout, lastMessage, ledgerText, loopSummary, lostFixes, movedByCalls, nodeDeclineEarned, parseAnswers, reaskPrompt, reviewLoop,
+  reviseMessage, roundFindings, type DeletedWire, type LoopFinding, type Review,
 } from "./critic-loop.ts";
 import { parseCritic, type MergedFinding, type ReviewLint } from "./critic.ts";
+import { wire } from "./fixtures/review/stubs.ts";
+import type { Order } from "./order.ts";
 import type { RethinkRecord } from "./rethink.ts";
 import type { ComputedFault, LayoutFacts } from "./space.ts";
 
@@ -415,7 +417,8 @@ describe("critic loop computed findings", () => {
       "</findings>",
     ].join("\n"));
     expect(text).toContain("A `measured` finding is a number the runner computed on the board file: an empty block, a section that is mostly empty, a band between sections that is too narrow or too wide,"
-      + " a wire through a section that holds neither of its ends, a far wire. A decline does not close a `measured space` finding: it comes back until the number passes.");
+      + " a wire through a section that holds neither of its ends, a far wire, a wire along a border, or what your last pass made worse: a wire it made longer, a note it left far from what it names."
+      + " A decline does not close a `measured space` finding: it comes back until the number passes.");
     expect(text).toContain("The `measured` findings and the findings from the `space` reviewer come first.");
   });
 });
@@ -489,6 +492,15 @@ describe("critic loop rethink turn", () => {
       "## Round 1 · score 1",
     ].join("\n"));
     expect(loopSummary(record)).toContain("stop clean after 2 of 3 rounds at medium effort · rethink: 7 tool calls, 1 section moved · last round:");
+  });
+
+  test("the ledger says what the order search found, whether the turn read the orders, and the cost of the order it left", async () => {
+    const order = (cost: number): Order => ({ rows: 1, columns: 3, grid: [["sec_a", "sec_b", "sec_c"]], cost: { total: cost, length: cost, back: 0, far: 0 } });
+    const found = (shown: boolean) => ({ cells: ["sec_a", "sec_b", "sec_c"], method: "every order" as const, kept: null, current: order(4000), drawn: 4100, best: [order(3000)], shown });
+    const text = async (rethink: RethinkRecord) => ledgerText(await reviewLoop({ budget: 3, rethink: async () => rethink, review: async () => review() })).split("\n")[1];
+    expect(await text({ ...turn(), order: found(true), orderAfter: order(3200) }))
+      .toBe("Order search (every order, 3 cells): the first draw cost 4000, the best order 3000 (25% cheaper) · the turn read the orders · after the turn 3200");
+    expect(await text({ ...turn(), order: found(false), orderAfter: null })).toBe("Order search (every order, 3 cells): the first draw cost 4000, the best order 3000 (25% cheaper) · not sent");
   });
 
   test("a loop with no rethink turn has none in its record", async () => {
@@ -987,7 +999,7 @@ describe("critic loop decline rule for layout findings", () => {
     expect(first).not.toContain("declined: moved <section>");
     expect(first).not.toContain("`facts` line");
     expect(second).toContain(`  from wires · layout finding\n  facts: ${BACK} w is 1800 px now, sec_a → sec_c, not neighbours: sec_b lies between them.\n</findings>`);
-    expect(second).toContain("A `facts` line under a finding says why it is back, and how the fault stands now: the wire's length and the sections between its ends.");
+    expect(second).toContain("A `facts` line under a finding says why it is back, and how the fault stands now.");
     // A board with no layout finding gets none of it.
     expect(reviseMessage("b1", roundFindings([], { lints: [lint()], findings: [seen()], layout: LAYOUT }).findings.filter((finding) => finding.source === "check"))[0]).not.toMatch(/layout finding|`facts`/);
   });
@@ -1048,6 +1060,126 @@ describe("critic loop decline rule for layout findings", () => {
     const { rounds } = await declining([{ reply: "F1 declined: moved sec_b\nF2 declined: moved sec_b", after: placed(["sec_b"]) }, { reply: "" }], both).record;
     expect(rounds[0]!.findings.map((finding) => [finding.id, finding.kind, finding.layout, finding.answer!.earned])).toEqual([["F1", "space", undefined, undefined], ["F2", "wire", true, true]]);
     expect([rounds[1]!.findings.map((finding) => [finding.id, finding.facts]), rounds[1]!.withheld.map((fault) => [fault.id, fault.why])]).toEqual([[["F1", undefined]], [["F2", "settled"]]]);
+  });
+});
+
+describe("critic loop node findings", () => {
+  const HUB = "Node hub sits in section sec_a, and none of its 2 wires joins another node of sec_a. Its wires, now and with the node at the centre of sec_b: w1 300 → 100 px, w2 300 → 100 px; in sum 600 → 200 px";
+  /** A computed node finding (space.ts): the node, its section, the section its wires say, then its wires. */
+  const node = (): ComputedFault => ({ kind: "node", key: `["node","hub"]`, ids: ["hub", "sec_a", "sec_b", "w1", "w2"], problem: HUB, number: 600, marks: [] });
+  /** A loop on one node finding that stays on the board, with the drawer's answer by round, the ids its move calls named and the plan its pass left. */
+  const loop = (turns: Array<{ reply: string; tried?: string[]; after?: LayoutFacts }>) => reviewLoop({
+    budget: 20,
+    review: async () => review({ layout: LAYOUT, computed: [node()] }),
+    revise: async (round) => ({ ...ran(turns[round - 1]!.reply), layout: turns[round - 1]!.after ?? LAYOUT, tried: turns[round - 1]!.tried }),
+  });
+  const BACK = "your decline in round 1 closed nothing: that turn made no move call on hub, or its answer did not give the 2 sums in px. Make the move, route the wires, read their lengths, and answer with both sums.";
+
+  test("the move calls of a pass are its move, arrange and arrange_section calls, and the ids they name", () => {
+    const call = (name: string, input: unknown, type = "assistant") => JSON.stringify({ type, message: { content: [{ type: "text", text: "next" }, { type: "tool_use", name, input }] } });
+    expect(movedByCalls([
+      call("mcp__canvas__move", { id: "hub", to: { section: "sec_b" } }), call("mcp__canvas__arrange_section", { section: "sec_c", rows: [["c1", "c2"]] }), "not json", "",
+      call("mcp__canvas__arrange", { ids: ["sec_a"], space: 240 }), call("mcp__canvas__route", { id: "w9" }), call("mcp__canvas__move", { id: "x" }, "user"),
+    ].join("\n"))).toEqual(["hub", "sec_b", "sec_c", "c1", "c2", "sec_a"]);
+  });
+
+  test("a decline of a node finding is earned by a move call on the node and 2 numbers in the answer", () => {
+    const earned = (tried: string[], reason: string) => nodeDeclineEarned(node(), tried, reason);
+    expect(earned(["hub", "sec_b"], "moved hub into sec_b: the sum went 600 → 940 px, so I moved it back")).toBe(true);
+    // No move call, a move of its section, and a move with no numbers or with one.
+    expect(earned([], "moved hub into sec_b: the sum went 600 → 940 px, so I moved it back")).toBe(false);
+    expect(earned(["sec_a"], "moved sec_a beside sec_b: the sum went 600 → 440 px")).toBe(false);
+    expect(earned(["hub"], "the brief puts the hub in sec_a")).toBe(false);
+    // An id is no number: w-12 and F7.
+    expect(earned(["hub"], "moved hub and back: w-12 got 300 px longer, see F17")).toBe(false);
+  });
+
+  test("a node finding declined with no move of the node comes back with one line of facts, and a measured decline settles it", async () => {
+    const record = await loop([
+      { reply: "F1 declined: moved sec_a under sec_b, 600 → 580 px", tried: ["sec_a"], after: placed(["sec_a"]) },
+      { reply: "F1 declined: moved hub into sec_b, the sum went 600 → 940 px with 2 new crossings, moved it back", tried: ["hub"] },
+    ]);
+    const [first, second, third] = record.rounds;
+    // A section move closes a layout finding. It closes no node finding.
+    expect(first!.findings.map((finding) => [finding.id, finding.kind, finding.layout, finding.facts, finding.answer!.earned])).toEqual([["F1", "node", true, undefined, false]]);
+    expect(first!.revise!.placed).toEqual(["sec_a"]);
+    expect(second!.findings.map((finding) => [finding.id, finding.facts, finding.answer!.earned])).toEqual([["F1", BACK, true]]);
+    expect([third!.findings, third!.withheld.map((fault) => [fault.id, fault.why]), record.stop]).toEqual([[], [["F1", "settled"]], "settled"]);
+    const text = ledgerText(record);
+    expect(text).toContain("  → declined: moved sec_a under sec_b, 600 → 580 px (closes nothing: the pass made no move call on the node, or the answer gives no 2 numbers)\n");
+    expect(text).toContain(`  facts: ${BACK}\n  → declined: moved hub into sec_b, the sum went 600 → 940 px with 2 new crossings, moved it back\n`);
+  });
+
+  test("the revise message says what closes a node finding, and keeps the layout rule for the layout findings", async () => {
+    const { findings } = roundFindings([], { lints: [], findings: [], computed: [node()], layout: LAYOUT });
+    const text = reviseMessage("b1", findings)[0] as string;
+    expect(text).toContain(`<findings>\nF1 [should, measured node] ${HUB}.\n  measured by the runner on the board file · node finding\n</findings>`);
+    expect(text).toContain(
+      "A `node finding` names a node whose wires say it sits in the wrong section, with the length of each wire now and an estimate of it with the node in the other section."
+      + " Make the move it names with `move`, route the node's wires again and read their lengths. Then keep the move, or undo it."
+      + " A decline closes such a finding only when this turn made that move on the board and your answer gives both sums in px: before the move and after it."
+      + " The runner reads your tool calls. Any other decline brings the finding back in the next round.");
+    expect(text).not.toContain("A `layout finding` is");
+    const both = reviseMessage("b1", roundFindings([], { lints: [], findings: [], computed: [node(), band()], layout: LAYOUT }).findings)[0] as string;
+    expect(both).toContain("A `node finding` names");
+    expect(both).toContain("A `layout finding` is");
+  });
+});
+
+describe("critic loop deleted wires", () => {
+  const far = lint({ at: ["n_vfail"], message: "n_vfail sits 20px off the line of n_started" });
+  const gone: DeletedWire = { id: "e1", from: "n_vfail", to: "client", names: ["e1", "n_vfail", "client", "w1"] };
+  const REOPENED = "the revise pass of round 2 deleted wire e1. Your decline stood on the board that had that wire, so it stands no more. Look at this finding on the board as it is now.";
+
+  test("the wires a pass deleted are those the board has no more, by id or by their 2 ends, each with the other wires of its end nodes", () => {
+    const before = [wire("e1", "n_vfail", "client", []), wire("e2", "n_started", "n_vfail", []), wire("e3", "a", "b", []), wire("e4", "b", "c", [])];
+    // e3 came back under a new id, between the same 2 nodes: it is no deleted wire.
+    expect(deletedWires(before, [before[1]!, wire("e9", "a", "b", []), before[3]!])).toEqual([{ id: "e1", from: "n_vfail", to: "client", names: ["e1", "n_vfail", "client", "e2"] }]);
+    expect(deletedWires(before, before)).toEqual([]);
+  });
+
+  test("a deleted wire reopens each decline on the wire, its end nodes or their other wires: a held lint and a settled finding go to the drawer again", async () => {
+    // Round 5 cycle 4, h3: round 1 deleted the 2 wires from the failure nodes, and its decline of the far wires into them stood to the end.
+    const earlier: unknown[][] = [];
+    const sent: string[][] = [];
+    const replies = ["F1 declined: the node sits by the client\nF2 declined: moved sec_b\nF3 declined: the bend clears a label", "F4 fixed", "F1 fixed\nF2 fixed"];
+    const record = await reviewLoop({
+      budget: 20,
+      review: async (round, notes) => {
+        earlier.push(notes);
+        return review({ layout: LAYOUT, ...(round > 3 ? {} : { lints: [far], computed: [band()], findings: round === 1 ? [seen({ ids: ["x"], labels: [] })] : round === 2 ? [seen({ ids: ["y"], labels: [] })] : [] }) });
+      },
+      revise: async (round, findings) => {
+        sent.push(findings.map((finding) => finding.id));
+        return { ...ran(replies[round - 1]!), layout: round === 1 ? placed(["sec_b"]) : LAYOUT, deleted: round === 2 ? [gone] : [] };
+      },
+    });
+    // Round 2 holds the lint and the wire finding is settled. Round 3 sends both again, each with why it is back.
+    expect(sent).toEqual([["F1", "F2", "F3"], ["F4"], ["F1", "F2"]]);
+    expect(record.rounds[1]!.withheld.map((fault) => [fault.id, fault.why])).toEqual([["F1", "held"], ["F2", "settled"]]);
+    expect([record.rounds[1]!.revise!.deleted, record.rounds[1]!.revise!.reopened, record.rounds[0]!.revise!.reopened]).toEqual([["e1"], ["F1", "F2"], []]);
+    expect(record.rounds[2]!.findings.map((finding) => [finding.id, finding.facts])).toEqual([["F1", REOPENED], ["F2", REOPENED]]);
+    expect(record.rounds[2]!.withheld).toEqual([]);
+    expect(record.rounds[0]!.findings.map((finding) => finding.answer!.reopened)).toEqual([{ round: 2, wire: "e1" }, { round: 2, wire: "e1" }, undefined]);
+    // The decline of F3 names none of them: the reviewers of round 3 still read it.
+    expect(earlier[2]).toEqual([{ ids: ["x"], regions: ["sec_a"], line: "[routing] x: The wire bends twice. The drawer declined: the bend clears a label", settled: false }]);
+    expect(record.stop).toBe("clean");
+    const text = ledgerText(record);
+    expect(text).toContain("  → declined: the node sits by the client (reopened: round 2 deleted wire e1)\n");
+    expect(text).toContain("\nWires the revise pass deleted: e1 · declines reopened: F1, F2\n");
+    expect(reviseMessage("b1", record.rounds[2]!.findings)[0]).toContain(`F1 [should, check near-miss] n_vfail sits 20px off the line of n_started. Fix: move b by dy -20\n  facts: ${REOPENED}\n`);
+  });
+
+  test("a reviewer's fault that a deleted wire reopened is no declined fault for the next reviewers, and a decline of the pass that deleted the wire is reopened too", async () => {
+    const earlier: unknown[][] = [];
+    const record = await reviewLoop({
+      budget: 20,
+      review: async (round, notes) => { earlier.push(notes); return review(round === 1 ? { lints: [far], findings: [seen({ ids: ["client"], labels: [] })] } : round === 2 ? { lints: [far] } : {}); },
+      revise: async (round) => ({ ...ran(round === 1 ? "F1 declined: the node sits by the client\nF2 declined: the bend clears a label" : "F1 fixed"), deleted: round === 1 ? [gone] : [] }),
+    });
+    expect(record.rounds[0]!.revise!.reopened).toEqual(["F1", "F2"]);
+    expect(record.rounds[1]!.findings.map((finding) => [finding.id, finding.facts?.slice(0, 44)])).toEqual([["F1", "the revise pass of round 1 deleted wire e1. "]]);
+    expect(earlier[1]).toEqual([]);
   });
 });
 

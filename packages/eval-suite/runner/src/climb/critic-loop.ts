@@ -28,7 +28,8 @@
  * Ford: "this is done, like, a programmatic way". The runner measures the
  * plan of the board itself (space.ts): the empty space, each band between
  * sections against the band rule, each wire through a section that holds
- * neither of its ends, and each far wire. A measure that fails is a
+ * neither of its ends, each far wire, each node its wires put in another
+ * section, and each wire along a border. A measure that fails is a
  * computed finding. It stays, and counts in the score, until the measure
  * passes. The drawer gets it 3 times at most (MEASURED_SENDS), and the loop
  * lists it after that. Before round 1, the drawer gets one rethink turn on the
@@ -42,6 +43,15 @@
  * MEASURED_SENDS sends at most. A loop that ends while a decline keeps a
  * layout finding from the drawer stops "settled", never "clean", and lists
  * those findings (LoopRecord `settled`).
+ *
+ * A node finding names a node whose wires say it sits in the wrong section.
+ * A decline closes it only when the revise pass made the move and the answer
+ * gives the lengths (nodeDeclineEarned). After each revise pass the runner
+ * also compares the board with the one before it (guard.ts): a wire the pass
+ * made longer and a note it left far from what it names are computed
+ * findings of the next round. And a wire the pass deleted reopens each
+ * decline on that wire, its end nodes or their other wires (reopenDeclines):
+ * the board the decline stood on is gone.
  *
  * The review starts by code each time a revise pass ends. The loop stops at
  * the first round where every reviewer answered, none found a blocker or a
@@ -72,6 +82,7 @@ import { renderBoardPng, type WorldRect } from "./render.ts";
 import { rethinkAnswers, rethinkMessage, rethinkReask, rethinkRecord, sectionMoves, unanswered as rethinkUnanswered, type RethinkRecord, type SectionMove } from "./rethink.ts";
 import { REVIEWER_KINDS, SPACE_UNIT, short, type Board, type Mark, type ReviewerKind } from "./review-inputs.ts";
 import { gapRule, sameBlock, type ComputedFault, type LayoutFacts } from "./space.ts";
+import { wireFacts, type WireFact } from "./wires.ts";
 
 export const VERDICTS = ["fixed", "disagree", "declined"] as const;
 export type Verdict = (typeof VERDICTS)[number];
@@ -84,7 +95,7 @@ export interface LoopFinding {
   /** check: a canvas_check lint. reviewer: one of the 6 kinds of reviewer. computed: a measure of the runner that fails (space.ts). */
   source: "check" | "reviewer" | "computed";
   severity: Severity;
-  /** The lint's rule, the reviewer's finding kind, or `space` or `wire` for a computed finding (space.ts ComputedFault). */
+  /** The lint's rule, the reviewer's finding kind, or the kind of a computed finding: `space`, `wire`, `node`, `route` or `note` (space.ts ComputedFault). */
   kind: string;
   ids: string[];
   labels: string[];
@@ -104,14 +115,15 @@ export interface LoopFinding {
   history?: string;
   /** True for a layout finding (isLayout): a decline closes it only when earned. */
   layout?: true;
-  /** The fault as it stands now, in one line, on a layout finding that came back after a decline that closed nothing. The drawer reads it under the finding. */
+  /** Why the finding is back, in one line: after a decline that closed nothing, with the fault as it stands now, or after a deleted wire reopened its decline. The drawer reads it under the finding. */
   facts?: string;
   /**
    * The drawer's answer and the round whose revise pass gave it, or null while
    * it has given none: in its round's revise pass, the re-ask, or a later round's pass.
-   * `earned` is set when it turned a layout finding down: whether that closes it (declineEarned).
+   * `earned` is set when it turned a layout finding down: whether that closes it (declineEarned, nodeDeclineEarned).
+   * `reopened` is set on a decline that stands no more: a later revise pass, or its own, deleted that wire (reopenDeclines).
    */
-  answer: (Answer & { round: number; earned?: boolean }) | null;
+  answer: (Answer & { round: number; earned?: boolean; reopened?: { round: number; wire: string } }) | null;
 }
 
 /** A fault a round found and did not send the drawer. */
@@ -159,6 +171,10 @@ export interface ReviseRecord extends DrawerRun {
   moved: SectionMove[];
   /** The sections whose row, column or neighbours the pass changed (placedSections): what the decline rule counts as a move. */
   placed: string[];
+  /** The wires the pass deleted (deletedWires). */
+  deleted: string[];
+  /** The ids of the findings whose decline a deleted wire reopened (reopenDeclines). */
+  reopened: string[];
 }
 
 /** What one review found (critic.ts), as the loop reads it. */
@@ -280,13 +296,13 @@ const SETTLED_AFTER = 2;
 /** A computed finding goes to the drawer this many times. After that the loop lists it and sends it no more. */
 export const MEASURED_SENDS = 3;
 /** The finding kinds a drawer fixes by moving or resizing things. */
-const LAYOUT_KINDS: ReadonlySet<string> = new Set(["placement", "spacing", "space", "wire"]);
+const LAYOUT_KINDS: ReadonlySet<string> = new Set(["placement", "spacing", "space", "wire", "node"]);
 /** The kinds of a reviewer's finding that a section move can fix. */
 const MOVE_KINDS: ReadonlySet<string> = new Set(["placement", "spacing", "routing"]);
 
 const normal = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-/** disagree and declined both turn a finding down. */
-const turnedDown = (finding: LoopFinding) => finding.answer !== null && finding.answer.verdict !== "fixed";
+/** disagree and declined both turn a finding down. A decline that a deleted wire reopened stands no more. */
+const turnedDown = (finding: LoopFinding) => finding.answer !== null && finding.answer.verdict !== "fixed" && !finding.answer.reopened;
 const withReason = (finding: LoopFinding) => turnedDown(finding) && finding.answer!.reason.trim().length > 0;
 /**
  * What makes two reviewer findings of different rounds one fault: the kind
@@ -303,14 +319,15 @@ function faultKey(finding: Pick<LoopFinding, "kind" | "ids" | "labels">): string
 /**
  * A layout finding: where a section sits is the fault, so a section move is
  * the fix. The runner's wire findings (a narrow band, a wire through a
- * section, a far wire), the space reviewer's placement, spacing and routing
+ * section, a far wire) and its node findings, where the fix is a node in
+ * another section, the space reviewer's placement, spacing and routing
  * findings, and any reviewer's finding of those kinds on sections alone (a
  * store before the stages that feed it) or on a wire between 2 sections that
  * crosses a wire, runs through a section or is long (space.ts LayoutFacts).
  * An empty block is not one: no decline closes it.
  */
 export function isLayout(finding: Pick<LoopFinding, "source" | "kind" | "ids" | "regions">, layout: LayoutFacts | undefined): boolean {
-  if (finding.source === "computed") return finding.kind === "wire";
+  if (finding.source === "computed") return finding.kind === "wire" || finding.kind === "node";
   if (finding.source !== "reviewer" || !MOVE_KINDS.has(finding.kind)) return false;
   return finding.regions.includes(SPACE_UNIT) || finding.ids.some((id) => layout?.wires[id] !== undefined)
     || (finding.ids.length > 0 && finding.ids.every((id) => layout?.sections[id] !== undefined));
@@ -368,6 +385,65 @@ export function declineEarned(finding: Pick<LoopFinding, "source" | "ids" | "sta
   return better(sum(before.numbers[numbers]), sum(after.numbers[numbers]));
 }
 
+/** The ids that the `move`, `arrange` and `arrange_section` calls of a drawer pass named, from its transcript. */
+export function movedByCalls(jsonl: string): string[] {
+  const ids = new Set<string>();
+  const strings = (value: unknown): string[] => typeof value === "string" ? [value] : value && typeof value === "object" ? Object.values(value).flatMap(strings) : [];
+  for (const line of jsonl.split("\n")) {
+    if (!line.trim()) continue;
+    let event: { type?: string; message?: { content?: unknown } };
+    try { event = JSON.parse(line) as typeof event; } catch { continue; }
+    if (event.type !== "assistant" || !Array.isArray(event.message?.content)) continue;
+    for (const block of event.message.content as Array<{ type?: string; name?: string; input?: unknown }>) {
+      if (block.type === "tool_use" && /__(move|arrange|arrange_section)$/.test(block.name ?? "")) for (const id of strings(block.input)) ids.add(id);
+    }
+  }
+  return [...ids];
+}
+
+/**
+ * Whether a decline of a node finding closes it: the pass made a move call
+ * on the node (`tried`: movedByCalls), and the answer gives 2 numbers or
+ * more, the lengths before and after. Round 5 cycle 4: all 3 drawers declined
+ * the wire findings of such a node on what a section move would cost, and
+ * none measured a move of the node. A section move earns nothing here.
+ */
+export function nodeDeclineEarned(finding: Pick<LoopFinding, "ids">, tried: string[], reason: string): boolean {
+  return tried.includes(finding.ids[0]!) && (reason.match(/(?<![\w-])\d{2,}/g) ?? []).length >= 2;
+}
+
+/** A wire a drawer pass deleted. `names`: the wire, its 2 end nodes, and the other wires that ended on one of them. */
+export interface DeletedWire { id: string; from: string; to: string; names: string[] }
+
+/** The wires of `before` that `after` has neither under their id nor between their 2 ends. */
+export function deletedWires(before: WireFact[], after: WireFact[]): DeletedWire[] {
+  return before.filter((old) => !after.some((fact) => fact.id === old.id || (fact.from === old.from && fact.to === old.to))).map((old) => ({
+    id: old.id, from: old.from, to: old.to,
+    names: [old.id, old.from, old.to, ...before.filter((fact) => fact !== old && [fact.from, fact.to].some((end) => end === old.from || end === old.to)).map((fact) => fact.id)],
+  }));
+}
+
+/**
+ * A deleted wire reopens each decline that stands on it. Round 5 cycle 4, h3:
+ * round 1 deleted the 2 wires from the failure nodes to the client, and its
+ * decline of the far wires into those nodes ("the failure ends now sit ...
+ * next to the client") stood to the end. Each finding the drawer turned down
+ * that names the wire, one of its end nodes or another wire of those nodes
+ * gets `reopened` on its answer: the decline holds and settles nothing more
+ * (turnedDown), a lint or a computed finding goes to the drawer again, and
+ * the reviewers no longer read it as declined. Returns the ids it reopened.
+ */
+function reopenDeclines(ledger: LoopFinding[], deleted: DeletedWire[], round: number): string[] {
+  const ids = new Set<string>();
+  for (const finding of ledger) {
+    const wire = turnedDown(finding) && deleted.find((each) => each.names.some((id) => finding.ids.includes(id)));
+    if (!wire) continue;
+    finding.answer!.reopened = { round, wire: wire.id };
+    ids.add(finding.id);
+  }
+  return [...ids];
+}
+
 /** How many revise passes turned these findings down. 2 findings one pass declined are one decline. */
 const declines = (findings: LoopFinding[]) => new Set(findings.filter(turnedDown).map((finding) => finding.answer!.round)).size;
 /**
@@ -400,6 +476,12 @@ function returningOf(ledger: LoopFinding[], previous: Pick<RoundRecord, "finding
 
 /** The line of facts under a layout finding that came back. */
 const returnLine = (last: LoopFinding, facts: string) => `your decline in round ${last.answer!.round} changed no section's row, column or neighbours, and did not make this finding's number 20% better. ${sentence(facts)}`;
+/** The line of facts under a node finding that came back. */
+const nodeReturnLine = (last: LoopFinding) => `your decline in round ${last.answer!.round} closed nothing: that turn made no move call on ${last.ids[0]}, or its answer did not give the 2 sums in px.`
+  + " Make the move, route the wires, read their lengths, and answer with both sums.";
+/** The line of facts under a lint or a computed finding that a deleted wire brought back. */
+const reopenedLine = ({ round, wire }: { round: number; wire: string }) => `the revise pass of round ${round} deleted wire ${wire}. Your decline stood on the board that had that wire, so it stands no more.`
+  + " Look at this finding on the board as it is now.";
 
 /**
  * The reversal guard. A layout finding on the items of a layout finding the
@@ -434,9 +516,10 @@ function historyOf(ledger: LoopFinding[], fresh: Pick<LoopFinding, "kind" | "ids
  * A computed finding keeps its id while its measure fails, from round to
  * round: `previous` is the round before. A measure that passes closes it, and
  * the same fault back on the board is a new finding. No answer settles
- * or holds a `space` one: round 5 closed real faults on a decline (h1: 8 wires
- * in a 280 px gap that the rule gives 340). An earned decline settles a `wire`
- * one (declineEarned). After a decline that closed nothing it comes back with
+ * or holds a `space`, `route` or `note` one: round 5 closed real faults on a
+ * decline (h1: 8 wires in a 280 px gap that the rule gives 340). An earned
+ * decline settles a `wire` one (declineEarned) and a `node` one
+ * (nodeDeclineEarned). After a decline that closed nothing it comes back with
  * its line of facts. It is sent MEASURED_SENDS times, so it cannot run the
  * loop to its last round alone. After that it is stuck: listed in `withheld`
  * with the drawer's last answer, and not sent.
@@ -480,7 +563,7 @@ export function roundFindings(
     if (round > 1 && fresh.severity === "should" && !knownItems.has(items(fresh))) grace += SCORE_WEIGHT[fresh.severity];
     const why = declines(before.filter(withReason)) >= SETTLED_AFTER ? "settled" : last && withReason(last) && last.state === lint.state ? "held" : null;
     if (why && last) withheld.push({ id: last.id, source: "check", severity: fresh.severity, kind: fresh.kind, ids: fresh.ids, problem: fresh.problem, why });
-    else findings.push({ id: last?.id ?? `F${next++}`, ...fresh });
+    else findings.push({ id: last?.id ?? `F${next++}`, ...fresh, ...(last?.answer?.reopened ? { facts: reopenedLine(last.answer.reopened) } : {}) });
   }
   const history = (fresh: Omit<LoopFinding, "id">) => {
     const line = historyOf(ledger, fresh);
@@ -494,7 +577,7 @@ export function roundFindings(
     const fresh: Omit<LoopFinding, "id"> = {
       source: "computed", severity: "should", kind: fault.kind,
       ids: fault.ids, labels: [], problem: fault.problem, suggestion: "", regions: [SPACE_UNIT], marks: [{ unit: SPACE_UNIT, marks: fault.marks }], state: fault.key,
-      ...(fault.block ? { block: fault.block } : {}), ...(fault.kind === "wire" ? { layout: true } : {}), answer: null,
+      ...(fault.block ? { block: fault.block } : {}), ...(isLayout({ source: "computed", kind: fault.kind, ids: fault.ids, regions: [] }, undefined) ? { layout: true } : {}), answer: null,
     };
     // A measure that passed closed its finding: the same fault back on the board is a new one, with its history.
     const measured = ledger.filter((finding) => finding.source === "computed" && finding.state === fault.key && onBoard(finding.id));
@@ -507,15 +590,18 @@ export function roundFindings(
     const last = before.at(-1);
     if (last) placed.add(last.id);
     score += SCORE_WEIGHT[fresh.severity];
-    const earned = last?.answer?.earned;
-    if (last && (earned || before.length >= MEASURED_SENDS)) {
+    const reopened = last?.answer?.reopened;
+    const earned = reopened ? undefined : last?.answer?.earned;
+    // Why it is back: a deleted wire reopened its decline, or the decline closed nothing.
+    const facts = reopened ? reopenedLine(reopened) : earned !== false ? undefined : fault.kind === "node" ? nodeReturnLine(last!) : fault.facts && returnLine(last!, fault.facts);
+    if (last && !reopened && (earned || before.length >= MEASURED_SENDS)) {
       const answer = last.answer && { verdict: last.answer.verdict, reason: last.answer.reason };
       withheld.push({
         id: last.id, source: "computed", severity: fresh.severity, kind: fresh.kind, ids: fresh.ids, problem: fresh.problem, why: earned ? "settled" : "stuck", answer,
         ...(fault.block ? { block: fault.block } : {}), ...(fresh.layout ? { layout: true } : {}),
       });
     // A finding that keeps its id was on the board before the fix of any other: it is no reversal.
-    } else findings.push(last ? { id: last.id, ...fresh, ...(earned === false && fault.facts ? { facts: returnLine(last, fault.facts) } : {}) } : { id: `F${next++}`, ...fresh, ...history(fresh) });
+    } else findings.push(last ? { id: last.id, ...fresh, ...(facts ? { facts } : {}) } : { id: `F${next++}`, ...fresh, ...history(fresh) });
   }
   const { layout } = review;
   /** The faults that came back, by fault key: a reviewer's new finding of one is the same fault. */
@@ -607,15 +693,16 @@ export function reviseMessage(board: string, findings: LoopFinding[], notes: Par
   // The sort is stable: each group stays most severe first.
   const ordered = [...findings].sort((a, b) => Number(space(b)) - Number(space(a)));
   const blocks = ordered.flatMap((finding) => {
-    if (finding.source === "check") return [findingLine(finding)];
+    if (finding.source === "check") return [findingLine(finding), ...(finding.facts ? [`  facts: ${finding.facts}`] : [])];
     const shown = images.flatMap((image, index) => image.findings.includes(finding.id) ? [`image ${index + 1}`] : []);
     return [
       findingLine(finding),
-      `  ${finding.source === "computed" ? "measured by the runner on the board file" : `from ${finding.regions.join(", ")}`}${finding.layout ? " · layout finding" : ""}${shown.length ? ` · ${shown.join(", ")}` : ""}`,
+      `  ${finding.source === "computed" ? "measured by the runner on the board file" : `from ${finding.regions.join(", ")}`}${finding.kind === "node" && finding.source === "computed" ? " · node finding" : finding.layout ? " · layout finding" : ""}${shown.length ? ` · ${shown.join(", ")}` : ""}`,
       ...(finding.history ? [`  history: ${finding.history}`] : []),
       ...(finding.facts ? [`  facts: ${finding.facts}`] : []),
     ];
   });
+  const node = (finding: LoopFinding) => finding.source === "computed" && finding.kind === "node";
   const text = [
     "Reviewers looked at your board: the canvas_check lints, and reviewers that each read one part: a section, the gaps between sections at full size, the wires between sections,"
     + " where the sections sit (`space`), the choices of colour, shape and icon against the brief, and the items in no section. Their findings are below, most severe first.",
@@ -626,9 +713,16 @@ export function reviseMessage(board: string, findings: LoopFinding[], notes: Par
     "A fix must not resize a section past its content, merge nodes, or grow an empty block. After you move a section, close the space it left.",
     ...(ordered.some((finding) => finding.source === "computed") ? [
       "A `measured` finding is a number the runner computed on the board file: an empty block, a section that is mostly empty, a band between sections that is too narrow or too wide,"
-      + " a wire through a section that holds neither of its ends, a far wire. A decline does not close a `measured space` finding: it comes back until the number passes.",
+      + " a wire through a section that holds neither of its ends, a far wire, a wire along a border, or what your last pass made worse: a wire it made longer, a note it left far from what it names."
+      + " A decline does not close a `measured space` finding: it comes back until the number passes.",
     ] : []),
-    ...(ordered.some((finding) => finding.layout) ? [
+    ...(ordered.some(node) ? [
+      "A `node finding` names a node whose wires say it sits in the wrong section, with the length of each wire now and an estimate of it with the node in the other section."
+      + " Make the move it names with `move`, route the node's wires again and read their lengths. Then keep the move, or undo it."
+      + " A decline closes such a finding only when this turn made that move on the board and your answer gives both sums in px: before the move and after it."
+      + " The runner reads your tool calls. Any other decline brings the finding back in the next round.",
+    ] : []),
+    ...(ordered.some((finding) => finding.layout && !node(finding)) ? [
       "A `layout finding` is a fault of where the sections sit: a crossing or a long wire between sections, a wire through a section, a band too narrow for its lanes."
       + " Move a section before you route or decline: swap 2 neighbours, or change the row or the column of one."
       + " A decline closes such a finding only when this turn changed the row, the column or a neighbour of a section it is about,"
@@ -637,7 +731,7 @@ export function reviseMessage(board: string, findings: LoopFinding[], notes: Par
       "Any other decline brings the finding back in the next round, with its facts.",
     ] : []),
     ...(ordered.some((finding) => finding.facts) ? [
-      "A `facts` line under a finding says why it is back, and how the fault stands now: the wire's length and the sections between its ends.",
+      "A `facts` line under a finding says why it is back, and how the fault stands now.",
     ] : []),
     ...(ordered.some(space) ? [
       "The `measured` findings and the findings from the `space` reviewer come first. They are fixed by moving or resizing whole sections: `arrange`, `move`, `place_section`, `fit_section`."
@@ -752,8 +846,10 @@ export async function reviewLoop(options: {
   /** The drawer's rethink turn, before round 1. */
   rethink?(): Promise<RethinkRecord>;
   review(round: number, earlier: EarlierFinding[]): Promise<Review>;
-  /** `layout`: what the decline rule reads of the board the pass left (space.ts LayoutFacts). */
-  revise?(round: number, findings: LoopFinding[], notes: ReviseNotes): Promise<{ run: DrawerRun; reply: string; images?: number; moved?: SectionMove[]; layout?: LayoutFacts }>;
+  /** `layout`: what the decline rule reads of the board the pass left (space.ts LayoutFacts). `tried`: the ids its move calls named (movedByCalls). `deleted`: the wires it deleted. */
+  revise?(round: number, findings: LoopFinding[], notes: ReviseNotes): Promise<{
+    run: DrawerRun; reply: string; images?: number; moved?: SectionMove[]; layout?: LayoutFacts; tried?: string[]; deleted?: DeletedWire[];
+  }>;
   reask?(round: number, ids: string[]): Promise<{ run: DrawerRun; reply: string }>;
   restore?(round: number): void;
   /** One more revise turn on the restored board, for the fixes the restore lost, and what the code checks find on the board it leaves. */
@@ -809,24 +905,29 @@ export async function reviewLoop(options: {
         unreviewed = true;
         const sent = [...findings, ...carried];
         const tally = () => ({ answered: findings.filter((finding) => finding.answer).length, unanswered: idsOf(sent.filter((finding) => !finding.answer)) });
-        const { run, reply, images = 0, moved = [], layout: after } = await options.revise(round, findings, notes);
+        const { run, reply, images = 0, moved = [], layout: after, tried = [], deleted = [] } = await options.revise(round, findings, notes);
         const take = (reply: string) => {
           const answers = parseAnswers(reply);
           for (const finding of sent) {
             const answer = answers.get(finding.id);
             if (finding.answer || !answer) continue;
             // A decline of a layout finding closes it only when earned.
-            const earned = finding.layout && answer.verdict !== "fixed" ? { earned: declineEarned(finding, review.layout, after) } : {};
+            const closes = () => finding.source === "computed" && finding.kind === "node" ? nodeDeclineEarned(finding, tried, answer.reason) : declineEarned(finding, review.layout, after);
+            const earned = finding.layout && answer.verdict !== "fixed" ? { earned: closes() } : {};
             finding.answer = { ...answer, round, ...earned };
           }
+          // A decline of this pass too: the pass that gave it deleted the wire.
+          return reopenDeclines(ledger(), deleted, round);
         };
-        take(reply);
+        const reopened = take(reply);
         // The record stands before the second ask, so a second ask that throws does not lose the ids.
-        const revise: ReviseRecord = record.revise = { ...run, ...tally(), images, reask: null, moved, placed: after ? placedSections(review.layout, after) : [] };
+        const revise: ReviseRecord = record.revise = {
+          ...run, ...tally(), images, reask: null, moved, placed: after ? placedSections(review.layout, after) : [], deleted: deleted.map((wire) => wire.id), reopened,
+        };
         if (revise.unanswered.length > 0 && run.exitCode === 0 && options.reask) {
           const ids = revise.unanswered;
           const second = await options.reask(round, ids);
-          take(second.reply);
+          reopened.push(...take(second.reply));
           Object.assign(revise, tally(), { reask: { ...second.run, ids } });
         }
         if (run.rateLimited) broken = { stop: "rate-limited", error: `round ${round}: the revise pass hit a rate limit on each of its ${run.tries} tries` };
@@ -939,10 +1040,13 @@ export function ledgerText(record: LoopRecord): string {
     ...round.findings.flatMap((finding) => [
       findingLine(finding),
       ...(finding.facts ? [`  facts: ${finding.facts}`] : []),
-      ...(finding.answer ? [`  → ${finding.answer.verdict}${finding.answer.reason ? `: ${finding.answer.reason}` : ""}${finding.answer.earned === false ? " (closes nothing: no section changed its row, column or neighbours, and its number is not 20% better)" : ""}`] : round.revise ? ["  → no answer"] : []),
+      ...(finding.answer ? [`  → ${finding.answer.verdict}${finding.answer.reason ? `: ${finding.answer.reason}` : ""}${finding.answer.earned !== false ? "" : finding.source === "computed" && finding.kind === "node" ? " (closes nothing: the pass made no move call on the node, or the answer gives no 2 numbers)"
+        : " (closes nothing: no section changed its row, column or neighbours, and its number is not 20% better)"}`
+        + `${finding.answer.reopened ? ` (reopened: round ${finding.answer.reopened.round} deleted wire ${finding.answer.reopened.wire})` : ""}`] : round.revise ? ["  → no answer"] : []),
     ]),
     ...(round.revise?.moved.length ? [`Sections moved in the revise pass: ${round.revise.moved.map((move) => `${move.id} (${move.dx}, ${move.dy})`).join(", ")}`] : []),
     ...(round.revise?.placed.length ? [`Sections that changed row, column or neighbours in the revise pass: ${round.revise.placed.join(", ")}`] : []),
+    ...(round.revise?.deleted.length ? [`Wires the revise pass deleted: ${round.revise.deleted.join(", ")}${round.revise.reopened.length ? ` · declines reopened: ${round.revise.reopened.join(", ")}` : ""}`] : []),
     ...round.withheld.map((fault) => `Not sent (${fault.why}): ${withheldLine(fault)}`),
     "",
   ]);
@@ -1019,6 +1123,11 @@ export async function reviewBoard(options: {
   let critique: CritiqueRecord | null = null;
   /** What the runner measures on the board file as it stands. */
   const measured = () => checkBoard(canvas, canvas.toolkit.openCanvasFile(boardPath));
+  /** The board a round reviewed, as the regression guard reads it (guard.ts). */
+  const readingOf = (round: number) => {
+    const file = canvas.toolkit.openCanvasFile(reviewed(round));
+    return { board: file.persisted as Board, facts: wireFacts(canvas.wires, file) };
+  };
   /** The sections a drawer pass moved, from the board `round` reviewed to the board file as it stands. */
   const movedSince = (round: number, now = measured()) =>
     sectionMoves(canvas.toolkit.openCanvasFile(reviewed(round)).persisted as Board, now.board, now.plan.pageFrame?.id ?? null);
@@ -1050,7 +1159,8 @@ export async function reviewBoard(options: {
     review: async (round, earlier) => {
       mkdirSync(roundDir(round), { recursive: true });
       copyFileSync(boardPath, reviewed(round));
-      critique = await critiqueBoard({ canvas, boardPath, outDir: roundDir(round), critic, brief: options.brief, earlier });
+      // The round before sent its board to a revise pass, or reviewed this same board again.
+      critique = await critiqueBoard({ canvas, boardPath, outDir: roundDir(round), critic, brief: options.brief, earlier, before: round > 1 ? readingOf(round - 1) : null });
       process.stdout.write(`${label}: review ${round} · ${critiqueSummary(critique)}\n`);
       return reviewOf(critique);
     },
@@ -1061,10 +1171,14 @@ export async function reviewBoard(options: {
         units: critique!.regions.map((region) => ({ id: region.region.id, kind: region.kind, rect: region.region, crops: region.crops })),
         findings, outDir: resolve(roundDir(round), "highlights"),
       });
-      const revise = await pass(reviseMessage(board, findings, { ...notes, images }), resolve(roundDir(round), "revise-transcript.jsonl"));
+      const transcript = resolve(roundDir(round), "revise-transcript.jsonl");
+      const revise = await pass(reviseMessage(board, findings, { ...notes, images }), transcript);
       passed(`revise ${round}`, revise.run);
       const now = measured();
-      return { ...revise, images: images.length, moved: movedSince(round, now), layout: now.plan.layout };
+      return {
+        ...revise, images: images.length, moved: movedSince(round, now), layout: now.plan.layout,
+        tried: movedByCalls(readFileSync(transcript, "utf8")), deleted: deletedWires(wireFacts(canvas.wires, file), now.facts),
+      };
     }),
     reask: pass && (async (round, ids) => {
       const reask = await pass([reaskPrompt(ids)], resolve(roundDir(round), "revise-reask-transcript.jsonl"));

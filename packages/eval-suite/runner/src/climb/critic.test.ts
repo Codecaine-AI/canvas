@@ -264,8 +264,9 @@ describe("climb review prompts", () => {
     expect(prompt).not.toContain("ends on a section frame and not on a node");
     expect(prompt).toContain(
       "The runner sends the drawer each of these as its own finding. Do not report one of them again"
-      + ` (wires through a section that holds neither end, wires over 1500 px between sections that are not neighbours, bands too narrow for their lanes):\n${through}`);
-    expect(wirePrompt({ ...wire, computed: [] })).toContain("bands too narrow for their lanes):\n(none)");
+      + ` (wires through a section that holds neither end, wires over 1500 px between sections that are not neighbours, bands too narrow for their lanes,`
+      + ` wires nearer than 40 px to a border along 300 px or more, wires the last pass made longer):\n${through}`);
+    expect(wirePrompt({ ...wire, computed: [] })).toContain("wires the last pass made longer):\n(none)");
   });
 
   test("a reviewer that reads wires reports a line that wires of different dash or colour share, and never words close lanes of such wires as a merge", () => {

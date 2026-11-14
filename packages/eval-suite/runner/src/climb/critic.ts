@@ -28,6 +28,7 @@ import { Semaphore } from "../semaphore.ts";
 import { isRateLimitText, retryRateLimited } from "./backoff.ts";
 import { CROP_MAX_WIDTH, renderCropPng } from "./crop.ts";
 import { gapCoverage, gapCropLines, gapCrops, gapUnits, wiresIn } from "./gaps.ts";
+import { regressions, type Reading } from "./guard.ts";
 import { CANVAS_REPO_ROOT } from "./paths.ts";
 import { loadCanvas, renderBoardPng, type CanvasFile, type CanvasModules, type Lint, type WorldRect } from "./render.ts";
 import {
@@ -37,7 +38,7 @@ import {
   untagWires, wireSheetLines,
   type Board, type Mark, type ReviewUnit, type ReviewerKind, type WireRow,
 } from "./review-inputs.ts";
-import { FAR_WIRE_PX, gapLine, gapRule, planOf, type ComputedFault, type LayoutFacts, type Plan } from "./space.ts";
+import { BORDER_LANE_PX, BORDER_RUN_PX, FAR_WIRE_PX, gapLine, gapRule, planOf, type ComputedFault, type LayoutFacts, type Plan } from "./space.ts";
 import { boardTotals, loadWireModules, sectionHeaders, wireFacts, type WireFact, type WireModules } from "./wires.ts";
 
 export const CRITIC_MODEL = "gpt-6.1-sol";
@@ -420,7 +421,8 @@ export function wirePrompt(text: WireText): string {
     ...notesBlocks(text.notes),
     ...block(`Wire sheet (${WIRE_SHEET_KEY}; kind is the 2 parts the wire joins):`, text.wires),
     ...block("Measured on your wires:", text.wireMeasures.map((line) => `measured: ${line}`)),
-    ...block(`${SENT_BY_RUNNER} (wires through a section that holds neither end, wires over ${FAR_WIRE_PX} px between sections that are not neighbours, bands too narrow for their lanes):`, text.computed),
+    ...block(`${SENT_BY_RUNNER} (wires through a section that holds neither end, wires over ${FAR_WIRE_PX} px between sections that are not neighbours, bands too narrow for their lanes,`
+      + ` wires nearer than ${BORDER_LANE_PX} px to a border along ${BORDER_RUN_PX} px or more, wires the last pass made longer):`, text.computed),
     ...block("Board totals:", [text.totals]),
   ].join("\n");
 }
@@ -731,7 +733,10 @@ export interface CritiqueRecord {
   gap: { chips: number; covered: number; crops: number };
   /** The reviewers' findings, merged. */
   findings: MergedFinding[];
-  /** What fails the runner's own measures of the board (space.ts planOf): empty space, thin sections, bands too narrow or too wide, wires through a section, far wires. */
+  /**
+   * What fails the runner's own measures of the board (space.ts planOf): empty space, thin sections, bands too narrow or too wide, nodes in the wrong section,
+   * wires through a section, far wires, wires along a border. Then what the last drawer pass made worse (guard.ts): wires it made longer, notes it left far from what they name.
+   */
   computed: ComputedFault[];
   /** What the loop needs to judge a decline of a layout finding (space.ts layoutFacts). */
   layout: LayoutFacts;
@@ -860,6 +865,8 @@ export async function critiqueBoard(options: {
   brief?: string | null;
   /** Earlier rounds' findings the drawer declined. Each goes to the units that hold one of its items, or that reported it. */
   earlier?: EarlierFinding[];
+  /** The board before the drawer pass this review follows, for the regression guard (guard.ts). Null or undefined: no pass came before. */
+  before?: Reading | null;
 }): Promise<CritiqueRecord> {
   const { canvas, boardPath, outDir } = options;
   const earlier = options.earlier ?? [];
@@ -872,6 +879,8 @@ export async function critiqueBoard(options: {
 
   const file: CanvasFile = canvas.toolkit.openCanvasFile(boardPath);
   const { board, facts, lints, plan } = checkBoard(canvas, file);
+  /** The measures that fail on the board, then what the last pass made worse. */
+  const computed = [...plan.faults, ...(options.before ? regressions(options.before, { board, facts }) : [])];
   const style = file.session.canvasStyle;
   const effort = options.critic.effort ?? reviewerEffort(board);
   const totals = boardTotals(canvas.wires, file).text;
@@ -998,7 +1007,7 @@ export async function critiqueBoard(options: {
       const stickies = board.objects.filter((object) => object.type === "sticky" && object.geometry);
       const images = [save("1-board.png", overview.png), save("2-map.png", png(sectionMapSvg(units, facts, camera, overview.size.width, stickies)))];
       const prompt = spacePrompt({
-        scale, ...spaceLines(units, facts, board), sections: sectionLines(units), bands: plan.gaps.map((gap) => gapLine(gap, gapRule(canvas.wires))), measured: plan.faults.map((fault) => fault.problem), totals, notes: notes(new Set(), []),
+        scale, ...spaceLines(units, facts, board), sections: sectionLines(units), bands: plan.gaps.map((gap) => gapLine(gap, gapRule(canvas.wires))), measured: computed.map((fault) => fault.problem), totals, notes: notes(new Set(), []),
       });
       return { unit, dir, images, prompt, wires: facts.length };
     }
@@ -1015,7 +1024,7 @@ export async function critiqueBoard(options: {
       ];
       const holds = new Set(rows.map((row) => row.fact.id));
       const prompt = wirePrompt({
-        scale, wires: wireSheetLines(rows), wireMeasures: wireMeasureLines(rows, wireContext), computed: plan.faults.filter((fault) => fault.kind === "wire").map((fault) => fault.problem),
+        scale, wires: wireSheetLines(rows), wireMeasures: wireMeasureLines(rows, wireContext), computed: computed.filter((fault) => fault.kind === "wire" || fault.kind === "route").map((fault) => fault.problem),
         totals, notes: notes(holds, lintsAt(holds).map(lintLine)),
       });
       return { unit, dir, images, prompt, wires: rows.length, rows };
@@ -1091,7 +1100,7 @@ export async function critiqueBoard(options: {
     regions,
     gap: { ...gapCoverage(board, pageFrame, facts, crops), crops: crops.length },
     findings,
-    computed: plan.faults,
+    computed,
     layout: plan.layout,
   };
   writeFileSync(resolve(outDir, "critique.json"), `${JSON.stringify(record, null, 2)}\n`);
