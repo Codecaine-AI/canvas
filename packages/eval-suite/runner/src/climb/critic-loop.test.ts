@@ -1090,6 +1090,9 @@ describe("critic loop node findings", () => {
     expect(earned([], "moved hub into sec_b: the sum went 600 → 940 px, so I moved it back")).toBe(false);
     expect(earned(["sec_a"], "moved sec_a beside sec_b: the sum went 600 → 440 px")).toBe(false);
     expect(earned(["hub"], "the brief puts the hub in sec_a")).toBe(false);
+    // One length with a thousands mark is one number.
+    expect(earned(["hub"], "moved hub into sec_b and back: the sum came to 10,239 px")).toBe(false);
+    expect(earned(["hub"], "moved hub into sec_b and back: 10,239 → 11,020 px")).toBe(true);
     // An id is no number: w-12 and F7.
     expect(earned(["hub"], "moved hub and back: w-12 got 300 px longer, see F17")).toBe(false);
   });
@@ -1136,6 +1139,10 @@ describe("critic loop deleted wires", () => {
     // e3 came back under a new id, between the same 2 nodes: it is no deleted wire.
     expect(deletedWires(before, [before[1]!, wire("e9", "a", "b", []), before[3]!])).toEqual([{ id: "e1", from: "n_vfail", to: "client", names: ["e1", "n_vfail", "client", "e2"] }]);
     expect(deletedWires(before, before)).toEqual([]);
+    // One of 2 wires between the same 2 nodes is a deleted wire, and a new wire stands for one old wire only.
+    const twin = [wire("t1", "a", "b", []), wire("t2", "a", "b", [])];
+    expect(deletedWires(twin, [twin[1]!]).map((gone) => gone.id)).toEqual(["t1"]);
+    expect(deletedWires(twin, [wire("t9", "a", "b", [])]).map((gone) => gone.id)).toEqual(["t2"]);
   });
 
   test("a deleted wire reopens each decline on the wire, its end nodes or their other wires: a held lint and a settled finding go to the drawer again", async () => {

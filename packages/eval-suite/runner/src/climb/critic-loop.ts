@@ -404,20 +404,26 @@ export function movedByCalls(jsonl: string): string[] {
 /**
  * Whether a decline of a node finding closes it: the pass made a move call
  * on the node (`tried`: movedByCalls), and the answer gives 2 numbers or
- * more, the lengths before and after. Round 5 cycle 4: all 3 drawers declined
+ * more, the lengths before and after: `10,239` is one. Round 5 cycle 4: all 3 drawers declined
  * the wire findings of such a node on what a section move would cost, and
  * none measured a move of the node. A section move earns nothing here.
  */
 export function nodeDeclineEarned(finding: Pick<LoopFinding, "ids">, tried: string[], reason: string): boolean {
-  return tried.includes(finding.ids[0]!) && (reason.match(/(?<![\w-])\d{2,}/g) ?? []).length >= 2;
+  return tried.includes(finding.ids[0]!) && (reason.match(/(?<![\w,.-])\d[\d,.]*\d/g) ?? []).length >= 2;
 }
 
 /** A wire a drawer pass deleted. `names`: the wire, its 2 end nodes, and the other wires that ended on one of them. */
 export interface DeletedWire { id: string; from: string; to: string; names: string[] }
 
-/** The wires of `before` that `after` has neither under their id nor between their 2 ends. */
+/** The wires of `before` that `after` has neither under their id nor, each under one new id, between their 2 ends. */
 export function deletedWires(before: WireFact[], after: WireFact[]): DeletedWire[] {
-  return before.filter((old) => !after.some((fact) => fact.id === old.id || (fact.from === old.from && fact.to === old.to))).map((old) => ({
+  const fresh = after.filter((fact) => !before.some((old) => old.id === fact.id));
+  const redrawn = (old: WireFact) => {
+    const at = fresh.findIndex((fact) => fact.from === old.from && fact.to === old.to);
+    if (at >= 0) fresh.splice(at, 1);
+    return at >= 0;
+  };
+  return before.filter((old) => !after.some((fact) => fact.id === old.id) && !redrawn(old)).map((old) => ({
     id: old.id, from: old.from, to: old.to,
     names: [old.id, old.from, old.to, ...before.filter((fact) => fact !== old && [fact.from, fact.to].some((end) => end === old.from || end === old.to)).map((fact) => fact.id)],
   }));
