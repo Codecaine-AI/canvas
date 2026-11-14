@@ -50,7 +50,7 @@
  * also compares the board with the one before it (guard.ts): a wire the pass
  * made longer and a note it left far from what it names are computed
  * findings of the next round. And a wire the pass deleted reopens each
- * decline on that wire, its end nodes or their other wires (reopenDeclines):
+ * decline on that wire or its end nodes (reopenDeclines):
  * the board the decline stood on is gone.
  *
  * The review starts by code each time a revise pass ends. The loop stops at
@@ -412,8 +412,8 @@ export function nodeDeclineEarned(finding: Pick<LoopFinding, "ids">, tried: stri
   return tried.includes(finding.ids[0]!) && (reason.match(/(?<![\w,.-])\d[\d,.]*\d/g) ?? []).length >= 2;
 }
 
-/** A wire a drawer pass deleted. `names`: the wire, its 2 end nodes, and the other wires that ended on one of them. */
-export interface DeletedWire { id: string; from: string; to: string; names: string[] }
+/** A wire a drawer pass deleted, with its 2 end nodes. */
+export interface DeletedWire { id: string; from: string; to: string }
 
 /** The wires of `before` that `after` has neither under their id nor, each under one new id, between their 2 ends. */
 export function deletedWires(before: WireFact[], after: WireFact[]): DeletedWire[] {
@@ -423,26 +423,24 @@ export function deletedWires(before: WireFact[], after: WireFact[]): DeletedWire
     if (at >= 0) fresh.splice(at, 1);
     return at >= 0;
   };
-  return before.filter((old) => !after.some((fact) => fact.id === old.id) && !redrawn(old)).map((old) => ({
-    id: old.id, from: old.from, to: old.to,
-    names: [old.id, old.from, old.to, ...before.filter((fact) => fact !== old && [fact.from, fact.to].some((end) => end === old.from || end === old.to)).map((fact) => fact.id)],
-  }));
+  return before.filter((old) => !after.some((fact) => fact.id === old.id) && !redrawn(old)).map((old) => ({ id: old.id, from: old.from, to: old.to }));
 }
 
 /**
  * A deleted wire reopens each decline that stands on it. Round 5 cycle 4, h3:
  * round 1 deleted the 2 wires from the failure nodes to the client, and its
- * decline of the far wires into those nodes ("the failure ends now sit ...
- * next to the client") stood to the end. Each finding the drawer turned down
- * that names the wire, one of its end nodes or another wire of those nodes
- * gets `reopened` on its answer: the decline holds and settles nothing more
+ * decline on those nodes ("the failure ends now sit ... next to the client")
+ * stood to the end. Each finding the drawer turned down that names the wire
+ * or one of its end nodes gets `reopened` on its answer. Another wire of an
+ * end node reopens nothing: on a dense board one hub would reopen half the
+ * ledger. The decline the decline holds and settles nothing more
  * (turnedDown), a lint or a computed finding goes to the drawer again, and
  * the reviewers no longer read it as declined. Returns the ids it reopened.
  */
 function reopenDeclines(ledger: LoopFinding[], deleted: DeletedWire[], round: number): string[] {
   const ids = new Set<string>();
   for (const finding of ledger) {
-    const wire = turnedDown(finding) && deleted.find((each) => each.names.some((id) => finding.ids.includes(id)));
+    const wire = turnedDown(finding) && deleted.find((each) => [each.id, each.from, each.to].some((id) => finding.ids.includes(id)));
     if (!wire) continue;
     finding.answer!.reopened = { round, wire: wire.id };
     ids.add(finding.id);
