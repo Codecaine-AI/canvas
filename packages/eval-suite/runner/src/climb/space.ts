@@ -603,7 +603,9 @@ function nodeFaults({ board, links }: Measures, facts: WireFact[], pageFrame: Bo
     const away = wires.filter((wire) => wire.target !== null);
     const targets = [...new Set(away.map((wire) => wire.target!))];
     const estimate = (target: string) => wires.map((wire) => between(byId.get(target)!.geometry, wire.other.geometry));
-    const far = targets.map((target) => away.filter((wire) => wire.target === target && wire.fact.length > FAR_WIRE_PX)).filter((group) => group.length >= 2).sort((a, b) => b.length - a.length)[0];
+    // Of 2 sections with far wires, the one with the least estimate: the order of the wires does not pick it.
+    const far = targets.map((target) => away.filter((wire) => wire.target === target && wire.fact.length > FAR_WIRE_PX)).filter((group) => group.length >= 2)
+      .sort((a, b) => total(estimate(a[0]!.target!)) - total(estimate(b[0]!.target!)))[0];
     const only = wires.length === 1 && away.length === 1 && away[0]!.fact.to === node.id && linkOf.get(away[0]!.fact.id)?.neighbours === false;
     const none = away.length >= 2 && !wires.some((wire) => wire.inOwn);
     if (!far && !only && !none) return [];

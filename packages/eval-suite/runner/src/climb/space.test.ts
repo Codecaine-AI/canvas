@@ -191,6 +191,9 @@ describe("climb node faults", () => {
     // The fault names the 2 far wires. Its number is the sum of the node's 4 wires.
     expect(nodes(far)).toEqual([[`["node","c2"]`, ["c2", "c", "a", "w", "v"], 4000]]);
     expect(nodes(far.map((fact) => fact.id === "v" ? link("v", "a2", "c2", 1500) : fact))).toEqual([]);
+    // 2 far wires into a and 2 into b, with one more wire to b: the node goes to b, in any order of the wires.
+    const both = [link("w", "a1", "c2", 1600), link("v", "a2", "c2", 1700), link("s", "b1", "c2", 1600), link("r", "b2", "c2", 1700), link("t", "c2", "b1", 600)];
+    for (const facts of [both, [...both].reverse()]) expect(nodes(facts).map(([, ids]) => (ids as string[]).slice(0, 3))).toEqual([["c2", "c", "b"]]);
     // The 2 far wires are the node's fault and no far-wire fault. Under a node with no wire to its section, a far wire keeps its own.
     const long = (facts: WireFact[]) => plan(row, facts).faults.filter((fault) => fault.kind === "wire").map((fault) => fault.key);
     expect(long(far)).toEqual([]);
