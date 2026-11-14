@@ -11,7 +11,7 @@
  * edit, so it is not repeated here.
  */
 import { kindOf } from "../../helpers";
-import { heldNodeClashes, isPageSection, pickSectionColor, sectionHue } from "../../section-colors";
+import { type HeldNodeClash, heldNodeClashes, isPageSection, pickSectionColor, sectionHue } from "../../section-colors";
 import { rectOf } from "../geometry";
 
 import type { LayoutRule } from "../types";
@@ -27,6 +27,14 @@ function named(ids: readonly string[]): string {
   return ids.length > MAX_NAMED ? `${shown} +${ids.length - MAX_NAMED}` : shown;
 }
 
+/** "s is teal, as is a in it", "s is green, one color family with a in it", or both. */
+function sameColorMessage(clash: HeldNodeClash): string {
+  const same = clash.held.filter((id) => !clash.near.includes(id));
+  const family = `one color family with ${named(clash.near)}`;
+  if (same.length === 0) return `${clash.section} is ${clash.color}, ${family} in it`;
+  return `${clash.section} is ${clash.color}, as is ${named(same)} in it${clash.near.length > 0 ? `, and ${family}` : ""}`;
+}
+
 export const sameColor: LayoutRule = {
   id: "same-color",
   title: "Same color as its section",
@@ -40,7 +48,7 @@ Fix: change_color the section to the color the finding names.`,
       severity: "warning",
       at: [clash.section, ...clash.held],
       where: rectOf(byId.get(clash.section)!),
-      message: `${clash.section} is ${clash.color}, as is ${named(clash.held)} in it`,
+      message: sameColorMessage(clash),
       suggestion: `change_color ${clash.section} ${clash.suggestion}`,
     }));
   },

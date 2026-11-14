@@ -29,7 +29,6 @@ export const DESIGN_TOPICS: readonly AuthoringTopic[] = [
         | --- | --- |
         | 5 equal boxes with labels | Each concept has a shape that mirrors its behavior |
         | Card grid layout | Visual structure matches conceptual structure |
-        | A plain rectangle for every node | A brand icon for each named product, a glyph for each role, a specific shape for each step |
         | Same container for everything | Distinct visual vocabulary per concept |
         | Everything in a diagram node | Short names, Markdown stickies for prose, and selective section containers |
     </bad_vs_good>
@@ -54,11 +53,11 @@ export const DESIGN_TOPICS: readonly AuthoringTopic[] = [
     </names>
 
     <wire_labels>
-        Label a wire only for a condition, a branch, or a payload the source names. The label says what the wire carries, such as \`order id\` or \`on timeout\`, and never repeats a node or section name. A plain next-step wire has no label.
+        Label a wire only for a condition, a branch, or a payload the source names, such as \`order id\` or \`on timeout\`. A plain next-step wire has no label.
     </wire_labels>
 
     <cover_every_requirement>
-        A reader looks for each component on a node and each behavior on a wire. A node draws only its name, so a fact a reader needs (a size, a tool name) goes in the name, a wire label or a sticky beside the node. A fact only in the board description or a section title counts as missing.
+        A reader looks for each component on a node and each behavior on a wire. A fact only in the board description or a section title counts as missing.
 
         - Before you place anything, list every component, every field or measure, and every behavior with its trigger in the source.
         - Give each component a node.
@@ -85,19 +84,19 @@ export const DESIGN_TOPICS: readonly AuthoringTopic[] = [
     </board_size>
 
     <build_order>
-        Write the plan first: the sections in rows, the subsections in each section, the nodes in each section as rows, the color key, and the wire table: every wire by pair of sections, then the lanes in each band between neighbour sections.
+        Write the plan first: the sections in rows, the subsections in each section, the nodes in each section as rows, the color key, the section pair table with the section order it gives, and the lanes in each band between neighbour sections.
 
-        1. place_section for each section, with its title, icon, and color in one call. Leave room between sections. Step 4 sets it. Place a subsection inside its section, with a color apart from it. page-frame is working room: resize it to hold the plan first, and call fit_section on page-frame last.
+        1. place_section for each section, with its title, icon, and color in one call. page-frame is working room: resize it to hold the plan first, and call fit_section on page-frame last.
         2. place_shape for each node inside its section, with its name, type and color in one call. For a named product, use the brand icon find_icon returns. Keep the default size: ${defaultSize("shape")} for a shape, ${defaultSize("icon")} for an icon. clone a finished node for each peer of the same role.
-        3. arrange_section for each section, with its node ids as rows. It sets the gaps (${CRAFT_TARGETS.nodeGapRow} across a row, ${CRAFT_TARGETS.nodeGapColumn} down a column) and fits the frame, so you write no coordinates. For a section that holds subsections, call arrange_section on each subsection, arrange the subsections with space, then call fit_section on the section.
+        3. arrange_section for each section, with its node ids as rows. It sets the gaps and fits the frame, so you write no coordinates. For a section that holds subsections, call arrange_section on each subsection, arrange the subsections with space, then call fit_section on the section.
         4. arrange each row of sections with space, then arrange the same row with align top. A band needs ${CRAFT_TARGETS.sectionGutterSideBySide} or more: topic \`rules\` has the numbers.
         5. connect every wire, then call tighten_wires once.
         6. Rethink once, as the workflow says.
-        7. canvas_check, then fix its errors. Overlap and integrity are the only checks: overlap is a box on a box, or a section on a section, and integrity fires only when something bypassed the automatic fixes. Wire routes, label chips, text fit, and section fit are automatic.
+        7. canvas_check, then fix its errors.
     </build_order>
 
     <connections>
-        Start each wire at the node that sends and end it at the node that acts. A wire from the wrong participant states a wrong fact. When every node of a subsection receives the same wire, end it on the subsection's frame once. When only some act, connect one wire per node.
+        Start each wire at the node that sends and end it at the node that acts. A wire from the wrong participant states a wrong fact.
 
         Color follows the board's color key: one hue per role, and red only for failures. Read color_palette before you color anything.
     </connections>
@@ -105,7 +104,6 @@ export const DESIGN_TOPICS: readonly AuthoringTopic[] = [
     <returns_retries_and_failures>
         Returns, retries, and failures run against the main flow, so they make the long detours a viewer notices first.
 
-        - Lay out sections in the order the main flow visits them, so the main path runs one way: left to right or top to bottom, from the top or the left.
         - Put the target of a return or retry next to its source, and a failure end (a reject, a dead letter) beside the step that fails.
         - Give every decision and retry all its exits, and draw each failure path to its end.
     </returns_retries_and_failures>

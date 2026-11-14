@@ -23,6 +23,12 @@
  * cycle 3 diagnoses: a band of 820 sized for 11 wires that only cross it,
  * bands the rule asked for counted as empty blocks, 8 wires that start on a
  * frame, notes and the key moved into gaps, and left edges at 116, 68 and 76.
+ * The node-home, order, snake, bus-label, chip-width, border and note rules
+ * answer the cycle 4 diagnoses: nodes whose only wires come from another
+ * section (2820 px), a hub above a 2 by 2 block of its groups, a 2182 px wrap
+ * wire (builds/r5/gates5/guidance/snake.txt measures the turn against it), 3
+ * labels deleted to split a bus, a 420 px chip on a 340 px section, wires
+ * 20 px from a frame border for 600 px, and a note 1000 px from its section.
  */
 import { NAME_TARGET_WORDS } from "../board/text-rules";
 import { LABELLED_GAP_AIR_PX } from "../connectors/label-placement";
@@ -73,6 +79,12 @@ export const BAND_NEED_MAX = 400;
 /** A wire longer than this joins sections that sit too far apart: a placement fault, not a routing one. */
 export const LONG_WIRE = 1500;
 
+/** A wire hugs a border when it runs within `gap` of a section or frame border for `run` or more. */
+export const BORDER_RUN = { gap: 40, run: 300 } as const;
+
+/** The farthest a note sits from what it names. */
+export const NOTE_REACH = 400;
+
 /** The empty block no board keeps, in the frame or inside a section: this area or more, with both sides `side` or more. */
 export const EMPTY_BLOCK = { area: 120_000, side: 200 } as const;
 
@@ -90,16 +102,17 @@ const LAYOUT_RULES: readonly string[] = [
   `\`arrange_section\` sets the gaps: ${CRAFT_TARGETS.nodeGapRow} across a row and ${CRAFT_TARGETS.nodeGapColumn} down a column.`,
   "When the board gets full or a section must grow, make room: `arrange` the sections in reading order with `flow: {axis: \"x\" or \"y\", gap}`.",
   "Put the two sections with the most wires between them side by side. Never put a section between two sections that wire to each other. A store sits beside the nodes that write to it. A store or an outcome that several stages feed sits after the last of them, never before or above the first.",
-  "The board reads one way, left to right or top to bottom, and the story starts at the top or the left. On the main path, a section sits after its source. Steps inside a section run the same way, and a chain never turns back: one that wraps starts its next row at the same side. Order a row of targets in the order of their sources.",
+  "A node sits in the section that holds most of its wires' other ends, in or out. When one other section holds them all, move it there or beside that section's edge. An empty block the move opens never blocks it: shrink the section after.",
+  "The board reads one way, left to right or top to bottom, and the story starts at the top or the left: the start node comes first in the first row. On the main path, a section sits after its source. A node that fans out to several groups sits beside or before them, or at the center of a 2 by 2 block, never above it. Steps inside a section run one way along a row or a column. A chain too long for one row turns at the row end, as a snake: the next row starts under the last step and runs the other way. The turn is one short straight wire, the only wire between the two rows. Order a row of targets in the order of their sources.",
   `Section order comes before routing. A wire over ${LONG_WIRE} long, a wire through a section that holds neither of its ends and a crossing between sections are placement faults: \`canvas_check\` lists them under LAYOUT. Move a section first (swap two neighbours, or change its row), then route. To decline such a finding, name the move you tried and what it measured.`,
   `A band is the gap between two neighbour sections, over the span the two share. Its lanes are the wires that run along it for ${BAND_LANE_RUN} or more inside that span: a wire that only crosses it straight is no lane. A band needs ${bandNeed(1)}, or the longest label leg of a chip that sits in it when that is more, plus ${SECTION_GAP_PER_WIRE} for each lane after the first. From its need to ${SECTION_GAP_SLACK} over, a band is right, and is never empty space. A band that needs over ${BAND_NEED_MAX} is a section-order fault: reorder the sections, never widen it. Gaps inside a section stay as \`arrange_section\` sets them.`,
   `A horizontal wire leg that carries a label is at least ${LABEL_LEG.base} plus ${LABEL_LEG.perCharacter} for each label character long: the chip, and ${LABELLED_GAP_AIR_PX / 2} clear on each side. A vertical one is at least ${LABEL_LEG.vertical} long.`,
   "One `arrange` call gives a row of sections one gap: where its bands need different widths, set each with `move`. After `connect`, call `arrange_section` again on a section of nodes that holds a labeled wire: it widens the gap under the label.",
   "Draw what lives inside a thing as a subsection: `place_section` inside the section, titled for the thing. A host and its loop, a mode and its knobs, a pool and its servers: the parts go in the subsection, and no wire runs from the thing to each part. A record of 2 or more fields is one subsection titled for the record, its fields stacked in one column. Each field keeps its icon or its typed shape: a row of plain rectangles is not a record. 2 or more nodes that share a group name make a subsection too. A section of 8 or more nodes holds subsections: name its groups before you place a node. When the source names two sides (inside and outside, existing and proposed), each side of 2 or more nodes is a subsection. Past 8 top-level sections, group related sections under a parent section. Never draw a subsection for 1 node or for a group with no name.",
   "Never call `arrange_section` on a section that holds subsections. `arrange` its subsections and loose nodes with `space`, then call `fit_section` on it.",
-  "Choose the board shape the flow needs, and move whole sections to get it. Of two shapes that fit, take the one with the shorter wires.",
+  "Of two board shapes that fit the flow, take the one with the shorter wires, and move whole sections to get it.",
   `Keep no empty block of ${EMPTY_BLOCK.area.toLocaleString("en-US")} px² or more with both sides ${EMPTY_BLOCK.side} or more, in the frame or in a section. To close one, shrink the section or the frame, or move a neighbour in. Never widen a section, reverse a chain, or add or move a sticky or the key to fill space. Bend a wire before you keep an empty block.`,
-  `A section keeps the size of its content: \`fit_section\` sets it. Its nodes fill ${SECTION_FILL_MIN * 100}% or more of the room inside its padding. Never stretch a section or a node to fill a row, align an edge or make room for a wire.`,
+  `A section keeps the size of its content: \`fit_section\` sets it. Its nodes fill ${SECTION_FILL_MIN * 100}% or more of the room inside its padding. Never stretch a section or a node to fill a row, align an edge or make room for a wire. One exception beats the empty-block rule: a section is as wide as the widest label chip in it.`,
   "Center a section on the node or section it connects to, and a hub on the row it fans out to. Where two sections map node to node, set each target in line with its source across the gap, so the wire runs straight.",
   `Sections stacked in a column share one left edge and one width, from rows of nodes that match, not from a stretch. Sections side by side keep their rows of nodes level. A hub over a row of children keeps one band at its need under it, where the wires to the children run as one bus.`,
   "After you move, add or delete a node in a section, call `fit_section`. It centers the children and evens each row.",
@@ -107,7 +120,7 @@ const LAYOUT_RULES: readonly string[] = [
   "Never pin a wire end with `position` to place or spread arrowheads. The board centers and merges them. `anchor` only picks the side.",
   "Move a wire label by hand only when you must. A label you pin joins no column.",
   "Make the call each near-miss names, then call `canvas_check` again.",
-  "Fix a finding without stretching a section, merging nodes, deleting a subsection or growing an empty block. Keep a subsection the source names, then shrink the section round it.",
+  "Fix a finding without stretching a section, merging nodes or deleting a subsection. Close an empty block the fix opens after it, never by undoing it. Keep a subsection the source names, then shrink the section round it.",
 ];
 
 export function canvasRules(): AuthoringTopic {
@@ -115,14 +128,14 @@ export function canvasRules(): AuthoringTopic {
     id: "rules",
     title: "Canvas Rules",
     text: [
-      "These rules hold on every board. Read this topic before you lay out or restructure a board.",
+      "These rules hold on every board.",
       "",
       "## Color and Theme",
       "",
       "- Color encodes kind, never decoration. Give each section and node its role's hue.",
       "- Every section and subsection takes a hue that the color key gives a meaning. Vary the hues across the board. Draw a gray or white section only when the source asks for one. When a check names gray for a section, give it a free hue.",
       "- A subsection takes a color apart from its section and from the subsections beside it.",
-      "- Never put a node or a sticky on a section of its own color. Draw a gray node only when the color key gives gray a meaning.",
+      "- Never put a node or a sticky on a section of its own color: teal and green count as one. Draw a gray node only when the color key gives gray a meaning.",
       "- Never nest a gray section directly in a gray section.",
       "- Never change the workspace theme. The theme is the person's workspace choice, and no tool changes it.",
       "",
@@ -139,7 +152,7 @@ export function canvasRules(): AuthoringTopic {
       "- A node shows its name only. Put extra context in a sticky note next to it.",
       "- A section has a title only.",
       "- Put a fact a reader needs (a size, a tool name) in the name, a wire label or a sticky.",
-      "- Put each sticky beside the node it explains and the color key under the title, never in a band between sections.",
+      `- Put each sticky within ${NOTE_REACH} of what it explains, and move it when its section moves. Put the color key under the title. Neither sits in a band between sections.`,
       "",
       "## Layout",
       "",
@@ -150,9 +163,10 @@ export function canvasRules(): AuthoringTopic {
       "- Label a wire only for a condition, a branch or a payload.",
       "- A wire label says what the wire carries. It never repeats a node or section name.",
       "- A dashed edge means planned or optional. A solid edge exists.",
-      "- Wires that share a source or a target and one meaning run as one trunk and split at the end. Give them one color and one dash, and never split a trunk the board merged.",
+      "- Wires that share a source or a target and one meaning run as one trunk and split at the end. Give them one color and one dash, and never split a trunk the board merged. Wires of one color and one dash into one node merge as a bus, and each keeps its label on its own leg, before the join. Never delete a label the source names, or spread the wires over more sides, to fix a shared arrowhead.",
       "- A wire always starts on a node: where every node of a subsection sends, start one wire at each. It ends on a frame only when the frame is a subsection of 2 or more nodes, drawn round exactly the group that receives it: `connect` that frame once. Any other wire ends on a node: a section with one node wires to the node.",
       "- Wires that differ in color or dash never share a line or an arrowhead, except in a bus. Where two meanings meet one node from two directions, give each the side that faces its other end: set `anchor` on that end in `connect`, or with `change_connection`. Two wires that cross on the way in trade sides, so choose sides that keep them apart. 3 or more wires that reach one node from one direction enter the side that faces them as one bus: never turn a wire back to reach another side.",
+      `- A wire never runs within ${BORDER_RUN.gap} of a section or frame border for ${BORDER_RUN.run} or more: run it down the middle of the band.`,
       "",
       "## Source",
       "",

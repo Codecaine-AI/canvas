@@ -499,6 +499,30 @@ describe("the chooser keeps the board's meaning", () => {
     expect(pickSectionColor(doc, "notes", style)).not.toBe("yellow");
   });
 
+  test("teal and green are one family: a section of one never holds a node of the other", () => {
+    // Round 5 cycle 4, board 04: teal nodes on green sections passed the check, and both judges faulted them.
+    const doc = makeDocument([
+      section("page", [0, 0, 2000, 1400], "white", null),
+      section("modes", [40, 40, 600, 400], "green", "page"),
+      node("knob", [100, 100, 200, 100], "teal", "modes"),
+      node("wait", [100, 240, 200, 100], "green", "modes"),
+      section("forms", [1000, 40, 600, 400], "teal", "page"),
+      node("atom", [1060, 100, 200, 100], "green", "forms"),
+      section("store", [1000, 800, 600, 400], "blue", "page"),
+      node("cache", [1060, 860, 200, 100], "teal", "store"),
+    ]);
+    // Teal on blue is no clash: only the chooser keeps those two apart, and only for touching sections.
+    expect(sameColor(doc).map((finding) => [finding.at, finding.message])).toEqual([
+      [["modes", "wait", "knob"], "modes is green, as is wait in it, and one color family with knob"],
+      [["forms", "atom"], "forms is teal, one color family with atom in it"],
+    ]);
+    for (const id of ["modes", "forms"]) expect(["green", "teal"], id).not.toContain(pickSectionColor(doc, id, style));
+    const session = makeTestSession(doc, ["page"]);
+    const result = runOp(session, "change_color", { id: "store", color: "green" });
+    expect(result.isError).toBe(true);
+    expect(result.text).toContain("store would paint green, one color family with cache it holds");
+  });
+
   test("a recolor into the color of a node the section holds is refused, even when all its nodes share it", () => {
     const category = board();
     category.objects.push(node("agent", [120, 200, 200, 100], "violet", "rounds"));
@@ -580,6 +604,9 @@ describe("the chooser keeps the board's meaning", () => {
       node("p", [560, 320, 200, 60], "pink", "x"),
     ]);
     // x sits in gray, touches blue, violet and green, and holds teal and pink nodes.
+    expect(pickSectionColor(doc, "x", style)).toBe("orange");
+    doc.objects.splice(5, 1);
+    // Green is free now, but it is one family with the teal node x holds.
     expect(pickSectionColor(doc, "x", style)).toBe("orange");
     doc.objects.splice(5, 1);
     expect(pickSectionColor(doc, "x", style)).toBe("green");
