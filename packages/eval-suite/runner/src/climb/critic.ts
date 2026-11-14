@@ -234,12 +234,18 @@ const KIND_LINES: Record<FindingKind, string> = {
  * as a wire that touches no node (h4: 8 wires started on a frame), and
  * findings asked for parts, nodes and wires the brief does not name (03 F3,
  * 03 F14, h1 F342).
+ *
+ * Round 5 cycle 4: the third line told the reviewers to report 2 labelled
+ * wires on one entry, against the bus rule of topic `rules`. On r3 3 blockers
+ * (F9, F35, F48) made the drawer split the 4 error wires over 3 sides of
+ * their node and delete 3 labels of the brief. A bus of one colour and one
+ * dash is legal when each label sits before the join.
  */
 const FRAME_ENDS = [
   "Report a wire that starts on the frame of a section or a subsection: a wire starts on a node.",
   "Report a wire that ends on the frame of a section or a subsection, unless the frame is a subsection drawn round exactly the group that receives the wire: each node in it receives it, and it holds no other node."
   + " Such a subsection is the wire's end, and it needs no node there.",
-  "Report 2 labelled wires that share one entry into a node, a merged trunk too: 2 wires that each have a label and end on one port with one arrowhead. A reader cannot tell which label the arrow belongs to.",
+  "Labelled wires of one colour and one dash that enter one node as a bus are legal when each label sits before the join: never report them as wires that share an arrowhead or an entry. Report a label chip that sits on the shared line after the join: a reader cannot tell which wire it belongs to.",
   "Report a label chip that touches the frame of a section or a subsection.",
 ];
 const BRIEF_NAMES = {
@@ -284,7 +290,7 @@ function answerRules(brief = false): string[] {
  */
 const MERGED_TRUNK = "Never report a merged trunk of one meaning as a fault: wires of one dash and one colour that share a source or a target and run on one line into one port, with one arrowhead, read as one trunk."
   + ` Ford kept them: "The lines just appear more aesthetic."`
-  + " The pass does not cover 2 wires that each have a label and end on one port: report those.";
+  + " The pass covers labelled wires too, when each label sits before the join.";
 const MIXED_TRUNK = "Wires that differ in dash or colour differ in meaning. Report a line or a trunk that such wires share, and a label chip on it: a reader cannot tell which wire the line or the label belongs to."
   + " When such wires run in lanes too close to tell apart, the fault is the room between the lanes. Never word it so that it reads as \"merge them\".";
 const MEASURED = "A \"measured\" line is a fact the runner measured on the board file. Judge it on the images: report it when it reads as a fault, with its numbers.";
@@ -405,7 +411,7 @@ export function wirePrompt(text: WireText): string {
     "- a wire through a section it does not belong to, or through a section's header or header chip;",
     `- a wire within ${BORDER_NEAR_PX} px of a section border along ${BORDER_RUN_MIN_PX} px or more;`,
     "- many wires into one node from different sides;",
-    `- wires of one dash and one colour that share a source or a target and run side by side in separate lanes, ${LANE_NEAR_PX} px apart or less: they must read as one trunk. Not a fault when 2 of them have a label and end on one node: those keep their own lanes.`,
+    `- wires of one dash and one colour that share a source or a target and run side by side in separate lanes, ${LANE_NEAR_PX} px apart or less: they must read as one trunk. Not a fault when 2 of them have a label and end on one node: those can keep their own lanes.`,
     MERGED_TRUNK,
     MIXED_TRUNK,
     MEASURED,

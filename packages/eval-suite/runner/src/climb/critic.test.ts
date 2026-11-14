@@ -169,14 +169,16 @@ describe("climb review prompts", () => {
   };
   const prompts = () => [sectionPrompt(unit(board, "sec"), section), sectionPrompt(unit(board, "loose"), section), gapPrompt(gap), wirePrompt(wire), spacePrompt(space), choicesPrompt(choices)];
 
-  test("every reviewer reports a wire that starts on a frame, one that ends on a frame that is no subsection round exactly its group, 2 labelled wires on one entry, and a chip on a frame", () => {
+  test("every reviewer reports a wire that starts on a frame, one that ends on a frame that is no subsection round exactly its group, a label after the join of a bus, and a chip on a frame", () => {
     for (const prompt of prompts()) {
       // Round 5 cycle 3: 8 wires of h4 started on a frame, and the judges read them as wires that touch no node.
       expect(prompt).toContain("Report a wire that starts on the frame of a section or a subsection: a wire starts on a node.");
       // The frame of a subsection is an end only for the group it is drawn round: that took board 06 from 26 wires to 20.
       expect(prompt).toContain("Report a wire that ends on the frame of a section or a subsection, unless the frame is a subsection drawn round exactly the group that receives the wire:"
         + " each node in it receives it, and it holds no other node. Such a subsection is the wire's end, and it needs no node there.");
-      expect(prompt).toContain("Report 2 labelled wires that share one entry into a node, a merged trunk too: 2 wires that each have a label and end on one port with one arrowhead.");
+      // Round 5 cycle 4: 3 blockers on r3 made the drawer split a legal bus and delete 3 labels of the brief.
+      expect(prompt).toContain("Labelled wires of one colour and one dash that enter one node as a bus are legal when each label sits before the join: never report them as wires that share an arrowhead or an entry. Report a label chip that sits on the shared line after the join: a reader cannot tell which wire it belongs to.");
+      expect(prompt).not.toContain("Report 2 labelled wires that share one entry");
       expect(prompt).toContain("Report a label chip that touches the frame of a section or a subsection.");
       expect(prompt).not.toContain("when the whole group sends or receives it");
     }
@@ -249,13 +251,14 @@ describe("climb review prompts", () => {
       "- a wire through a section it does not belong to, or through a section's header or header chip;",
       "- a wire within 24 px of a section border along 100 px or more;",
       "- wires of one dash and one colour that share a source or a target and run side by side in separate lanes, 40 px apart or less: they must read as one trunk."
-      + " Not a fault when 2 of them have a label and end on one node: those keep their own lanes.",
+      + " Not a fault when 2 of them have a label and end on one node: those can keep their own lanes.",
     ]) expect(prompt).toContain(fault);
-    // Ford kept merged junctions. The reviewer must not ask the drawer to split one of one meaning, and the pass ends where 2 labels share the entry.
+    // Ford kept merged junctions. The reviewer must not ask the drawer to split one of one meaning, labelled wires too.
     expect(prompt).toContain(
       "Never report a merged trunk of one meaning as a fault: wires of one dash and one colour that share a source or a target and run on one line into one port, with one arrowhead, read as one trunk."
       + ` Ford kept them: "The lines just appear more aesthetic."`
-      + " The pass does not cover 2 wires that each have a label and end on one port: report those.");
+      + " The pass covers labelled wires too, when each label sits before the join.");
+    expect(prompt).not.toContain("report those");
     expect(prompt).toContain("W1 w · a → b · sec → loose");
     expect(prompt).toContain("Measured on your wires:\n(none)");
     expect(prompt).not.toContain("ends on a section frame and not on a node");
