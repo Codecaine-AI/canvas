@@ -583,14 +583,14 @@ const sidesOf = (rect: WorldRect): Array<Run & { name: SideName }> => [
 export interface Stretch { wire: string; length: number; from: Point; to: Point }
 export interface BorderRun extends Stretch { section: string; side: SideName; distance: number }
 
-/** The stretches where a wire runs along a section border. */
-export function borderRuns(facts: WireFact[], sections: BoardObject[]): BorderRun[] {
+/** The stretches where a wire runs along a section border: `near` px from it or less, along `minRun` px or more. */
+export function borderRuns(facts: WireFact[], sections: BoardObject[], near = BORDER_NEAR_PX, minRun = BORDER_RUN_MIN_PX): BorderRun[] {
   const found: BorderRun[] = [];
   for (const fact of facts) for (const run of runsOf(fact.points)) for (const section of sections) for (const side of sidesOf(section.geometry)) {
     if (side.axis !== run.axis) continue;
     const distance = Math.abs(run.fixed - side.fixed);
     const [from, to] = [Math.max(run.from, side.from), Math.min(run.to, side.to)];
-    if (distance > BORDER_NEAR_PX || to - from < BORDER_RUN_MIN_PX) continue;
+    if (distance > near || to - from < minRun) continue;
     found.push({ wire: fact.id, section: section.id, side: side.name, distance: Math.round(distance), length: Math.round(to - from), from: pointOn(run, from), to: pointOn(run, to) });
   }
   return found;

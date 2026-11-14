@@ -1,0 +1,1523 @@
+{
+  "schemaVersion": 1,
+  "id": "llm-inference-gateway",
+  "title": "LLM Inference Gateway: Routing & Fallback",
+  "description": "LLM inference gateway: how one client endpoint turns a capability-tier request into a routed, cached, streamed and metered response, and how it behaves under overload and provider failure.\n\n**Layout.** A two-row ring. Top row, left to right, is the request path: Client Apps → Edge & Admission (edge service, admission controller, deadline-aware queue, explicit reject) → Prompt & Cache (prompt assembler, response cache) → Routing & Protection (tier router, shadow mirror, circuit-breaker states Closed → Open → Half-open). Below, right to left, the response comes back: Fallback (under Routing: tokens-already-sent decision → failure classifier → retryable decision) → Backend Capacity (hosted provider accounts A/B, self-hosted pool with scheduler and replicas, shadow backend) → Response Streaming (token streamer plus the caller-facing failure ends: visible stream failure, return error now) → Accounting (spend guard, metering, billing stream, audit store, one column under the client).\n\n**Key flows.** Cache miss → router → backends; backend tokens → streamer → client; backend failure → \"tokens already sent?\" (yes: fail visibly, keep sent tokens; no: classify → retryable? yes: back to the router with the next fallback, a fresh deadline and the same idempotency key; no: return immediately). The classifier feeds the breaker errors and timeouts; an open breaker drains traffic at the router. At the spend ceiling the spend guard first has the router use the cheapest backend, then has admission reject new work.\n\n**Color key.** blue = request/response step, violet = control decision, teal = model backend, green = store or stream, orange = shadow evaluation, red = reject or failure.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "LLM Inference Gateway: Routing & Fallback",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 60,
+        "y": 20,
+        "width": 3720,
+        "height": 1704
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "s_client",
+      "type": "section",
+      "text": "Client Apps",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 200,
+        "width": 340,
+        "height": 220
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "users"
+    },
+    {
+      "id": "s_edge",
+      "type": "section",
+      "text": "Edge & Admission",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 720,
+        "y": 200,
+        "width": 788,
+        "height": 612
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "s_prep",
+      "type": "section",
+      "text": "Prompt & Cache",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1816,
+        "y": 200,
+        "width": 776,
+        "height": 340
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "cache"
+    },
+    {
+      "id": "s_route",
+      "type": "section",
+      "text": "Routing & Protection",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2860,
+        "y": 200,
+        "width": 880,
+        "height": 740
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "route"
+    },
+    {
+      "id": "s_acct",
+      "type": "section",
+      "text": "Accounting",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 720,
+        "width": 340,
+        "height": 820
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "coin"
+    },
+    {
+      "id": "s_resp",
+      "type": "section",
+      "text": "Response Streaming",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 720,
+        "y": 1100,
+        "width": 580,
+        "height": 480
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "s_back",
+      "type": "section",
+      "text": "Backend Capacity",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1580,
+        "y": 880,
+        "width": 960,
+        "height": 740
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "cloud"
+    },
+    {
+      "id": "s_breaker",
+      "type": "section",
+      "text": "Circuit Breaker",
+      "color": "pink",
+      "parentId": "s_route",
+      "geometry": {
+        "x": 3340,
+        "y": 280,
+        "width": 360,
+        "height": 620
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "lock"
+    },
+    {
+      "id": "s_hosted",
+      "type": "section",
+      "text": "Hosted Providers",
+      "color": "blue",
+      "parentId": "s_back",
+      "geometry": {
+        "x": 1660,
+        "y": 960,
+        "width": 340,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "cloud"
+    },
+    {
+      "id": "s_self",
+      "type": "section",
+      "text": "Self-Hosted Pool",
+      "color": "yellow",
+      "parentId": "s_back",
+      "geometry": {
+        "x": 2160,
+        "y": 960,
+        "width": 340,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "n_client",
+      "type": "icon",
+      "text": "Client app",
+      "color": "blue",
+      "parentId": "s_client",
+      "geometry": {
+        "x": 120,
+        "y": 256,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "users"
+    },
+    {
+      "id": "n_edge",
+      "type": "icon",
+      "text": "Edge service",
+      "color": "blue",
+      "parentId": "s_edge",
+      "geometry": {
+        "x": 756,
+        "y": 248,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "api"
+    },
+    {
+      "id": "n_admit",
+      "type": "icon",
+      "text": "Admission controller",
+      "color": "violet",
+      "parentId": "s_edge",
+      "geometry": {
+        "x": 1188,
+        "y": 248,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "n_queue",
+      "type": "icon",
+      "text": "Deadline-aware queue",
+      "color": "green",
+      "parentId": "s_edge",
+      "geometry": {
+        "x": 1188,
+        "y": 492,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "queue"
+    },
+    {
+      "id": "n_reject",
+      "type": "octagon",
+      "text": "Reject: retry later",
+      "color": "red",
+      "parentId": "s_edge",
+      "geometry": {
+        "x": 836,
+        "y": 480,
+        "width": 140,
+        "height": 144
+      },
+      "style": {
+        "shape": "octagon"
+      }
+    },
+    {
+      "id": "n_assemble",
+      "type": "icon",
+      "text": "Prompt assembler",
+      "color": "blue",
+      "parentId": "s_prep",
+      "geometry": {
+        "x": 1920,
+        "y": 240,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "layers"
+    },
+    {
+      "id": "n_cache",
+      "type": "icon",
+      "text": "Response cache",
+      "color": "green",
+      "parentId": "s_prep",
+      "geometry": {
+        "x": 2280,
+        "y": 240,
+        "width": 280,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "cache"
+    },
+    {
+      "id": "n_router",
+      "type": "icon",
+      "text": "Tier router",
+      "color": "violet",
+      "parentId": "s_route",
+      "geometry": {
+        "x": 2900,
+        "y": 320,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "route"
+    },
+    {
+      "id": "n_mirror",
+      "type": "icon",
+      "text": "Shadow mirror",
+      "color": "orange",
+      "parentId": "s_route",
+      "geometry": {
+        "x": 2900,
+        "y": 620,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "branch"
+    },
+    {
+      "id": "n_closed",
+      "type": "process",
+      "text": "Closed",
+      "color": "violet",
+      "parentId": "s_breaker",
+      "geometry": {
+        "x": 3380,
+        "y": 360,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "n_open",
+      "type": "process",
+      "text": "Open: draining",
+      "color": "violet",
+      "parentId": "s_breaker",
+      "geometry": {
+        "x": 3380,
+        "y": 560,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "n_half",
+      "type": "process",
+      "text": "Half-open: probes",
+      "color": "violet",
+      "parentId": "s_breaker",
+      "geometry": {
+        "x": 3380,
+        "y": 760,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "n_provA",
+      "type": "icon",
+      "text": "Provider account A",
+      "color": "teal",
+      "parentId": "s_hosted",
+      "geometry": {
+        "x": 1680,
+        "y": 1020,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "cloud"
+    },
+    {
+      "id": "n_provB",
+      "type": "icon",
+      "text": "Provider account B",
+      "color": "teal",
+      "parentId": "s_hosted",
+      "geometry": {
+        "x": 1680,
+        "y": 1220,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "cloud"
+    },
+    {
+      "id": "n_sched",
+      "type": "icon",
+      "text": "Pool scheduler",
+      "color": "violet",
+      "parentId": "s_self",
+      "geometry": {
+        "x": 2180,
+        "y": 1000,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "schedule"
+    },
+    {
+      "id": "n_replicas",
+      "type": "icon",
+      "text": "Model replicas",
+      "color": "teal",
+      "parentId": "s_self",
+      "geometry": {
+        "x": 2180,
+        "y": 1220,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "model"
+    },
+    {
+      "id": "n_shadow",
+      "type": "icon",
+      "text": "Shadow backend",
+      "color": "orange",
+      "parentId": "s_back",
+      "geometry": {
+        "x": 2040,
+        "y": 1460,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "eval"
+    },
+    {
+      "id": "n_streamer",
+      "type": "icon",
+      "text": "Token streamer",
+      "color": "blue",
+      "parentId": "s_resp",
+      "geometry": {
+        "x": 860,
+        "y": 1160,
+        "width": 280,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "send"
+    },
+    {
+      "id": "n_vfail",
+      "type": "octagon",
+      "text": "Visible stream failure",
+      "color": "red",
+      "parentId": "s_resp",
+      "geometry": {
+        "x": 1100,
+        "y": 1380,
+        "width": 160,
+        "height": 160
+      },
+      "style": {
+        "shape": "octagon"
+      }
+    },
+    {
+      "id": "n_started",
+      "type": "decision",
+      "text": "Tokens already sent?",
+      "color": "violet",
+      "parentId": "s_fallback",
+      "geometry": {
+        "x": 2900,
+        "y": 1300,
+        "width": 280,
+        "height": 160
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "n_error",
+      "type": "octagon",
+      "text": "Return error now",
+      "color": "red",
+      "parentId": "s_resp",
+      "geometry": {
+        "x": 760,
+        "y": 1380,
+        "width": 160,
+        "height": 160
+      },
+      "style": {
+        "shape": "octagon"
+      }
+    },
+    {
+      "id": "n_retry",
+      "type": "decision",
+      "text": "Retryable?",
+      "color": "violet",
+      "parentId": "s_fallback",
+      "geometry": {
+        "x": 3380,
+        "y": 1540,
+        "width": 280,
+        "height": 120
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "n_classify",
+      "type": "icon",
+      "text": "Failure classifier",
+      "color": "violet",
+      "parentId": "s_fallback",
+      "geometry": {
+        "x": 3380,
+        "y": 1320,
+        "width": 280,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "judge"
+    },
+    {
+      "id": "n_meter",
+      "type": "icon",
+      "text": "Metering",
+      "color": "green",
+      "parentId": "s_acct",
+      "geometry": {
+        "x": 120,
+        "y": 976,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "gauge"
+    },
+    {
+      "id": "n_billing",
+      "type": "icon",
+      "text": "Billing stream",
+      "color": "green",
+      "parentId": "s_acct",
+      "geometry": {
+        "x": 120,
+        "y": 1176,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "n_audit",
+      "type": "icon",
+      "text": "Audit store",
+      "color": "green",
+      "parentId": "s_acct",
+      "geometry": {
+        "x": 120,
+        "y": 1376,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "n_spend",
+      "type": "icon",
+      "text": "Spend guard",
+      "color": "violet",
+      "parentId": "s_acct",
+      "geometry": {
+        "x": 120,
+        "y": 780,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "coin"
+    },
+    {
+      "id": "k_color",
+      "type": "sticky",
+      "text": "**Color key** — blue: request/response step · violet: control decision · teal: model backend · green: store, queue or record · orange: shadow eval · red: reject or failure",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 100,
+        "width": 1000,
+        "height": 80
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "t_edge",
+      "type": "sticky",
+      "text": "Edge authenticates the caller, resolves tenant identity and quota, and stamps a **request id** carried by every attempt.",
+      "color": "yellow",
+      "parentId": "s_edge",
+      "geometry": {
+        "x": 740,
+        "y": 680,
+        "width": 360,
+        "height": 100
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "t_cache",
+      "type": "sticky",
+      "text": "Assembler adds tenant system context + safety policy. **Cache key** = prompt + parameters + policy version; hit on exact match or deterministic near-duplicate.",
+      "color": "yellow",
+      "parentId": "s_prep",
+      "geometry": {
+        "x": 1920,
+        "y": 400,
+        "width": 460,
+        "height": 100
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "t_classes",
+      "type": "sticky",
+      "text": "**Classes**: timeout · rate-limit rejection · content-policy refusal · backend overload · malformed response",
+      "color": "yellow",
+      "parentId": "s_fallback",
+      "geometry": {
+        "x": 2900,
+        "y": 1560,
+        "width": 440,
+        "height": 100
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "t_shadow",
+      "type": "sticky",
+      "text": "Shadow result never changes the client response.",
+      "color": "yellow",
+      "parentId": "s_back",
+      "geometry": {
+        "x": 1720,
+        "y": 1480,
+        "width": 240,
+        "height": 100
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s_fallback",
+      "type": "section",
+      "text": "Fallback",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2860,
+        "y": 1220,
+        "width": 860,
+        "height": 464
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "judge"
+    },
+    {
+      "id": "t_router",
+      "type": "sticky",
+      "text": "Router picks a backend within the tier by live health, measured latency, queue depth, price and tenant data residency.",
+      "color": "yellow",
+      "parentId": "s_route",
+      "geometry": {
+        "x": 2900,
+        "y": 780,
+        "width": 400,
+        "height": 100
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e_client_edge",
+      "from": {
+        "objectId": "n_client"
+      },
+      "to": {
+        "objectId": "n_edge"
+      },
+      "label": "capability tier",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.55
+      }
+    },
+    {
+      "id": "e_edge_admit",
+      "from": {
+        "objectId": "n_edge"
+      },
+      "to": {
+        "objectId": "n_admit"
+      },
+      "label": "request id",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_admit_queue",
+      "from": {
+        "objectId": "n_admit"
+      },
+      "to": {
+        "objectId": "n_queue"
+      },
+      "label": "over concurrency or token rate",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_admit_assemble",
+      "from": {
+        "objectId": "n_admit"
+      },
+      "to": {
+        "objectId": "n_assemble"
+      },
+      "label": "admitted",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_queue_assemble",
+      "from": {
+        "objectId": "n_queue"
+      },
+      "to": {
+        "objectId": "n_assemble",
+        "anchor": "bottom"
+      },
+      "label": "slot before deadline",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_queue_reject",
+      "from": {
+        "objectId": "n_queue"
+      },
+      "to": {
+        "objectId": "n_reject"
+      },
+      "label": "deadline passed",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e_admit_reject",
+      "from": {
+        "objectId": "n_admit"
+      },
+      "to": {
+        "objectId": "n_reject",
+        "anchor": "top"
+      },
+      "label": "spend ceiling hit",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e_reject_client",
+      "from": {
+        "objectId": "n_reject"
+      },
+      "to": {
+        "objectId": "n_client"
+      },
+      "label": "retry signal",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e_assemble_cache",
+      "from": {
+        "objectId": "n_assemble"
+      },
+      "to": {
+        "objectId": "n_cache"
+      },
+      "label": "assembled prompt",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_cache_router",
+      "from": {
+        "objectId": "n_cache"
+      },
+      "to": {
+        "objectId": "n_router",
+        "anchor": "top"
+      },
+      "label": "miss",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_cache_streamer",
+      "from": {
+        "objectId": "n_cache",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "n_streamer",
+        "anchor": "top"
+      },
+      "label": "hit: stored response",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "waypoints": [
+        [
+          2420,
+          740
+        ],
+        [
+          1560,
+          740
+        ],
+        [
+          1560,
+          1000
+        ],
+        [
+          1000,
+          1000
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.62
+      }
+    },
+    {
+      "id": "e_router_hosted",
+      "from": {
+        "objectId": "n_router"
+      },
+      "to": {
+        "objectId": "s_hosted",
+        "anchor": "top"
+      },
+      "label": "dispatch",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          2720,
+          380
+        ],
+        [
+          2720,
+          800
+        ],
+        [
+          1840,
+          800
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.5
+      }
+    },
+    {
+      "id": "e_router_sched",
+      "from": {
+        "objectId": "n_router"
+      },
+      "to": {
+        "objectId": "n_sched"
+      },
+      "label": "dispatch",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          2720,
+          380
+        ],
+        [
+          2720,
+          1060
+        ]
+      ]
+    },
+    {
+      "id": "e_sched_replicas",
+      "from": {
+        "objectId": "n_sched"
+      },
+      "to": {
+        "objectId": "n_replicas"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_router_mirror",
+      "from": {
+        "objectId": "n_router",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "n_mirror",
+        "anchor": "right"
+      },
+      "label": "eval sample",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange",
+      "labelPosition": {
+        "along": 0.75
+      }
+    },
+    {
+      "id": "e_mirror_shadow",
+      "from": {
+        "objectId": "n_mirror",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "n_shadow",
+        "anchor": "top"
+      },
+      "label": "mirrored copy",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange",
+      "waypoints": [
+        [
+          2800,
+          680
+        ],
+        [
+          2800,
+          1420
+        ],
+        [
+          2200,
+          1420
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.3
+      }
+    },
+    {
+      "id": "e_provA_stream",
+      "from": {
+        "objectId": "n_provA"
+      },
+      "to": {
+        "objectId": "n_streamer"
+      },
+      "label": "tokens",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "labelPosition": {
+        "along": 0.68
+      }
+    },
+    {
+      "id": "e_provB_stream",
+      "from": {
+        "objectId": "n_provB"
+      },
+      "to": {
+        "objectId": "n_streamer"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e_repl_stream",
+      "from": {
+        "objectId": "n_replicas"
+      },
+      "to": {
+        "objectId": "n_streamer"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          2120,
+          1280
+        ],
+        [
+          2120,
+          1420
+        ],
+        [
+          1380,
+          1420
+        ],
+        [
+          1380,
+          1220
+        ]
+      ]
+    },
+    {
+      "id": "e_provA_fail",
+      "from": {
+        "objectId": "n_provA",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "n_started",
+        "anchor": "bottom"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          2060,
+          1080
+        ],
+        [
+          2060,
+          920
+        ],
+        [
+          2600,
+          920
+        ],
+        [
+          2600,
+          1500
+        ],
+        [
+          3040,
+          1500
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.8
+      }
+    },
+    {
+      "id": "e_provB_fail",
+      "from": {
+        "objectId": "n_provB",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "n_started",
+        "anchor": "bottom"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          2060,
+          1280
+        ],
+        [
+          2060,
+          920
+        ],
+        [
+          2600,
+          920
+        ],
+        [
+          2600,
+          1500
+        ],
+        [
+          3040,
+          1500
+        ]
+      ]
+    },
+    {
+      "id": "e_repl_fail",
+      "from": {
+        "objectId": "n_replicas",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "n_started",
+        "anchor": "bottom"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          2600,
+          1280
+        ],
+        [
+          2600,
+          1500
+        ],
+        [
+          3040,
+          1500
+        ]
+      ]
+    },
+    {
+      "id": "e_started_vfail",
+      "from": {
+        "objectId": "n_started",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "n_vfail",
+        "anchor": "right"
+      },
+      "label": "yes: fail visibly, keep sent tokens",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          2680,
+          1380
+        ],
+        [
+          2680,
+          840
+        ],
+        [
+          1460,
+          840
+        ],
+        [
+          1460,
+          1460
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.9
+      }
+    },
+    {
+      "id": "e_started_classify",
+      "from": {
+        "objectId": "n_started"
+      },
+      "to": {
+        "objectId": "n_classify"
+      },
+      "label": "no",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_classify_retry",
+      "from": {
+        "objectId": "n_classify"
+      },
+      "to": {
+        "objectId": "n_retry"
+      },
+      "label": "failure class",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e_retry_error",
+      "from": {
+        "objectId": "n_retry",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "n_error",
+        "anchor": "bottom"
+      },
+      "label": "no: return immediately",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          3520,
+          1720
+        ],
+        [
+          840,
+          1720
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.97
+      }
+    },
+    {
+      "id": "e_retry_router",
+      "from": {
+        "objectId": "n_retry",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "n_router",
+        "anchor": "bottom"
+      },
+      "label": "yes: next fallback, fresh deadline, same idempotency key",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          3760,
+          1600
+        ],
+        [
+          3760,
+          1100
+        ],
+        [
+          2760,
+          1100
+        ],
+        [
+          2760,
+          560
+        ],
+        [
+          3060,
+          560
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.34
+      }
+    },
+    {
+      "id": "e_stream_client",
+      "from": {
+        "objectId": "n_streamer",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "n_client",
+        "anchor": "bottom"
+      },
+      "label": "tokens as they arrive",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "labelPosition": {
+        "along": 0.62
+      }
+    },
+    {
+      "id": "e_stream_meter",
+      "from": {
+        "objectId": "n_streamer",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "n_meter",
+        "anchor": "right"
+      },
+      "label": "usage record",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e_stream_audit",
+      "from": {
+        "objectId": "n_streamer",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "n_audit",
+        "anchor": "right"
+      },
+      "label": "redacted prompt + response",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "labelPosition": {
+        "along": 0.9
+      }
+    },
+    {
+      "id": "e_meter_billing",
+      "from": {
+        "objectId": "n_meter"
+      },
+      "to": {
+        "objectId": "n_billing"
+      },
+      "label": "tokens, latency, backend, cache, cost",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e_meter_spend",
+      "from": {
+        "objectId": "n_meter"
+      },
+      "to": {
+        "objectId": "n_spend"
+      },
+      "label": "tenant spend",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e_spend_admit",
+      "from": {
+        "objectId": "n_spend"
+      },
+      "to": {
+        "objectId": "n_admit",
+        "anchor": "top"
+      },
+      "label": "then: reject new work",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e_spend_router",
+      "from": {
+        "objectId": "n_spend"
+      },
+      "to": {
+        "objectId": "n_router",
+        "anchor": "left"
+      },
+      "label": "at ceiling, first: cheapest backend",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          2640,
+          840
+        ],
+        [
+          2640,
+          400
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.2
+      }
+    },
+    {
+      "id": "e_classify_breaker",
+      "from": {
+        "objectId": "n_started",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "n_closed",
+        "anchor": "right"
+      },
+      "label": "all backend errors, timeouts",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e_closed_open",
+      "from": {
+        "objectId": "n_closed"
+      },
+      "to": {
+        "objectId": "n_open"
+      },
+      "label": "sustained errors",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e_open_half",
+      "from": {
+        "objectId": "n_open"
+      },
+      "to": {
+        "objectId": "n_half"
+      },
+      "label": "admit probe trickle",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e_half_closed",
+      "from": {
+        "objectId": "n_half"
+      },
+      "to": {
+        "objectId": "n_closed"
+      },
+      "label": "probes succeed",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e_open_router",
+      "from": {
+        "objectId": "n_open"
+      },
+      "to": {
+        "objectId": "n_router"
+      },
+      "label": "drain to healthy capacity",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": -40
+      }
+    }
+  ],
+  "annotations": []
+}

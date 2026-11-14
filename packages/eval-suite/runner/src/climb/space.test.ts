@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { loadReviewCanvas } from "./critic.ts";
 import { box, labelled, wire } from "./fixtures/review/stubs.ts";
 import { reviewUnits, type Board, type BoardObject } from "./review-inputs.ts";
-import { EMPTY_BLOCK, FAR_WIRE_PX, SPACE_FIXES, blockLine, emptyBlocks, gapLine, gapMeasures, gapRule, planOf, type GapRule } from "./space.ts";
+import { EMPTY_BLOCK, FAR_WIRE_PX, SPACE_FIXES, blockLine, emptyBlocks, gapLine, gapMeasures, gapRule, planOf, type ComputedFault, type GapRule } from "./space.ts";
 import { wireFacts, type WireFact } from "./wires.ts";
 
 /** The band rule of topic `rules` in round 5 cycle 4. */
@@ -19,8 +19,8 @@ const plan = (file: Board, facts: WireFact[] = []) => planOf(file, facts, RULE);
 const blocks = (file: Board, facts: WireFact[] = []) => plan(file, facts).blocks.map(blockLine);
 /** A straight wire from x 250 to `toX` at height `y`: it crosses a band there, and runs along none. */
 const across = (id: string, y: number, toX = 550) => wire(id, "p", "q", [[250, y], [toX, y]]);
-/** `n` wires from section a to section b that each run down the band at x 320, 340 and so on, from y 50 to y 350. */
-const lanes = (n: number, toX = 550) => Array.from({ length: n }, (_, i) => wire(`l${i + 1}`, "a-n", "b-n", [[250, 50], [320 + 20 * i, 50], [320 + 20 * i, 350], [toX, 350]]));
+/** `n` wires from section a to section b that each run down the band at x 340, 360 and so on, from y 50 to y 350: the first is 40 px from the border of a. */
+const lanes = (n: number, toX = 550) => Array.from({ length: n }, (_, i) => wire(`l${i + 1}`, "a-n", "b-n", [[250, 50], [340 + 20 * i, 50], [340 + 20 * i, 350], [toX, 350]]));
 
 describe("climb computed checks on final boards of round 5", () => {
   /** A final board of round 5 cycle 2 (r5b) or cycle 3 (r5c), as the judges saw it. */
@@ -61,7 +61,7 @@ describe("climb computed checks on final boards of round 5", () => {
     const found = await measured("r5c-09");
     expect(bands(found)).toEqual([["sec-kernel", "sec-archon", 820, 4, 460, 580, "over"], ["sec-archon", "sec-gaps", 200, 0, 200, 320, null]]);
     expect(found.gaps[0]!.chips).toBe(11);
-    expect(found.faults.at(-1)).toEqual({
+    expect(found.faults.findLast((fault) => fault.kind === "space")).toEqual({
       kind: "space", key: `["gap","over",["sec-archon","sec-kernel"]]`, ids: ["sec-kernel", "sec-archon"],
       problem: "The band between sec-kernel and sec-archon (side by side), x 520 to 1340, y 280 to 2304, is 820 px wide and 4 wires run along it (w-model, w-manager, w-trace, w-state):"
         + " it needs 460 px (400 px for the longest label leg in it, plus 20 px for each lane after the first) and is legal to 580 px, so it is 240 px too wide."
@@ -113,6 +113,124 @@ describe("climb computed checks on final boards of round 5", () => {
     ]);
     expect(found.blocks.some((block) => block.in === "ret_ev")).toBe(true);
     expect(found.faults.some((fault) => fault.key === `["empty-block","ret_ev"]`)).toBe(false);
+  });
+});
+
+describe("climb computed checks on final boards of round 5 cycle 4", () => {
+  /** A final board of round 5 cycle 4 (r5d), as the judges saw it. */
+  const faults = async (name: string, kind: ComputedFault["kind"]) => {
+    const canvas = await loadReviewCanvas();
+    const file = canvas.toolkit.openCanvasFile(resolve(import.meta.dir, "fixtures/space", `r5d-${name}.canvas.json`));
+    return planOf(file.persisted as Board, wireFacts(canvas.wires, file), gapRule(canvas.wires)).faults.filter((fault) => fault.kind === kind);
+  };
+  /** Each node fault: the node, its section, the section its wires say, and the sums of its wires now and by the estimate. */
+  const nodes = async (name: string) => (await faults(name, "node")).map((fault) => [...fault.ids.slice(0, 3), /in sum (\d+ → \d+) px/.exec(fault.problem)![1]]);
+
+  test("board h3: the 2 failure nodes in Responses have one wire each, from Fallback", async () => {
+    expect(await nodes("h3")).toEqual([["n_vfail", "s_resp", "s_fallback", "2774 → 322"], ["n_error", "s_resp", "s_fallback", "2894 → 378"]]);
+    expect((await faults("h3", "node"))[0]!.problem).toBe(
+      "Node n_vfail sits in section s_resp, and its only wire comes from section s_fallback, which is no neighbour of s_resp."
+      + " Its wires, now and with the node at the centre of s_fallback (an estimate between centres): e_started_vfail (from n_started in s_fallback) 2774 → 322 px; in sum 2774 → 322 px."
+      + " The node may sit in the wrong section. Try it: move n_vfail into s_fallback, route its wires again and read their lengths."
+      + " Keep the move when the sum is shorter and the brief does not put the node in s_resp. Else move it back");
+    // The 2 far wires into them are those 2 faults: the board has no far-wire fault on them too.
+    expect((await faults("h3", "wire")).map((fault) => fault.key)).toEqual([`["long",["s_acct","s_route"]]`, `["long",["s_prep","s_resp"]]`, `["long",["s_client","s_resp"]]`]);
+  });
+
+  test("board r5: the Hub sits in Apply, and none of its wires joins a node of Apply", async () => {
+    const found = await faults("r5", "node");
+    expect(found.map((fault) => fault.key)).toContain(`["node","hub"]`);
+    expect(found.find((fault) => fault.ids[0] === "hub")).toMatchObject({ ids: ["hub", "apply", "build", "e-hub-edit", "e-hub-rebuild"], number: 3337 });
+    expect(found.find((fault) => fault.ids[0] === "hub")!.problem).toContain("none of its 2 wires joins another node of apply");
+  });
+
+  test("board 14: the Backfill job has 2 wires over 1500 px into nas-01, and its 2 nodes there are no second fault", async () => {
+    expect(await nodes("14")).toEqual([["backfill", "svc", "nas", "10239 → 9120"]]);
+    expect((await faults("14", "node"))[0]!.problem).toContain("2 of its wires run over 1500 px into section nas");
+  });
+
+  test("board r3: 2 wires run 20 px from a border of Run for over 300 px", async () => {
+    expect((await faults("r3", "route")).map((fault) => [fault.key, fault.ids])).toEqual([[`["border","x-applied"]`, ["x-applied", "sec-run"]], [`["border","x-apply"]`, ["x-apply", "sec-run"]]]);
+    expect((await faults("r3", "route"))[0]!.problem).toBe(
+      "Wire x-applied runs 20 px from the right border of sec-run for 610 px, from x 2480, y 1150 to x 2480, y 1760:"
+      + " a wire nearer than 40 px to a border along 300 px or more reads as part of the border. Route it 40 px or more from the border, or straight across it");
+  });
+});
+
+describe("climb node faults", () => {
+  /** A section 300 × 400 px with 2 nodes, `<id>1` over `<id>2`, at a column of a row with 200 px between 2 sections. */
+  const two = (id: string, column: number): BoardObject[] =>
+    [box(id, "section", null, 500 * column, 0, 300, 400), box(`${id}1`, "rectangle", id, 500 * column + 100, 50), box(`${id}2`, "rectangle", id, 500 * column + 100, 250)];
+  const row = board(two("a", 0), two("b", 1), two("c", 2));
+  /** A wire of `length` px: where it runs does not count here. */
+  const link = (id: string, from: string, to: string, length: number) => wire(id, from, to, [[0, -100], [length, -100]]);
+  const nodes = (facts: WireFact[], file = row) => plan(file, facts).faults.filter((fault) => fault.kind === "node").map((fault) => [fault.key, fault.ids, fault.number]);
+
+  test("a node whose only wire comes from a section that is no neighbour of its own", () => {
+    expect(nodes([link("w", "a1", "c2", 1100)])).toEqual([[`["node","c2"]`, ["c2", "c", "a", "w"], 1100]]);
+    expect(plan(row, [link("w", "a1", "c2", 1100)]).faults.find((fault) => fault.kind === "node")!.problem).toStartWith(
+      "Node c2 sits in section c, and its only wire comes from section a, which is no neighbour of c."
+      + " Its wires, now and with the node at the centre of a (an estimate between centres): w (from a1 in a) 1100 → 100 px; in sum 1100 → 100 px.");
+    // The fault is on the node the wire ends on, never on its source.
+    expect(nodes([link("w", "c2", "a1", 1100)]).map(([key]) => key)).toEqual([`["node","a1"]`]);
+    // From the section beside it, or with a second wire: no fault.
+    expect(nodes([link("w", "b1", "c2", 600)])).toEqual([]);
+    expect(nodes([link("w", "a1", "c2", 1100), link("v", "c1", "c2", 100)])).toEqual([]);
+  });
+
+  test("a node with 2 wires or more to other sections and none to a node of its own: the section with the least estimate", () => {
+    const away = [link("w", "c2", "b1", 600), link("v", "c2", "b2", 500)];
+    expect(nodes(away)).toEqual([[`["node","c2"]`, ["c2", "c", "b", "w", "v"], 1100]]);
+    expect(nodes([...away, link("u", "c2", "c1", 100)])).toEqual([]);
+    // One wire to b and one from a, which is twice as far: the node goes to b.
+    expect(nodes([link("w", "c2", "b1", 600), link("v", "a1", "c2", 1100)]).map(([, ids]) => ids)).toEqual([["c2", "c", "b", "w", "v"]]);
+  });
+
+  test("a node with 2 wires over 1500 px into one section, with a wire to its own section or not", () => {
+    const far = [link("w", "a1", "c2", 1600), link("v", "a2", "c2", 1700), link("u", "c2", "c1", 100), link("t", "c2", "b1", 600)];
+    // The fault names the 2 far wires. Its number is the sum of the node's 4 wires.
+    expect(nodes(far)).toEqual([[`["node","c2"]`, ["c2", "c", "a", "w", "v"], 4000]]);
+    expect(nodes(far.map((fact) => fact.id === "v" ? link("v", "a2", "c2", 1500) : fact))).toEqual([]);
+    // The 2 far wires are the node's fault and no far-wire fault. Under a node with no wire to its section, a far wire keeps its own.
+    const long = (facts: WireFact[]) => plan(row, facts).faults.filter((fault) => fault.kind === "wire").map((fault) => fault.key);
+    expect(long(far)).toEqual([]);
+    expect(long(far.slice(0, 1))).toEqual([]);
+    expect([nodes([link("w", "c2", "b1", 600), link("v", "a1", "c2", 1600)]).length, long([link("w", "c2", "b1", 600), link("v", "a1", "c2", 1600)])]).toEqual([1, [`["long",["a","c"]]`]]);
+  });
+
+  test("no fault when the estimate is not 10% shorter, in a section of one node, or on a node in no section", () => {
+    // b1 has a wire to each side, as long as the estimate from either section.
+    expect(nodes([link("w", "b1", "a1", 500), link("v", "b1", "c1", 500)])).toEqual([]);
+    const alone = board(two("a", 0), two("b", 1), box("c", "section", null, 1000, 0, 300, 400), box("c2", "rectangle", "c", 1100, 250), box("loose", "rectangle", null, 1100, 600));
+    expect(nodes([link("w", "a1", "c2", 1100), link("v", "a2", "loose", 1100)], alone)).toEqual([]);
+  });
+
+  test("2 nodes that name one wire are one fault, and a board has 2 node faults at most", () => {
+    // a1 has no wire to a2, and c1 and c2 have one wire each, from a1: 3 nodes, 2 wires.
+    const shared = nodes([link("w", "a1", "c1", 1100), link("v", "a1", "c2", 1100)]);
+    expect(shared.flatMap(([, ids]) => (ids as string[]).slice(3)).sort()).toEqual(["v", "w"]);
+    const wide = board(two("a", 0), two("b", 1), two("c", 2), two("d", 3), two("e", 4));
+    const three = [link("w", "a1", "c1", 1100), link("v", "a2", "d1", 1600), link("u", "b1", "e1", 1600)];
+    expect(nodes(three, wide).map(([key]) => key)).toHaveLength(2);
+  });
+});
+
+describe("climb wires along a border", () => {
+  const file = board(full("a", null, 0, 0, 300, 400), full("b", null, 500, 0, 300, 400));
+  /** A wire from a to b that runs down the band at `x`, from y 50 to `to`. */
+  const along = (x: number, to = 350) => plan(file, [wire("w", "a-n", "b-n", [[250, 50], [x, 50], [x, to], [550, to]])]).faults.filter((fault) => fault.kind === "route");
+
+  test("a wire nearer than 40 px to a section border along 300 px or more is a route fault", () => {
+    expect(along(320)).toEqual([{
+      kind: "route", key: `["border","w"]`, ids: ["w", "a"],
+      problem: "Wire w runs 20 px from the right border of a for 300 px, from x 320, y 50 to x 320, y 350:"
+        + " a wire nearer than 40 px to a border along 300 px or more reads as part of the border. Route it 40 px or more from the border, or straight across it",
+      marks: [{ path: [[250, 50], [320, 50], [320, 350], [550, 350]] }],
+    }]);
+    // 39 px is near. 40 px is the padding of a lane, and 299 px is short.
+    expect([along(339).length, along(340).length, along(320, 349).length]).toEqual([1, 0, 0]);
+    // The border of the other section counts too: one fault a wire.
+    expect(along(470).map((fault) => fault.ids)).toEqual([["w", "b"]]);
   });
 });
 
@@ -172,7 +290,7 @@ describe("climb empty blocks", () => {
     expect(keys(321)).toEqual([`["gap","over",["a","b"]]`]);
     expect(keys(150)).toEqual([`["band",["a","b"]]`]);
     // 5 lanes need 280 px: 400 px is legal, and no block.
-    const five = [0, 1, 2, 3, 4].map((i) => wire(`l${i}`, "a-n", "b-n", [[700, 50], [820 + 20 * i, 50], [820 + 20 * i, 350], [1250, 350]]));
+    const five = [0, 1, 2, 3, 4].map((i) => wire(`l${i}`, "a-n", "b-n", [[700, 50], [840 + 20 * i, 50], [840 + 20 * i, 350], [1250, 350]]));
     expect(keys(400, five)).toEqual([]);
     expect(keys(401, five)).toEqual([`["gap","over",["a","b"]]`]);
     // The corner past the span 2 sections share is no band: a block.

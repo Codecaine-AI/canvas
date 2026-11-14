@@ -20,8 +20,8 @@
  */
 import type { WorldRect } from "./render.ts";
 import {
-  LONG_WIRE_PX, bounds, reviewUnits, runsOf, runsThrough, sectionGaps, segmentsOf, touches,
-  type Board, type BoardObject, type Mark, type ReviewUnit, type SectionGap,
+  LONG_WIRE_PX, borderRuns, bounds, reviewUnits, runsOf, runsThrough, sectionGaps, segmentsOf, touches,
+  type Board, type BoardObject, type BorderRun, type Mark, type ReviewUnit, type SectionGap,
 } from "./review-inputs.ts";
 import type { Point, WireFact, WireModules } from "./wires.ts";
 
@@ -39,6 +39,15 @@ const MAX_HOLDER_BLOCKS = 4;
 export const MAX_SPACE_FAULTS = 4;
 /** The most wire faults a board reports: narrow bands, wires through a section and far wires. */
 export const MAX_WIRE_FAULTS = 6;
+/** The most node faults a board reports: nodes whose wires say they sit in the wrong section. */
+export const MAX_NODE_FAULTS = 2;
+/** A node is a fault only when its wires are this part of their length now, or less, with the node in the other section: 10% shorter by the estimate. */
+const NODE_GAIN = 0.9;
+/** A wire nearer than this to a section or frame border, along BORDER_RUN_PX or more, hugs the border. At 40 px a wire is in the lane the frame's padding leaves. */
+export const BORDER_LANE_PX = 40;
+export const BORDER_RUN_PX = 300;
+/** The most route faults of one sort a board reports (a wire along a border here, a wire a revise pass made longer in guard.ts). */
+export const MAX_ROUTE_FAULTS = 3;
 /** What fixes an empty block or a thin section, and what does not. Round 5 cycle 2: the drawer widened a section (h6), turned a column into a row (06) and added stickies (08). Cycle 3: it moved 2 notes and the key into gaps (03). */
 export const SPACE_FIXES = "The allowed fixes: shrink the section or the frame, or move a neighbour in. Not a fix: widen a section, add a sticky, reverse a chain. Never move a note or the key into a gap.";
 
@@ -408,8 +417,13 @@ export function layoutFacts(
 
 /** A measure of the board that fails: a finding the loop holds until the measure passes. */
 export interface ComputedFault {
-  /** space: an empty block, a thin section, a band too wide. wire: a band too narrow, a wire through a section, a far wire. A decline closes a wire fault only with a real section move or a better number (critic-loop.ts). */
-  kind: "space" | "wire";
+  /**
+   * space: an empty block, a thin section, a band too wide. wire: a band too narrow, a wire through a section, a far wire.
+   * node: a node whose wires say it sits in the wrong section. route: a wire along a border, or one a revise pass made longer (guard.ts).
+   * note: a note a revise pass left far from what it names (guard.ts).
+   * A decline closes a wire fault only with a real section move or a better number, and a node fault only with the move made and its numbers (critic-loop.ts).
+   */
+  kind: "space" | "wire" | "node" | "route" | "note";
   /** What makes it the same fault in a later round: the measure and the items, never the numbers. 2 empty blocks of one frame or section share it: `block` tells them apart. */
   key: string;
   /** An empty block's place in its frame or section. A later round's is the same fault when one of the 2 holds half of the other (critic-loop.ts). */
@@ -419,7 +433,7 @@ export interface ComputedFault {
   problem: string;
   /** A wire fault as it stands this round, in one line: the loop adds it when the fault comes back after a decline that closed nothing. */
   facts?: string;
-  /** A wire fault's own number, where less is better: a band's px short, a section's wires through it, a pair's longest far wire. A decline closes the fault when it fell by a fifth (critic-loop.ts). */
+  /** A wire or node fault's own number, where less is better: a band's px short, a section's wires through it, a pair's longest far wire, the length of a node's wires. A decline closes the fault when it fell by a fifth (critic-loop.ts). */
   number?: number;
   marks: Mark[];
 }
@@ -428,7 +442,7 @@ const span = (rect: WorldRect) => `x ${Math.round(rect.x)} to ${Math.round(rect.
 const size = (rect: { width: number; height: number }) => `${Math.round(rect.width)} × ${Math.round(rect.height)} px`;
 const percent = (share: number) => `${Math.round(share * 100)}%`;
 const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
-const pathOf = (fact: WireFact): Mark => ({ path: fact.points.map((point): [number, number] => [point.x, point.y]) });
+export const pathOf = (fact: WireFact): Mark => ({ path: fact.points.map((point): [number, number] => [point.x, point.y]) });
 /** The most wires a wire fault marks on the board. */
 const MAX_MARKED = 4;
 
@@ -543,6 +557,98 @@ function wireFaults({ board, rule, gaps, links, through }: Measures): ComputedFa
   return Array.from({ length: turns }, (_, turn) => kinds.flatMap((faults) => faults[turn] ?? [])).flat();
 }
 
+/**
+ * The node faults: the nodes whose wires say they sit in the wrong section.
+ * Round 5 cycle 4: a node in the wrong section held 3 of 6 weak boards down
+ * (h3: 2 nodes in Responses with one wire each, from Fallback, 2774 and
+ * 2894 px; r5: the Hub in Apply, with no wire to Apply; 14: the Backfill job,
+ * 4 wires over 1200 px into nas-01), and no finding named the node: the
+ * findings named its wires, and the drawer declined each section move.
+ *
+ * A node of a section that holds another node is one when:
+ * - 2 or more of its wires run over FAR_WIRE_PX into one other section, or
+ * - its only wire comes from a section that is no neighbour of its own, or
+ * - 2 or more of its wires go to other sections and none to its own.
+ * And when its wires are 10% shorter or more with the node in that section,
+ * by the estimate: the px between the centre of the section and the centre
+ * of each wire's other end. With no wire to its own section the target is
+ * the section with the least estimate. 2 nodes that name one wire are one
+ * fault: the first of the list above, then the one that saves the larger
+ * part. The list is by the part saved, largest first, and MAX_NODE_FAULTS
+ * long. `replaced`: the wires that a fault of the first 2 kinds names. The
+ * node is the cause of each, so it is no far-wire fault of its own (planOf).
+ */
+function nodeFaults({ board, links }: Measures, facts: WireFact[], pageFrame: BoardObject | null): { nodes: ComputedFault[]; replaced: Set<string> } {
+  const byId = new Map(board.objects.map((object) => [object.id, object]));
+  const chain = (id: string) => chainIn(byId)(id).filter((holder) => holder !== pageFrame?.id);
+  const linkOf = new Map(links.map((link) => [link.fact.id, link]));
+  const isNode = (object: BoardObject) => Boolean(object.geometry) && object.type !== SECTION && object.type !== STICKY;
+  const between = (a: WorldRect, b: WorldRect) => { const [from, to] = [centre(a), centre(b)]; return Math.round(Math.abs(from.x - to.x) + Math.abs(from.y - to.y)); };
+  const total = (lengths: number[]) => lengths.reduce((sum, length) => sum + length, 0);
+  const found = board.objects.flatMap((node) => {
+    const own = node.parentId ? byId.get(node.parentId) : undefined;
+    if (!isNode(node) || !own || own === pageFrame || own.type !== SECTION) return [];
+    // A section of one node is that node: where it sits is the order of the sections.
+    if (!board.objects.some((other) => other !== node && other.parentId === own.id && isNode(other))) return [];
+    const mine = chain(node.id);
+    const wires = facts.flatMap((fact) => {
+      const other = fact.from === node.id ? byId.get(fact.to) : fact.to === node.id ? byId.get(fact.from) : undefined;
+      if (!other?.geometry || other === node) return [];
+      const holders = chain(other.id);
+      // The section the wire goes to: the outermost one that holds its other end and not the node.
+      const outer = holders.findLast((holder) => !mine.includes(holder));
+      const inOwn = holders.includes(own.id);
+      return [{ fact, other, inOwn, target: !inOwn && outer && byId.get(outer)!.type === SECTION ? outer : null }];
+    });
+    const away = wires.filter((wire) => wire.target !== null);
+    const targets = [...new Set(away.map((wire) => wire.target!))];
+    const estimate = (target: string) => wires.map((wire) => between(byId.get(target)!.geometry, wire.other.geometry));
+    const far = targets.map((target) => away.filter((wire) => wire.target === target && wire.fact.length > FAR_WIRE_PX)).filter((group) => group.length >= 2).sort((a, b) => b.length - a.length)[0];
+    const only = wires.length === 1 && away.length === 1 && away[0]!.fact.to === node.id && linkOf.get(away[0]!.fact.id)?.neighbours === false;
+    const none = away.length >= 2 && !wires.some((wire) => wire.inOwn);
+    if (!far && !only && !none) return [];
+    const target = far || only ? (far ?? away)[0]!.target! : targets.reduce((best, each) => total(estimate(each)) < total(estimate(best)) ? each : best);
+    const [now, moved] = [total(wires.map((wire) => wire.fact.length)), estimate(target)];
+    if (total(moved) > NODE_GAIN * now) return [];
+    const named = far ?? away;
+    const why = far ? `${far.length} of its wires run over ${FAR_WIRE_PX} px into section ${target}`
+      : only ? `its only wire comes from section ${target}, which is no neighbour of ${linkOf.get(away[0]!.fact.id)!.a === target ? linkOf.get(away[0]!.fact.id)!.b : linkOf.get(away[0]!.fact.id)!.a}`
+        : `none of its ${count(wires.length, "wire", "wires")} joins another node of ${own.id}`;
+    const fault: ComputedFault = {
+      kind: "node", key: JSON.stringify(["node", node.id]), ids: [node.id, own.id, target, ...named.map((wire) => wire.fact.id)], number: now,
+      problem: `Node ${node.id} sits in section ${own.id}, and ${why}. Its wires, now and with the node at the centre of ${target} (an estimate between centres):`
+        + ` ${wires.map((wire, at) => `${wire.fact.id} (${wire.fact.from === node.id ? "to" : "from"} ${wire.other.id}${wire.target ? ` in ${wire.target}` : ""}) ${wire.fact.length} → ${moved[at]} px`).join(", ")}; in sum ${now} → ${total(moved)} px.`
+        + ` The node may sit in the wrong section. Try it: move ${node.id} into ${target}, route its wires again and read their lengths.`
+        + ` Keep the move when the sum is shorter and the brief does not put the node in ${own.id}. Else move it back`,
+      marks: [{ box: node.geometry }, { box: byId.get(target)!.geometry }, ...named.slice(0, MAX_MARKED).map((wire) => pathOf(wire.fact))],
+    };
+    return [{ fault, named: named.map((wire) => wire.fact.id), first: Boolean(far), replaces: Boolean(far) || only, part: total(moved) / now }];
+  });
+  const kept: typeof found = [];
+  for (const each of found.sort((a, b) => Number(b.first) - Number(a.first) || a.part - b.part)) if (!kept.some((taken) => taken.named.some((id) => each.named.includes(id)))) kept.push(each);
+  const sent = kept.sort((a, b) => a.part - b.part).slice(0, MAX_NODE_FAULTS);
+  return { nodes: sent.map(({ fault }) => fault), replaced: new Set(sent.flatMap((each) => each.replaces ? each.named : [])) };
+}
+
+/**
+ * The route faults a board has by itself: the wires that hug a border, the
+ * longest run first, one fault a wire. Round 5 cycle 4: the loop's own
+ * revise passes left wires 20 px from a frame border for 600 px (r3 and r5
+ * F85), where a reader takes the 2 lines for one.
+ */
+function borderFaults(board: Board, facts: WireFact[]): ComputedFault[] {
+  const sections = board.objects.filter((object) => object.type === SECTION && object.geometry);
+  const factOf = new Map(facts.map((fact) => [fact.id, fact]));
+  const longest = new Map<string, BorderRun>();
+  for (const run of borderRuns(facts, sections, BORDER_LANE_PX - 1, BORDER_RUN_PX)) if (run.length > (longest.get(run.wire)?.length ?? 0)) longest.set(run.wire, run);
+  return [...longest.values()].sort((a, b) => b.length - a.length).map((run): ComputedFault => ({
+    kind: "route", key: JSON.stringify(["border", run.wire]), ids: [run.wire, run.section],
+    problem: `Wire ${run.wire} runs ${run.distance} px from the ${run.side} border of ${run.section} for ${run.length} px, from x ${Math.round(run.from.x)}, y ${Math.round(run.from.y)} to x ${Math.round(run.to.x)}, y ${Math.round(run.to.y)}:`
+      + ` a wire nearer than ${BORDER_LANE_PX} px to a border along ${BORDER_RUN_PX} px or more reads as part of the border. Route it ${BORDER_LANE_PX} px or more from the border, or straight across it`,
+    marks: [pathOf(factOf.get(run.wire)!)],
+  }));
+}
+
 /** What the runner measures on the plan of a board. `blocks`, `thin` and `gaps` are whole: `faults` holds the ones under the caps. */
 export interface Plan extends Omit<Measures, "board" | "rule"> { pageFrame: BoardObject | null; units: ReviewUnit[]; faults: ComputedFault[]; layout: LayoutFacts }
 
@@ -554,7 +660,10 @@ export function planOf(board: Board, facts: WireFact[], rule: GapRule): Plan {
   const through = facts.flatMap((fact): Through[] => { const sections = throughOf(fact); return sections.length ? [{ fact, sections }] : []; });
   const measures: Measures = { board, rule, gaps, blocks: emptyBlocks(board, pageFrame, gaps), thin: thinSections(board, pageFrame, rule.padding), links, through };
   const { board: _, rule: __, ...rest } = measures;
-  const wires = wireFaults(measures);
-  // The space faults, then the wire faults, each under its cap.
-  return { pageFrame, units, ...rest, faults: [...spaceFaults(measures), ...wires.slice(0, MAX_WIRE_FAULTS)], layout: layoutFacts(board, facts, links, through, pageFrame, gaps, wires) };
+  const { nodes, replaced } = nodeFaults(measures, facts, pageFrame);
+  // A far-wire fault with no wire but those of a node fault is that fault: one finding names the cause.
+  const wires = wireFaults(measures).filter((fault) => !(fault.key.startsWith(`["long",`) && fault.ids.slice(2).every((id) => replaced.has(id))));
+  // The space faults, the node faults, the wire faults, then the wires along a border, each under its cap.
+  const faults = [...spaceFaults(measures), ...nodes, ...wires.slice(0, MAX_WIRE_FAULTS), ...borderFaults(board, facts).slice(0, MAX_ROUTE_FAULTS)];
+  return { pageFrame, units, ...rest, faults, layout: layoutFacts(board, facts, links, through, pageFrame, gaps, [...nodes, ...wires]) };
 }
