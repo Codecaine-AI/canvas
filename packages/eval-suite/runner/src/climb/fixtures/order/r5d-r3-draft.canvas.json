@@ -1,0 +1,1092 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-operation-pipeline",
+  "title": "How one canvas edit call runs",
+  "description": "Pipeline that every Codecaine Canvas edit tool runs, from tool definition to result (canvas/src/session/tools/operations/operation-tool.ts).\n\n**Reading order**: top row left to right: Tool definition (OperationSpec → defineOperationTool → Tool descriptor), then Runtime validation (Schema validation, with its own runtime validation error end). The `execute` wire enters runOperation, whose 13 stages run top to bottom in four columns, left to right: Run the edit (1–3), Reconcile the draft (4–6), Guard checks (7–10, diamonds), Commit and report (11–13). Each stage links to the next with `next`.\n\n**Results** (bottom row, Call results): red wires go to ERROR (spec.validate, Section auto-grow, Held-move, Broken-wire, Section rule checks), gray wires go to NO-OP (spec.apply, Zero-delta check), and the green `APPLIED headline` wire runs from operationPerception to APPLIED. ERROR and NO-OP both lead to \"Draft unchanged, no event\"; an edge-target NO-OP also carries the edge's numbered route. Only the commit column changes the board. Result node names carry the result line formats.\n\n**Color key**: blue nodes = tool definition; violet = pipeline stage; orange diamonds = checks; green = commit path / APPLIED; red = error; gray = no-op / unchanged. Stickies hold per-stage details and the known waypoint-replay gap (in Reconcile the draft).",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "How one canvas edit call runs",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 20,
+        "y": 40,
+        "width": 2460,
+        "height": 2400
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-def",
+      "type": "section",
+      "text": "Tool definition",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 60,
+        "y": 120,
+        "width": 1180,
+        "height": 352
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "code"
+    },
+    {
+      "id": "sec-schema",
+      "type": "section",
+      "text": "Runtime validation",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1540,
+        "y": 120,
+        "width": 900,
+        "height": 300
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "sec-run",
+      "type": "section",
+      "text": "runOperation",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 60,
+        "y": 680,
+        "width": 2380,
+        "height": 1160
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "sec-out",
+      "type": "section",
+      "text": "Call results",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 320,
+        "y": 2120,
+        "width": 2120,
+        "height": 280
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "sub-edit",
+      "type": "section",
+      "text": "Run the edit",
+      "color": "teal",
+      "parentId": "sec-run",
+      "geometry": {
+        "x": 100,
+        "y": 760,
+        "width": 360,
+        "height": 940
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sub-recon",
+      "type": "section",
+      "text": "Reconcile the draft",
+      "color": "pink",
+      "parentId": "sec-run",
+      "geometry": {
+        "x": 740,
+        "y": 760,
+        "width": 360,
+        "height": 960
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sub-guards",
+      "type": "section",
+      "text": "Guard checks",
+      "color": "violet",
+      "parentId": "sec-run",
+      "geometry": {
+        "x": 1380,
+        "y": 760,
+        "width": 360,
+        "height": 1040
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sub-commit",
+      "type": "section",
+      "text": "Commit and report",
+      "color": "orange",
+      "parentId": "sec-run",
+      "geometry": {
+        "x": 2040,
+        "y": 760,
+        "width": 360,
+        "height": 920
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "n-spec",
+      "type": "icon",
+      "text": "OperationSpec",
+      "color": "blue",
+      "parentId": "sec-def",
+      "geometry": {
+        "x": 120,
+        "y": 168,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "n-define",
+      "type": "icon",
+      "text": "defineOperationTool",
+      "color": "blue",
+      "parentId": "sec-def",
+      "geometry": {
+        "x": 560,
+        "y": 168,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "function"
+    },
+    {
+      "id": "n-desc",
+      "type": "icon",
+      "text": "Tool descriptor",
+      "color": "blue",
+      "parentId": "sec-def",
+      "geometry": {
+        "x": 920,
+        "y": 168,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "n-schema",
+      "type": "decision",
+      "text": "Schema validation",
+      "color": "orange",
+      "parentId": "sec-schema",
+      "geometry": {
+        "x": 1580,
+        "y": 220,
+        "width": 280,
+        "height": 140
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "n-rterr",
+      "type": "octagon",
+      "text": "Runtime validation error",
+      "color": "red",
+      "parentId": "sec-schema",
+      "geometry": {
+        "x": 2200,
+        "y": 200,
+        "width": 180,
+        "height": 180
+      },
+      "style": {
+        "shape": "octagon"
+      }
+    },
+    {
+      "id": "s01-resolve",
+      "type": "process",
+      "text": "Resolve session",
+      "color": "violet",
+      "parentId": "sub-edit",
+      "geometry": {
+        "x": 140,
+        "y": 840,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s02-validate",
+      "type": "process",
+      "text": "spec.validate",
+      "color": "violet",
+      "parentId": "sub-edit",
+      "geometry": {
+        "x": 140,
+        "y": 1040,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s03-apply",
+      "type": "process",
+      "text": "spec.apply",
+      "color": "violet",
+      "parentId": "sub-edit",
+      "geometry": {
+        "x": 140,
+        "y": 1240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s04-grow",
+      "type": "process",
+      "text": "Section auto-grow (growSectionsToChildren)",
+      "color": "violet",
+      "parentId": "sub-recon",
+      "geometry": {
+        "x": 780,
+        "y": 840,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s05-waypoints",
+      "type": "process",
+      "text": "Reconcile waypoints",
+      "color": "violet",
+      "parentId": "sub-recon",
+      "geometry": {
+        "x": 780,
+        "y": 1040,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s06-membership",
+      "type": "process",
+      "text": "Reconcile membership",
+      "color": "violet",
+      "parentId": "sub-recon",
+      "geometry": {
+        "x": 780,
+        "y": 1240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s07-held",
+      "type": "decision",
+      "text": "Held-move check",
+      "color": "orange",
+      "parentId": "sub-guards",
+      "geometry": {
+        "x": 1420,
+        "y": 840,
+        "width": 280,
+        "height": 120
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "s08-zero",
+      "type": "decision",
+      "text": "Zero-delta check",
+      "color": "orange",
+      "parentId": "sub-guards",
+      "geometry": {
+        "x": 1420,
+        "y": 1060,
+        "width": 280,
+        "height": 120
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "s09-broken",
+      "type": "decision",
+      "text": "Broken-wire check",
+      "color": "orange",
+      "parentId": "sub-guards",
+      "geometry": {
+        "x": 1420,
+        "y": 1280,
+        "width": 280,
+        "height": 120
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "s10-rule",
+      "type": "decision",
+      "text": "Section rule check",
+      "color": "orange",
+      "parentId": "sub-guards",
+      "geometry": {
+        "x": 1420,
+        "y": 1500,
+        "width": 280,
+        "height": 120
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "s11-commit",
+      "type": "process",
+      "text": "commitDraft",
+      "color": "green",
+      "parentId": "sub-commit",
+      "geometry": {
+        "x": 2080,
+        "y": 840,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s12-perception",
+      "type": "process",
+      "text": "operationPerception",
+      "color": "green",
+      "parentId": "sub-commit",
+      "geometry": {
+        "x": 2080,
+        "y": 1040,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s13-emit",
+      "type": "process",
+      "text": "Emit proposal, delta events",
+      "color": "green",
+      "parentId": "sub-commit",
+      "geometry": {
+        "x": 2080,
+        "y": 1240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "r-error",
+      "type": "octagon",
+      "text": "ERROR · <tool> — <lines>",
+      "color": "red",
+      "parentId": "sec-out",
+      "geometry": {
+        "x": 1760,
+        "y": 2200,
+        "width": 160,
+        "height": 160
+      },
+      "style": {
+        "shape": "octagon"
+      }
+    },
+    {
+      "id": "r-noop",
+      "type": "ellipse",
+      "text": "NO-OP · <tool> <id> — <note>",
+      "color": "gray",
+      "parentId": "sec-out",
+      "geometry": {
+        "x": 840,
+        "y": 2220,
+        "width": 280,
+        "height": 120
+      },
+      "style": {
+        "shape": "ellipse"
+      }
+    },
+    {
+      "id": "r-applied",
+      "type": "ellipse",
+      "text": "APPLIED · <summary>",
+      "color": "green",
+      "parentId": "sec-out",
+      "geometry": {
+        "x": 2120,
+        "y": 2220,
+        "width": 280,
+        "height": 120
+      },
+      "style": {
+        "shape": "ellipse"
+      }
+    },
+    {
+      "id": "k-edit",
+      "type": "sticky",
+      "text": "**Resolve session** takes the current draft as *before*.\n**spec.validate**: state checks — existence, kind, lock state.\n**spec.apply**: the mutation; returns an applied draft or a no-op.\nAn ERROR or a NO-OP leaves the draft as it was and fires no event.",
+      "color": "yellow",
+      "parentId": "sub-edit",
+      "geometry": {
+        "x": 140,
+        "y": 1380,
+        "width": 280,
+        "height": 280
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "k-recon",
+      "type": "sticky",
+      "text": "**reconcileConnectionWaypoints** translates waypoints on a rigid move and drops them on an asymmetric move or resize.\n**Known gap**: a commit replays the whole proposal, so asymmetric net movement can lose waypoints on replay.\n**reconcileSectionMembership** derives each parentId from geometry.",
+      "color": "yellow",
+      "parentId": "sub-recon",
+      "geometry": {
+        "x": 780,
+        "y": 1380,
+        "width": 280,
+        "height": 300
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "k-guards",
+      "type": "sticky",
+      "text": "**newBrokenWires** finds self-loops, dangling and zero-length wires.",
+      "color": "yellow",
+      "parentId": "sub-guards",
+      "geometry": {
+        "x": 1420,
+        "y": 1660,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "k-commit",
+      "type": "sticky",
+      "text": "**commitDraft** assigns the draft and refreshes the board render: only a call that reaches it changes the board.\n**operationPerception** builds the DELTA, the lint delta and the ROUTES for a touched edge.\n**Emit** fires one proposal event, then one delta event.",
+      "color": "yellow",
+      "parentId": "sub-commit",
+      "geometry": {
+        "x": 2080,
+        "y": 1380,
+        "width": 280,
+        "height": 260
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "k-def",
+      "type": "sticky",
+      "text": "**OperationSpec**: name, description, fields, validate(ctx, params), apply(ctx, params).\n**Descriptor**: name, label, description, executionMode \"sequential\", parameters sealed with additionalProperties: false, so an unknown key is refused.",
+      "color": "yellow",
+      "parentId": "sec-def",
+      "geometry": {
+        "x": 140,
+        "y": 332,
+        "width": 1020,
+        "height": 100
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "r-kept",
+      "type": "icon",
+      "text": "Draft unchanged, no event",
+      "color": "gray",
+      "parentId": "sec-out",
+      "geometry": {
+        "x": 1292,
+        "y": 2220,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "lock"
+    },
+    {
+      "id": "r-route",
+      "type": "rectangle",
+      "text": "Edge's numbered route",
+      "color": "gray",
+      "parentId": "sec-out",
+      "geometry": {
+        "x": 360,
+        "y": 2232,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-spec-define",
+      "from": {
+        "objectId": "n-spec"
+      },
+      "to": {
+        "objectId": "n-define"
+      },
+      "label": "declares the gesture",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-define-desc",
+      "from": {
+        "objectId": "n-define"
+      },
+      "to": {
+        "objectId": "n-desc"
+      },
+      "label": "returns",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-desc-schema",
+      "from": {
+        "objectId": "n-desc"
+      },
+      "to": {
+        "objectId": "n-schema"
+      },
+      "label": "sealed parameters",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-schema-err",
+      "from": {
+        "objectId": "n-schema"
+      },
+      "to": {
+        "objectId": "n-rterr"
+      },
+      "label": "type, enum, id-format error",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-schema-resolve",
+      "from": {
+        "objectId": "n-schema",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "s01-resolve",
+        "anchor": "top"
+      },
+      "label": "execute",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "n01",
+      "from": {
+        "objectId": "s01-resolve"
+      },
+      "to": {
+        "objectId": "s02-validate"
+      },
+      "label": "next",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "n02",
+      "from": {
+        "objectId": "s02-validate"
+      },
+      "to": {
+        "objectId": "s03-apply"
+      },
+      "label": "next",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "n03",
+      "from": {
+        "objectId": "s03-apply",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "s04-grow",
+        "anchor": "left"
+      },
+      "label": "next",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "n04",
+      "from": {
+        "objectId": "s04-grow"
+      },
+      "to": {
+        "objectId": "s05-waypoints"
+      },
+      "label": "next",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "n05",
+      "from": {
+        "objectId": "s05-waypoints"
+      },
+      "to": {
+        "objectId": "s06-membership"
+      },
+      "label": "next",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "n06",
+      "from": {
+        "objectId": "s06-membership",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "s07-held",
+        "anchor": "left"
+      },
+      "label": "next",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "n07",
+      "from": {
+        "objectId": "s07-held"
+      },
+      "to": {
+        "objectId": "s08-zero"
+      },
+      "label": "next",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "n08",
+      "from": {
+        "objectId": "s08-zero"
+      },
+      "to": {
+        "objectId": "s09-broken"
+      },
+      "label": "next",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "n09",
+      "from": {
+        "objectId": "s09-broken"
+      },
+      "to": {
+        "objectId": "s10-rule"
+      },
+      "label": "next",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "n10",
+      "from": {
+        "objectId": "s10-rule",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "s11-commit",
+        "anchor": "left"
+      },
+      "label": "next",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          2000,
+          1560
+        ],
+        [
+          2000,
+          890
+        ]
+      ]
+    },
+    {
+      "id": "n11",
+      "from": {
+        "objectId": "s11-commit"
+      },
+      "to": {
+        "objectId": "s12-perception"
+      },
+      "label": "next",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "n12",
+      "from": {
+        "objectId": "s12-perception"
+      },
+      "to": {
+        "objectId": "s13-emit"
+      },
+      "label": "next",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "x-validate",
+      "from": {
+        "objectId": "s02-validate",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "r-error",
+        "anchor": "top"
+      },
+      "label": "any error",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          580,
+          1090
+        ],
+        [
+          580,
+          2000
+        ],
+        [
+          1840,
+          2000
+        ]
+      ]
+    },
+    {
+      "id": "x-grow",
+      "from": {
+        "objectId": "s04-grow",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "r-error",
+        "anchor": "top"
+      },
+      "label": "growing would pull a neighbor in",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          1240,
+          900
+        ],
+        [
+          1240,
+          2000
+        ],
+        [
+          1840,
+          2000
+        ]
+      ]
+    },
+    {
+      "id": "x-held",
+      "from": {
+        "objectId": "s07-held",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "r-error",
+        "anchor": "top"
+      },
+      "label": "held object would move",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "labelPosition": {
+        "along": 0.17
+      }
+    },
+    {
+      "id": "x-broken",
+      "from": {
+        "objectId": "s09-broken",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "r-error",
+        "anchor": "top"
+      },
+      "label": "would break a wire",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "labelPosition": {
+        "along": 0.25
+      }
+    },
+    {
+      "id": "x-rule",
+      "from": {
+        "objectId": "s10-rule",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "r-error",
+        "anchor": "top"
+      },
+      "label": "section rule refused",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          1560,
+          1640
+        ],
+        [
+          1840,
+          1640
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.45
+      }
+    },
+    {
+      "id": "x-apply",
+      "from": {
+        "objectId": "s03-apply",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "r-noop",
+        "anchor": "top"
+      },
+      "label": "status noop",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray",
+      "waypoints": [
+        [
+          660,
+          1300
+        ],
+        [
+          660,
+          1940
+        ],
+        [
+          980,
+          1940
+        ]
+      ]
+    },
+    {
+      "id": "x-zero",
+      "from": {
+        "objectId": "s08-zero",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "r-noop",
+        "anchor": "top"
+      },
+      "label": "board already matches",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray",
+      "waypoints": [
+        [
+          1300,
+          1120
+        ],
+        [
+          1300,
+          1940
+        ],
+        [
+          980,
+          1940
+        ]
+      ]
+    },
+    {
+      "id": "x-applied",
+      "from": {
+        "objectId": "s12-perception",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "r-applied",
+        "anchor": "top"
+      },
+      "label": "APPLIED headline",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "waypoints": [
+        [
+          2380,
+          1100
+        ],
+        [
+          2380,
+          2060
+        ],
+        [
+          2260,
+          2060
+        ]
+      ]
+    },
+    {
+      "id": "k-noop-kept",
+      "from": {
+        "objectId": "r-noop",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "r-kept",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "k-error-kept",
+      "from": {
+        "objectId": "r-error",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "r-kept",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "k-noop-route",
+      "from": {
+        "objectId": "r-noop",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "r-route",
+        "anchor": "right"
+      },
+      "label": "edge target",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    }
+  ],
+  "annotations": []
+}

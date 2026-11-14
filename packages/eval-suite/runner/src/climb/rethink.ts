@@ -12,8 +12,13 @@
  * the computed findings and the board's size. The drawer writes 3 answers, then edits. An
  * answer can be "no change" only with its reason. The loop record keeps the
  * answers, the tool calls and the sections that moved.
+ *
+ * Round 5 cycle 4: A3 asked for another order and no drawer had one to
+ * weigh. So the turn also reads the best 2 orders of the order search
+ * (order.ts), when the best is ORDER_GAIN cheaper than the board's own.
  */
 import type { DrawerRun } from "./drawer.ts";
+import { ORDER_COSTS, orderLines, type Order, type OrderSearch } from "./order.ts";
 import { transcriptMetrics } from "./render.ts";
 import { SPACE_UNIT, ownerUnits, spaceLines, type Board } from "./review-inputs.ts";
 import { gapLine, type GapRule, type Plan } from "./space.ts";
@@ -35,8 +40,8 @@ const LONGEST = 5;
 
 const block = (title: string, lines: string[]) => ["", title, ...(lines.length ? lines : ["(none)"])];
 
-/** The turn's message: what to answer and do, then the measured facts. */
-export function rethinkMessage(board: string, { board: file, facts, plan }: Measured, rule: GapRule): string {
+/** The turn's message: what to answer and do, then the measured facts. `order`: the order search of the board, read only when it found a cheaper order (`shown`). */
+export function rethinkMessage(board: string, { board: file, facts, plan }: Measured, rule: GapRule, order: OrderSearch | null = null): string {
   const lines = spaceLines(plan.units, facts, file);
   const owner = ownerUnits(plan.units);
   const named = (id: string) => `${id} (${owner.get(id) ?? "board"})`;
@@ -58,6 +63,14 @@ export function rethinkMessage(board: string, { board: file, facts, plan }: Meas
     "Run canvas_check when you are done.",
     ...block("Board:", [lines.shape]),
     ...block("Wires between sections (the 2 sections · wires · their total length · whether the 2 are neighbours), most wires first:", lines.pairs),
+    ...(order?.shown ? block(
+      "Section orders the runner measured for A3. It put the sections on a grid of rows and columns and searched the orders."
+      + ` The cost of an order is the px of wire between the centres of its cells, plus ${ORDER_COSTS.back} px for each wire that runs back (to the left or up),`
+      + ` plus ${ORDER_COSTS.far} px for each pair of cells with a wire that are not neighbours. It is an estimate from cell centres, and the runner forces no order.`
+      + (order.kept ? ` The brief names a start, so the first row (${order.kept.join(", ")}) stayed.` : "")
+      + " In A3, say which order you take, or why you keep yours, with numbers. When you take one, move the whole sections to it, then check the wires you get:",
+      orderLines(order),
+    ) : []),
     ...block(
       `Bands, each against the band rule. A band is the gap between 2 neighbour sections, over the span the 2 share. Its lanes are the wires that run along it for 40 px or more inside that span: a wire that only crosses it straight is no lane.`
       + ` A band needs ${rule.base} px, or the longest label leg of a chip that sits in it when that is more (${rule.labelBase} px plus ${rule.labelPerCharacter} px a character on a horizontal leg), plus ${rule.perWire} px for each lane after the first.`
@@ -162,10 +175,15 @@ export interface RethinkRecord extends DrawerRun {
   frame: { before: string; after: string };
   /** How many measures of the board failed before and after (space.ts planOf). */
   faults: { before: number; after: number };
+  /** The order search of the first draw, or null when the board has no orders to search. The turn read it when `shown`. */
+  order: OrderSearch | null;
+  /** The board's own order after the turn, at the same model's cost: what the drawer did with the orders. */
+  orderAfter: Order | null;
 }
 
 export function rethinkRecord(turn: {
   run: DrawerRun; transcript: string; answers: RethinkAnswers; reask: RethinkRecord["reask"]; before: Measured; after: Measured;
+  order?: { before: OrderSearch | null; after: OrderSearch | null };
 }): RethinkRecord {
   const { before, after } = turn;
   const frame = ({ plan }: Measured) => {
@@ -180,5 +198,7 @@ export function rethinkRecord(turn: {
     moved: sectionMoves(before.board, after.board, after.plan.pageFrame?.id ?? null),
     frame: { before: frame(before), after: frame(after) },
     faults: { before: before.plan.faults.length, after: after.plan.faults.length },
+    order: turn.order?.before ?? null,
+    orderAfter: turn.order?.after?.current ?? null,
   };
 }

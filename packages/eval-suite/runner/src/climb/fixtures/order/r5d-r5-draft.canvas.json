@@ -1,0 +1,1773 @@
+{
+  "schemaVersion": 1,
+  "id": "system-prompt-build",
+  "title": "How the shared system prompt is built",
+  "description": "How agent-config builds `instructions/AGENTS.md`, the one global instruction file every coding agent reads.\n\n**Layout.** There are two rows. On top: Sources (left), Build (middle) and Agent files (right). Below: Prompt blocks (under Sources) and the Apply step (under Build). The six section-file wires run as one line over the top into *Build: wrap and join*. The block-file wires run as one line up the gap between Prompt blocks and Apply into the mcp-protocols generator. The links from the seven agent files run back along the gap between Build and Agent files to AGENTS.md.\n\n- **Sources**: six section files. sections.toml sets order and groups. Principle files, harnesses.toml and task-routing.toml feed the principles and routing generators.\n- **Prompt blocks**: four core MCP servers' `cli.ts instructions` print blocks to mcp_protocols.py, which uses the machines list from mcp/servers.toml. `--write` writes block + sha256 to four block files, and those join in server-name order into the mcp-protocols generator. The red ends are a missing cli.ts and a drift found by --check.\n- **Build**: three generators feed the build step, which writes AGENTS.md. The size limits lead to *Build fails*.\n- **Apply step**: instructions/apply.py runs the build, backs up the stale copy, reads agents.toml, runs mcp_protocols.py --check, exits 1 while stale and creates or repairs the links. Root apply.py runs it after the MCP step. The Hub page edits section files, and every save rebuilds.\n- **Loop**: the orange \"edit through the link\" wire runs from Claude Code's link back to AGENTS.md. The loop note under the agent files explains the backup-and-overwrite and the stale-source cycle.\n\nColors: blue source, violet script or the runs it triggers, green generated, teal symlink, orange edits/Hub, red failure.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "How the shared system prompt is built",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 40,
+        "y": 40,
+        "width": 4040,
+        "height": 2680
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sources",
+      "type": "section",
+      "text": "Sources",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 160,
+        "y": 220,
+        "width": 1020,
+        "height": 1324
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "folder"
+    },
+    {
+      "id": "section-files",
+      "type": "section",
+      "text": "Section files",
+      "color": "teal",
+      "parentId": "sources",
+      "geometry": {
+        "x": 200,
+        "y": 300,
+        "width": 400,
+        "height": 1204
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "f-comm",
+      "type": "icon",
+      "text": "communication-style.md",
+      "color": "blue",
+      "parentId": "section-files",
+      "geometry": {
+        "x": 260,
+        "y": 340,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "f-orch",
+      "type": "icon",
+      "text": "orchestration.md",
+      "color": "blue",
+      "parentId": "section-files",
+      "geometry": {
+        "x": 260,
+        "y": 540,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "f-routing",
+      "type": "icon",
+      "text": "routing.md",
+      "color": "blue",
+      "parentId": "section-files",
+      "geometry": {
+        "x": 260,
+        "y": 740,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "f-ship",
+      "type": "icon",
+      "text": "ship.md",
+      "color": "blue",
+      "parentId": "section-files",
+      "geometry": {
+        "x": 260,
+        "y": 940,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "f-eco",
+      "type": "icon",
+      "text": "ecosystem.md",
+      "color": "blue",
+      "parentId": "section-files",
+      "geometry": {
+        "x": 260,
+        "y": 1140,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "f-princ",
+      "type": "icon",
+      "text": "principles.md",
+      "color": "blue",
+      "parentId": "section-files",
+      "geometry": {
+        "x": 260,
+        "y": 1340,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "sections-toml",
+      "type": "icon",
+      "text": "sections.toml",
+      "color": "blue",
+      "parentId": "sources",
+      "geometry": {
+        "x": 780,
+        "y": 300,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "principle-files",
+      "type": "icon",
+      "text": "Principle files (26)",
+      "color": "blue",
+      "parentId": "sources",
+      "geometry": {
+        "x": 780,
+        "y": 500,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "documents"
+    },
+    {
+      "id": "harnesses-toml",
+      "type": "icon",
+      "text": "harnesses.toml",
+      "color": "blue",
+      "parentId": "sources",
+      "geometry": {
+        "x": 780,
+        "y": 700,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "table"
+    },
+    {
+      "id": "task-routing-toml",
+      "type": "icon",
+      "text": "task-routing.toml",
+      "color": "blue",
+      "parentId": "sources",
+      "geometry": {
+        "x": 780,
+        "y": 900,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "route"
+    },
+    {
+      "id": "prompt-blocks",
+      "type": "section",
+      "text": "Prompt blocks",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 160,
+        "y": 1740,
+        "width": 1660,
+        "height": 940
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "layers"
+    },
+    {
+      "id": "servers",
+      "type": "section",
+      "text": "Core MCP servers",
+      "color": "green",
+      "parentId": "prompt-blocks",
+      "geometry": {
+        "x": 200,
+        "y": 1820,
+        "width": 340,
+        "height": 820
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "block-files",
+      "type": "section",
+      "text": "Block files",
+      "color": "teal",
+      "parentId": "prompt-blocks",
+      "geometry": {
+        "x": 1440,
+        "y": 1820,
+        "width": 340,
+        "height": 820
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "srv-docs",
+      "type": "icon",
+      "text": "docs-system cli.ts",
+      "color": "violet",
+      "parentId": "servers",
+      "geometry": {
+        "x": 220,
+        "y": 1876,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "srv-canvas",
+      "type": "icon",
+      "text": "codecaine-canvas cli.ts",
+      "color": "violet",
+      "parentId": "servers",
+      "geometry": {
+        "x": 220,
+        "y": 2076,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "srv-prompt",
+      "type": "icon",
+      "text": "prompt-kit cli.ts",
+      "color": "violet",
+      "parentId": "servers",
+      "geometry": {
+        "x": 220,
+        "y": 2276,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "srv-knowledge",
+      "type": "icon",
+      "text": "knowledge-system cli.ts",
+      "color": "violet",
+      "parentId": "servers",
+      "geometry": {
+        "x": 220,
+        "y": 2476,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "b-docs",
+      "type": "icon",
+      "text": "docs-system.md",
+      "color": "green",
+      "parentId": "block-files",
+      "geometry": {
+        "x": 1460,
+        "y": 1876,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "code-file"
+    },
+    {
+      "id": "b-canvas",
+      "type": "icon",
+      "text": "codecaine-canvas.md",
+      "color": "green",
+      "parentId": "block-files",
+      "geometry": {
+        "x": 1460,
+        "y": 2076,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "code-file"
+    },
+    {
+      "id": "b-prompt",
+      "type": "icon",
+      "text": "prompt-kit.md",
+      "color": "green",
+      "parentId": "block-files",
+      "geometry": {
+        "x": 1460,
+        "y": 2276,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "code-file"
+    },
+    {
+      "id": "b-knowledge",
+      "type": "icon",
+      "text": "knowledge-system.md",
+      "color": "green",
+      "parentId": "block-files",
+      "geometry": {
+        "x": 1460,
+        "y": 2476,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "code-file"
+    },
+    {
+      "id": "mcp-protocols-py",
+      "type": "icon",
+      "text": "mcp_protocols.py",
+      "color": "violet",
+      "parentId": "prompt-blocks",
+      "geometry": {
+        "x": 720,
+        "y": 2180,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "code"
+    },
+    {
+      "id": "servers-toml",
+      "type": "icon",
+      "text": "mcp/servers.toml",
+      "color": "blue",
+      "parentId": "prompt-blocks",
+      "geometry": {
+        "x": 840,
+        "y": 1880,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "cli-missing",
+      "type": "octagon",
+      "text": "Missing cli.ts fails",
+      "color": "red",
+      "parentId": "prompt-blocks",
+      "geometry": {
+        "x": 740,
+        "y": 2460,
+        "width": 140,
+        "height": 140
+      },
+      "style": {
+        "shape": "octagon"
+      }
+    },
+    {
+      "id": "check-drift",
+      "type": "octagon",
+      "text": "--check fails on drift",
+      "color": "red",
+      "parentId": "prompt-blocks",
+      "geometry": {
+        "x": 940,
+        "y": 2460,
+        "width": 140,
+        "height": 140
+      },
+      "style": {
+        "shape": "octagon"
+      }
+    },
+    {
+      "id": "build",
+      "type": "section",
+      "text": "Build (instructions/sections.py)",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1532,
+        "y": 380,
+        "width": 1560,
+        "height": 768
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "function"
+    },
+    {
+      "id": "generators",
+      "type": "section",
+      "text": "Generators",
+      "color": "pink",
+      "parentId": "build",
+      "geometry": {
+        "x": 1572,
+        "y": 488,
+        "width": 340,
+        "height": 620
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "gen-principles",
+      "type": "icon",
+      "text": "principles generator",
+      "color": "violet",
+      "parentId": "generators",
+      "geometry": {
+        "x": 1592,
+        "y": 544,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "function"
+    },
+    {
+      "id": "gen-routing",
+      "type": "icon",
+      "text": "routing generator",
+      "color": "violet",
+      "parentId": "generators",
+      "geometry": {
+        "x": 1592,
+        "y": 708,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "function"
+    },
+    {
+      "id": "gen-mcp",
+      "type": "icon",
+      "text": "mcp-protocols generator",
+      "color": "violet",
+      "parentId": "generators",
+      "geometry": {
+        "x": 1592,
+        "y": 944,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "function"
+    },
+    {
+      "id": "build-step",
+      "type": "process",
+      "text": "Build: wrap and join",
+      "color": "violet",
+      "parentId": "build",
+      "geometry": {
+        "x": 2132,
+        "y": 460,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "agents-md",
+      "type": "icon",
+      "text": "instructions/AGENTS.md",
+      "color": "green",
+      "parentId": "build",
+      "geometry": {
+        "x": 2752,
+        "y": 448,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "build-fails",
+      "type": "octagon",
+      "text": "Build fails",
+      "color": "red",
+      "parentId": "build",
+      "geometry": {
+        "x": 2372,
+        "y": 768,
+        "width": 144,
+        "height": 144
+      },
+      "style": {
+        "shape": "octagon"
+      }
+    },
+    {
+      "id": "note-build",
+      "type": "sticky",
+      "text": "Wraps each section that is on in an XML block named after its id, and the behavior group in one `<behavior>` block. routing and principles build as file text, then generated text.",
+      "color": "yellow",
+      "parentId": "build",
+      "geometry": {
+        "x": 2592,
+        "y": 768,
+        "width": 400,
+        "height": 140
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "note-agents",
+      "type": "sticky",
+      "text": "One file for every machine; every agent file links here.",
+      "color": "yellow",
+      "parentId": "build",
+      "geometry": {
+        "x": 2760,
+        "y": 660,
+        "width": 300,
+        "height": 80
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "agent-files",
+      "type": "section",
+      "text": "Agent files (symlinks)",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 3640,
+        "y": 380,
+        "width": 400,
+        "height": 1752
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "link"
+    },
+    {
+      "id": "a-claude",
+      "type": "icon",
+      "text": "Claude Code ~/.claude/CLAUDE.md",
+      "color": "teal",
+      "parentId": "agent-files",
+      "geometry": {
+        "x": 3692,
+        "y": 428,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "brand-claude-code"
+    },
+    {
+      "id": "a-codex",
+      "type": "icon",
+      "text": "Codex ~/.codex/AGENTS.md",
+      "color": "teal",
+      "parentId": "agent-files",
+      "geometry": {
+        "x": 3692,
+        "y": 648,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "brand-codex"
+    },
+    {
+      "id": "a-opencode",
+      "type": "icon",
+      "text": "OpenCode ~/.config/opencode/AGENTS.md",
+      "color": "teal",
+      "parentId": "agent-files",
+      "geometry": {
+        "x": 3692,
+        "y": 848,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "terminal"
+    },
+    {
+      "id": "a-pi",
+      "type": "icon",
+      "text": "Pi ~/.pi/agent/AGENTS.md",
+      "color": "teal",
+      "parentId": "agent-files",
+      "geometry": {
+        "x": 3692,
+        "y": 1068,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "brand-pi"
+    },
+    {
+      "id": "a-gemini",
+      "type": "icon",
+      "text": "Gemini CLI ~/.gemini/GEMINI.md",
+      "color": "teal",
+      "parentId": "agent-files",
+      "geometry": {
+        "x": 3692,
+        "y": 1268,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "brand-gemini"
+    },
+    {
+      "id": "a-muse",
+      "type": "icon",
+      "text": "Muse Code ~/.config/muse/AGENTS.md",
+      "color": "teal",
+      "parentId": "agent-files",
+      "geometry": {
+        "x": 3692,
+        "y": 1468,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "brand-muse"
+    },
+    {
+      "id": "a-antigravity",
+      "type": "icon",
+      "text": "Antigravity ~/.gemini/config/AGENTS.md",
+      "color": "teal",
+      "parentId": "agent-files",
+      "geometry": {
+        "x": 3692,
+        "y": 1688,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "brand-antigravity"
+    },
+    {
+      "id": "apply",
+      "type": "section",
+      "text": "Apply step",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2100,
+        "y": 1392,
+        "width": 1300,
+        "height": 608
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "terminal"
+    },
+    {
+      "id": "hub",
+      "type": "icon",
+      "text": "Hub Instructions page",
+      "color": "orange",
+      "parentId": "apply",
+      "geometry": {
+        "x": 2120,
+        "y": 1448,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "browser"
+    },
+    {
+      "id": "apply-py",
+      "type": "icon",
+      "text": "instructions/apply.py",
+      "color": "violet",
+      "parentId": "apply",
+      "geometry": {
+        "x": 2620,
+        "y": 1440,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "terminal"
+    },
+    {
+      "id": "backup",
+      "type": "icon",
+      "text": "Backup folder",
+      "color": "green",
+      "parentId": "apply",
+      "geometry": {
+        "x": 3020,
+        "y": 1720,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "root-apply",
+      "type": "icon",
+      "text": "root apply.py",
+      "color": "violet",
+      "parentId": "apply",
+      "geometry": {
+        "x": 2120,
+        "y": 1728,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "agents-toml",
+      "type": "icon",
+      "text": "agents.toml",
+      "color": "blue",
+      "parentId": "apply",
+      "geometry": {
+        "x": 2620,
+        "y": 1720,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "note-backup",
+      "type": "sticky",
+      "text": "`.agent-config/backups/<UTC timestamp>/AGENTS.md`",
+      "color": "yellow",
+      "parentId": "apply",
+      "geometry": {
+        "x": 3000,
+        "y": 1880,
+        "width": 320,
+        "height": 80
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "note-loop",
+      "type": "sticky",
+      "text": "**Loop.** An agent editing its own global file writes AGENTS.md through the link; the next rebuild backs that copy up and overwrites it. A hand edit to any source leaves AGENTS.md stale: --check fails until apply.py --write or the next Hub save.",
+      "color": "yellow",
+      "parentId": "agent-files",
+      "geometry": {
+        "x": 3680,
+        "y": 1872,
+        "width": 320,
+        "height": 220
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "note-sections",
+      "type": "sticky",
+      "text": "Section files live in `instructions/sections/`. sections.toml: seven `[[section]]` tables in build order. The first four share group `behavior`. mcp-protocols has no file, only generated text.",
+      "color": "yellow",
+      "parentId": "sources",
+      "geometry": {
+        "x": 760,
+        "y": 1100,
+        "width": 380,
+        "height": 160
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "note-servers",
+      "type": "sticky",
+      "text": "Block files live in `instructions/mcp-protocols/`. Listed in servers.toml: a missing cli.ts fails. Any other machine: the server is skipped.",
+      "color": "yellow",
+      "parentId": "prompt-blocks",
+      "geometry": {
+        "x": 1120,
+        "y": 2440,
+        "width": 280,
+        "height": 180
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "note-key",
+      "type": "sticky",
+      "text": "**Key** · blue: edited source · violet: script or step, and the runs it triggers · green: generated file · teal: agent symlink · orange: Hub page and edits (by hand or through a link) · red: failure",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 80,
+        "y": 120,
+        "width": 1300,
+        "height": 80
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-comm",
+      "from": {
+        "objectId": "f-comm",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "build-step",
+        "anchor": "top"
+      },
+      "label": "gives section text",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          700,
+          400
+        ],
+        [
+          700,
+          280
+        ],
+        [
+          2280,
+          280
+        ]
+      ]
+    },
+    {
+      "id": "e-orch",
+      "from": {
+        "objectId": "f-orch",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "build-step",
+        "anchor": "top"
+      },
+      "label": "gives section text",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          700,
+          600
+        ],
+        [
+          700,
+          280
+        ],
+        [
+          2280,
+          280
+        ]
+      ]
+    },
+    {
+      "id": "e-routing",
+      "from": {
+        "objectId": "f-routing",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "build-step",
+        "anchor": "top"
+      },
+      "label": "gives section text",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          700,
+          800
+        ],
+        [
+          700,
+          280
+        ],
+        [
+          2280,
+          280
+        ]
+      ]
+    },
+    {
+      "id": "e-ship",
+      "from": {
+        "objectId": "f-ship",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "build-step",
+        "anchor": "top"
+      },
+      "label": "gives section text",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          700,
+          1000
+        ],
+        [
+          700,
+          280
+        ],
+        [
+          2280,
+          280
+        ]
+      ]
+    },
+    {
+      "id": "e-eco",
+      "from": {
+        "objectId": "f-eco",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "build-step",
+        "anchor": "top"
+      },
+      "label": "gives section text",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          700,
+          1200
+        ],
+        [
+          700,
+          280
+        ],
+        [
+          2280,
+          280
+        ]
+      ]
+    },
+    {
+      "id": "e-princ",
+      "from": {
+        "objectId": "f-princ",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "build-step",
+        "anchor": "top"
+      },
+      "label": "gives section text",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          700,
+          1400
+        ],
+        [
+          700,
+          280
+        ],
+        [
+          2280,
+          280
+        ]
+      ]
+    },
+    {
+      "id": "e-sections-toml",
+      "from": {
+        "objectId": "sections-toml",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "build-step",
+        "anchor": "left"
+      },
+      "label": "sets order and groups",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1960,
+          360
+        ],
+        [
+          1960,
+          520
+        ]
+      ]
+    },
+    {
+      "id": "e-principle-files",
+      "from": {
+        "objectId": "principle-files"
+      },
+      "to": {
+        "objectId": "gen-principles"
+      },
+      "label": "frontmatter",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-harnesses",
+      "from": {
+        "objectId": "harnesses-toml"
+      },
+      "to": {
+        "objectId": "gen-routing"
+      },
+      "label": "[[provider]] rows",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-task-routing",
+      "from": {
+        "objectId": "task-routing-toml"
+      },
+      "to": {
+        "objectId": "gen-routing"
+      },
+      "label": "[[route]] rows",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-srv-docs",
+      "from": {
+        "objectId": "srv-docs"
+      },
+      "to": {
+        "objectId": "mcp-protocols-py"
+      },
+      "label": "prints its block",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-srv-canvas",
+      "from": {
+        "objectId": "srv-canvas"
+      },
+      "to": {
+        "objectId": "mcp-protocols-py"
+      },
+      "label": "prints its block",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-srv-prompt",
+      "from": {
+        "objectId": "srv-prompt"
+      },
+      "to": {
+        "objectId": "mcp-protocols-py"
+      },
+      "label": "prints its block",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-srv-knowledge",
+      "from": {
+        "objectId": "srv-knowledge"
+      },
+      "to": {
+        "objectId": "mcp-protocols-py"
+      },
+      "label": "prints its block",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-servers-toml",
+      "from": {
+        "objectId": "servers-toml"
+      },
+      "to": {
+        "objectId": "mcp-protocols-py"
+      },
+      "label": "machines list",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-write-blocks",
+      "from": {
+        "objectId": "mcp-protocols-py"
+      },
+      "to": {
+        "objectId": "block-files"
+      },
+      "label": "--write: block + sha256",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-cli-missing",
+      "from": {
+        "objectId": "mcp-protocols-py"
+      },
+      "to": {
+        "objectId": "cli-missing"
+      },
+      "label": "listed machine",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-drift",
+      "from": {
+        "objectId": "mcp-protocols-py"
+      },
+      "to": {
+        "objectId": "check-drift"
+      },
+      "label": "output ≠ block file",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-b-docs",
+      "from": {
+        "objectId": "b-docs",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "gen-mcp",
+        "anchor": "bottom"
+      },
+      "label": "joins in server-name order",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1880,
+          1940
+        ],
+        [
+          1880,
+          1260
+        ],
+        [
+          1740,
+          1260
+        ]
+      ]
+    },
+    {
+      "id": "e-b-canvas",
+      "from": {
+        "objectId": "b-canvas",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "gen-mcp",
+        "anchor": "bottom"
+      },
+      "label": "joins in server-name order",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1880,
+          2140
+        ],
+        [
+          1880,
+          1260
+        ],
+        [
+          1740,
+          1260
+        ]
+      ]
+    },
+    {
+      "id": "e-b-prompt",
+      "from": {
+        "objectId": "b-prompt",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "gen-mcp",
+        "anchor": "bottom"
+      },
+      "label": "joins in server-name order",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1880,
+          2340
+        ],
+        [
+          1880,
+          1260
+        ],
+        [
+          1740,
+          1260
+        ]
+      ]
+    },
+    {
+      "id": "e-b-knowledge",
+      "from": {
+        "objectId": "b-knowledge",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "gen-mcp",
+        "anchor": "bottom"
+      },
+      "label": "joins in server-name order",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1880,
+          2540
+        ],
+        [
+          1880,
+          1260
+        ],
+        [
+          1740,
+          1260
+        ]
+      ]
+    },
+    {
+      "id": "e-gen-principles",
+      "from": {
+        "objectId": "gen-principles",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "build-step",
+        "anchor": "left"
+      },
+      "label": "<principles> index",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-gen-routing",
+      "from": {
+        "objectId": "gen-routing",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "build-step",
+        "anchor": "left"
+      },
+      "label": "routing tables",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-gen-mcp",
+      "from": {
+        "objectId": "gen-mcp",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "build-step",
+        "anchor": "left"
+      },
+      "label": "<mcp_protocols> blocks",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-gen-refuse",
+      "from": {
+        "objectId": "gen-mcp"
+      },
+      "to": {
+        "objectId": "build-fails"
+      },
+      "label": "block >12 lines / 800 B, section >4,000 B",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-write-agents",
+      "from": {
+        "objectId": "build-step"
+      },
+      "to": {
+        "objectId": "agents-md"
+      },
+      "label": "writes the joined text",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e-too-long",
+      "from": {
+        "objectId": "build-step",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "build-fails",
+        "anchor": "top"
+      },
+      "label": "above 300 lines",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-run-build",
+      "from": {
+        "objectId": "apply-py",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "build-step",
+        "anchor": "bottom"
+      },
+      "label": "runs the build",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-backup",
+      "from": {
+        "objectId": "apply-py"
+      },
+      "to": {
+        "objectId": "backup"
+      },
+      "label": "--write: backs up the stale copy",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-agents-toml",
+      "from": {
+        "objectId": "apply-py"
+      },
+      "to": {
+        "objectId": "agents-toml"
+      },
+      "label": "reads agent paths",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-stale",
+      "from": {
+        "objectId": "apply-py",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "agents-md",
+        "anchor": "bottom"
+      },
+      "label": "--check: exits 1 while stale",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          3200,
+          1500
+        ],
+        [
+          3200,
+          620
+        ],
+        [
+          2900,
+          620
+        ]
+      ]
+    },
+    {
+      "id": "e-mcp-check",
+      "from": {
+        "objectId": "apply-py"
+      },
+      "to": {
+        "objectId": "mcp-protocols-py"
+      },
+      "label": "runs mcp_protocols.py --check",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-root",
+      "from": {
+        "objectId": "root-apply"
+      },
+      "to": {
+        "objectId": "apply-py"
+      },
+      "label": "runs it after the MCP step",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-hub-edit",
+      "from": {
+        "objectId": "hub",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "section-files",
+        "anchor": "bottom"
+      },
+      "label": "edits section files",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-hub-rebuild",
+      "from": {
+        "objectId": "hub",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "build-step",
+        "anchor": "bottom"
+      },
+      "label": "every save rebuilds AGENTS.md",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-links",
+      "from": {
+        "objectId": "apply-py"
+      },
+      "to": {
+        "objectId": "agent-files"
+      },
+      "label": "creates or repairs links",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "labelPosition": {
+        "along": 0.5
+      }
+    },
+    {
+      "id": "l-claude",
+      "from": {
+        "objectId": "a-claude",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "agents-md",
+        "anchor": "right"
+      },
+      "label": "links to",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "l-codex",
+      "from": {
+        "objectId": "a-codex",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "agents-md",
+        "anchor": "right"
+      },
+      "label": "links to",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "l-opencode",
+      "from": {
+        "objectId": "a-opencode",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "agents-md",
+        "anchor": "right"
+      },
+      "label": "links to",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "l-pi",
+      "from": {
+        "objectId": "a-pi",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "agents-md",
+        "anchor": "right"
+      },
+      "label": "links to",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "l-gemini",
+      "from": {
+        "objectId": "a-gemini",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "agents-md",
+        "anchor": "right"
+      },
+      "label": "links to",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "l-muse",
+      "from": {
+        "objectId": "a-muse",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "agents-md",
+        "anchor": "right"
+      },
+      "label": "links to",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal",
+      "waypoints": [
+        [
+          3520,
+          1520
+        ],
+        [
+          3520,
+          500
+        ]
+      ]
+    },
+    {
+      "id": "l-antigravity",
+      "from": {
+        "objectId": "a-antigravity",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "agents-md",
+        "anchor": "right"
+      },
+      "label": "links to",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal",
+      "waypoints": [
+        [
+          3520,
+          1740
+        ],
+        [
+          3520,
+          500
+        ]
+      ]
+    },
+    {
+      "id": "e-edit-link",
+      "from": {
+        "objectId": "a-claude",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "agents-md",
+        "anchor": "top"
+      },
+      "label": "edit through the link",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    }
+  ],
+  "annotations": []
+}

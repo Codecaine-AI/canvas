@@ -1,0 +1,1696 @@
+{
+  "schemaVersion": 1,
+  "id": "agent-session-orchestration",
+  "title": "Long-lived Agent Session Orchestration",
+  "description": "How the platform runs long-lived AI agent sessions through a shared control plane.\n\n**Top row (request path, left to right):** Client app → API Tier (open session, authenticate, resolve workspace and quotas) → Session Scheduler (select runner host under residency/isolation rules and the capacity pool) → Runner Host, whose Orchestrator Turn Loop assembles a request, calls the model, executes tool calls (idempotency keys toward external systems), appends results and checks for finish/ceiling before the next turn.\n\n**Second row:** Recovery and Lifecycle (heartbeat monitor, rescue from checkpoint, idle/suspend releasing runners, resume-and-rehydrate on any host, plus a Cancellation subsection that stops the stream, abandons tools, records uncertain outcomes and commits a resumable checkpoint); Durable State (Event Log feeding metering, cost and forensic replay; Snapshot Chain of content-addressed checkpoints with forks and reachability GC); Session Tree and Quotas (spawn child with scoped context and budget, child result back to the parent, orphan reaper, tree/workspace quotas pausing for a user decision); Release Drain (old-version host stops placements and drains sessions via completion, suspension or safe checkpoint before replacement).\n\nColor key: blue request path, violet agent execution, green durable state, orange quotas/budget, teal lifecycle/recovery, red failure/cancellation.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Long-lived Agent Session Orchestration",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 20,
+        "y": 0,
+        "width": 3240,
+        "height": 2580
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "client",
+      "type": "section",
+      "text": "Client",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 60,
+        "y": 160,
+        "width": 340,
+        "height": 220
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "browser"
+    },
+    {
+      "id": "api",
+      "type": "section",
+      "text": "API Tier",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 600,
+        "y": 160,
+        "width": 360,
+        "height": 620
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "api"
+    },
+    {
+      "id": "sched",
+      "type": "section",
+      "text": "Session Scheduler",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1220,
+        "y": 180,
+        "width": 340,
+        "height": 620
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "route"
+    },
+    {
+      "id": "runner",
+      "type": "section",
+      "text": "Runner Host",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1880,
+        "y": 160,
+        "width": 1320,
+        "height": 796
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "loop",
+      "type": "section",
+      "text": "Orchestrator Turn Loop",
+      "color": "pink",
+      "parentId": "runner",
+      "geometry": {
+        "x": 1920,
+        "y": 240,
+        "width": 1240,
+        "height": 460
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "loop"
+    },
+    {
+      "id": "client_app",
+      "type": "icon",
+      "text": "Client app",
+      "color": "blue",
+      "parentId": "client",
+      "geometry": {
+        "x": 80,
+        "y": 216,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "browser"
+    },
+    {
+      "id": "user",
+      "type": "icon",
+      "text": "User budget decision",
+      "color": "orange",
+      "parentId": "tree",
+      "geometry": {
+        "x": 2432,
+        "y": 1680,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "open_session",
+      "type": "icon",
+      "text": "Open session",
+      "color": "blue",
+      "parentId": "api",
+      "geometry": {
+        "x": 632,
+        "y": 216,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "api"
+    },
+    {
+      "id": "auth",
+      "type": "icon",
+      "text": "Authenticate user",
+      "color": "blue",
+      "parentId": "api",
+      "geometry": {
+        "x": 632,
+        "y": 416,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "key"
+    },
+    {
+      "id": "resolve_ws",
+      "type": "icon",
+      "text": "Resolve workspace and quotas",
+      "color": "blue",
+      "parentId": "api",
+      "geometry": {
+        "x": 632,
+        "y": 616,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "select_host",
+      "type": "icon",
+      "text": "Select runner host",
+      "color": "blue",
+      "parentId": "sched",
+      "geometry": {
+        "x": 1240,
+        "y": 436,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "route"
+    },
+    {
+      "id": "residency",
+      "type": "icon",
+      "text": "Residency and isolation",
+      "color": "blue",
+      "parentId": "sched",
+      "geometry": {
+        "x": 1240,
+        "y": 236,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "lock"
+    },
+    {
+      "id": "capacity",
+      "type": "icon",
+      "text": "Runner capacity pool",
+      "color": "blue",
+      "parentId": "sched",
+      "geometry": {
+        "x": 1240,
+        "y": 636,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "gauge"
+    },
+    {
+      "id": "assemble",
+      "type": "icon",
+      "text": "Assemble model request",
+      "color": "violet",
+      "parentId": "loop",
+      "geometry": {
+        "x": 1960,
+        "y": 296,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "layers"
+    },
+    {
+      "id": "model_call",
+      "type": "icon",
+      "text": "Call model",
+      "color": "violet",
+      "parentId": "loop",
+      "geometry": {
+        "x": 2412,
+        "y": 296,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "model"
+    },
+    {
+      "id": "exec_tools",
+      "type": "icon",
+      "text": "Execute tool calls",
+      "color": "violet",
+      "parentId": "loop",
+      "geometry": {
+        "x": 2840,
+        "y": 296,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "tool"
+    },
+    {
+      "id": "append",
+      "type": "icon",
+      "text": "Append tool results",
+      "color": "violet",
+      "parentId": "loop",
+      "geometry": {
+        "x": 2840,
+        "y": 528,
+        "width": 300,
+        "height": 124
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "function"
+    },
+    {
+      "id": "turn_check",
+      "type": "decision",
+      "text": "Finished or at ceiling?",
+      "color": "violet",
+      "parentId": "loop",
+      "geometry": {
+        "x": 2420,
+        "y": 520,
+        "width": 280,
+        "height": 140
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "stream_out",
+      "type": "icon",
+      "text": "Turn output stream",
+      "color": "violet",
+      "parentId": "loop",
+      "geometry": {
+        "x": 1960,
+        "y": 532,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "session_done",
+      "type": "ellipse",
+      "text": "Session complete",
+      "color": "violet",
+      "parentId": "runner",
+      "geometry": {
+        "x": 2420,
+        "y": 812,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "ellipse"
+      }
+    },
+    {
+      "id": "external",
+      "type": "icon",
+      "text": "External systems",
+      "color": "violet",
+      "parentId": "runner",
+      "geometry": {
+        "x": 2840,
+        "y": 800,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "globe"
+    },
+    {
+      "id": "tree",
+      "type": "section",
+      "text": "Session Tree and Quotas",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2380,
+        "y": 1180,
+        "width": 780,
+        "height": 680
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "users"
+    },
+    {
+      "id": "durable",
+      "type": "section",
+      "text": "Durable State",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1220,
+        "y": 1180,
+        "width": 900,
+        "height": 1300
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "recovery",
+      "type": "section",
+      "text": "Recovery and Lifecycle",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 60,
+        "y": 1000,
+        "width": 900,
+        "height": 1440
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "monitor"
+    },
+    {
+      "id": "drain",
+      "type": "section",
+      "text": "Release Drain",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2380,
+        "y": 2060,
+        "width": 840,
+        "height": 480
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "container"
+    },
+    {
+      "id": "evlog",
+      "type": "section",
+      "text": "Event Log",
+      "color": "blue",
+      "parentId": "durable",
+      "geometry": {
+        "x": 1260,
+        "y": 1260,
+        "width": 700,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "event"
+    },
+    {
+      "id": "snaps",
+      "type": "section",
+      "text": "Snapshot Chain",
+      "color": "teal",
+      "parentId": "durable",
+      "geometry": {
+        "x": 1260,
+        "y": 1780,
+        "width": 820,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "commit"
+    },
+    {
+      "id": "cancel",
+      "type": "section",
+      "text": "Cancellation",
+      "color": "pink",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 100,
+        "y": 1960,
+        "width": 820,
+        "height": 440
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "bell"
+    },
+    {
+      "id": "spawn_child",
+      "type": "icon",
+      "text": "Spawn child session",
+      "color": "violet",
+      "parentId": "tree",
+      "geometry": {
+        "x": 2840,
+        "y": 1236,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "child",
+      "type": "icon",
+      "text": "Child session",
+      "color": "violet",
+      "parentId": "tree",
+      "geometry": {
+        "x": 2840,
+        "y": 1436,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "reaper",
+      "type": "octagon",
+      "text": "Orphan reaper",
+      "color": "red",
+      "parentId": "tree",
+      "geometry": {
+        "x": 2920,
+        "y": 1668,
+        "width": 140,
+        "height": 144
+      },
+      "style": {
+        "shape": "octagon"
+      }
+    },
+    {
+      "id": "quota",
+      "type": "icon",
+      "text": "Tree and workspace quotas",
+      "color": "orange",
+      "parentId": "tree",
+      "geometry": {
+        "x": 2432,
+        "y": 1236,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "pause",
+      "type": "icon",
+      "text": "Pause for user decision",
+      "color": "orange",
+      "parentId": "tree",
+      "geometry": {
+        "x": 2432,
+        "y": 1436,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "wait"
+    },
+    {
+      "id": "old_host",
+      "type": "icon",
+      "text": "Old-version host",
+      "color": "teal",
+      "parentId": "drain",
+      "geometry": {
+        "x": 2412,
+        "y": 2140,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "stop_place",
+      "type": "process",
+      "text": "Stop accepting placements",
+      "color": "teal",
+      "parentId": "drain",
+      "geometry": {
+        "x": 2880,
+        "y": 2152,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "drain_sess",
+      "type": "decision",
+      "text": "Drain each session",
+      "color": "teal",
+      "parentId": "drain",
+      "geometry": {
+        "x": 2420,
+        "y": 2360,
+        "width": 280,
+        "height": 140
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "replace",
+      "type": "icon",
+      "text": "Replace host",
+      "color": "teal",
+      "parentId": "drain",
+      "geometry": {
+        "x": 2892,
+        "y": 2368,
+        "width": 300,
+        "height": 124
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "container"
+    },
+    {
+      "id": "event_log",
+      "type": "icon",
+      "text": "Durable event log",
+      "color": "green",
+      "parentId": "evlog",
+      "geometry": {
+        "x": 1280,
+        "y": 1316,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "event"
+    },
+    {
+      "id": "metering",
+      "type": "icon",
+      "text": "Usage metering",
+      "color": "green",
+      "parentId": "evlog",
+      "geometry": {
+        "x": 1640,
+        "y": 1316,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "chart"
+    },
+    {
+      "id": "cost",
+      "type": "icon",
+      "text": "Per-session cost",
+      "color": "green",
+      "parentId": "evlog",
+      "geometry": {
+        "x": 1640,
+        "y": 1516,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "coin"
+    },
+    {
+      "id": "forensic",
+      "type": "icon",
+      "text": "Forensic replay",
+      "color": "green",
+      "parentId": "evlog",
+      "geometry": {
+        "x": 1280,
+        "y": 1516,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "search"
+    },
+    {
+      "id": "checkpoint",
+      "type": "icon",
+      "text": "Turn checkpoint",
+      "color": "green",
+      "parentId": "snaps",
+      "geometry": {
+        "x": 1280,
+        "y": 1836,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "commit"
+    },
+    {
+      "id": "snapshots",
+      "type": "icon",
+      "text": "Content-addressed snapshots",
+      "color": "green",
+      "parentId": "snaps",
+      "geometry": {
+        "x": 1700,
+        "y": 1836,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "fork",
+      "type": "icon",
+      "text": "Fork from checkpoint",
+      "color": "green",
+      "parentId": "snaps",
+      "geometry": {
+        "x": 1700,
+        "y": 2036,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "branch"
+    },
+    {
+      "id": "gc",
+      "type": "icon",
+      "text": "Reachability GC",
+      "color": "green",
+      "parentId": "snaps",
+      "geometry": {
+        "x": 1280,
+        "y": 2036,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "crash",
+      "type": "icon",
+      "text": "Runner crash",
+      "color": "red",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 100,
+        "y": 1048,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "bug"
+    },
+    {
+      "id": "heartbeat",
+      "type": "icon",
+      "text": "Heartbeat monitor",
+      "color": "teal",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 600,
+        "y": 1048,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "monitor"
+    },
+    {
+      "id": "rescue",
+      "type": "icon",
+      "text": "Rescue from checkpoint",
+      "color": "teal",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 600,
+        "y": 1268,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "loop"
+    },
+    {
+      "id": "suspend",
+      "type": "icon",
+      "text": "Idle or suspended",
+      "color": "teal",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 100,
+        "y": 1268,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "schedule"
+    },
+    {
+      "id": "resume",
+      "type": "icon",
+      "text": "Resume and rehydrate",
+      "color": "teal",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 340,
+        "y": 1540,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "cache"
+    },
+    {
+      "id": "cancel_in",
+      "type": "icon",
+      "text": "Cancel or interrupt",
+      "color": "red",
+      "parentId": "cancel",
+      "geometry": {
+        "x": 120,
+        "y": 2036,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "bell"
+    },
+    {
+      "id": "stop_stream",
+      "type": "process",
+      "text": "Stop model stream",
+      "color": "red",
+      "parentId": "cancel",
+      "geometry": {
+        "x": 580,
+        "y": 2072,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "abandon",
+      "type": "icon",
+      "text": "Abandon in-flight tools",
+      "color": "red",
+      "parentId": "cancel",
+      "geometry": {
+        "x": 120,
+        "y": 2232,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "filter"
+    },
+    {
+      "id": "uncertain",
+      "type": "icon",
+      "text": "Record uncertain outcome",
+      "color": "red",
+      "parentId": "cancel",
+      "geometry": {
+        "x": 520,
+        "y": 2232,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "key",
+      "type": "sticky",
+      "text": "**Color key** — blue: request path · violet: agent execution · green: durable state · orange: quotas and budget · teal: lifecycle and recovery · red: failure and cancellation",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 60,
+        "y": 80,
+        "width": 1400,
+        "height": 60
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "note_request",
+      "type": "sticky",
+      "text": "Each request = system context + conversation history + permitted tool surface. The loop ends when the agent finishes or hits its turn or token ceiling.",
+      "color": "yellow",
+      "parentId": "runner",
+      "geometry": {
+        "x": 1920,
+        "y": 740,
+        "width": 420,
+        "height": 140
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "note_events",
+      "type": "sticky",
+      "text": "Event log records each request, model response, tool call and result, checkpoint reference, budget decision and lifecycle transition. Metering sums token spend, wall-clock time, tool calls and concurrent sessions per session tree and workspace for quotas.",
+      "color": "yellow",
+      "parentId": "durable",
+      "geometry": {
+        "x": 1260,
+        "y": 2240,
+        "width": 820,
+        "height": 100
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "note_snap",
+      "type": "sticky",
+      "text": "Snapshot = conversation state + tool results + workspace files. Content-addressed, parent = prior; unchanged content dedupes. A fork keeps its shared snapshots alive.",
+      "color": "yellow",
+      "parentId": "durable",
+      "geometry": {
+        "x": 1260,
+        "y": 2360,
+        "width": 820,
+        "height": 80
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "note_recovery",
+      "type": "sticky",
+      "text": "Recovery replays at most the in-flight turn, so state-changing tool calls carry idempotency keys.",
+      "color": "yellow",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 360,
+        "y": 1720,
+        "width": 260,
+        "height": 140
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "w_open",
+      "from": {
+        "objectId": "client_app"
+      },
+      "to": {
+        "objectId": "open_session"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_auth",
+      "from": {
+        "objectId": "open_session"
+      },
+      "to": {
+        "objectId": "auth"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_resolve",
+      "from": {
+        "objectId": "auth"
+      },
+      "to": {
+        "objectId": "resolve_ws"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_place_req",
+      "from": {
+        "objectId": "resolve_ws"
+      },
+      "to": {
+        "objectId": "select_host"
+      },
+      "label": "placement",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_residency",
+      "from": {
+        "objectId": "residency"
+      },
+      "to": {
+        "objectId": "select_host"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_capacity",
+      "from": {
+        "objectId": "capacity"
+      },
+      "to": {
+        "objectId": "select_host"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_host",
+      "from": {
+        "objectId": "select_host"
+      },
+      "to": {
+        "objectId": "assemble"
+      },
+      "label": "runner host",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_model",
+      "from": {
+        "objectId": "assemble"
+      },
+      "to": {
+        "objectId": "model_call"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_toolcalls",
+      "from": {
+        "objectId": "model_call"
+      },
+      "to": {
+        "objectId": "exec_tools"
+      },
+      "label": "tool calls",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_results",
+      "from": {
+        "objectId": "exec_tools"
+      },
+      "to": {
+        "objectId": "append"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_check",
+      "from": {
+        "objectId": "append"
+      },
+      "to": {
+        "objectId": "turn_check"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_next",
+      "from": {
+        "objectId": "turn_check"
+      },
+      "to": {
+        "objectId": "assemble"
+      },
+      "label": "next turn",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_done",
+      "from": {
+        "objectId": "turn_check"
+      },
+      "to": {
+        "objectId": "session_done"
+      },
+      "label": "done or ceiling",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_stream",
+      "from": {
+        "objectId": "model_call"
+      },
+      "to": {
+        "objectId": "stream_out"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_live",
+      "from": {
+        "objectId": "stream_out"
+      },
+      "to": {
+        "objectId": "client_app",
+        "anchor": "bottom"
+      },
+      "label": "live stream",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          1800,
+          600
+        ],
+        [
+          1800,
+          900
+        ],
+        [
+          240,
+          900
+        ]
+      ]
+    },
+    {
+      "id": "w_commit",
+      "from": {
+        "objectId": "stream_out"
+      },
+      "to": {
+        "objectId": "event_log"
+      },
+      "label": "identical stream",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "w_idem",
+      "from": {
+        "objectId": "exec_tools"
+      },
+      "to": {
+        "objectId": "external"
+      },
+      "label": "idempotency key",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_ckpt",
+      "from": {
+        "objectId": "turn_check"
+      },
+      "to": {
+        "objectId": "checkpoint"
+      },
+      "label": "every completed turn",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "w_replay",
+      "from": {
+        "objectId": "client_app"
+      },
+      "to": {
+        "objectId": "event_log"
+      },
+      "label": "replay from last ack",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "w_parent",
+      "from": {
+        "objectId": "checkpoint"
+      },
+      "to": {
+        "objectId": "snapshots"
+      },
+      "label": "parent = prior",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_fork",
+      "from": {
+        "objectId": "snapshots"
+      },
+      "to": {
+        "objectId": "fork"
+      },
+      "label": "earlier checkpoint",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_gc",
+      "from": {
+        "objectId": "gc"
+      },
+      "to": {
+        "objectId": "snapshots"
+      },
+      "label": "collect unreachable",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_meter",
+      "from": {
+        "objectId": "event_log"
+      },
+      "to": {
+        "objectId": "metering"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_cost",
+      "from": {
+        "objectId": "metering"
+      },
+      "to": {
+        "objectId": "cost"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_forensic",
+      "from": {
+        "objectId": "event_log"
+      },
+      "to": {
+        "objectId": "forensic"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_missed",
+      "from": {
+        "objectId": "crash"
+      },
+      "to": {
+        "objectId": "heartbeat"
+      },
+      "label": "missed heartbeat",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "w_return_cap",
+      "from": {
+        "objectId": "heartbeat"
+      },
+      "to": {
+        "objectId": "capacity"
+      },
+      "label": "return capacity",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "w_rescue",
+      "from": {
+        "objectId": "heartbeat"
+      },
+      "to": {
+        "objectId": "rescue"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_rescue_resume",
+      "from": {
+        "objectId": "rescue"
+      },
+      "to": {
+        "objectId": "resume"
+      },
+      "label": "last checkpoint",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_release",
+      "from": {
+        "objectId": "suspend"
+      },
+      "to": {
+        "objectId": "capacity"
+      },
+      "label": "release runner",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "w_suspend_resume",
+      "from": {
+        "objectId": "suspend"
+      },
+      "to": {
+        "objectId": "resume"
+      },
+      "label": "on resume",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_rehydrate",
+      "from": {
+        "objectId": "snapshots"
+      },
+      "to": {
+        "objectId": "resume"
+      },
+      "label": "latest snapshot",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "w_replace_host",
+      "from": {
+        "objectId": "resume"
+      },
+      "to": {
+        "objectId": "select_host"
+      },
+      "label": "any host",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "w_cancel1",
+      "from": {
+        "objectId": "cancel_in"
+      },
+      "to": {
+        "objectId": "stop_stream"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_cancel2",
+      "from": {
+        "objectId": "stop_stream"
+      },
+      "to": {
+        "objectId": "abandon"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_cancel3",
+      "from": {
+        "objectId": "abandon"
+      },
+      "to": {
+        "objectId": "uncertain"
+      },
+      "label": "unconfirmed stop",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_resumable",
+      "from": {
+        "objectId": "uncertain"
+      },
+      "to": {
+        "objectId": "checkpoint"
+      },
+      "label": "resumable checkpoint",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "w_cancel_release",
+      "from": {
+        "objectId": "uncertain"
+      },
+      "to": {
+        "objectId": "suspend"
+      },
+      "label": "then release",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_cancel_req",
+      "from": {
+        "objectId": "client_app"
+      },
+      "to": {
+        "objectId": "cancel_in"
+      },
+      "label": "cancel",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "w_spawn",
+      "from": {
+        "objectId": "exec_tools"
+      },
+      "to": {
+        "objectId": "spawn_child"
+      },
+      "label": "subtask",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_child_result",
+      "from": {
+        "objectId": "child",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "append"
+      },
+      "label": "child result",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "w_reap",
+      "from": {
+        "objectId": "reaper"
+      },
+      "to": {
+        "objectId": "child"
+      },
+      "label": "parent gone",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "w_usage",
+      "from": {
+        "objectId": "metering"
+      },
+      "to": {
+        "objectId": "quota"
+      },
+      "label": "usage totals",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "w_exhaust",
+      "from": {
+        "objectId": "quota"
+      },
+      "to": {
+        "objectId": "pause"
+      },
+      "label": "allowance exhausted",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "w_decide",
+      "from": {
+        "objectId": "pause"
+      },
+      "to": {
+        "objectId": "user"
+      },
+      "label": "children stay counted",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "w_d1",
+      "from": {
+        "objectId": "old_host"
+      },
+      "to": {
+        "objectId": "stop_place"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_d2",
+      "from": {
+        "objectId": "stop_place"
+      },
+      "to": {
+        "objectId": "drain_sess"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_d3",
+      "from": {
+        "objectId": "drain_sess"
+      },
+      "to": {
+        "objectId": "replace"
+      },
+      "label": "all drained",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_exclude",
+      "from": {
+        "objectId": "stop_place"
+      },
+      "to": {
+        "objectId": "select_host"
+      },
+      "label": "exclude host",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "w_drain_ckpt",
+      "from": {
+        "objectId": "drain_sess"
+      },
+      "to": {
+        "objectId": "checkpoint"
+      },
+      "label": "safe checkpoint",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "w_drain_suspend",
+      "from": {
+        "objectId": "drain_sess"
+      },
+      "to": {
+        "objectId": "suspend"
+      },
+      "label": "suspend",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "w_drain_done",
+      "from": {
+        "objectId": "drain_sess"
+      },
+      "to": {
+        "objectId": "session_done"
+      },
+      "label": "run to completion",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "w_child",
+      "from": {
+        "objectId": "spawn_child",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "child",
+        "anchor": "top"
+      },
+      "label": "scoped context, budget",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "w_propagate",
+      "from": {
+        "objectId": "cancel_in"
+      },
+      "to": {
+        "objectId": "child",
+        "anchor": "left"
+      },
+      "label": "propagates down tree",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    }
+  ],
+  "annotations": []
+}

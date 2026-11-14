@@ -467,7 +467,7 @@ describe("critic loop rethink turn", () => {
     ...ran("").run,
     answers: { A1: "move sec_b under sec_a: w4 runs 1900 px", A2: "no change: every gap is within its number", A3: "" }, reask: null,
     toolCalls: { total: 7, byTool: { arrange: 2, route: 5 } }, moved: [{ id: "sec_b", dx: -900, dy: 600 }],
-    frame: { before: "2400 × 900 px", after: "1500 × 1500 px" }, faults: { before: 3, after: 1 },
+    frame: { before: "2400 × 900 px", after: "1500 × 1500 px" }, faults: { before: 3, after: 1 }, order: null, orderAfter: null,
   });
 
   test("the rethink turn runs once, before the first review, and the record keeps it", async () => {

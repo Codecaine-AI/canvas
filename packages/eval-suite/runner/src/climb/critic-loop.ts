@@ -66,6 +66,7 @@ import {
 } from "./critic.ts";
 import { drawerFlags, drawerSession, type DrawerPart, type DrawerRun } from "./drawer.ts";
 import { renderHighlights, type HighlightImage } from "./highlights.ts";
+import { namesStart, orderGain, orderSearch } from "./order.ts";
 import { parseFlags } from "./paths.ts";
 import { renderBoardPng, type WorldRect } from "./render.ts";
 import { rethinkAnswers, rethinkMessage, rethinkReask, rethinkRecord, sectionMoves, unanswered as rethinkUnanswered, type RethinkRecord, type SectionMove } from "./rethink.ts";
@@ -924,6 +925,11 @@ export function ledgerText(record: LoopRecord): string {
     `## Rethink turn · exit ${rethink.exitCode ?? rethink.signal} · ${rethink.toolCalls.total} tool calls`
     + ` · ${rethink.moved.length ? `moved ${rethink.moved.map((move) => move.id).join(", ")}` : "no section moved"} · frame ${rethink.frame.before} → ${rethink.frame.after}`
     + ` · ${rethink.faults.before} → ${rethink.faults.after} computed findings`,
+    ...(rethink.order ? [
+      `Order search (${rethink.order.method}, ${rethink.order.cells.length} cells): the first draw cost ${rethink.order.current.cost.total}, the best order ${rethink.order.best[0]!.cost.total}`
+      + ` (${orderGain(rethink.order, rethink.order.best[0]!)}% cheaper) · ${rethink.order.shown ? "the turn read the orders" : "not sent"}`
+      + (rethink.orderAfter ? ` · after the turn ${rethink.orderAfter.cost.total}` : ""),
+    ] : []),
     ...Object.entries(rethink.answers).map(([name, answer]) => `${name}: ${answer || "no answer"}`),
     "",
   ] : [];
@@ -1022,8 +1028,11 @@ export async function reviewBoard(options: {
       mkdirSync(outDir, { recursive: true });
       copyFileSync(boardPath, resolve(outDir, "rethink-before.canvas.json"));
       const before = measured();
+      const rule = gapRule(canvas.wires);
+      const orderOf = (now: typeof before) => orderSearch(now.board, now.facts, now.plan.pageFrame, rule.base, options.brief !== null && namesStart(options.brief));
+      const order = orderOf(before);
       const transcript = resolve(outDir, "rethink-transcript.jsonl");
-      const turn = await pass([rethinkMessage(board, before, gapRule(canvas.wires))], transcript);
+      const turn = await pass([rethinkMessage(board, before, rule, order)], transcript);
       passed("rethink", turn.run);
       let answers = rethinkAnswers(readFileSync(transcript, "utf8"));
       let reask: RethinkRecord["reask"] = null;
@@ -1035,7 +1044,8 @@ export async function reviewBoard(options: {
         answers = { ...answers, ...Object.fromEntries(Object.entries(rethinkAnswers(readFileSync(again, "utf8"))).filter(([, answer]) => answer)) };
         reask = { ...second.run, asked };
       }
-      return rethinkRecord({ run: turn.run, transcript: readFileSync(transcript, "utf8"), answers, reask, before, after: measured() });
+      const after = measured();
+      return rethinkRecord({ run: turn.run, transcript: readFileSync(transcript, "utf8"), answers, reask, before, after, order: { before: order, after: orderOf(after) } });
     }),
     review: async (round, earlier) => {
       mkdirSync(roundDir(round), { recursive: true });

@@ -1,0 +1,1864 @@
+{
+  "schemaVersion": 1,
+  "id": "archon-node-kinds",
+  "title": "Archon node kinds",
+  "description": "Archon's DAG node schema drawn as a hierarchy, top to bottom.\n\n- **Top strip:** color key, the constitution line (\"YAML coordinates. Code computes. Agents judge.\"), and the note that every DAG node extends dagNodeBaseSchema and picks one NODE_MODE_SHAPES key.\n- **Row 1:** **Common fields** (the eight shared fields) beside the **when / trigger_rule grammar**: `when` wires to the atom (Refs, Ops), `trigger_rule` to its four values.\n- **Hub:** the **DAG node** points up to the common fields (\"extends\") and right to the decision **exactly 1 of 11 mode keys**. One trunk runs down the band between columns, branching to each group's modes subsection.\n- **Row 2:** **Agent nodes** (command, prompt, Agent knobs, Claude knobs) | **Pause nodes** (wait → its four forms, approval → its fields, cancel).\n- **Row 3:** **Control nodes** (loop → loop knobs, loop_group, include and workflow → fan_out) | **Code nodes** (bash, script → stdout → output_format check → node output, or red failure with no retry).\n\nColor key: blue = mode key, teal = field/knob/value, orange = choice, violet = DAG node, red = failure.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Archon node kinds",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 60,
+        "y": 20,
+        "width": 3612,
+        "height": 3760
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "common",
+      "type": "section",
+      "text": "Common fields",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 112,
+        "y": 200,
+        "width": 840,
+        "height": 820
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "grammar",
+      "type": "section",
+      "text": "when / trigger_rule grammar",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1160,
+        "y": 200,
+        "width": 2420,
+        "height": 860
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "filter"
+    },
+    {
+      "id": "agent",
+      "type": "section",
+      "text": "Agent nodes",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 1360,
+        "width": 1960,
+        "height": 1060
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "code",
+      "type": "section",
+      "text": "Code nodes",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2040,
+        "y": 2840,
+        "width": 1540,
+        "height": 900
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "code"
+    },
+    {
+      "id": "control",
+      "type": "section",
+      "text": "Control nodes",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 2620,
+        "width": 1732,
+        "height": 1060
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "loop"
+    },
+    {
+      "id": "pause",
+      "type": "section",
+      "text": "Pause nodes",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2300,
+        "y": 1360,
+        "width": 1332,
+        "height": 1280
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "wait"
+    },
+    {
+      "id": "agent-modes",
+      "type": "section",
+      "text": "Agent modes",
+      "color": "pink",
+      "parentId": "agent",
+      "geometry": {
+        "x": 140,
+        "y": 1440,
+        "width": 840,
+        "height": 220
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "agent-knobs",
+      "type": "section",
+      "text": "Agent knobs",
+      "color": "orange",
+      "parentId": "agent",
+      "geometry": {
+        "x": 140,
+        "y": 1760,
+        "width": 840,
+        "height": 620
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "claude-knobs",
+      "type": "section",
+      "text": "Claude knobs",
+      "color": "green",
+      "parentId": "agent",
+      "geometry": {
+        "x": 1180,
+        "y": 1760,
+        "width": 840,
+        "height": 620
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "brand-claude"
+    },
+    {
+      "id": "code-modes",
+      "type": "section",
+      "text": "Code modes",
+      "color": "pink",
+      "parentId": "code",
+      "geometry": {
+        "x": 2092,
+        "y": 2928,
+        "width": 784,
+        "height": 204
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "exec-output",
+      "type": "section",
+      "text": "Exec output",
+      "color": "violet",
+      "parentId": "code",
+      "geometry": {
+        "x": 2080,
+        "y": 3240,
+        "width": 1460,
+        "height": 460
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "terminal"
+    },
+    {
+      "id": "control-modes",
+      "type": "section",
+      "text": "Control modes",
+      "color": "pink",
+      "parentId": "control",
+      "geometry": {
+        "x": 152,
+        "y": 2700,
+        "width": 1640,
+        "height": 220
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "loop-knobs",
+      "type": "section",
+      "text": "loop knobs",
+      "color": "violet",
+      "parentId": "control",
+      "geometry": {
+        "x": 140,
+        "y": 3020,
+        "width": 360,
+        "height": 620
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "loop"
+    },
+    {
+      "id": "fan-out",
+      "type": "section",
+      "text": "fan_out",
+      "color": "green",
+      "parentId": "control",
+      "geometry": {
+        "x": 820,
+        "y": 3020,
+        "width": 840,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "network"
+    },
+    {
+      "id": "pause-modes",
+      "type": "section",
+      "text": "Pause modes",
+      "color": "violet",
+      "parentId": "pause",
+      "geometry": {
+        "x": 2520,
+        "y": 1440,
+        "width": 1072,
+        "height": 260
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "wait-forms",
+      "type": "section",
+      "text": "wait forms",
+      "color": "green",
+      "parentId": "pause",
+      "geometry": {
+        "x": 2340,
+        "y": 1780,
+        "width": 360,
+        "height": 820
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "schedule"
+    },
+    {
+      "id": "approval-fields",
+      "type": "section",
+      "text": "approval fields",
+      "color": "orange",
+      "parentId": "pause",
+      "geometry": {
+        "x": 2912,
+        "y": 1780,
+        "width": 360,
+        "height": 620
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "refs",
+      "type": "section",
+      "text": "Refs",
+      "color": "pink",
+      "parentId": "grammar",
+      "geometry": {
+        "x": 1680,
+        "y": 280,
+        "width": 840,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "link"
+    },
+    {
+      "id": "ops",
+      "type": "section",
+      "text": "Ops",
+      "color": "violet",
+      "parentId": "grammar",
+      "geometry": {
+        "x": 2720,
+        "y": 280,
+        "width": 360,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "trigger-values",
+      "type": "section",
+      "text": "trigger_rule values",
+      "color": "orange",
+      "parentId": "grammar",
+      "geometry": {
+        "x": 1200,
+        "y": 800,
+        "width": 1860,
+        "height": 220
+      },
+      "style": {
+        "shape": "section"
+      },
+      "icon": "merge"
+    },
+    {
+      "id": "f-id",
+      "type": "rectangle",
+      "text": "id",
+      "color": "teal",
+      "parentId": "common",
+      "geometry": {
+        "x": 152,
+        "y": 280,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "f-depends",
+      "type": "rectangle",
+      "text": "depends_on",
+      "color": "teal",
+      "parentId": "common",
+      "geometry": {
+        "x": 152,
+        "y": 480,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "f-when",
+      "type": "rectangle",
+      "text": "when",
+      "color": "teal",
+      "parentId": "common",
+      "geometry": {
+        "x": 632,
+        "y": 280,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "f-trigger",
+      "type": "rectangle",
+      "text": "trigger_rule (join over depends_on)",
+      "color": "teal",
+      "parentId": "common",
+      "geometry": {
+        "x": 632,
+        "y": 480,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "f-output",
+      "type": "rectangle",
+      "text": "output_format (JSON Schema for output)",
+      "color": "teal",
+      "parentId": "common",
+      "geometry": {
+        "x": 152,
+        "y": 680,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "f-retry",
+      "type": "rectangle",
+      "text": "retry (max_attempts 1 to 5)",
+      "color": "teal",
+      "parentId": "common",
+      "geometry": {
+        "x": 632,
+        "y": 680,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "f-idle",
+      "type": "rectangle",
+      "text": "idle_timeout (ms without activity)",
+      "color": "teal",
+      "parentId": "common",
+      "geometry": {
+        "x": 152,
+        "y": 880,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "f-always",
+      "type": "rectangle",
+      "text": "always_run (re-run on resume)",
+      "color": "teal",
+      "parentId": "common",
+      "geometry": {
+        "x": 632,
+        "y": 880,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "atom",
+      "type": "predefined-process",
+      "text": "atom: ref op 'literal'",
+      "color": "teal",
+      "parentId": "grammar",
+      "geometry": {
+        "x": 1300,
+        "y": 280,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "r-id",
+      "type": "rectangle",
+      "text": "$id.output",
+      "color": "teal",
+      "parentId": "refs",
+      "geometry": {
+        "x": 1720,
+        "y": 360,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "r-path",
+      "type": "rectangle",
+      "text": "$id.output.a.b",
+      "color": "teal",
+      "parentId": "refs",
+      "geometry": {
+        "x": 2200,
+        "y": 360,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "r-inputs",
+      "type": "rectangle",
+      "text": "$INPUTS.name",
+      "color": "teal",
+      "parentId": "refs",
+      "geometry": {
+        "x": 1720,
+        "y": 560,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "r-loop",
+      "type": "rectangle",
+      "text": "$LOOP_PREV.id.output",
+      "color": "teal",
+      "parentId": "refs",
+      "geometry": {
+        "x": 2200,
+        "y": 560,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "op-compare",
+      "type": "rectangle",
+      "text": "== != < > <= >=",
+      "color": "teal",
+      "parentId": "ops",
+      "geometry": {
+        "x": 2760,
+        "y": 360,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "op-join",
+      "type": "rectangle",
+      "text": "joined with && and ||",
+      "color": "teal",
+      "parentId": "ops",
+      "geometry": {
+        "x": 2760,
+        "y": 560,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "t-all-success",
+      "type": "rectangle",
+      "text": "all_success",
+      "color": "teal",
+      "parentId": "trigger-values",
+      "geometry": {
+        "x": 1240,
+        "y": 880,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "t-one-success",
+      "type": "rectangle",
+      "text": "one_success",
+      "color": "teal",
+      "parentId": "trigger-values",
+      "geometry": {
+        "x": 1720,
+        "y": 880,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "t-none-failed",
+      "type": "rectangle",
+      "text": "none_failed_min_one_success",
+      "color": "teal",
+      "parentId": "trigger-values",
+      "geometry": {
+        "x": 2200,
+        "y": 880,
+        "width": 340,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "t-all-done",
+      "type": "rectangle",
+      "text": "all_done",
+      "color": "teal",
+      "parentId": "trigger-values",
+      "geometry": {
+        "x": 2740,
+        "y": 880,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "m-command",
+      "type": "icon",
+      "text": "command (named command file)",
+      "color": "blue",
+      "parentId": "agent-modes",
+      "geometry": {
+        "x": 180,
+        "y": 1496,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "code-file"
+    },
+    {
+      "id": "m-prompt",
+      "type": "icon",
+      "text": "prompt (inline prompt text)",
+      "color": "blue",
+      "parentId": "agent-modes",
+      "geometry": {
+        "x": 640,
+        "y": 1496,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "message"
+    },
+    {
+      "id": "k-provider",
+      "type": "rectangle",
+      "text": "provider",
+      "color": "teal",
+      "parentId": "agent-knobs",
+      "geometry": {
+        "x": 180,
+        "y": 1840,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "k-model",
+      "type": "rectangle",
+      "text": "model",
+      "color": "teal",
+      "parentId": "agent-knobs",
+      "geometry": {
+        "x": 660,
+        "y": 1840,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "k-effort",
+      "type": "rectangle",
+      "text": "effort",
+      "color": "teal",
+      "parentId": "agent-knobs",
+      "geometry": {
+        "x": 180,
+        "y": 2040,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "k-context",
+      "type": "rectangle",
+      "text": "context (fresh, shared, resume)",
+      "color": "teal",
+      "parentId": "agent-knobs",
+      "geometry": {
+        "x": 660,
+        "y": 2040,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "k-persist",
+      "type": "rectangle",
+      "text": "persist_session (forks next run)",
+      "color": "teal",
+      "parentId": "agent-knobs",
+      "geometry": {
+        "x": 420,
+        "y": 2240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "c-tools",
+      "type": "rectangle",
+      "text": "allowed_tools",
+      "color": "teal",
+      "parentId": "claude-knobs",
+      "geometry": {
+        "x": 1220,
+        "y": 1840,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "c-mcp",
+      "type": "rectangle",
+      "text": "mcp",
+      "color": "teal",
+      "parentId": "claude-knobs",
+      "geometry": {
+        "x": 1700,
+        "y": 1840,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "c-skills",
+      "type": "rectangle",
+      "text": "skills",
+      "color": "teal",
+      "parentId": "claude-knobs",
+      "geometry": {
+        "x": 1220,
+        "y": 2040,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "c-plugins",
+      "type": "rectangle",
+      "text": "plugins",
+      "color": "teal",
+      "parentId": "claude-knobs",
+      "geometry": {
+        "x": 1700,
+        "y": 2040,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "c-agents",
+      "type": "rectangle",
+      "text": "agents",
+      "color": "teal",
+      "parentId": "claude-knobs",
+      "geometry": {
+        "x": 1220,
+        "y": 2240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "c-sandbox",
+      "type": "rectangle",
+      "text": "sandbox",
+      "color": "teal",
+      "parentId": "claude-knobs",
+      "geometry": {
+        "x": 1700,
+        "y": 2240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "m-bash",
+      "type": "icon",
+      "text": "bash (shell)",
+      "color": "blue",
+      "parentId": "code-modes",
+      "geometry": {
+        "x": 2120,
+        "y": 2980,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "terminal"
+    },
+    {
+      "id": "m-script",
+      "type": "icon",
+      "text": "script (named file, bun or uv)",
+      "color": "blue",
+      "parentId": "code-modes",
+      "geometry": {
+        "x": 2520,
+        "y": 2980,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "function"
+    },
+    {
+      "id": "x-stdout",
+      "type": "rectangle",
+      "text": "stdout",
+      "color": "teal",
+      "parentId": "exec-output",
+      "geometry": {
+        "x": 2132,
+        "y": 3340,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "x-match",
+      "type": "decision",
+      "text": "matches output_format?",
+      "color": "orange",
+      "parentId": "exec-output",
+      "geometry": {
+        "x": 2600,
+        "y": 3320,
+        "width": 320,
+        "height": 140
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "x-output",
+      "type": "rectangle",
+      "text": "node output",
+      "color": "teal",
+      "parentId": "exec-output",
+      "geometry": {
+        "x": 3220,
+        "y": 3340,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "x-fail",
+      "type": "ellipse",
+      "text": "node fails, no retry",
+      "color": "red",
+      "parentId": "exec-output",
+      "geometry": {
+        "x": 2620,
+        "y": 3560,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "ellipse"
+      }
+    },
+    {
+      "id": "m-loop",
+      "type": "icon",
+      "text": "loop",
+      "color": "blue",
+      "parentId": "control-modes",
+      "geometry": {
+        "x": 172,
+        "y": 2756,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "loop"
+    },
+    {
+      "id": "m-loop-group",
+      "type": "icon",
+      "text": "loop_group",
+      "color": "blue",
+      "parentId": "control-modes",
+      "geometry": {
+        "x": 452,
+        "y": 2756,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "layers"
+    },
+    {
+      "id": "m-include",
+      "type": "icon",
+      "text": "include (inlined at load, same run)",
+      "color": "blue",
+      "parentId": "control-modes",
+      "geometry": {
+        "x": 852,
+        "y": 2756,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "link"
+    },
+    {
+      "id": "m-workflow",
+      "type": "icon",
+      "text": "workflow (child run, own run row)",
+      "color": "blue",
+      "parentId": "control-modes",
+      "geometry": {
+        "x": 1352,
+        "y": 2756,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "branch"
+    },
+    {
+      "id": "l-until",
+      "type": "rectangle",
+      "text": "until",
+      "color": "teal",
+      "parentId": "loop-knobs",
+      "geometry": {
+        "x": 180,
+        "y": 3100,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "l-until-bash",
+      "type": "rectangle",
+      "text": "until_bash",
+      "color": "teal",
+      "parentId": "loop-knobs",
+      "geometry": {
+        "x": 180,
+        "y": 3300,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "l-max-iter",
+      "type": "rectangle",
+      "text": "max_iter",
+      "color": "teal",
+      "parentId": "loop-knobs",
+      "geometry": {
+        "x": 180,
+        "y": 3500,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "fo-items",
+      "type": "rectangle",
+      "text": "items (JSON array output)",
+      "color": "teal",
+      "parentId": "fan-out",
+      "geometry": {
+        "x": 860,
+        "y": 3100,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "fo-as",
+      "type": "rectangle",
+      "text": "as (read as $INPUTS.<as>)",
+      "color": "teal",
+      "parentId": "fan-out",
+      "geometry": {
+        "x": 1340,
+        "y": 3100,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "fo-max",
+      "type": "rectangle",
+      "text": "max_parallel (default 5, or all)",
+      "color": "teal",
+      "parentId": "fan-out",
+      "geometry": {
+        "x": 860,
+        "y": 3300,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "fo-join",
+      "type": "rectangle",
+      "text": "join (all_done default, all_success)",
+      "color": "teal",
+      "parentId": "fan-out",
+      "geometry": {
+        "x": 1340,
+        "y": 3300,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "m-wait",
+      "type": "icon",
+      "text": "wait (durable)",
+      "color": "blue",
+      "parentId": "pause-modes",
+      "geometry": {
+        "x": 2540,
+        "y": 1520,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "wait"
+    },
+    {
+      "id": "m-approval",
+      "type": "icon",
+      "text": "approval",
+      "color": "blue",
+      "parentId": "pause-modes",
+      "geometry": {
+        "x": 2940,
+        "y": 1520,
+        "width": 300,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "m-cancel",
+      "type": "octagon",
+      "text": "cancel (ends the run)",
+      "color": "blue",
+      "parentId": "pause-modes",
+      "geometry": {
+        "x": 3340,
+        "y": 1520,
+        "width": 140,
+        "height": 140
+      },
+      "style": {
+        "shape": "octagon"
+      }
+    },
+    {
+      "id": "w-duration",
+      "type": "rectangle",
+      "text": "duration_ms",
+      "color": "teal",
+      "parentId": "wait-forms",
+      "geometry": {
+        "x": 2380,
+        "y": 1860,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "w-until",
+      "type": "rectangle",
+      "text": "until (ISO timestamp or output ref)",
+      "color": "teal",
+      "parentId": "wait-forms",
+      "geometry": {
+        "x": 2380,
+        "y": 2060,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "w-event",
+      "type": "rectangle",
+      "text": "event + deadline_ms",
+      "color": "teal",
+      "parentId": "wait-forms",
+      "geometry": {
+        "x": 2380,
+        "y": 2260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "w-attention",
+      "type": "rectangle",
+      "text": "attention + form: message/approval/select",
+      "color": "teal",
+      "parentId": "wait-forms",
+      "geometry": {
+        "x": 2380,
+        "y": 2460,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "a-message",
+      "type": "rectangle",
+      "text": "message",
+      "color": "teal",
+      "parentId": "approval-fields",
+      "geometry": {
+        "x": 2952,
+        "y": 1860,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "a-decisions",
+      "type": "rectangle",
+      "text": "decisions",
+      "color": "teal",
+      "parentId": "approval-fields",
+      "geometry": {
+        "x": 2952,
+        "y": 2060,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "a-reject",
+      "type": "rectangle",
+      "text": "on_reject",
+      "color": "teal",
+      "parentId": "approval-fields",
+      "geometry": {
+        "x": 2952,
+        "y": 2260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "dag-node",
+      "type": "icon",
+      "text": "DAG node",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 380,
+        "y": 1112,
+        "width": 300,
+        "height": 124
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "mode-pick",
+      "type": "decision",
+      "text": "exactly 1 of 11 mode keys",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2040,
+        "y": 1100,
+        "width": 280,
+        "height": 148
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "key",
+      "type": "sticky",
+      "text": "**Color key** · blue: mode key (each node sets one) · teal: field, knob or value · orange: choice · violet: the DAG node · red: failure",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 100,
+        "width": 880,
+        "height": 80
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "constitution",
+      "type": "sticky",
+      "text": "**YAML coordinates. Code computes. Agents judge.** A node declares order and data flow. A script does the math. An agent node makes the judgment call. *.archon/workflow-language-constitution.md:9*",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1040,
+        "y": 100,
+        "width": 1260,
+        "height": 80
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "dag-note",
+      "type": "sticky",
+      "text": "Every DAG node **extends dagNodeBaseSchema** (dag-node-base.ts:61-148) and sets exactly one mode key of NODE_MODE_SHAPES (dag-node.ts:164-191).",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2360,
+        "y": 100,
+        "width": 1180,
+        "height": 80
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "grammar-note",
+      "type": "sticky",
+      "text": "**when** atom: `$id.output.field <op> 'literal'`\nAtoms join with `&&` and `||`.\n*when-atom.ts:14-22 · dag-node-base.ts:23-28*",
+      "color": "yellow",
+      "parentId": "grammar",
+      "geometry": {
+        "x": 3160,
+        "y": 800,
+        "width": 380,
+        "height": 160
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "agent-note",
+      "type": "sticky",
+      "text": "Sends **sendQuery** to a provider. `context: { resume: <node> }` resumes that node's session. persist_session forks the session on the next run. Other providers warn and ignore Claude-only knobs.\n*dag-node-base.ts:44,70-104*",
+      "color": "yellow",
+      "parentId": "agent",
+      "geometry": {
+        "x": 1180,
+        "y": 1460,
+        "width": 360,
+        "height": 200
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "code-note",
+      "type": "sticky",
+      "text": "Runs **exec**; stdout is the output. A declared output_format must match, or the node fails with no retry.\n*node-output.ts:48-53*",
+      "color": "yellow",
+      "parentId": "code",
+      "geometry": {
+        "x": 3080,
+        "y": 2960,
+        "width": 360,
+        "height": 140
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "control-note",
+      "type": "sticky",
+      "text": "Repeat, compose, spawn. **fan_out** goes on include and workflow; each item is read as `$INPUTS.<as>`.\n*workflow-node.ts:49-54*",
+      "color": "yellow",
+      "parentId": "control",
+      "geometry": {
+        "x": 820,
+        "y": 3520,
+        "width": 840,
+        "height": 80
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "pause-note",
+      "type": "sticky",
+      "text": "Stop or end the run with **no subprocess or provider slot held**. wait is durable and takes exactly one of four forms.",
+      "color": "yellow",
+      "parentId": "pause",
+      "geometry": {
+        "x": 2920,
+        "y": 2460,
+        "width": 360,
+        "height": 100
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-extends",
+      "from": {
+        "objectId": "dag-node"
+      },
+      "to": {
+        "objectId": "common"
+      },
+      "label": "extends",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-pick",
+      "from": {
+        "objectId": "dag-node"
+      },
+      "to": {
+        "objectId": "mode-pick"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-agent",
+      "from": {
+        "objectId": "mode-pick",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "agent-modes",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          2180,
+          1300
+        ],
+        [
+          560,
+          1300
+        ]
+      ]
+    },
+    {
+      "id": "e-code",
+      "from": {
+        "objectId": "mode-pick",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "code-modes",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          2180,
+          2740
+        ],
+        [
+          2480,
+          2740
+        ]
+      ]
+    },
+    {
+      "id": "e-control",
+      "from": {
+        "objectId": "mode-pick"
+      },
+      "to": {
+        "objectId": "control-modes"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          2180,
+          2520
+        ],
+        [
+          980,
+          2520
+        ]
+      ]
+    },
+    {
+      "id": "e-pause",
+      "from": {
+        "objectId": "mode-pick",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "pause-modes",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          2180,
+          1300
+        ],
+        [
+          3060,
+          1300
+        ]
+      ]
+    },
+    {
+      "id": "e-when",
+      "from": {
+        "objectId": "f-when"
+      },
+      "to": {
+        "objectId": "atom"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-refs",
+      "from": {
+        "objectId": "atom"
+      },
+      "to": {
+        "objectId": "refs"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-ops",
+      "from": {
+        "objectId": "atom",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "ops",
+        "anchor": "bottom"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1440,
+          760
+        ],
+        [
+          2900,
+          760
+        ]
+      ]
+    },
+    {
+      "id": "e-trigger",
+      "from": {
+        "objectId": "f-trigger"
+      },
+      "to": {
+        "objectId": "trigger-values"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-bash-out",
+      "from": {
+        "objectId": "m-bash"
+      },
+      "to": {
+        "objectId": "x-stdout"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-script-out",
+      "from": {
+        "objectId": "m-script",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "x-stdout",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-check",
+      "from": {
+        "objectId": "x-stdout"
+      },
+      "to": {
+        "objectId": "x-match"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-ok",
+      "from": {
+        "objectId": "x-match"
+      },
+      "to": {
+        "objectId": "x-output"
+      },
+      "label": "match or no schema",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-fail",
+      "from": {
+        "objectId": "x-match"
+      },
+      "to": {
+        "objectId": "x-fail"
+      },
+      "label": "mismatch",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-loop",
+      "from": {
+        "objectId": "m-loop"
+      },
+      "to": {
+        "objectId": "loop-knobs"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-include-fan",
+      "from": {
+        "objectId": "m-include"
+      },
+      "to": {
+        "objectId": "fan-out"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-workflow-fan",
+      "from": {
+        "objectId": "m-workflow"
+      },
+      "to": {
+        "objectId": "fan-out"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-approval",
+      "from": {
+        "objectId": "m-approval"
+      },
+      "to": {
+        "objectId": "approval-fields"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-w-duration",
+      "from": {
+        "objectId": "m-wait",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "w-duration",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          2700,
+          1740
+        ],
+        [
+          2800,
+          1740
+        ],
+        [
+          2800,
+          1920
+        ]
+      ]
+    },
+    {
+      "id": "e-w-until",
+      "from": {
+        "objectId": "m-wait",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "w-until",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          2700,
+          1740
+        ],
+        [
+          2800,
+          1740
+        ],
+        [
+          2800,
+          2120
+        ]
+      ]
+    },
+    {
+      "id": "e-w-event",
+      "from": {
+        "objectId": "m-wait",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "w-event",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          2700,
+          1740
+        ],
+        [
+          2800,
+          1740
+        ],
+        [
+          2800,
+          2320
+        ]
+      ]
+    },
+    {
+      "id": "e-w-attention",
+      "from": {
+        "objectId": "m-wait",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "w-attention",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          2700,
+          1740
+        ],
+        [
+          2800,
+          1740
+        ],
+        [
+          2800,
+          2520
+        ]
+      ]
+    }
+  ],
+  "annotations": []
+}

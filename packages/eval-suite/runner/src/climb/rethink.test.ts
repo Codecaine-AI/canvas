@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import { box, wire } from "./fixtures/review/stubs.ts";
+import { orderSearch } from "./order.ts";
 import { rethinkAnswers, rethinkMessage, rethinkReask, rethinkRecord, sectionMoves, unanswered, type Measured } from "./rethink.ts";
 import type { Board, BoardObject } from "./review-inputs.ts";
 import { planOf, type GapRule } from "./space.ts";
@@ -155,12 +156,14 @@ describe("climb rethink turn record", () => {
   test("the record keeps the answers, the tool calls by tool, the sections moved, the frame and the count of failed measures before and after", () => {
     const run = { exitCode: 0, signal: null, timedOut: false, durationMs: 9, tries: 1, rateLimited: false };
     const answers = { A1: "move b beside a", A2: "a ↔ b is under its number by 40 px", A3: "no change: the frame fits" };
+    const before = measured(draft(), wires);
+    // The drawer widened the a ↔ b gap to 240 px.
+    const after = measured(draft(540), [lane("w1", 340, 540), lane("w2", 360, 540), lane("w3", 380, 540), wires[3]!]);
+    const order = { before: orderSearch(before.board, before.facts, before.plan.pageFrame, RULE.base, false), after: orderSearch(after.board, after.facts, after.plan.pageFrame, RULE.base, false) };
     const record = rethinkRecord({
-      run, answers, reask: null, transcript: transcript(["A1: move b beside a"], ["canvas_open", "arrange", "route", "route", "canvas_check"]),
-      before: measured(draft(), wires),
-      // The drawer widened the a ↔ b gap to 240 px.
-      after: measured(draft(540), [lane("w1", 340, 540), lane("w2", 360, 540), lane("w3", 380, 540), wires[3]!]),
+      run, answers, reask: null, transcript: transcript(["A1: move b beside a"], ["canvas_open", "arrange", "route", "route", "canvas_check"]), before, after, order,
     });
+    expect(order.before?.cells).toEqual(["a", "b", "c"]);
     expect(record).toEqual({
       ...run, answers, reask: null,
       toolCalls: { total: 5, byTool: { canvas_open: 1, arrange: 1, route: 2, canvas_check: 1 } },
@@ -168,6 +171,8 @@ describe("climb rethink turn record", () => {
       frame: { before: "1700 × 1000 px", after: "1700 × 1000 px" },
       // Before: the band too narrow and the empty block. After: the block.
       faults: { before: 2, after: 1 },
+      // The order search of the first draw, and the board's own order after the turn at the same model's cost.
+      order: order.before, orderAfter: order.after!.current,
     });
   });
 });
