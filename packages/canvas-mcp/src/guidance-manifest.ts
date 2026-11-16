@@ -66,11 +66,11 @@ const rules = { topic: "rules" } as const;
 const UNITS: readonly ManifestUnit[] = [
   {
     id: "skill.frontmatter", kind: "metadata", file: SKILL, lines: [1, 12], scenario: "draw-board", destination: workflow,
-    text: "---\nname: canvas\ndescription: \"Draw and edit Codecaine Canvas boards through the\n  codecaine-canvas MCP: system architecture, flow and pipeline diagrams,\n  state charts and ownership maps. Use after the instruments skill\n  routes a diagram to canvas, when Ford says canvas or board, or before\n  any place_*, connect or look call.\"\ncompatibility: \"Needs the codecaine-canvas MCP server.\"\nmetadata:\n  version: \"0.1.0\"\n  product: canvas\n---",
+    text: "---\nname: canvas\ndescription: \"Draw and edit Codecaine Canvas boards through the\n  canvas MCP: system architecture, flow and pipeline diagrams,\n  state charts and ownership maps. Use after the instruments skill\n  routes a diagram to canvas, when Ford says canvas or board, or before\n  any place_*, connect or look call.\"\ncompatibility: \"Needs the canvas MCP server.\"\nmetadata:\n  version: \"0.1.0\"\n  product: canvas\n---",
     anchors: [
       "The canvas tools draw and edit Codecaine Canvas boards: system architecture, flow and pipeline diagrams, state charts and ownership maps",
       "Use them when the user says canvas or board, after the instruments skill routes a diagram to canvas, and before any place_*, connect or look call",
-      "They come from the codecaine-canvas MCP server",
+      "They come from the canvas MCP server",
     ],
   },
   {

@@ -62,7 +62,7 @@ function summarize(result: { isError?: boolean; content: Array<{ type: string; t
 export function createCanvasMcpServer(options: CanvasServiceOptions): Server {
   const service = createCanvasService({ ...options, workspace: resolve(options.workspace) });
   const server = new Server(
-    { name: "codecaine-canvas", version },
+    { name: "canvas", version },
     { capabilities: { tools: {}, resources: {} }, instructions: INSTRUCTIONS },
   );
   server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: service.listTools() }));

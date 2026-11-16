@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "codecaine-canvas",
+      "name": "canvas",
       "devDependencies": {
         "@happy-dom/global-registrator": "^20.9.0",
         "@types/bun": "latest",

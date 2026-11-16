@@ -23,7 +23,7 @@ export function canvasWorkflow(): AuthoringTopic {
     id: "workflow",
     title: "Canvas Workflow",
     text: [
-      "The canvas tools draw and edit Codecaine Canvas boards: system architecture, flow and pipeline diagrams, state charts and ownership maps. They come from the codecaine-canvas MCP server.",
+      "The canvas tools draw and edit Codecaine Canvas boards: system architecture, flow and pipeline diagrams, state charts and ownership maps. They come from the canvas MCP server.",
       "",
       "## When to Use the Canvas Tools",
       "",

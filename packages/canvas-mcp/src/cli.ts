@@ -1,10 +1,10 @@
 #!/usr/bin/env bun
 /**
- * `codecaine-canvas` — command-line entry for the canvas MCP.
+ * `canvas` — command-line entry for the canvas MCP.
  *
- *   codecaine-canvas mcp [--workspace <dir>] [--canvases <dir>]   serve the canvas tools over stdio
- *   codecaine-canvas instructions                    print the prompt block (MCP instructions)
- *   codecaine-canvas manifest                        print the rule-unit manifest as JSON
+ *   canvas mcp [--workspace <dir>] [--canvases <dir>]   serve the canvas tools over stdio
+ *   canvas instructions                    print the prompt block (MCP instructions)
+ *   canvas manifest                        print the rule-unit manifest as JSON
  *
  * Three roots, one role each:
  * - Containment root: `--workspace`, else the project root. canvas_open opens

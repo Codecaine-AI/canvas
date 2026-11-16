@@ -1891,7 +1891,7 @@
                 "text": "Start the server",
                 "steps": [
                   {
-                    "text": "`Client` spawns `codecaine-canvas mcp` over stdio"
+                    "text": "`Client` spawns `canvas mcp` over stdio"
                   },
                   {
                     "text": "`cli.ts` resolves the workspace directory"
@@ -3060,7 +3060,7 @@
       },
       "text": [
         {
-          "insert": "claude mcp add -s user codecaine-canvas -- <bun> <repo>/packages/canvas-mcp/src/cli.ts mcp"
+          "insert": "claude mcp add -s user canvas -- <bun> <repo>/packages/canvas-mcp/src/cli.ts mcp"
         }
       ],
       "children": []
@@ -3093,7 +3093,7 @@
       },
       "text": [
         {
-          "insert": "[mcp_servers.codecaine-canvas]\ncommand = \"<bun>\"\nargs = [\"<repo>/packages/canvas-mcp/src/cli.ts\", \"mcp\"]"
+          "insert": "[mcp_servers.canvas]\ncommand = \"<bun>\"\nargs = [\"<repo>/packages/canvas-mcp/src/cli.ts\", \"mcp\"]"
         }
       ],
       "children": []
