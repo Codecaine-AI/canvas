@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "bin": { "codecaine-canvas": "./src/cli.ts" },
+  "bin": { "canvas": "./src/cli.ts" },
   "exports": { ".": "./src/index.ts" },
   "scripts": {
     "test": "bun test src",

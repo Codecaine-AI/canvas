@@ -1,7 +1,7 @@
 /**
  * The MCP surface itself, over the SDK's in-memory transport and over real
  * stdio: tools/list carries every gesture with the agent's own schema, and a
- * spawned `codecaine-canvas mcp` answers initialize, tools/list, canvas_open,
+ * spawned `canvas mcp` answers initialize, tools/list, canvas_open,
  * and an edit.
  */
 import { afterEach, describe, expect, test } from "bun:test";
@@ -135,7 +135,7 @@ describe("canvas MCP server", () => {
     }));
     cleanups.push(() => client.close());
 
-    expect(client.getServerVersion()?.name).toBe("codecaine-canvas");
+    expect(client.getServerVersion()?.name).toBe("canvas");
     const { tools } = await client.listTools();
     expect(tools.map((tool) => tool.name)).toContain("place_sticky");
 
