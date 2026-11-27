@@ -74,13 +74,24 @@ describe("place_section picks a color when the call names none", () => {
     expect(session.draft.objects.find((object) => object.id === "lenses")?.parentId).toBe("pack");
     expect(colorOf(session, "lenses")).not.toBe("gray");
     expect(result.text).toContain(`place_section lenses 100,880 400×120 ${colorOf(session, "lenses")}`);
+
+    // In a blue parent, gray is free again.
+    const inBlue = makeTestSession(board(), ["page"]);
+    runOp(inBlue, "place_section", { id: "reviewers", text: "Reviewers", at: [120, 200], size: { width: 400, height: 200 } });
+    expect(inBlue.draft.objects.find((object) => object.id === "reviewers")?.parentId).toBe("rounds");
+    expect(colorOf(inBlue, "reviewers")).toBe("gray");
   });
 
-  test("a top-level section that touches a gray sibling takes the first free cool hue", () => {
+  test("a top-level section that touches a gray sibling takes the first free cool hue; one set apart stays gray", () => {
     const session = makeTestSession(board(), ["page"]);
     // 40px right of pack (gray): closer than one gutter, so they touch.
     runOp(session, "place_section", { id: "first", text: "First", at: [1580, 600], size: { width: 300, height: 200 } });
     expect(colorOf(session, "first")).toBe("blue");
+
+    // 60px from pack and 160px under outside: the gap separates them.
+    const apart = makeTestSession(board(), ["page"]);
+    runOp(apart, "place_section", { id: "first", text: "First", at: [1600, 600], size: { width: 300, height: 200 } });
+    expect(colorOf(apart, "first")).toBe("gray");
   });
 
   test("a frame drawn around a section never takes that section's color", () => {
@@ -99,6 +110,12 @@ describe("an edit that nests a section in its own color is refused", () => {
     const result = runOp(session, "change_color", { id: "rounds", color: "gray" });
     expect(result.isError).toBe(true);
     expect(result.text).toContain("rounds would share gray with its parent section pack");
+    expect(session.draft).toBe(before);
+
+    // Recoloring the parent into its child's color is refused too.
+    const parentRecolor = runOp(session, "change_color", { id: "pack", color: "blue" });
+    expect(parentRecolor.isError).toBe(true);
+    expect(parentRecolor.text).toContain("rounds would share blue with its parent section pack");
     expect(session.draft).toBe(before);
   });
 
@@ -151,6 +168,11 @@ describe("integrity reports a stored same-color nest", () => {
     expect(findings[0]).toMatchObject({ severity: "error", at: ["rounds", "pack"] });
     expect(findings[0]!.message).toBe("rounds shares gray with its parent section pack: nested levels must differ in color");
     expect(findings[0]!.suggestion).toBe("change_color rounds to another color, such as blue");
+
+    // A section with no stored color is gray, the default it paints.
+    const unset = board();
+    unset.objects[2] = { ...unset.objects[2]!, color: undefined };
+    expect(integrity(unset).map((finding) => finding.at)).toEqual([["rounds", "pack"]]);
   });
 
   test("the page is exempt as a parent: the page frame, or a parentless white section", () => {
@@ -268,6 +290,11 @@ describe("touching sibling sections never share a look", () => {
     expect(session.draft.objects.find((object) => object.id === "lenses")?.parentId).toBe("pack");
     // Not gray (pack, its parent), not blue (rounds, touching).
     expect(colorOf(session, "lenses")).toBe("violet");
+
+    // 60px under rounds (blue): the gap separates them, so blue is free.
+    const apart = makeTestSession(board(), ["page"]);
+    runOp(apart, "place_section", { id: "lenses", text: "Lenses", at: [100, 880], size: { width: 400, height: 120 } });
+    expect(colorOf(apart, "lenses")).toBe("blue");
   });
 
   test("a recolor into a touching sibling's color is refused, naming the sibling", () => {
@@ -471,6 +498,14 @@ describe("the chooser keeps the board's meaning", () => {
       section("x", [480, 40, 400, 640], "gray", "page"),
     ]);
     expect(pickSectionColor(beside, "x", style, "teal")).toBe("violet");
+    // With no preference: x touches gray g and teal t; blue is first but sits beside teal, so violet.
+    const besideTeal = makeDocument([
+      section("page", [0, 0, 2000, 1400], "white", null),
+      section("g", [40, 40, 400, 300], "gray", "page"),
+      section("t", [40, 380, 400, 300], "teal", "page"),
+      section("x", [480, 40, 400, 640], "gray", "page"),
+    ]);
+    expect(pickSectionColor(besideTeal, "x", style)).toBe("violet");
   });
 
   test("a category section takes the one hue its colored nodes share, past the hue cap, with no finding", () => {

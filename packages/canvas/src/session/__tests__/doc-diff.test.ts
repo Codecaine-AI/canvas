@@ -51,6 +51,14 @@ describe("diffDocuments", () => {
       { type: "removeObject", objectId: "removed" },
     ]);
     expect(JSON.stringify(operations)).not.toContain("parentId");
+
+    // A type change alone is an update (terminators must survive accept).
+    expect(diffDocuments(
+      makeDocument([box("a", 0, 0)]),
+      makeDocument([{ ...box("a", 0, 0), type: "ellipse" as const }]),
+    )).toEqual([
+      { type: "updateObject", objectId: "a", patch: { type: "ellipse" } },
+    ]);
   });
 
   test("carries waypoint steering on updateConnection and addConnection as deep copies", () => {
@@ -107,6 +115,39 @@ describe("diffDocuments", () => {
     expect(update.patch.waypoints![0]).not.toBe(draftConnection.waypoints![0]);
     expect(add.connection.waypoints).not.toBe(addedConnection.waypoints);
     expect(add.connection.waypoints![0]).not.toBe(addedConnection.waypoints![0]);
+
+    // A waypoint-only change emits exactly one update carrying only the waypoints.
+    expect(diffDocuments(
+      makeDocument(
+        [box("a", 0, 0), box("b", 192, 0)],
+        [{ ...connect("steered", "a", "b"), waypoints: [[80, 112]] }],
+      ),
+      makeDocument(
+        [box("a", 0, 0), box("b", 192, 0)],
+        [{ ...connect("steered", "a", "b"), waypoints: [[320, 240], [400, 240]] }],
+      ),
+    )).toEqual([
+      {
+        type: "updateConnection",
+        connectionId: "steered",
+        patch: { waypoints: [[320, 240], [400, 240]] },
+      },
+    ]);
+
+    // An added connection carries its labelPosition, deep-copied.
+    const pinnedConnection: InteractiveCanvasConnection = {
+      ...connect("pinned", "a", "b"),
+      label: "handoff",
+      labelPosition: { along: 0.75, offset: 20 },
+    };
+    const pinnedOperations = diffDocuments(
+      makeDocument([box("a", 0, 0), box("b", 192, 0)]),
+      makeDocument([box("a", 0, 0), box("b", 192, 0)], [pinnedConnection]),
+    );
+    const pinnedAdd = pinnedOperations[0] as Extract<(typeof pinnedOperations)[number], { type: "addConnection" }>;
+    expect(pinnedAdd.type).toBe("addConnection");
+    expect(pinnedAdd.connection.labelPosition).toEqual({ along: 0.75, offset: 20 });
+    expect(pinnedAdd.connection.labelPosition).not.toBe(pinnedConnection.labelPosition);
   });
 
   test("clearing waypoints emits a null, the clear that survives the JSON wire", () => {
@@ -271,6 +312,17 @@ describe("diffDocuments", () => {
     const draft = structuredClone(baseline);
 
     expect(diffDocuments(baseline, draft)).toEqual([]);
+
+    // A matching description emits no description operation.
+    const described = { ...makeDocument([box("kept", 0, 0)]), description: "Same account" };
+    expect(diffDocuments(described, structuredClone(described))).toEqual([]);
+
+    // Structurally equal waypoints in independently built arrays are unchanged.
+    const steered = () => makeDocument(
+      [box("a", 0, 0), box("b", 192, 0)],
+      [{ ...connect("steered", "a", "b"), waypoints: [[80, 112], [160, 112]] }],
+    );
+    expect(diffDocuments(steered(), steered())).toEqual([]);
   });
 
   test("does not emit empty patches when only excluded fields change", () => {

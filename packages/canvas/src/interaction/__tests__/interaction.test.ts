@@ -83,6 +83,34 @@ function up(world: { x: number; y: number }, hit: CanvasPointerEvent["hit"] = { 
   return pointerEvent({ type: "up", world, screen: world, hit, shiftKey });
 }
 
+function bendDoc() {
+  return makeDocument(
+    [
+      makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
+      makeObject({ id: "b", geometry: { x: 300, y: 0, width: 100, height: 100 } }),
+    ],
+    [
+      makeConnection({
+        id: "c1",
+        from: { objectId: "a", anchor: "right" },
+        to: { objectId: "b", anchor: "left" },
+        waypoints: [
+          [150, 50],
+          [150, 160],
+          [300, 160],
+        ],
+      }),
+    ],
+  );
+}
+
+function portDoc() {
+  return makeDocument([
+    makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
+    makeObject({ id: "b", geometry: { x: 300, y: 0, width: 100, height: 100 } }),
+  ]);
+}
+
 function expectOrthogonalPolyline(points: ReadonlyArray<{ x: number; y: number }>) {
   for (let index = 1; index < points.length; index += 1) {
     const previous = points[index - 1];
@@ -94,13 +122,61 @@ function expectOrthogonalPolyline(points: ReadonlyArray<{ x: number; y: number }
 }
 
 describe("interaction: hitTestObjects", () => {
-  it("hits the topmost object at a point when objects overlap", () => {
-    const document = makeDocument([
-      makeObject({ id: "back", geometry: { x: 0, y: 0, width: 200, height: 200 } }),
-      makeObject({ id: "front", geometry: { x: 50, y: 50, width: 100, height: 100 } }),
-    ]);
-    const hit = hitTestObjects(document, { x: 75, y: 75 });
-    expect(hit?.id).toBe("front");
+  it.each([
+    {
+      name: "the later of two overlapping shapes",
+      objects: [
+        makeObject({ id: "back", geometry: { x: 0, y: 0, width: 200, height: 200 } }),
+        makeObject({ id: "front", geometry: { x: 50, y: 50, width: 100, height: 100 } }),
+      ],
+      point: { x: 75, y: 75 },
+      expected: "front",
+    },
+    {
+      name: "a member object rendered above its section",
+      objects: [
+        makeObject({ id: "section", type: "section", text: "S", color: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
+        makeObject({ id: "child", parentId: "section", geometry: { x: 100, y: 100, width: 50, height: 50 } }),
+      ],
+      point: { x: 120, y: 120 },
+      expected: "child",
+    },
+    {
+      name: "a shape above a section that is later in the raw array",
+      objects: [
+        makeObject({ id: "shape", geometry: { x: 100, y: 100, width: 50, height: 50 } }),
+        makeObject({ id: "section", type: "section", text: "S", color: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
+      ],
+      point: { x: 120, y: 120 },
+      expected: "shape",
+    },
+    {
+      name: "the smaller top-painted section of overlapping equal-depth sections",
+      objects: [
+        makeObject({ id: "small", type: "section", text: "Small", color: "blue", geometry: { x: 50, y: 50, width: 100, height: 100 } }),
+        makeObject({ id: "large", type: "section", text: "Large", color: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
+      ],
+      point: { x: 75, y: 75 },
+      expected: "small",
+    },
+    {
+      name: "the section itself inside it but outside its members",
+      objects: [
+        makeObject({ id: "section", type: "section", text: "S", color: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
+        makeObject({ id: "child", parentId: "section", geometry: { x: 100, y: 100, width: 50, height: 50 } }),
+      ],
+      point: { x: 5, y: 5 },
+      expected: "section",
+    },
+    {
+      name: "a solid rectangle anywhere in its interior",
+      objects: [makeObject({ id: "rect", type: "rectangle", geometry: { x: 0, y: 0, width: 300, height: 300 } })],
+      point: { x: 150, y: 150 },
+      expected: "rect",
+    },
+  ])("hits the topmost object at a point: $name", ({ objects, point, expected }) => {
+    const hit = hitTestObjects(makeDocument(objects), point);
+    expect(hit?.id).toBe(expected);
   });
 
   it("returns null when the point misses everything", () => {
@@ -251,40 +327,24 @@ describe("interaction: connector-endpoint-drag (3.2.2)", () => {
     expect(result.dispatch).toEqual([]);
   });
 
-  it("Escape cancels the drag back to idle with no dispatch", () => {
-    const document = endpointDoc();
-    const ctx = makeContext(document);
-    const hit = { kind: "endpoint" as const, connectionId: "c1", end: "to" as const };
+  it("Escape cancels an endpoint, bend, or create drag back to idle with no dispatch", () => {
+    const gestures: Array<{ document: InteractiveCanvasDocument; at: { x: number; y: number }; hit: CanvasPointerEvent["hit"] }> = [
+      { document: endpointDoc(), at: { x: 300, y: 50 }, hit: { kind: "endpoint", connectionId: "c1", end: "to" } },
+      { document: bendDoc(), at: { x: 150, y: 100 }, hit: { kind: "bend-segment", connectionId: "c1", segmentIndex: 1 } },
+      { document: portDoc(), at: { x: 100, y: 50 }, hit: { kind: "port", objectId: "a", anchor: "right" } },
+    ];
 
-    const dragging = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 300, y: 50 }, hit), ctx);
-    const cancelled = cancelInteraction(dragging.state);
-    expect(cancelled.state.kind).toBe("idle");
-    expect(cancelled.dispatch).toEqual([]);
+    for (const { document, at, hit } of gestures) {
+      const dragging = stepInteraction(IDLE_INTERACTION_STATE, down(at, hit), makeContext(document));
+      expect(dragging.state.kind).not.toBe("idle");
+      const cancelled = cancelInteraction(dragging.state);
+      expect(cancelled.state.kind).toBe("idle");
+      expect(cancelled.dispatch).toEqual([]);
+    }
   });
 });
 
 describe("interaction: connector-bend-drag", () => {
-  function bendDoc() {
-    return makeDocument(
-      [
-        makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
-        makeObject({ id: "b", geometry: { x: 300, y: 0, width: 100, height: 100 } }),
-      ],
-      [
-        makeConnection({
-          id: "c1",
-          from: { objectId: "a", anchor: "right" },
-          to: { objectId: "b", anchor: "left" },
-          waypoints: [
-            [150, 50],
-            [150, 160],
-            [300, 160],
-          ],
-        }),
-      ],
-    );
-  }
-
   function straightBendDoc(waypoints?: Array<[number, number]>) {
     return makeDocument(
       [
@@ -557,13 +617,6 @@ describe("interaction: connector-bend-drag", () => {
 });
 
 describe("interaction: connector-create from edge ports (3.3.2)", () => {
-  function portDoc() {
-    return makeDocument([
-      makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
-      makeObject({ id: "b", geometry: { x: 300, y: 0, width: 100, height: 100 } }),
-    ]);
-  }
-
   it("commits immediately to connector-create on a port hit", () => {
     const document = portDoc();
     const ctx = makeContext(document);

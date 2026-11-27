@@ -73,9 +73,12 @@ describe("outlineContainsPoint (D16)", () => {
 });
 
 describe("hitTestObjects (D16)", () => {
-  it("clicking a diamond's empty corner falls through to the object behind", () => {
-    const hit = hitTestObjects(doc([rectBehind, diamond]), { x: 5, y: 5 });
-    expect(hit?.id).toBe("rect-behind");
+  it.each([
+    { name: "a diamond's empty corner falls through to the object behind", objects: [rectBehind, diamond], point: { x: 5, y: 5 }, expected: "rect-behind" },
+    { name: "inside the diamond outline hits the topmost diamond", objects: [rectBehind, diamond], point: { x: 50, y: 50 }, expected: "diamond" },
+    { name: "a bbox-outline object's corner hits its full box", objects: [rectBehind], point: { x: 0.5, y: 0.5 }, expected: "rect-behind" },
+  ])("clicking $name", ({ objects, point, expected }) => {
+    expect(hitTestObjects(doc(objects), point)?.id).toBe(expected);
   });
 
   it("clicking a diamond's empty corner with nothing behind resolves to null (canvas)", () => {

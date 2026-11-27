@@ -16,6 +16,15 @@ describe("pathfinding priority-queue", () => {
     expect(queue.dequeue()).toBe("b");
     expect(queue.dequeue()).toBe("c");
     expect(queue.empty()).toBe(true);
+
+    const numbers = new PriorityQueue<number, number>((a, b) => a - b);
+    for (const value of [5, 3, 8, 1, 9, 2, 7, 4, 6, 0]) numbers.enqueue(value, value);
+    const drained: number[] = [];
+    while (!numbers.empty()) {
+      const value = numbers.dequeue();
+      if (value !== null) drained.push(value);
+    }
+    expect(drained).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });
 
   it("returns null when empty", () => {

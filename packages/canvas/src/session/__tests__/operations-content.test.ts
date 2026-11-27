@@ -181,6 +181,12 @@ describe("change_shape", () => {
     // The document's {type: "icon", icon} split never reached the tool surface.
     expect(swapped.type).toBe("icon");
     expect(swapped.icon).toBe("memory");
+
+    // icon → icon swaps the glyph and keeps the carrier type.
+    expect(runOp(session, "change_shape", { id: "step", patch: { type: "key" } }).isError)
+      .toBeUndefined();
+    expect(objectOf(session, "step").type).toBe("icon");
+    expect(objectOf(session, "step").icon).toBe("key");
   });
 
   test("icon → shape clears the glyph, so no icon ghost survives the swap", () => {

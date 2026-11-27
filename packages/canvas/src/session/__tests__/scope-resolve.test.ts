@@ -65,6 +65,19 @@ describe("scope resolution characterization", () => {
         ],
       }
     `);
+
+    // The whole board: every id, no boundary arrows.
+    expect(consumed(resolveScope(synthetic, ["north", "east", "second", "first", "section"]))).toEqual({
+      boundaryArrowCount: 0,
+      frame: { height: 576, width: 888, x: 0, y: -176 },
+      scopeObjectIds: ["section", "first", "second", "east", "north"],
+    });
+    // A child-only scope stays inside its section.
+    expect(consumed(resolveScope(synthetic, ["first"]))).toEqual({
+      boundaryArrowCount: 2,
+      frame: { height: 96, width: 128, x: 48, y: 80 },
+      scopeObjectIds: ["first"],
+    });
   });
 
   test("expands a selected section to its geometric descendants", () => {

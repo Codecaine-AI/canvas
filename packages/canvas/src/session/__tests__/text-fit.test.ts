@@ -75,7 +75,12 @@ function expectNeededSizeFits(
 }
 
 describe("textFitReport — shape labels", () => {
-  test("a long label in the same box clips, and needs more height", () => {
+  test("a short label fits a default node box; a long label in the same box clips, and needs more height", () => {
+    const short = textFitReport(shape(160, 96), { width: 160, height: 96 }, "Ingest");
+    expect(short.fits).toBe(true);
+    expect(short.slot).toBe("shape-label");
+    expect(short.neededSize).toBeUndefined();
+
     const report = textFitReport(shape(160, 96), { width: 160, height: 96 }, LONG_LABEL);
     expect(report.fits).toBe(false);
     expect(report.slot).toBe("shape-label");
@@ -123,7 +128,11 @@ describe("textFitReport — shape labels", () => {
 });
 
 describe("textFitReport — sticky bodies", () => {
-  test("a five-bullet list does not — the 36px pitch only leaves two rows", () => {
+  test("a one-line note fits the default sticky; a five-bullet list does not — the 36px pitch only leaves two rows", () => {
+    const short = textFitReport(sticky(176, 128), { width: 176, height: 128 }, "Ship it");
+    expect(short.fits).toBe(true);
+    expect(short.slot).toBe("sticky-body");
+
     const text = "- one\n- two\n- three\n- four\n- five";
     const report = textFitReport(sticky(176, 128), { width: 176, height: 128 }, text);
     expect(report.fits).toBe(false);
@@ -156,7 +165,11 @@ describe("textFitReport — sticky edge cases", () => {
 });
 
 describe("textFitReport — section titles (chip, not body slot)", () => {
-  test("a title wider than the frame ellipsizes, and needs a wider frame", () => {
+  test("a short title fits its frame; a title wider than the frame ellipsizes, and needs a wider frame", () => {
+    const short = textFitReport(section(480, 360), { width: 480, height: 360 }, "Discovery");
+    expect(short.fits).toBe(true);
+    expect(short.slot).toBe("section-title");
+
     const text = "Discovery and framing workstream";
     const report = textFitReport(section(200, 360), { width: 200, height: 360 }, text);
     expect(report.fits).toBe(false);
@@ -170,7 +183,11 @@ describe("textFitReport — section titles (chip, not body slot)", () => {
 });
 
 describe("textFitReport — edge labels (chip against its corridor)", () => {
-  test("a long label in a tight corridor crowds it, and reports the chip's demand", () => {
+  test("a short label fits a wide corridor; a long label in a tight corridor crowds it, and reports the chip's demand", () => {
+    const short = textFitReport(EDGE, { width: 400, height: 200 }, "calls");
+    expect(short.fits).toBe(true);
+    expect(short.slot).toBe("edge-label");
+
     const report = textFitReport(EDGE, { width: 100, height: 200 }, "publishes an event");
     expect(report.fits).toBe(false);
     expect(report.slot).toBe("edge-label");

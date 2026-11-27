@@ -50,6 +50,20 @@ describe("numberedRouteSegments", () => {
     ]);
     expect(formatNumberedRoute(document.connections[0]!, document))
       .toBe("A ─(s0 h y=248)→ (s1 v x=400) ─(s2 h y=448)→ B");
+
+    // A multi-elbow manual route numbers every leg in polyline order.
+    const multi = makeDocument(
+      [box("A", 0, 200), box("B", 800, 600)],
+      [{
+        ...connect("e2", "A", "B"),
+        waypoints: waypointsOf([[300, 248], [300, 400], [600, 400], [600, 648]]),
+      }],
+    );
+    expect(formatNumberedRoute(multi.connections[0]!, multi)).toBe(
+      "A ─(s0 h y=248)→ (s1 v x=300) ─(s2 h y=400)→ (s3 v x=600) ─(s4 h y=648)→ B",
+    );
+    expect(numberedRouteSegments(multi.connections[0]!, multi).map((s) => s.index))
+      .toEqual([0, 1, 2, 3, 4]);
   });
 
   test("the auto-router's anchor stubs are numbered too — they carry bend handles", () => {
@@ -87,6 +101,14 @@ describe("numberedSegmentsForPolyline · off-axis and degenerate legs", () => {
       [0, "h", 0],
       [1, "v", 110],
       [2, "h", 200],
+    ]);
+
+    // Horizontal-dominant: |dx| 400 > |dy| 21 → h, y = mean of 0 and 21.
+    expect(numberedSegmentsForPolyline([
+      { x: 0, y: 0 },
+      { x: 400, y: 21 },
+    ])).toEqual([
+      { index: 0, axis: "h", fixed: 10.5, from: { x: 0, y: 0 }, to: { x: 400, y: 21 } },
     ]);
   });
 

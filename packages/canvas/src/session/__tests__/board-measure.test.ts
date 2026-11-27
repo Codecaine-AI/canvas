@@ -99,6 +99,13 @@ describe("measureRegion", () => {
       // Three rows at 0/200/400 — two boxes share the first two.
       { axis: "y", deltas: [200, 200] },
     ]);
+
+    // The grid section: columns at x 40/280, rows at y 80/240.
+    const { document: grid, home } = gridBoard();
+    expect(measureRegion(grid, home.geometry, { sectionId: "home" }).pitch).toEqual([
+      { axis: "x", deltas: [240] },
+      { axis: "y", deltas: [160] },
+    ]);
   });
 
   test("a section region carries the free margin a fit would reclaim on each side", () => {
@@ -151,8 +158,19 @@ describe("measureRegion", () => {
 });
 
 describe("MEASURES grammar", () => {
-  test("a framed section prints gaps, pitch, free and ink in that order", () => {
+  test("a framed section prints gaps, pitch, free and ink in that order, omitting empty categories", () => {
     const { document, home } = gridBoard();
+
+    // One row of two boxes: no y corridor, no y pitch, no free rect.
+    expect(formatRegionMeasures(
+      "at",
+      measureRegion(document, { x: 0, y: 0, width: 480, height: 200 }),
+    )).toBe([
+      "MEASURES · at 0,0 480×200",
+      "  gaps x  a↔b 80",
+      "  pitch x 240",
+      "  ink     32%",
+    ].join("\n"));
 
     const block = formatRegionMeasures(
       "section home",

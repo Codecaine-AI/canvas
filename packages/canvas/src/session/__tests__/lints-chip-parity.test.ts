@@ -1,11 +1,12 @@
 import { describe, expect, test } from "bun:test";
 
-import { chipFor, CHIP_HEIGHT } from "../../board/lints/geometry";
+import { chipFor, CHIP_HEIGHT, chipWidth } from "../../board/lints/geometry";
 import { renderDocumentToSvg } from "../../render/static-svg.ts";
 import { box, connect, makeDocument } from "./synthetic";
 import type { InteractiveCanvasDocument } from "../../state/schema";
-import { type CanvasStyle } from "../../theme/canvas-style";
+import { canvasThemePreset, type CanvasStyle } from "../../theme/canvas-style";
 import { FIGJAM_CANVAS_STYLE } from "./helpers";
+import { measureWidth } from "../../theme/text-measure.ts";
 
 /**
  * Lint chips ARE the renderer's chips. The CONNECTION_LABEL_* constants are
@@ -80,7 +81,7 @@ function expectRendererParity(
 }
 
 describe("lint chip / static renderer parity", () => {
-  test("figjam short label: the renderer's 41px minimum width, 30px height", () => {
+  test("chip sizes match the renderer: figjam 41px minimum and measured labels, schematic mono, elbowed route", () => {
     const document = makeDocument(
       [box("a", 0, 0), box("b", 600, 0)],
       [{ ...connect("e", "a", "b"), label: "X" }],
@@ -89,6 +90,35 @@ describe("lint chip / static renderer parity", () => {
     expect(chip.rect.width).toBe(41);        // min width beats 1×9.6 + 24
     expect(chip.rect.height).toBe(CHIP_HEIGHT);
     expectRendererParity(document);
+
+    // Figjam mid and long labels: measured in Inter Bold 16 plus 12px padding a side.
+    const bold16 = { family: "Inter", size: 16, weight: 700 };
+    expect(chipWidth("go live", FIGJAM_CANVAS_STYLE)).toBe(measureWidth("go live", bold16) + 24);
+    expect(chipWidth("connect-to-database", FIGJAM_CANVAS_STYLE)).toBe(measureWidth("connect-to-database", bold16) + 24);
+    // Real advances, not the old 0.6em-per-character estimate (19 × 9.6 = 182.4px).
+    expect(measureWidth("connect-to-database", bold16)).toBeLessThan(172.4);
+    const twoLabels = (shortLabel: string) => makeDocument(
+      [box("a", 0, 0), box("b", 600, 0), box("c", 0, 300), box("d", 600, 300)],
+      [
+        { ...connect("short", "a", "b"), label: shortLabel },
+        { ...connect("long", "c", "d"), label: "connect-to-database" },
+      ],
+    );
+    expectRendererParity(twoLabels("go live"));
+
+    // Schematic: 19 Plex Mono cells at 15px (171px) + 7.5px a side, 26px tall.
+    const schematic = canvasThemePreset("schematic-light");
+    const mono = twoLabels("X");
+    const monoChip = chipFor(mono.connections[1]!, mono, schematic)!;
+    expect(monoChip.rect.width).toBe(186);
+    expect(monoChip.rect.height).toBe(26);
+    expectRendererParity(mono, schematic);
+
+    // Elbowed route: parity holds at the router's own labelPoint.
+    expectRendererParity(makeDocument(
+      [box("a", 0, 0), box("w", 400, 252), box("b", 800, 0)],
+      [{ ...connect("e", "a", "b"), label: "detour", waypoints: [[160, 300], [800, 300]] }],
+    ));
   });
 
   test("empty-adjacent: empty and whitespace labels draw no chip on either side", () => {

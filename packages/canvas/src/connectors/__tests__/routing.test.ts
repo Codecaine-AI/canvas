@@ -117,14 +117,14 @@ function firstLineTarget(path: string): CanvasPoint {
 
 describe("routing", () => {
   describe("autoPickAnchors", () => {
-    it("picks facing sides for horizontal layout", () => {
-      const from = object("from", 0, 0);
-      const to = object("to", 240, 0);
-
-      expect(autoPickAnchors(from.geometry, to.geometry)).toEqual({
-        startAnchor: "right",
-        endAnchor: "left",
-      });
+    it.each([
+      { layout: "horizontal", from: { x: 0, y: 0, width: 100, height: 60 }, to: { x: 240, y: 0, width: 100, height: 60 }, startAnchor: "right", endAnchor: "left" },
+      { layout: "vertical", from: { x: 0, y: 0, width: 100, height: 60 }, to: { x: 0, y: 180, width: 100, height: 60 }, startAnchor: "bottom", endAnchor: "top" },
+      { layout: "horizontal-dominant diagonal", from: { x: 0, y: 0, width: 100, height: 60 }, to: { x: 260, y: 80, width: 100, height: 60 }, startAnchor: "right", endAnchor: "left" },
+      { layout: "vertical-dominant diagonal", from: { x: 0, y: 0, width: 100, height: 60 }, to: { x: 80, y: 260, width: 100, height: 60 }, startAnchor: "bottom", endAnchor: "top" },
+      { layout: "vertically overlapping tall", from: { x: 0, y: 0, width: 100, height: 300 }, to: { x: 140, y: 180, width: 100, height: 300 }, startAnchor: "right", endAnchor: "left" },
+    ])("picks facing sides for $layout layout", ({ from, to, startAnchor, endAnchor }) => {
+      expect(autoPickAnchors(from, to)).toEqual({ startAnchor, endAnchor });
     });
   });
 
@@ -212,6 +212,11 @@ describe("routing", () => {
       const routed = routeConnection(from, to, connection("solid", { from: "top", to: "left" }));
 
       expectPointClose(routed.labelPoint, { x: 56, y: 150 });
+
+      // Default facing anchors: raw elbow (100,30)→(124,30)→(180,30)→(180,150)→(236,150)→(260,150),
+      // 280px long, so the unrounded middle is 60px down the vertical run.
+      const elbow = routeConnection(from, to, connection("solid"));
+      expectPointClose(elbow.labelPoint, { x: 180, y: 90 });
     });
 
     it("ignores stale waypoint polylines with diagonal segments and falls back to an orthogonal route", () => {
@@ -393,6 +398,31 @@ describe("routing", () => {
               });
             }
           }
+        }
+      }
+
+      // Figjam: a cursor 30px out and slightly off the anchor's axis.
+      for (const anchor of anchors) {
+        const start = borderPoint(from, anchor);
+        const normal = normalFor(anchor);
+        const tangent = { x: -normal.y, y: normal.x };
+
+        for (const offset of [-20, -8, 8, 20]) {
+          const point = {
+            x: start.x + normal.x * 30 + tangent.x * offset,
+            y: start.y + normal.y * 30 + tangent.y * offset,
+          };
+          const routed = routeConnectionToPoint(from, anchor, point, FIGJAM_CANVAS_STYLE);
+
+          expect({
+            anchor,
+            offset,
+            reversals: shortReversalSegments(routed.points ?? []),
+          }).toEqual({
+            anchor,
+            offset,
+            reversals: [],
+          });
         }
       }
     });

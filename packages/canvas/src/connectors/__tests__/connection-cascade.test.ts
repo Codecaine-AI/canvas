@@ -42,7 +42,7 @@ describe("resolveConnectionCascade", () => {
     expect(atHighZoom.kind).not.toBe("anchor");
   });
 
-  it("snaps to the nearest outline point when close to the border but beyond anchor radius and away from the 4 cardinal points", () => {
+  it("snaps to the nearest outline point of a shape or section when close to the border but beyond anchor radius and away from the 4 cardinal points", () => {
     const object = rectObject();
     // A point near the top-right corner region, away from the N and E anchors,
     // close to the top edge (within OUTLINE_SNAP_WORLD_PX of y=0).
@@ -52,6 +52,19 @@ describe("resolveConnectionCascade", () => {
     if (result.kind === "outline") {
       expect(result.point.y).toBeCloseTo(0, 5);
     }
+
+    const section = rectObject({
+      id: "section-1",
+      type: "section",
+      text: "Section",
+      geometry: { x: 0, y: 0, width: 400, height: 300 },
+    });
+    const sectionResult = resolveConnectionCascade(point, [section], 1);
+    expect(sectionResult.kind).toBe("outline");
+    if (sectionResult.kind === "outline") {
+      expect(sectionResult.objectId).toBe("section-1");
+      expect(sectionResult.point).toEqual({ x: 80, y: 0 });
+    }
   });
 
   it("resolves to 'inside' when the pointer is inside the shape but far from any anchor or edge", () => {
@@ -59,6 +72,11 @@ describe("resolveConnectionCascade", () => {
     const point = { x: 50, y: 50 }; // dead center
     const result = resolveConnectionCascade(point, [object], 1);
     expect(result).toEqual({ kind: "inside", objectId: "rect-1" });
+    // 20px below the top anchor and edge: beyond both snap radii at zoom 1.
+    expect(resolveConnectionCascade({ x: 50, y: 20 }, [object], 1)).toEqual({
+      kind: "inside",
+      objectId: "rect-1",
+    });
   });
 
   it("treats empty section interiors as free canvas instead of inside candidates", () => {

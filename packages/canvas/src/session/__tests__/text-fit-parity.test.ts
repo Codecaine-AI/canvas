@@ -114,6 +114,22 @@ describe("text-fit / renderer parity — shape labels", () => {
     // One pixel shorter is no longer a sure fit — "smallest" means smallest.
     const shy = shape(LONG_LABEL, needed.width, needed.height - 1);
     expect(textFitReport(shy, shy.geometry, shy.text).fits).toBe(false);
+
+    // The schematic themes: a clipping label renders an ellipsis; the reported
+    // needed size does not, and one pixel shorter is no longer a sure fit.
+    for (const theme of ["schematic-light", "schematic-dark"] as const) {
+      const style = canvasThemePreset(theme);
+      const styledSvg = (probe: InteractiveCanvasObject) =>
+        renderDocumentToSvg(makeDocument([probe]), { canvasStyle: style }).svg;
+      const report = textFitReport(object, object.geometry, object.text, style);
+      expect(report.verdict).toBe("overflows");
+      expect(styledSvg(object)).toContain("…");
+      const themedGrown = shape(LONG_LABEL, report.neededSize!.width, report.neededSize!.height);
+      expect(textFitReport(themedGrown, themedGrown.geometry, themedGrown.text, style).verdict).toBe("fits");
+      expect(styledSvg(themedGrown)).not.toContain("…");
+      const themedShy = shape(LONG_LABEL, report.neededSize!.width, report.neededSize!.height - 1);
+      expect(textFitReport(themedShy, themedShy.geometry, themedShy.text, style).fits).toBe(false);
+    }
   });
 });
 

@@ -51,6 +51,17 @@ describe("connector bend editing", () => {
         axis: "horizontal",
       },
     ]);
+
+    expect(connectorBendSegments([p(100, 262), p(240, 262)])).toEqual([
+      {
+        index: 0,
+        start: p(100, 262),
+        end: p(240, 262),
+        midpoint: p(170, 262),
+        handlePoint: p(170, 262),
+        axis: "horizontal",
+      },
+    ]);
   });
 
   it("uses explicit label clearance when the 25% bend handle point would overlap the chip", () => {
@@ -119,9 +130,16 @@ describe("connector bend editing", () => {
     expect(commit.waypoints).toEqual([[160, 0]]);
   });
 
-  it("keeps every segment orthogonal when dragging an h,h,v,h,h route", () => {
+  it("keeps every segment orthogonal when dragging an h,h,v,h,h or h,h,h route", () => {
     const points = [p(0, 0), p(40, 0), p(80, 0), p(80, 60), p(120, 60), p(160, 60)];
+    const delta = { dx: 20, dy: 30 };
     const cases = [
+      {
+        points: [p(0, 0), p(40, 0), p(80, 0), p(120, 0)],
+        segmentIndex: 1,
+        delta: { dx: 0, dy: 30 },
+        expected: [p(0, 0), p(40, 0), p(40, 30), p(80, 30), p(80, 0), p(120, 0)],
+      },
       {
         segmentIndex: 0,
         expected: [p(0, 0), p(0, 30), p(40, 30), p(40, 0), p(80, 0), p(80, 60), p(120, 60), p(160, 60)],
@@ -144,8 +162,13 @@ describe("connector bend editing", () => {
       },
     ];
 
-    for (const { segmentIndex, expected } of cases) {
-      const preview = dragOrthogonalSegment(points, segmentIndex, { dx: 20, dy: 30 });
+    for (const testCase of cases) {
+      const { segmentIndex, expected } = testCase;
+      const preview = dragOrthogonalSegment(
+        "points" in testCase ? testCase.points : points,
+        segmentIndex,
+        "delta" in testCase ? testCase.delta : delta,
+      );
       expect(preview).toEqual(expected);
       expectOrthogonalPolyline(preview);
       expectOrthogonalPolyline(commitBendPolyline(preview, 8).points);
@@ -217,6 +240,28 @@ describe("connector bend editing", () => {
     expect(commit.interiorCornerCount).toBe(1);
     expect(commit.clearedWaypoints).toBe(false);
     expect(commit.waypoints).toEqual([[80, 0]]);
+
+    const tolerant = commitBendPolyline([p(0, 0), p(80, 0), p(80, 60)], 8);
+    expect(tolerant.interiorCornerCount).toBe(1);
+    expect(tolerant.clearedWaypoints).toBe(false);
+    expect(tolerant.waypoints).toEqual([[80, 0]]);
+
+    const fourCorners = commitBendPolyline([
+      p(0, 0),
+      p(40, 0),
+      p(40, 60),
+      p(120, 60),
+      p(120, 120),
+      p(160, 120),
+    ]);
+    expect(fourCorners.interiorCornerCount).toBe(4);
+    expect(fourCorners.clearedWaypoints).toBe(false);
+    expect(fourCorners.waypoints).toEqual([
+      [40, 0],
+      [40, 60],
+      [120, 60],
+      [120, 120],
+    ]);
   });
 
   it("keeps a 20px kink outside the straight-snap window on a 3-segment route", () => {
