@@ -50,21 +50,19 @@ describe("numberedRouteSegments", () => {
     ]);
     expect(formatNumberedRoute(document.connections[0]!, document))
       .toBe("A ─(s0 h y=248)→ (s1 v x=400) ─(s2 h y=448)→ B");
-  });
 
-  test("a multi-elbow manual route numbers every leg in polyline order", () => {
-    const document = makeDocument(
+    // A multi-elbow manual route numbers every leg in polyline order.
+    const multi = makeDocument(
       [box("A", 0, 200), box("B", 800, 600)],
       [{
         ...connect("e2", "A", "B"),
         waypoints: waypointsOf([[300, 248], [300, 400], [600, 400], [600, 648]]),
       }],
     );
-
-    expect(formatNumberedRoute(document.connections[0]!, document)).toBe(
+    expect(formatNumberedRoute(multi.connections[0]!, multi)).toBe(
       "A ─(s0 h y=248)→ (s1 v x=300) ─(s2 h y=400)→ (s3 v x=600) ─(s4 h y=648)→ B",
     );
-    expect(numberedRouteSegments(document.connections[0]!, document).map((s) => s.index))
+    expect(numberedRouteSegments(multi.connections[0]!, multi).map((s) => s.index))
       .toEqual([0, 1, 2, 3, 4]);
   });
 
@@ -104,19 +102,14 @@ describe("numberedSegmentsForPolyline · off-axis and degenerate legs", () => {
       [1, "v", 110],
       [2, "h", 200],
     ]);
-  });
 
-  test("a horizontal-dominant diagonal takes h and the mean y", () => {
-    const segments = numberedSegmentsForPolyline([
+    // Horizontal-dominant: |dx| 400 > |dy| 21 → h, y = mean of 0 and 21.
+    expect(numberedSegmentsForPolyline([
       { x: 0, y: 0 },
       { x: 400, y: 21 },
-    ]);
-
-    expect(segments).toEqual([
+    ])).toEqual([
       { index: 0, axis: "h", fixed: 10.5, from: { x: 0, y: 0 }, to: { x: 400, y: 21 } },
     ]);
-    // Printed coordinates are whole world units.
-    expect(numberedSegmentsForPolyline([{ x: 0, y: 0 }, { x: 400, y: 21 }])).toHaveLength(1);
   });
 
   test("a zero-length hop is dropped and its index is left as a hole", () => {

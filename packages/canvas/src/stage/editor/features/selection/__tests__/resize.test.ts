@@ -1,21 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import {
-  IDLE_INTERACTION_STATE,
-  MIN_DIRECT_RESIZE_SIZE,
-  RESIZE_HANDLES,
-  applyResizeHandle,
-  cancelInteraction,
-  stepInteraction,
-  type CanvasAction,
-  type CanvasPointerEvent,
-  type CanvasSelection,
-  type InteractionContext,
-  type InteractionState,
-  type InteractiveCanvasConnection,
-  type InteractiveCanvasDocument,
-  type InteractiveCanvasObject,
-  type ResizeHandle,
-} from "../../../../../index";
+import { IDLE_INTERACTION_STATE, MIN_DIRECT_RESIZE_SIZE, RESIZE_HANDLES, applyResizeHandle, cancelInteraction, stepInteraction, type CanvasAction, type CanvasPointerEvent, type InteractionContext, type InteractiveCanvasConnection, type InteractiveCanvasDocument, type InteractiveCanvasObject, type ResizeHandle } from "../../../../../index";
 import { canvasThemePreset } from "../../../../../theme/canvas-style";
 
 /** Selection slice resize-handle math and gesture coverage. */
@@ -39,12 +23,6 @@ function makeDocument(
     objects,
     connections,
   };
-}
-
-function makeConnection(
-  overrides: Partial<InteractiveCanvasConnection> & { id: string; from: InteractiveCanvasConnection["from"]; to: InteractiveCanvasConnection["to"] },
-): InteractiveCanvasConnection {
-  return { ...overrides };
 }
 
 function makeContext(
@@ -102,61 +80,29 @@ function reconcileSectionActions(actions: CanvasAction[]) {
 describe("interaction: applyResizeHandle", () => {
   const start = { x: 100, y: 100, width: 200, height: 150 };
 
-  it("se: grows width/height, anchors nw corner", () => {
-    const result = applyResizeHandle(start, "se", 50, 30);
-    expect(result).toEqual({ x: 100, y: 100, width: 250, height: 180 });
+  it.each([
+    ["se", 50, 30, { x: 100, y: 100, width: 250, height: 180 }],
+    ["nw", -50, -30, { x: 50, y: 70, width: 250, height: 180 }],
+    ["ne", 50, -30, { x: 100, y: 70, width: 250, height: 180 }],
+    ["sw", -50, 30, { x: 50, y: 100, width: 250, height: 180 }],
+    ["n", 0, 30, { x: 100, y: 130, width: 200, height: 120 }],
+    ["s", 0, 30, { x: 100, y: 100, width: 200, height: 180 }],
+    ["e", 40, 0, { x: 100, y: 100, width: 240, height: 150 }],
+    ["w", -40, 0, { x: 60, y: 100, width: 240, height: 150 }],
+  ] as const)("%s handle moves its own edges and anchors the opposite side (dx %d, dy %d)", (handle, dx, dy, expected) => {
+    expect(applyResizeHandle(start, handle, dx, dy)).toEqual(expected);
   });
 
-  it("nw: moves x/y, anchors se corner", () => {
-    const result = applyResizeHandle(start, "nw", -50, -30);
-    expect(result).toEqual({ x: 50, y: 70, width: 250, height: 180 });
-  });
-
-  it("ne: moves y and grows width, anchors sw corner", () => {
-    const result = applyResizeHandle(start, "ne", 50, -30);
-    expect(result).toEqual({ x: 100, y: 70, width: 250, height: 180 });
-  });
-
-  it("sw: moves x and grows height, anchors ne corner", () => {
-    const result = applyResizeHandle(start, "sw", -50, 30);
-    expect(result).toEqual({ x: 50, y: 100, width: 250, height: 180 });
-  });
-
-  it("n: moves y and shrinks height from the top, anchors bottom edge", () => {
-    const result = applyResizeHandle(start, "n", 0, 30);
-    expect(result).toEqual({ x: 100, y: 130, width: 200, height: 120 });
-  });
-
-  it("s: grows height from the bottom, anchors top edge", () => {
-    const result = applyResizeHandle(start, "s", 0, 30);
-    expect(result).toEqual({ x: 100, y: 100, width: 200, height: 180 });
-  });
-
-  it("e: grows width from the right, anchors left edge", () => {
-    const result = applyResizeHandle(start, "e", 40, 0);
-    expect(result).toEqual({ x: 100, y: 100, width: 240, height: 150 });
-  });
-
-  it("w: moves x and grows width from the left, anchors right edge", () => {
-    const result = applyResizeHandle(start, "w", -40, 0);
-    expect(result).toEqual({ x: 60, y: 100, width: 240, height: 150 });
-  });
-
-  it("clamps to MIN_DIRECT_RESIZE_SIZE when dragging past the opposite edge", () => {
+  it("clamps to MIN_DIRECT_RESIZE_SIZE when dragging past the opposite edge, keeping the anchored corner", () => {
     const result = applyResizeHandle(start, "se", -1000, -1000);
     expect(result.width).toBe(MIN_DIRECT_RESIZE_SIZE);
     expect(result.height).toBe(MIN_DIRECT_RESIZE_SIZE);
     // Anchored corner (nw, i.e. x/y) must not move.
     expect(result.x).toBe(100);
     expect(result.y).toBe(100);
-  });
 
-  it("clamps nw resize so the anchored se corner does not move", () => {
-    const result = applyResizeHandle(start, "nw", 1000, 1000);
-    expect(result.width).toBe(MIN_DIRECT_RESIZE_SIZE);
-    expect(result.height).toBe(MIN_DIRECT_RESIZE_SIZE);
-    expect(result.x + result.width).toBe(start.x + start.width);
-    expect(result.y + result.height).toBe(start.y + start.height);
+    // nw past the se corner: 48x48 with right/bottom held at (300, 250).
+    expect(applyResizeHandle(start, "nw", 1000, 1000)).toEqual({ x: 252, y: 202, width: 48, height: 48 });
   });
 
   it("covers all 8 documented resize handles", () => {

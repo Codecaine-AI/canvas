@@ -81,27 +81,16 @@ describe("snapping", () => {
   });
 
   describe("computeSpacingHints", () => {
-    it("detects equal horizontal gaps anchored on the moving object", () => {
-      const moving = bounds(60, 0, 40, 40);
-      const hints = computeSpacingHints(moving, [bounds(0, 0, 40, 40), bounds(120, 0, 40, 40)], "x");
+    // cross = midpoint of the flanking bounds' overlap on the other axis
+    // (0..40 -> 20), so gap chips render centered on the row being measured.
+    it.each([
+      ["horizontal", "x", bounds(60, 0, 40, 40), [bounds(0, 0, 40, 40), bounds(120, 0, 40, 40)]],
+      ["vertical", "y", bounds(0, 60, 40, 40), [bounds(0, 0, 40, 40), bounds(0, 120, 40, 40)]],
+    ] as const)("detects equal %s gaps anchored on the moving object", (_label, axis, moving, peers) => {
+      const hints = computeSpacingHints(moving, [...peers], axis);
 
       expect(hints).toHaveLength(1);
-      expect(hints[0]!.axis).toBe("x");
-      expectClose(hints[0]!.gap, 20);
-      // cross = midpoint of the flanking bounds' vertical overlap (0..40 -> 20),
-      // so gap chips render centered on the row being measured.
-      expect(hints[0]!.segments).toEqual([
-        { start: 40, end: 60, cross: 20 },
-        { start: 100, end: 120, cross: 20 },
-      ]);
-    });
-
-    it("detects equal vertical gaps anchored on the moving object", () => {
-      const moving = bounds(0, 60, 40, 40);
-      const hints = computeSpacingHints(moving, [bounds(0, 0, 40, 40), bounds(0, 120, 40, 40)], "y");
-
-      expect(hints).toHaveLength(1);
-      expect(hints[0]!.axis).toBe("y");
+      expect(hints[0]!.axis).toBe(axis);
       expectClose(hints[0]!.gap, 20);
       expect(hints[0]!.segments).toEqual([
         { start: 40, end: 60, cross: 20 },

@@ -181,6 +181,12 @@ describe("change_shape", () => {
     // The document's {type: "icon", icon} split never reached the tool surface.
     expect(swapped.type).toBe("icon");
     expect(swapped.icon).toBe("memory");
+
+    // icon → icon swaps the glyph and keeps the carrier type.
+    expect(runOp(session, "change_shape", { id: "step", patch: { type: "key" } }).isError)
+      .toBeUndefined();
+    expect(objectOf(session, "step").type).toBe("icon");
+    expect(objectOf(session, "step").icon).toBe("key");
   });
 
   test("icon → shape clears the glyph, so no icon ghost survives the swap", () => {
@@ -198,21 +204,6 @@ describe("change_shape", () => {
     const swapped = objectOf(session, "glyph");
     expect(swapped.type).toBe("rectangle");
     expect(swapped.icon).toBeUndefined();
-  });
-
-  test("icon → icon swaps the glyph and keeps the carrier type", () => {
-    const document = contentBoard();
-    document.objects.push({
-      ...box("glyph", 300, 300, 120, 120, "icon"),
-      text: "Store",
-      icon: "memory",
-    } as InteractiveCanvasObject);
-    const session = makeTestSession(document, ["frame"]);
-
-    expect(runOp(session, "change_shape", { id: "glyph", patch: { type: "key" } }).isError)
-      .toBeUndefined();
-    expect(objectOf(session, "glyph").type).toBe("icon");
-    expect(objectOf(session, "glyph").icon).toBe("key");
   });
 
   test("a facing type takes the validator's default when none is asked for", () => {

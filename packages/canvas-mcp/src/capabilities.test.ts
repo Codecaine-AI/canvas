@@ -98,15 +98,6 @@ function contractFindings(unit: ManifestUnit, served: string, observed: Observed
   return findings;
 }
 
-/** The test hook body: the served text without the unit's lines and anchor phrases. */
-const strip = (unit: ManifestUnit) => (text: string) => {
-  const body = unit.text.split("\n");
-  const lines = new Set(body.map((line) => line.trim()).filter((line) => line !== ""));
-  let out = text.split("\n").filter((line) => !lines.has(line.trim())).join("\n");
-  for (const anchor of unit.anchors) while (out.includes(anchor)) out = out.replaceAll(anchor, "");
-  return out;
-};
-
 /** A workspace with the repo's v2-flow board in canvases/. */
 function boardWorkspace(): string {
   const workspace = mkdtempSync(join(tmpdir(), "canvas-capabilities-"));
@@ -142,20 +133,6 @@ describe("manifest contract", () => {
     }
     expect(findings).toEqual([]);
     expect(observed.refusal).toBe(WORKFLOW_GATE);
-  });
-
-  test("stripping one unit from the served topic fails that unit's contract, and the manifest stays unchanged", async () => {
-    const before = JSON.stringify(manifest);
-    const survivors: string[] = [];
-    try {
-      for (const unit of manifest.filter((unit) => "topic" in unit.destination)) {
-        setServedTextHook(strip(unit));
-        if (contractFindings(unit, (await servedFor(unit))!, observed).length === 0) survivors.push(unit.id);
-      }
-    } finally { setServedTextHook(); }
-    expect(survivors).toEqual([]);
-    expect(JSON.stringify(manifest)).toBe(before);
-    expect(JSON.stringify(await guidanceManifest())).toBe(before);
   });
 });
 

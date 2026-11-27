@@ -4,7 +4,7 @@ import type { InteractiveCanvasDocument } from "../../state/schema";
 
 import { blockingDiagnostics, formatDiagnostics, runDiagnostics as runAll } from "../../board/lints/run";
 import type { Diagnostic, LayoutRule } from "../../board/lints/types";
-import { box, connect, makeDocument } from "./synthetic";
+import { box, makeDocument } from "./synthetic";
 import { FIGJAM_CONTEXT } from "./helpers";
 
 // Framework tests exercise the runner (ordering, ids, formatting), so they run
@@ -163,12 +163,11 @@ describe("notes", () => {
     const text = formatDiagnostics(diagnostics);
     expect(text).toContain("DIAGNOSTICS · 1 error · 1 warning · 1 note");
     expect(text).toContain("N1 edgy: edgy: within 1px of its box edge — can't promise");
-  });
 
-  test("a board with only notes is not clean, and nothing in it blocks", () => {
-    const diagnostics = runAll(makeDocument([box("edgy", 0, 0)]), [noteRule]);
-    expect(formatDiagnostics(diagnostics)).toStartWith("DIAGNOSTICS · 0 errors · 0 warnings · 1 note");
-    expect(blockingDiagnostics(diagnostics)).toEqual([]);
+    // A board with only notes is not clean, and nothing in it blocks.
+    const notesOnly = runAll(makeDocument([box("edgy", 0, 0)]), [noteRule]);
+    expect(formatDiagnostics(notesOnly)).toStartWith("DIAGNOSTICS · 0 errors · 0 warnings · 1 note");
+    expect(blockingDiagnostics(notesOnly)).toEqual([]);
   });
 });
 
@@ -185,18 +184,17 @@ describe("formatDiagnostics", () => {
     expect(text).toContain("W1 spacing: gap a↔b 44px off the ladder (axis x) (nearest rungs 32 / 64)");
     expect(text).not.toContain("[quickfix]");
     expect(text).not.toContain("suggested op:");
-  });
 
-  test("renders a finding's prose suggestion without structured operations", () => {
-    // Same-size boxes offset 80px: half of each is covered.
-    const document = makeDocument([box("alpha", 0, 0), box("beta", 80, 0)]);
-    const text = formatDiagnostics(runAll(document, undefined, FIGJAM_CONTEXT));
-
-    expect(text).toContain("E1 covered-content: alpha and beta overlap by 50% of the smaller box");
-    expect(text).toContain("(move beta clear of alpha)");
-    expect(text).not.toContain('"operations"');
-    expect(text).not.toContain("suggested op:");
-    expect(text).not.toContain("[quickfix]");
+    // Full registry: same-size boxes offset 80px cover half of each; the
+    // suggestion is prose only, with no structured operations.
+    const overlap = formatDiagnostics(
+      runAll(makeDocument([box("alpha", 0, 0), box("beta", 80, 0)]), undefined, FIGJAM_CONTEXT),
+    );
+    expect(overlap).toContain("E1 covered-content: alpha and beta overlap by 50% of the smaller box");
+    expect(overlap).toContain("(move beta clear of alpha)");
+    expect(overlap).not.toContain('"operations"');
+    expect(overlap).not.toContain("suggested op:");
+    expect(overlap).not.toContain("[quickfix]");
   });
 
   test("an empty list renders as clean", () => {

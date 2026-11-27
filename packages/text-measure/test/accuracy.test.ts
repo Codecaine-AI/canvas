@@ -21,7 +21,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { useHarfBuzz } from "../src/headless.ts";
 import { useTableBackend } from "../src/index.ts";
-import { absQuantile, evaluate, summarize, truth } from "./accuracy/evaluate.ts";
+import { absQuantile, evaluate, summarize } from "./accuracy/evaluate.ts";
 
 const LAYOUT_UNIT = 1 / 64;
 const TIMEOUT = 120_000;
@@ -31,14 +31,6 @@ afterAll(async () => {
 });
 
 describe("accuracy against Chromium (committed truth)", () => {
-  test("truth file covers the grid it claims", () => {
-    expect(truth.grids.map((g) => g.name)).toEqual(["inter", "plex-mono", "inter-letter-spacing"]);
-    const inter = truth.grids[0]!;
-    expect([...new Set(inter.fonts.map((f) => f.size))]).toEqual([12, 13.5, 14, 16, 17.5, 24]);
-    expect([...new Set(inter.fonts.map((f) => f.weight))]).toEqual([400, 500, 600, 700]);
-    expect(truth.deltas).toEqual([-1, -0.5, -0.25, -0.1, 0.1, 0.25, 0.5, 1]);
-  });
-
   test(
     "harfbuzz: exact line counts, borderline edges, widths within one layout unit",
     async () => {

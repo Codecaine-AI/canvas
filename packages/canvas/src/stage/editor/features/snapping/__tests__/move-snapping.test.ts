@@ -1,21 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import {
-  IDLE_INTERACTION_STATE,
-  MIN_DIRECT_RESIZE_SIZE,
-  RESIZE_HANDLES,
-  applyResizeHandle,
-  cancelInteraction,
-  stepInteraction,
-  type CanvasAction,
-  type CanvasPointerEvent,
-  type CanvasSelection,
-  type InteractionContext,
-  type InteractionState,
-  type InteractiveCanvasConnection,
-  type InteractiveCanvasDocument,
-  type InteractiveCanvasObject,
-  type ResizeHandle,
-} from "../../../../../index";
+import { IDLE_INTERACTION_STATE, stepInteraction, type CanvasAction, type CanvasPointerEvent, type InteractionContext, type InteractiveCanvasConnection, type InteractiveCanvasDocument, type InteractiveCanvasObject } from "../../../../../index";
 
 /** Snapping slice live move-guide coverage through the editor pipeline. */
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
@@ -38,12 +22,6 @@ function makeDocument(
     objects,
     connections,
   };
-}
-
-function makeConnection(
-  overrides: Partial<InteractiveCanvasConnection> & { id: string; from: InteractiveCanvasConnection["from"]; to: InteractiveCanvasConnection["to"] },
-): InteractiveCanvasConnection {
-  return { ...overrides };
 }
 
 function makeContext(
@@ -91,13 +69,6 @@ function updateGeometriesActions(actions: CanvasAction[]) {
   );
 }
 
-function reconcileSectionActions(actions: CanvasAction[]) {
-  return actions.filter(
-    (action): action is Extract<CanvasAction, { type: "canvas.reconcileSectionMembership" }> =>
-      action.type === "canvas.reconcileSectionMembership",
-  );
-}
-
 describe("interaction: live snap guides during move", () => {
   it("applies a snap correction when dragging near an aligned sibling and exposes a guide", () => {
     // "anchor" sits with its left edge at x=204. Dragging "a" (starts at x=0)
@@ -125,22 +96,7 @@ describe("interaction: live snap guides during move", () => {
     expect(result.overlay.guides!.some((guide) => guide.axis === "x" && guide.position === 204)).toBe(true);
   });
 
-  it("does not snap when no candidate is within threshold", () => {
-    const document = makeDocument([
-      makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
-      makeObject({ id: "far", geometry: { x: 5000, y: 5000, width: 100, height: 100 } }),
-    ]);
-    const ctx = makeContext(document);
-    const hit = { kind: "object" as const, objectId: "a" };
-
-    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 10, y: 10 }, hit), ctx);
-    result = stepInteraction(result.state, move({ x: 30, y: 30 }, hit), ctx);
-    const geometryActions = updateGeometriesActions(result.dispatch);
-    expect(geometryActions[0]!.geometries.a).toEqual({ x: 20, y: 20, width: 100, height: 100 });
-    expect(result.overlay.guides ?? []).toHaveLength(0);
-  });
-
-  it("scales the snap threshold by viewport zoom (6 screen px / zoom)", () => {
+  it("scales the snap threshold by viewport zoom (6 screen px / zoom), and does not snap with no candidate in range", () => {
     // At zoom=2, the 6 screen-px threshold is 3 world units, so an 8-unit-away
     // sibling should NOT snap even though it would at zoom=1. Vertical extents
     // are offset (anchor at y=900) so no axis aligns "for free".
@@ -156,6 +112,17 @@ describe("interaction: live snap guides during move", () => {
     const geometryActions = updateGeometriesActions(result.dispatch);
     expect(geometryActions[0]!.geometries.a!.x).toBe(100);
     expect(result.overlay.guides ?? []).toHaveLength(0);
+
+    // At zoom=1 with the only sibling far away, nothing is in range: the raw move lands, no guides.
+    const farDocument = makeDocument([
+      makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
+      makeObject({ id: "far", geometry: { x: 5000, y: 5000, width: 100, height: 100 } }),
+    ]);
+    const farCtx = makeContext(farDocument);
+    let farResult = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 10, y: 10 }, hit), farCtx);
+    farResult = stepInteraction(farResult.state, move({ x: 30, y: 30 }, hit), farCtx);
+    expect(updateGeometriesActions(farResult.dispatch)[0]!.geometries.a).toEqual({ x: 20, y: 20, width: 100, height: 100 });
+    expect(farResult.overlay.guides ?? []).toHaveLength(0);
   });
 
   it("clears guides once the gesture ends (release)", () => {

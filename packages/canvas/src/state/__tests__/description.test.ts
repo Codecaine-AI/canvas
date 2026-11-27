@@ -27,28 +27,24 @@ describe("interactive canvas description", () => {
         "# System map\n\nRequests flow through the gateway.",
       );
     }
-  });
 
-  it("drops non-string descriptions without a warning", () => {
-    const result = validateInteractiveCanvasDocument({
+    // A non-string description is dropped without a warning.
+    const nonString = validateInteractiveCanvasDocument({
       ...makeDocument(),
       description: { markdown: "# System map" },
     });
-
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.document.description).toBeUndefined();
-      expect(result.warnings).toBeUndefined();
+    expect(nonString.ok).toBe(true);
+    if (nonString.ok) {
+      expect(nonString.document.description).toBeUndefined();
+      expect(nonString.warnings).toBeUndefined();
     }
-  });
 
-  it("leaves an absent description absent during validation", () => {
-    const { description: _description, ...document } = makeDocument();
-    const result = validateInteractiveCanvasDocument(document);
-
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.document.description).toBeUndefined();
+    // An absent description stays absent.
+    const { description: _description, ...withoutKey } = makeDocument();
+    const absent = validateInteractiveCanvasDocument(withoutKey);
+    expect(absent.ok).toBe(true);
+    if (absent.ok) {
+      expect(absent.document.description).toBeUndefined();
     }
   });
 
@@ -68,17 +64,15 @@ describe("interactive canvas description", () => {
       changedConnectionIds: [],
       changedAnnotationIds: [],
     });
-  });
 
-  it("clears the description when the replacement trims to empty", () => {
-    const state = createInteractiveCanvasState(makeDocument("# System map"));
-    const next = reduceInteractiveCanvasState(state, {
+    // A replacement that trims to empty clears the description, still as one entry.
+    const stored = createInteractiveCanvasState(makeDocument("# System map"));
+    const cleared = reduceInteractiveCanvasState(stored, {
       type: "canvas.setDocumentDescription",
       description: " \n ",
     });
-
-    expect(next.document.description).toBeUndefined();
-    expect(next.history.past).toEqual([state.document]);
+    expect(cleared.document.description).toBeUndefined();
+    expect(cleared.history.past).toEqual([stored.document]);
   });
 
   it("returns the same state when the stored description already matches", () => {

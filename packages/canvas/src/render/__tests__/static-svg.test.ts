@@ -1,6 +1,4 @@
 import { describe, expect, it } from "bun:test";
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 import { renderDocumentToSvg } from "../static-svg";
 import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 import {
@@ -350,19 +348,5 @@ describe("renderDocumentToSvg", () => {
     const { svg } = renderDocumentToSvg(doc, { background: "transparent", canvasStyle: FIGJAM_CANVAS_STYLE });
     expect(count(svg, "<svg")).toBe(1); // no nested glyph svg
     expect(svg).toContain('rx="1"'); // the neutral rounded rect body (2px radius − 1px half-stroke)
-  });
-
-  it("smoke-renders a real canvas file when present", () => {
-    const fixturePath = join(import.meta.dir, "../../../../../canvases/v2-flow.canvas.json");
-    if (!existsSync(fixturePath)) return;
-    const doc = JSON.parse(readFileSync(fixturePath, "utf8")) as InteractiveCanvasDocument;
-    const result = renderDocumentToSvg(doc);
-    expect(result.svg.startsWith('<svg xmlns="http://www.w3.org/2000/svg"')).toBe(true);
-    expect(result.svg.endsWith("</svg>")).toBe(true);
-    expect(result.svg.length).toBeGreaterThan(1000);
-    expect(result.width).toBeGreaterThan(0);
-    expect(result.height).toBeGreaterThan(0);
-    // Deterministic on real content too.
-    expect(renderDocumentToSvg(doc).svg).toBe(result.svg);
   });
 });

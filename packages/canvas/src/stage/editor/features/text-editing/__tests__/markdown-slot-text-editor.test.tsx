@@ -250,6 +250,20 @@ describe("MarkdownSlotTextEditor", () => {
       ),
     ).toEqual(["true", "true"]);
     expect(code?.textContent).toContain("`code`");
+
+    // An indented heading still renders as a heading, one level deep, with its
+    // prefix hidden.
+    cleanup();
+    const indented = render(<MarkdownHarness initialValue="  # Title" onCommit={() => undefined} />);
+    const indentedLine = indented.container.querySelector<HTMLElement>("[data-sticky-markdown-line]");
+    const indentedPrefix = indentedLine?.querySelector<HTMLElement>(
+      '[data-sticky-markdown-marker="heading-prefix"]',
+    );
+    expect(indentedLine?.getAttribute("data-heading")).toBe("1");
+    expect(indentedLine?.getAttribute("data-line-depth")).toBe("1");
+    expect(indentedLine?.style.fontSize).toBe("1.15em");
+    expect(indentedPrefix).not.toBeNull();
+    expect(indentedPrefix!.getAttribute("data-sticky-markdown-marker-hidden")).toBe("true");
   });
 
   it("replaces the selected source through the native beforeinput insertText path", () => {
@@ -378,7 +392,10 @@ describe("MarkdownSlotTextEditor", () => {
     );
   });
 
-  it("keeps Enter as a line break and Escape as the raw markdown commit", () => {
+  it.each([
+    ["Enter", false],
+    ["Shift+Enter", true],
+  ])("keeps %s as a bullet-continuing line break and Escape as the raw markdown commit", (_label, shiftKey) => {
     const commits: string[] = [];
     const cancels: number[] = [];
     render(
@@ -395,42 +412,17 @@ describe("MarkdownSlotTextEditor", () => {
     expect(editor.getAttribute("data-sticky-markdown-source")).toBe("- item");
     setSourceCaret(editor, "- item".length);
 
-    const enter = dispatchKeyDown(editor, { key: "Enter" });
+    const enter = dispatchKeyDown(editor, { key: "Enter", shiftKey });
     expect(enter.defaultAllowed).toBe(false);
     expect(enter.event.defaultPrevented).toBe(true);
-    expect(editor.getAttribute("data-sticky-markdown-source")).toBe("- item\n- ");
-    expect(commits).toEqual([]);
-    expect(cancels).toEqual([]);
-
-    fireEvent.keyDown(editor, { key: "Escape" });
-    expect(commits).toEqual(["- item\n- "]);
-    expect(cancels).toEqual([]);
-  });
-
-  it("Shift+Enter continues bullets and Escape never cancels", () => {
-    const commits: string[] = [];
-    const cancels: number[] = [];
-    render(
-      <MarkdownHarness
-        initialValue="- item"
-        onCommit={(value) => commits.push(value)}
-        onCancel={() => cancels.push(1)}
-      />,
-    );
-
-    const editor = screen.getByRole("textbox", { name: "Object text" });
-    setSourceCaret(editor, "- item".length);
-    const shiftEnter = dispatchKeyDown(editor, { key: "Enter", shiftKey: true });
-    expect(shiftEnter.defaultAllowed).toBe(false);
-    expect(shiftEnter.event.defaultPrevented).toBe(true);
     expect(editor.getAttribute("data-sticky-markdown-source")).toBe("- item\n- ");
     expect(commits).toEqual([]);
     expect(cancels).toEqual([]);
     expect(screen.getByRole("textbox", { name: "Object text" })).toBeTruthy();
 
     fireEvent.keyDown(editor, { key: "Escape" });
-    expect(cancels).toEqual([]);
     expect(commits).toEqual(["- item\n- "]);
+    expect(cancels).toEqual([]);
   });
 
   it("handles Tab and Shift+Tab without blurring the markdown editor", () => {
@@ -514,23 +506,6 @@ describe("MarkdownSlotTextEditor", () => {
       "3",
       "3",
     ]);
-  });
-
-  it("renders an indented heading as a heading with a hidden prefix", () => {
-    const { container } = render(
-      <MarkdownHarness initialValue="  # Title" onCommit={() => undefined} />,
-    );
-
-    const line = container.querySelector<HTMLElement>("[data-sticky-markdown-line]");
-    const prefix = line?.querySelector<HTMLElement>(
-      '[data-sticky-markdown-marker="heading-prefix"]',
-    );
-
-    expect(line?.getAttribute("data-heading")).toBe("1");
-    expect(line?.getAttribute("data-line-depth")).toBe("1");
-    expect(line?.style.fontSize).toBe("1.15em");
-    expect(prefix).not.toBeNull();
-    expect(prefix!.getAttribute("data-sticky-markdown-marker-hidden")).toBe("true");
   });
 
   it("blur commits the current sticky markdown source", () => {

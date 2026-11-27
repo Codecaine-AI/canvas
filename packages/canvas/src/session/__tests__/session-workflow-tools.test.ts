@@ -56,36 +56,29 @@ function threadOf(session: LayoutSession, id: string): InteractiveCanvasAnnotati
 }
 
 describe("annotate thread", () => {
-  test("appends an agent reply and leaves the thread open", () => {
+  test.each([
+    { thread: "R1", body: "Splitting it now — the second step lands next." },
+    { thread: "doc-1", body: "On it." },
+  ])("appends an agent reply via $thread, shows it in REQUESTS, and leaves the thread open", ({ thread: threadRef, body }) => {
     const session = sessionWithThread();
 
-    const result = toolAnnotate(
-      session,
-      { thread: "R1", body: "Splitting it now — the second step lands next." },
-      emitSessionEvent,
-    );
+    const result = toolAnnotate(session, { thread: threadRef, body }, emitSessionEvent);
 
     expect(result.isError).toBeUndefined();
     expect(result.text).toContain("APPLIED · annotate doc-1");
     const thread = threadOf(session, "doc-1");
     expect(thread.replies).toHaveLength(1);
     expect(thread.replies[0]!.author).toBe("agent");
-    expect(thread.replies[0]!.body).toBe("Splitting it now — the second step lands next.");
+    expect(thread.replies[0]!.body).toBe(body);
     // The whole point of the split from resolve_request: status does not move.
     expect(thread.status).toBe("open");
     expect(session.requests[0]!.status).toBe("open");
     expect(session.requests[0]!.note).toBeUndefined();
-  });
-
-  test("the reply shows in the REQUESTS block the result returns", () => {
-    const session = sessionWithThread();
-
-    const result = toolAnnotate(session, { thread: "doc-1", body: "On it." }, emitSessionEvent);
-
+    // The reply shows in the REQUESTS block the result returns, and the queue
+    // entry carries it too, so the live <requests> block does.
     expect(result.text).toContain("REQUESTS · 0/1 disposed");
-    expect(result.text).toContain('↳ agent — "On it."');
-    // The queue entry carries the reply too, so the live <requests> block does.
-    expect(session.requests[0]!.replies.map((reply) => reply.body)).toEqual(["On it."]);
+    expect(result.text).toContain(`↳ agent — "${body}"`);
+    expect(session.requests[0]!.replies.map((reply) => reply.body)).toEqual([body]);
   });
 
   test("replies stack, and resolve_request still closes the thread afterwards", () => {

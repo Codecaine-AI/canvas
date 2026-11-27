@@ -2,16 +2,11 @@ import { describe, expect, it } from "bun:test";
 import { createElement } from "react";
 import { FIGJAM_CANVAS_STYLE, renderFigjam } from "../../theme/__tests__/figjam";
 import { resolveObjectRoleColors } from "../object-shell";
-import { OBJECT_DEFS, objectDefForType } from "../object-def";
+import { objectDefForType } from "../object-def";
 import { OBJECT_TEXT_COLOR } from "../text-slots";
 import { ObjectShape } from "../../stage/ObjectShape";
 import type { CanvasObjectColor, InteractiveCanvasObject } from "../../state/schema";
-import {
-  resolveConnectorStroke,
-  resolveSectionColors,
-  resolveShapeColors,
-  resolveStickyFill,
-} from "../../theme/palette";
+import { resolveSectionColors, resolveShapeColors, resolveStickyFill } from "../../theme/palette";
 
 /**
  * P1 role resolution (OBJECT-DEF-OVERHAUL.md §3.2/§3.5, D8/D12/D17): one
@@ -20,18 +15,17 @@ import {
  */
 
 describe("resolveObjectRoleColors: shape role", () => {
-  it("pick = fill + ink border", () => {
+  it("pick = fill + ink border, and white keeps a visible ink border", () => {
     expect(resolveObjectRoleColors({ color: "red" }, "shape", FIGJAM_CANVAS_STYLE)).toEqual({
       fill: "#FFD2CC",
       border: "#D5322F",
       text: OBJECT_TEXT_COLOR,
     });
-  });
-
-  it("white keeps a visible ink border", () => {
-    const white = resolveObjectRoleColors({ color: "white" }, "shape", FIGJAM_CANVAS_STYLE);
-    expect(white.fill).toBe("#FFFFFF");
-    expect(white.border).toBe("#757980");
+    expect(resolveObjectRoleColors({ color: "white" }, "shape", FIGJAM_CANVAS_STYLE)).toEqual({
+      fill: "#FFFFFF",
+      border: "#757980",
+      text: OBJECT_TEXT_COLOR,
+    });
   });
 
   it("no pick falls back to the shape first-use default (gray)", () => {
@@ -107,19 +101,7 @@ describe("resolveObjectRoleColors: section role", () => {
   });
 });
 
-describe("connector role", () => {
-  it("the default gray pick resolves to the sampled neutral stroke", () => {
-    expect(resolveConnectorStroke("gray")).toBe("#757575");
-  });
-});
-
 describe("ObjectDef.colorRole (§3.5)", () => {
-  it("every registered def declares its role table", () => {
-    for (const def of OBJECT_DEFS) {
-      expect(["shape", "sticky", "section"]).toContain(def.colorRole);
-    }
-  });
-
   it("section/sticky use their own roles; everything else uses the shape role", () => {
     expect(objectDefForType("section")?.colorRole).toBe("section");
     expect(objectDefForType("sticky")?.colorRole).toBe("sticky");

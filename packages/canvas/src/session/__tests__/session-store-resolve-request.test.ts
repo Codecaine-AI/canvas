@@ -112,30 +112,39 @@ describe("resolve_request", () => {
     expect(result.text).not.toContain("DELTA");
     expect(result.text).not.toContain("BOARD DIFF");
     expect(session.requests[0]).toMatchObject({ status: "done", note: "Split into prep and run" });
+
+    // Declining with a note records the note on that entry.
+    const declining = sessionWithQueue();
+    const declined = toolResolveRequest(
+      declining,
+      "R2",
+      "declined",
+      "Out of scope for this pass",
+      emitSessionEvent,
+    );
+    expect(declined.isError).toBeUndefined();
+    expect(declined.text).toContain('R2 declined "Out of scope for this pass"');
+    expect(declining.requests[1]!.status).toBe("declined");
   });
 
-  test("writes the disposition into the thread on the draft and announces it", () => {
+  test.each([
+    { disposition: "done" as const, note: "Split into prep and run", status: "applied" },
+    // A declined thread closes as resolved.
+    { disposition: "declined" as const, note: "Out of scope", status: "resolved" },
+  ])("writes a $disposition disposition into the thread on the draft and announces it", ({ disposition, note, status }) => {
     const session = sessionWithQueue();
 
-    toolResolveRequest(session, "R1", "done", "Split into prep and run", emitSessionEvent);
+    toolResolveRequest(session, "R1", disposition, note, emitSessionEvent);
 
     const thread = session.draft.annotations?.find((annotation) => annotation.id === "doc-1");
-    expect(thread?.status).toBe("applied");
+    expect(thread?.status).toBe(status);
     expect(thread?.replies).toMatchObject([
-      { author: "agent", body: "Split into prep and run" },
+      { author: "agent", body: note },
     ]);
     expect(session.requests[0]!.replies).toMatchObject([
-      { author: "agent", body: "Split into prep and run" },
+      { author: "agent", body: note },
     ]);
     expect(session.events.map((event) => event.type)).toEqual(["annotations"]);
-  });
-
-  test("closes a declined thread as resolved", () => {
-    const session = sessionWithQueue();
-
-    toolResolveRequest(session, "R1", "declined", "Out of scope", emitSessionEvent);
-
-    expect(session.draft.annotations?.[0]?.status).toBe("resolved");
   });
 
   test("leaves the draft alone for an invoke-only request", () => {
@@ -146,22 +155,6 @@ describe("resolve_request", () => {
     expect(session.draft.annotations?.map((annotation) => annotation.id)).toEqual(["doc-1"]);
     expect(session.events).toEqual([]);
     expect(session.requests[1]).toMatchObject({ status: "done", note: "recolored it" });
-  });
-
-  test("declines with a note", () => {
-    const session = sessionWithQueue();
-
-    const result = toolResolveRequest(
-      session,
-      "R2",
-      "declined",
-      "Out of scope for this pass",
-      emitSessionEvent,
-    );
-
-    expect(result.isError).toBeUndefined();
-    expect(result.text).toContain('R2 declined "Out of scope for this pass"');
-    expect(session.requests[1]!.status).toBe("declined");
   });
 
   test("rejects an unknown id, naming the current queue state", () => {
@@ -277,6 +270,20 @@ describe("annotate objectId", () => {
       { alias: "R1", annotationId: "annotation-1", createdBy: "agent", status: "open" },
     ]);
     expect(session.events.map((event) => event.type)).toEqual(["annotations"]);
+
+    // A null thread counts as absent, so objectId alone opens the thread.
+    const nulled = makeTestSession(makeDocument([box("task", 0, 0)]), ["task"]);
+    syncSessionRequests(nulled);
+    const opened = toolAnnotate(
+      nulled,
+      { objectId: "task", thread: null, body: "Is this the retry path?" },
+      emitSessionEvent,
+    );
+    expect(opened.isError).toBeUndefined();
+    expect(opened.text).toContain("APPLIED · annotate annotation-1");
+    expect(nulled.draft.annotations).toMatchObject([
+      { id: "annotation-1", target: { kind: "object", objectId: "task" }, createdBy: "agent" },
+    ]);
   });
 
   test("rejects an unknown object and an empty body without touching the draft", () => {
@@ -291,23 +298,6 @@ describe("annotate objectId", () => {
     expect(blank.text).toContain("body must be a non-empty question");
     expect(session.draft.annotations ?? []).toEqual([]);
     expect(session.events).toEqual([]);
-  });
-
-  test("a null thread counts as absent, so objectId alone opens the thread", () => {
-    const session = makeTestSession(makeDocument([box("task", 0, 0)]), ["task"]);
-    syncSessionRequests(session);
-
-    const result = toolAnnotate(
-      session,
-      { objectId: "task", thread: null, body: "Is this the retry path?" },
-      emitSessionEvent,
-    );
-
-    expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · annotate annotation-1");
-    expect(session.draft.annotations).toMatchObject([
-      { id: "annotation-1", target: { kind: "object", objectId: "task" }, createdBy: "agent" },
-    ]);
   });
 });
 

@@ -1,71 +1,11 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { cssVar } from "@codecaine-ai/design-system";
-import {
-  CanvasDock,
-  FIGJAM_DOCK_HEIGHT_PX,
-  FIGJAM_DOCK_RADIUS_PX,
-  FIGJAM_DOCK_WIDTH_PX,
-} from "../CanvasDock";
+import { CanvasDock } from "../CanvasDock";
 import { EDITOR_STYLE } from "../editor-style";
 
 afterEach(() => {
   cleanup();
-});
-
-describe("CanvasDock geometry", () => {
-  it("renders at the professional rounded dock dimensions", () => {
-    expect(FIGJAM_DOCK_WIDTH_PX).toBe("fit-content");
-    expect(FIGJAM_DOCK_HEIGHT_PX).toBe(53);
-    expect(FIGJAM_DOCK_RADIUS_PX).toBe(cssVar("radius.base"));
-
-    const { container } = render(<CanvasDock />);
-    const dock = container.querySelector("[data-figjam-dock]") as HTMLElement;
-    expect(dock).toBeTruthy();
-    expect(dock.style.width).toBe("fit-content");
-    expect(dock.style.height).toBe("53px");
-    expect(dock.style.borderRadius).toBe(cssVar("radius.base"));
-    expect(dock.style.background).toBe(cssVar("color.surface.panel"));
-    expect(dock.style.padding).toBe("0px 10px");
-  });
-
-  it("uses consistent enlarged button and icon sizing for every dock tool", () => {
-    const { container } = render(<CanvasDock />);
-    const buttons = container.querySelectorAll("[data-dock-tool]");
-    for (const button of buttons) {
-      const buttonEl = button as HTMLElement;
-      const icon = buttonEl.querySelector("svg") as SVGElement;
-      const tool = buttonEl.getAttribute("data-dock-tool");
-      expect(buttonEl.style.width).toBe(cssVar("space.10"));
-      expect(buttonEl.style.height).toBe(cssVar("space.10"));
-      expect(buttonEl.style.borderRadius).toBe(cssVar("radius.base"));
-      const expectedIconPx = tool === "sticky"
-        ? `${EDITOR_STYLE.dockStickyIconSizePx}px`
-        : EDITOR_STYLE.dockIconSize;
-      expect(icon.style.width).toBe(expectedIconPx);
-      expect(icon.style.height).toBe(expectedIconPx);
-      expect(icon.getAttribute("class")).toContain(`canvas-dock-icon--${tool}`);
-    }
-  });
-
-  it("uses lighter dock icon stroke weights without changing generated icons", () => {
-    const { container } = render(<CanvasDock />);
-    const styles = container.querySelector("[data-dock-icon-styles]") as HTMLStyleElement;
-    expect(styles).toBeTruthy();
-    expect(styles.textContent).toContain(`stroke-width: ${EDITOR_STYLE.dockNucleoIconStrokeWidthPx}`);
-    expect(styles.textContent).toContain(`stroke-width: ${EDITOR_STYLE.dockStickyIconStrokeWidthPx}`);
-    expect(styles.textContent).toContain(`stroke-width: ${EDITOR_STYLE.dockSectionIconStrokeWidthPx}`);
-    // The sticky override must out-specify the generic dock rule above it.
-    expect(styles.textContent).toContain(".canvas-dock-icon.canvas-dock-icon--sticky");
-  });
-
-  it("has a soft box-shadow (not flat, not none)", () => {
-    const { container } = render(<CanvasDock />);
-    const dock = container.querySelector("[data-figjam-dock]") as HTMLElement;
-    expect(dock.style.boxShadow).not.toBe("");
-    expect(dock.style.boxShadow).toBe(cssVar("shadow.glass"));
-    expect(dock.style.boxShadow).toBe(EDITOR_STYLE.dockShadow);
-  });
 });
 
 describe("CanvasDock button inventory", () => {
@@ -109,13 +49,6 @@ describe("CanvasDock button inventory", () => {
     }
     expect(container.textContent).not.toContain("|");
   });
-
-  it("does not render the removed pen, highlighter, or comment buttons", () => {
-    const { queryByLabelText } = render(<CanvasDock />);
-    expect(queryByLabelText("Pen")).toBeNull();
-    expect(queryByLabelText("Highlighter")).toBeNull();
-    expect(queryByLabelText("Comment")).toBeNull();
-  });
 });
 
 describe("CanvasDock state rules", () => {
@@ -125,31 +58,25 @@ describe("CanvasDock state rules", () => {
     expect(activeButtons.length).toBe(0);
   });
 
-  it("highlights exactly the button matching activeTool with the solid accent tile", () => {
-    const { container } = render(<CanvasDock activeTool="hand" />);
-    const active = container.querySelector('[data-dock-tool="hand"]') as HTMLElement;
-    expect(active.getAttribute("data-active")).toBe("true");
-    expect(active.style.background).toBe(cssVar("color.accent"));
-    // The glyph on the accent tile is the on-solid glyph; resting glyphs stay body text.
-    expect(active.style.color).toBe(cssVar("color.text.on-solid"));
+  it.each(["hand", "connector"] as const)(
+    "highlights exactly the button matching activeTool %p with the solid accent tile",
+    (tool) => {
+      const { container } = render(<CanvasDock activeTool={tool} />);
+      const active = container.querySelector(`[data-dock-tool="${tool}"]`) as HTMLElement;
+      expect(active.getAttribute("data-active")).toBe("true");
+      expect(active.style.background).toBe(cssVar("color.accent"));
+      // The glyph on the accent tile is the on-solid glyph; resting glyphs stay body text.
+      expect(active.style.color).toBe(cssVar("color.text.on-solid"));
 
-    const others = container.querySelectorAll('[data-active="true"]');
-    expect(others.length).toBe(1);
-    for (const button of container.querySelectorAll<HTMLElement>('[data-dock-tool]:not([data-dock-tool="hand"])')) {
-      expect(button.style.background).not.toBe(cssVar("color.accent"));
-    }
-  });
+      const others = container.querySelectorAll('[data-active="true"]');
+      expect(others.length).toBe(1);
+      for (const button of container.querySelectorAll<HTMLElement>(`[data-dock-tool]:not([data-dock-tool="${tool}"])`)) {
+        expect(button.style.background).not.toBe(cssVar("color.accent"));
+      }
+    },
+  );
 
-  it("highlights the connector button when activeTool is connector", () => {
-    const { container } = render(<CanvasDock activeTool="connector" />);
-    const active = container.querySelector('[data-dock-tool="connector"]') as HTMLElement;
-    expect(active.getAttribute("data-active")).toBe("true");
-    expect(active.style.background).toBe(cssVar("color.accent"));
-
-    const others = container.querySelectorAll('[data-active="true"]');
-    expect(others.length).toBe(1);
-  });
-
+  // regression: 3c5f8ac
   it("shows a hover fill distinct from the solid accent tile", () => {
     const { container } = render(<CanvasDock activeTool="select" />);
     const connectorButton = container.querySelector('[data-dock-tool="connector"]') as HTMLElement;

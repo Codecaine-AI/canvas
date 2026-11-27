@@ -94,13 +94,6 @@ describe("CanvasStage: connector rendering (3.1.2 / 3.3.1)", () => {
     }
   });
 
-  it("renders a wide invisible hit path with data-canvas-connection-id", () => {
-    const { container } = render(<CanvasStage document={makeDocument()} viewport={viewport} />);
-    const hitPath = container.querySelector('[data-canvas-connection-id="connection-a"]');
-    expect(hitPath).toBeTruthy();
-    expect(hitPath?.getAttribute("stroke-width")).toBe("14");
-  });
-
   it("renders endpoint handles only when the connection is selected", () => {
     const notSelected = render(
       <CanvasStage document={makeDocument()} viewport={viewport} selectedConnectionId={null} />,

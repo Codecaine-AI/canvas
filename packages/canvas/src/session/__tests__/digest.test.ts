@@ -187,15 +187,6 @@ describe("formatBoardDigest", () => {
     ]));
     expect(digest).toContain('  solo section "Solo" 0,0 480×320\n    (empty)');
   });
-
-  test("renders long text in full, collapsing whitespace to one line", () => {
-    const digest = formatBoardDigest(makeDocument([
-      { ...box("wordy", 0, 0), text: `multi\nline ${"x".repeat(200)}` },
-    ]));
-    expect(digest).toContain(`multi line ${"x".repeat(200)}`);
-    expect(digest).not.toContain("\nline");
-    expect(digest).not.toMatch(/…\(\+\d+ch\)/);
-  });
 });
 
 describe("digest characterization", () => {

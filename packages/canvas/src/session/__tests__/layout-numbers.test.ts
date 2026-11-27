@@ -46,8 +46,12 @@ describe("layout numbers", () => {
         { ...box("a", 40, 80), parentId: "frame" },
         { ...box("b", 800, 80), parentId: "frame" },
         { ...box("c", 400, 400), parentId: "frame" },
+        // dock holds only io's start: io leaves it through its right edge.
+        box("dock", 0, 1000, 600, 300, "section"),
+        { ...box("in", 40, 1080), parentId: "dock" },
+        box("out", 1000, 1080),
       ],
-      [connect("ab", "a", "b"), connect("ac", "a", "c"), connect("cb", "c", "b")],
+      [connect("ab", "a", "b"), connect("ac", "a", "c"), connect("cb", "c", "b"), connect("io", "in", "out")],
     );
 
     const numbers = layoutNumbers(document);

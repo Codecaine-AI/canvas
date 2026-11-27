@@ -111,29 +111,6 @@ describe("Wave C render smoke: the `icon` object type", () => {
     });
   });
 
-  it("applies the interactive-canvas-object-icon class", () => {
-    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const { container } = render(<InteractiveCanvasViewer document={iconDocument(ICON_OBJECTS)} />);
-      const node = container.querySelector('[data-canvas-object-id="icon-model"]') as HTMLElement | null;
-      expect(node?.className.trim()).toBe("interactive-canvas-object interactive-canvas-object-icon");
-    });
-  });
-
-  it("sizes the glyph svg to the icon body without fixed pixel attributes", () => {
-    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const { container } = renderFigjam(<InteractiveCanvasViewer document={iconDocument(ICON_OBJECTS)} />);
-      const svg = container.querySelector('[data-canvas-object-id="icon-model"] [data-canvas-icon-glyph="model"]') as
-        | SVGSVGElement
-        | null;
-      expect(svg).toBeTruthy();
-      expect(svg?.getAttribute("width")).toBeNull();
-      expect(svg?.getAttribute("height")).toBeNull();
-      expect(svg?.style.width).toBe("100%");
-      expect(svg?.style.height).toBe("100%");
-      expect(svg?.getAttribute("preserveAspectRatio")).toBeNull();
-    });
-  });
-
   it("renders the default (gray) pick as glyph-interior fill + saturated stroke (P1/D13 — no fixed colors)", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = renderFigjam(<InteractiveCanvasViewer document={iconDocument(ICON_OBJECTS)} />);

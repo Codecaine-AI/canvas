@@ -12,20 +12,13 @@ function makeDocument(overrides: Partial<InteractiveCanvasDocument> = {}): Inter
 }
 
 describe("sanitizeExportFilename", () => {
-  it("lowercases and turns whitespace runs into single dashes", () => {
-    expect(sanitizeExportFilename("My  Great\tBoard")).toBe("my-great-board");
-  });
-
-  it("strips characters illegal in filenames", () => {
-    expect(sanitizeExportFilename('a/b\\c:d*e?f"g<h>i|j')).toBe("abcdefghij");
-  });
-
-  it("keeps existing dashes and collapses runs", () => {
-    expect(sanitizeExportFilename("agent-flows--2")).toBe("agent-flows-2");
-  });
-
-  it("trims leading/trailing dashes and dots", () => {
-    expect(sanitizeExportFilename("  --board.. ")).toBe("board");
+  it.each([
+    ["My  Great\tBoard", "my-great-board"],
+    ['a/b\\c:d*e?f"g<h>i|j', "abcdefghij"],
+    ["agent-flows--2", "agent-flows-2"],
+    ["  --board.. ", "board"],
+  ])("lowercases, strips illegal characters, collapses dash runs and trims: %p", (raw, expected) => {
+    expect(sanitizeExportFilename(raw)).toBe(expected);
   });
 
   it("falls back to canvas when nothing printable survives", () => {

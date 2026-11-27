@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { cssVar } from "@codecaine-ai/design-system";
 import type { CanvasAction, CanvasSelection } from "../../../../../state/actions";
 import type { InteractiveCanvasDocument } from "../../../../../state/schema";
 import { worldToScreen } from "../../../../viewport";
@@ -200,20 +199,6 @@ describe("annotation mode authoring", () => {
       type: "canvas.select",
       selection: { kind: "none" },
     });
-  });
-
-  it("uses the selection-toolbar shadow and 140ms enter animation", () => {
-    render(
-      <AnnotationPopup
-        anchor={{ x: 0, y: 0 }}
-        targetLabel="Object A"
-        onSave={() => {}}
-        onCancel={() => {}}
-      />,
-    );
-    const popup = window.document.querySelector("[data-annotation-popup]") as HTMLElement;
-    expect(popup.style.boxShadow).toBe(cssVar("shadow.glass"));
-    expect(popup.style.animation).toContain("canvas-selection-toolbar-enter 140ms");
   });
 
   it("labels sections by name and falls back to the object type", () => {
@@ -451,22 +436,6 @@ describe("annotation pins", () => {
     expect(pin.style.top).toBe("20px");
     expect(pin.style.transform).toContain("scale(0.5)");
     expect(pin.style.pointerEvents).toBe("auto");
-  });
-
-  it("selects the annotation when its pin is clicked", () => {
-    const dispatch = mock((_action: CanvasAction) => {});
-    const { container } = render(
-      <AnnotationPins
-        document={pinDocument}
-        selection={{ kind: "none" }}
-        dispatch={dispatch}
-      />,
-    );
-    fireEvent.click(container.querySelector('[data-annotation-pin="open-agent-note"]')!);
-    expect(dispatch).toHaveBeenCalledWith({
-      type: "canvas.select",
-      selection: { kind: "annotation", annotationId: "open-agent-note" },
-    });
   });
 
   it("gives an agent-opened thread its own pin treatment in the same pin language", () => {

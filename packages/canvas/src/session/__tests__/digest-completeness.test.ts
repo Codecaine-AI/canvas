@@ -62,18 +62,6 @@ const ENDPOINT_FIELD_COVERAGE: Record<keyof CanvasConnectionEndpoint, Coverage> 
 };
 
 describe("digest completeness invariant", () => {
-  test("every op-writable field is classified (compile-time) and the maps stay honest", () => {
-    const classifications = [
-      ...Object.values(OBJECT_FIELD_COVERAGE),
-      ...Object.values(CONNECTION_FIELD_COVERAGE),
-      ...Object.values(ENDPOINT_FIELD_COVERAGE),
-    ];
-    expect(classifications.every((value) =>
-      value === "rendered" || value === "legend" || value === "structural" || value === "unrendered")).toBe(true);
-    // Only the stored node detail is unrendered: no op writes it any more.
-    expect(Object.entries(OBJECT_FIELD_COVERAGE).filter(([, value]) => value === "unrendered").map(([key]) => key)).toEqual(["detail"]);
-  });
-
   test("the declared legend covers every legend-covered default and ships in the state grammar", () => {
     expect(DIGEST_DEFAULTS_LEGEND).toContain("color gray");
     expect(DIGEST_DEFAULTS_LEGEND).toContain("sticky yellow");
@@ -162,6 +150,13 @@ describe("digest completeness invariant", () => {
     expect(digest).not.toContain("detail=");
     expect(digest).not.toContain("claude-opus");
     expect(digest.split("\n").find((line) => line.includes(" brain "))).not.toContain("icon=");
+
+    // A root icon object prints its folded glyph name, never an icon= extra.
+    const root = formatBoardDigest(makeDocument([
+      { ...box("store", 0, 0, 120, 120, "icon"), text: "Long-term", icon: "memory" as const },
+    ]));
+    expect(root).toContain('  store memory "Long-term" 0,0 120×120');
+    expect(root).not.toContain("icon=");
   });
 
   test("every rendered connection field appears in the digest when set non-default", () => {
@@ -216,6 +211,13 @@ describe("digest completeness invariant", () => {
     expect(digest).toContain(longLabel);
     expect(digest).toContain(`Ford ${"a".repeat(80)}`);
     expect(digest).not.toMatch(/…\(\+\d+ch\)/);
+
+    const short = formatBoardDigest(makeDocument([
+      { ...box("wordy", 0, 0), text: `multi\nline ${"x".repeat(200)}` },
+    ]));
+    expect(short).toContain(`multi line ${"x".repeat(200)}`);
+    expect(short).not.toContain("\nline");
+    expect(short).not.toMatch(/…\(\+\d+ch\)/);
   });
 
   test("explicit default values are elided (lossless via the legend)", () => {

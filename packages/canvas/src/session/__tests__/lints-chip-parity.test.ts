@@ -81,7 +81,7 @@ function expectRendererParity(
 }
 
 describe("lint chip / static renderer parity", () => {
-  test("figjam short label: the renderer's 41px minimum width, 30px height", () => {
+  test("chip sizes match the renderer: figjam 41px minimum and measured labels, schematic mono, elbowed route", () => {
     const document = makeDocument(
       [box("a", 0, 0), box("b", 600, 0)],
       [{ ...connect("e", "a", "b"), label: "X" }],
@@ -90,25 +90,35 @@ describe("lint chip / static renderer parity", () => {
     expect(chip.rect.width).toBe(41);        // min width beats 1×9.6 + 24
     expect(chip.rect.height).toBe(CHIP_HEIGHT);
     expectRendererParity(document);
-  });
 
-  test("figjam mid and long labels: the label measured in Inter Bold 16 plus 12px padding a side", () => {
+    // Figjam mid and long labels: measured in Inter Bold 16 plus 12px padding a side.
     const bold16 = { family: "Inter", size: 16, weight: 700 };
     expect(chipWidth("go live", FIGJAM_CANVAS_STYLE)).toBe(measureWidth("go live", bold16) + 24);
     expect(chipWidth("connect-to-database", FIGJAM_CANVAS_STYLE)).toBe(measureWidth("connect-to-database", bold16) + 24);
     // Real advances, not the old 0.6em-per-character estimate (19 × 9.6 = 182.4px).
-    expect(measureWidth("connect-to-database", bold16)).toBeLessThan(19 * 9.6 - 10);
-    const document = makeDocument(
+    expect(measureWidth("connect-to-database", bold16)).toBeLessThan(172.4);
+    const twoLabels = (shortLabel: string) => makeDocument(
+      [box("a", 0, 0), box("b", 600, 0), box("c", 0, 300), box("d", 600, 300)],
       [
-        box("a", 0, 0), box("b", 600, 0),
-        box("c", 0, 300), box("d", 600, 300),
-      ],
-      [
-        { ...connect("mid", "a", "b"), label: "go live" },
+        { ...connect("short", "a", "b"), label: shortLabel },
         { ...connect("long", "c", "d"), label: "connect-to-database" },
       ],
     );
-    expectRendererParity(document);
+    expectRendererParity(twoLabels("go live"));
+
+    // Schematic: 19 Plex Mono cells at 15px (171px) + 7.5px a side, 26px tall.
+    const schematic = canvasThemePreset("schematic-light");
+    const mono = twoLabels("X");
+    const monoChip = chipFor(mono.connections[1]!, mono, schematic)!;
+    expect(monoChip.rect.width).toBe(186);
+    expect(monoChip.rect.height).toBe(26);
+    expectRendererParity(mono, schematic);
+
+    // Elbowed route: parity holds at the router's own labelPoint.
+    expectRendererParity(makeDocument(
+      [box("a", 0, 0), box("w", 400, 252), box("b", 800, 0)],
+      [{ ...connect("e", "a", "b"), label: "detour", waypoints: [[160, 300], [800, 300]] }],
+    ));
   });
 
   test("empty-adjacent: empty and whitespace labels draw no chip on either side", () => {
@@ -129,34 +139,6 @@ describe("lint chip / static renderer parity", () => {
     // Exactly one chip renders, and it matches the lint's.
     expectRendererParity(document);
     expect(svgChipRects(renderDocumentToSvg(document).svg, labelsOf(document))).toHaveLength(1);
-  });
-
-  test("schematic theme: the shorter mono chip is still exactly the renderer's", () => {
-    const style = canvasThemePreset("schematic-light");
-    const document = makeDocument(
-      [box("a", 0, 0), box("b", 600, 0), box("c", 0, 300), box("d", 600, 300)],
-      [
-        { ...connect("short", "a", "b"), label: "X" },
-        { ...connect("long", "c", "d"), label: "connect-to-database" },
-      ],
-    );
-    const chip = chipFor(document.connections[1]!, document, style)!;
-    expect(chip.rect.height).toBe(26);
-    // 19 Plex Mono cells at 15px (171px) + 7.5px a side.
-    expect(chip.rect.width).toBe(Math.ceil(19 * 9 * 64) / 64 + 2 * 7.5);
-    expectRendererParity(document, style);
-  });
-
-  test("elbowed route: chip parity holds at the router's own labelPoint", () => {
-    const document = makeDocument(
-      [box("a", 0, 0), box("w", 400, 252), box("b", 800, 0)],
-      [{
-        ...connect("e", "a", "b"),
-        label: "detour",
-        waypoints: [[160, 300], [800, 300]],
-      }],
-    );
-    expectRendererParity(document);
   });
 
   /**

@@ -139,6 +139,14 @@ describe("sticky markdown editing model", () => {
     expect(sourceOffsetToStickyMarkdownDomPosition(document, document.lines[2].contentStart).leafKey).toBe(
       blankPlaceholder?.key,
     );
+
+    // Bare blank lines stay addressable: an interior blank gets a NBSP placeholder, the terminal one sits at the end.
+    const blanks = "a\n\nb\n";
+    roundTripEveryOffset(blanks);
+    const blankDocument = parseStickyMarkdown(blanks);
+    expect(blankDocument.lines).toHaveLength(4);
+    expect(blankDocument.lines[1].placeholder?.text).toBe(" ");
+    expect(blankDocument.lines[3].placeholder?.sourceStart).toBe(blanks.length);
   });
 
   it("maps active marker-visibility lines from collapsed and ranged source selections", () => {
@@ -222,16 +230,6 @@ describe("sticky markdown editing model", () => {
       textLine.contentStart,
     );
     expect(normalizeStickyMarkdownCaret(document, document.source.length, 0)).toBe(document.source.length);
-  });
-
-  it("keeps blank lines addressable in source-position mapping", () => {
-    const source = "a\n\nb\n";
-    const document = parseStickyMarkdown(source);
-
-    expect(document.lines).toHaveLength(4);
-    expect(document.lines[1].placeholder?.text).toBe("\u00A0");
-    expect(document.lines[3].placeholder?.sourceStart).toBe(source.length);
-    roundTripEveryOffset(source);
   });
 
   it("implements depth-preserving line breaks and empty-prefix exits", () => {

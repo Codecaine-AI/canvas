@@ -13,7 +13,7 @@ import {
 } from "..";
 import type { LayoutToolTextResult } from "../tools";
 import type { AgentSessionAnnotation } from "../protocol";
-import { FIGJAM_CANVAS_STYLE, makeTestSession, runOp } from "./helpers";
+import { makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
 
 function requestAnnotation(id: string, objectId: string, body: string): AgentSessionAnnotation {
@@ -86,25 +86,6 @@ describe("finalize committed — lint gate (scoped errors)", () => {
     expect(session.status).toBe("proposal-ready");
     expect(session.proposal!.operations).toHaveLength(1);
   });
-
-  test("an operation returns lint findings without blocking the edit", () => {
-    const baseline = makeDocument([
-      box("a", 0, 0, 160, 96, "process"),
-      box("b", 320, 0, 160, 96, "process"),
-    ]);
-    const session = makeTestSession(baseline, ["a", "b"], { canvasStyle: FIGJAM_CANVAS_STYLE });
-
-    const result = runOp(session, "move", { id: "b", to: { x: 40, y: 0 } });
-
-    expect(result.isError).not.toBe(true);
-    expect(result.text).toContain("APPLIED · move b");
-    expect(result.text).toContain("DELTA");
-    expect(result.text).toContain("LINTS · +1 error (1 open)");
-    expect(result.text).toContain("a and b overlap by");
-    expect(session.draft.objects.find((object) => object.id === "b")?.geometry.x).toBe(40);
-    expect(session.status).toBe("running");
-    expect(session.proposal).toBeNull();
-  });
 });
 
 describe("finalize committed — request gate", () => {
@@ -120,9 +101,23 @@ describe("finalize committed — request gate", () => {
 
     expectBlocked(result, session, 'R1 open  object:task  human — "Split this into two steps"');
     expect(result.text).toContain("dispose with resolve_request");
+
+    // Lint blockers and open requests are reported together.
+    const section = { ...box("section", 0, 0, 640, 320, "section"), text: "Section" };
+    const one = { ...box("one", 40, 96, 184, 96, "process"), parentId: "section" };
+    const two = { ...box("two", 400, 96, 184, 96, "process"), parentId: "section" };
+    const both = makeTestSession(makeDocument([section, one, two]), ["section"], {
+      annotations: [requestAnnotation("req-1", "section", "Tighten the layout")],
+    });
+    syncSessionRequests(both);
+    both.draft = makeDocument([section, one, { ...two, geometry: { ...two.geometry, x: 80 } }]);
+    const twice = toolFinalize(both, "committed", "Should fail twice over", emitSessionEvent);
+    expect(twice.isError).toBe(true);
+    expect(twice.text).toContain("E1 covered-content:");
+    expect(twice.text).toContain("R1 open");
   });
 
-  test("commits once every request reaches a terminal state", () => {
+  test("commits once every request reaches a terminal state, and an open agent-authored thread never blocks", () => {
     const baseline = makeDocument([box("task", 0, 0, 184, 96, "process")]);
     const session = makeTestSession(baseline, ["task"], {
       annotations: [
@@ -142,45 +137,20 @@ describe("finalize committed — request gate", () => {
     expect(result.isError).toBeUndefined();
     expect(session.status).toBe("proposal-ready");
     expect(session.events.map((event) => event.type)).toEqual(["proposal-ready"]);
-  });
 
-  test("does not block on an open agent-authored thread", () => {
     const task = box("task", 0, 0, 184, 96, "process");
-    const session = makeTestSession(makeDocument([task]), ["task"], {
+    const asked = makeTestSession(makeDocument([task]), ["task"], {
       annotations: [{
         ...requestAnnotation("agent-question", "task", "Should this be split further?"),
         createdBy: "agent",
       }],
     });
-    syncSessionRequests(session);
-    session.draft = {
-      ...session.draft,
-      objects: [{ ...task, text: "edited" }],
-    };
-
-    const result = toolFinalize(session, "committed", "Edited the task", emitSessionEvent);
-
-    expect(result.isError).toBeUndefined();
-    expect(session.status).toBe("proposal-ready");
-    expect(session.events.map((event) => event.type)).toEqual(["proposal-ready"]);
-  });
-
-  test("reports lint blockers and open requests together", () => {
-    const section = { ...box("section", 0, 0, 640, 320, "section"), text: "Section" };
-    const one = { ...box("one", 40, 96, 184, 96, "process"), parentId: "section" };
-    const two = { ...box("two", 400, 96, 184, 96, "process"), parentId: "section" };
-    const baseline = makeDocument([section, one, two]);
-    const session = makeTestSession(baseline, ["section"], {
-      annotations: [requestAnnotation("req-1", "section", "Tighten the layout")],
-    });
-    syncSessionRequests(session);
-    session.draft = makeDocument([section, one, { ...two, geometry: { ...two.geometry, x: 80 } }]);
-
-    const result = toolFinalize(session, "committed", "Should fail twice over", emitSessionEvent);
-
-    expect(result.isError).toBe(true);
-    expect(result.text).toContain("E1 covered-content:");
-    expect(result.text).toContain("R1 open");
+    syncSessionRequests(asked);
+    asked.draft = { ...asked.draft, objects: [{ ...task, text: "edited" }] };
+    const committed = toolFinalize(asked, "committed", "Edited the task", emitSessionEvent);
+    expect(committed.isError).toBeUndefined();
+    expect(asked.status).toBe("proposal-ready");
+    expect(asked.events.map((event) => event.type)).toEqual(["proposal-ready"]);
   });
 });
 
@@ -293,24 +263,17 @@ describe("finalize none", () => {
       sessionId: session.id,
       reason: "The request needs objects outside my scope.",
     }]);
-  });
 
-  test("outcome none is valid even with open requests and error lints", () => {
+    // Outcome none is valid even with a dirty draft, an open request and error lints.
     const section = { ...box("section", 0, 0, 480, 320, "section"), text: "Section" };
     const child = { ...box("child", 80, 96, 184, 96, "process"), parentId: "section" };
-    const baseline = makeDocument([section, child]);
-    const session = makeTestSession(baseline, ["section"], {
+    const blocked = makeTestSession(makeDocument([section, child]), ["section"], {
       annotations: [requestAnnotation("req-1", "section", "Tighten the layout")],
     });
-    syncSessionRequests(session);
-    session.draft = makeDocument([
-      section,
-      { ...child, geometry: { ...child.geometry, x: 400 } },
-    ]);
-
-    const result = toolFinalize(session, "none", "Cannot do this safely.", emitSessionEvent);
-
-    expect(result.isError).toBeUndefined();
-    expect(session.status).toBe("abandoned");
+    syncSessionRequests(blocked);
+    blocked.draft = makeDocument([section, { ...child, geometry: { ...child.geometry, x: 400 } }]);
+    const abandoned = toolFinalize(blocked, "none", "Cannot do this safely.", emitSessionEvent);
+    expect(abandoned.isError).toBeUndefined();
+    expect(blocked.status).toBe("abandoned");
   });
 });

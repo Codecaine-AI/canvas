@@ -92,11 +92,6 @@ describe("fit_section pads on the agent grid", () => {
 });
 
 describe("snapRectOutward", () => {
-  test("is an identity on grid multiples", () => {
-    const rect = { x: 160, y: 120, width: 620, height: 340 };
-    expect(snapRectOutward(rect)).toEqual(rect);
-  });
-
   test("grows: the snapped rect always contains the input", () => {
     const rect = { x: 163, y: 127, width: 381, height: 183 };
     const snapped = snapRectOutward(rect);
@@ -105,6 +100,9 @@ describe("snapRectOutward", () => {
     expect(snapped.y).toBeLessThanOrEqual(rect.y);
     expect(snapped.x + snapped.width).toBeGreaterThanOrEqual(rect.x + rect.width);
     expect(snapped.y + snapped.height).toBeGreaterThanOrEqual(rect.y + rect.height);
+    // A rect already on grid multiples snaps to itself.
+    expect(snapRectOutward({ x: 160, y: 120, width: 620, height: 340 }))
+      .toEqual({ x: 160, y: 120, width: 620, height: 340 });
   });
 
   test("handles negative coordinates and degenerate input", () => {

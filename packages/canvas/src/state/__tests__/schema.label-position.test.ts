@@ -44,26 +44,19 @@ function loadConnection(labelPosition: unknown) {
 }
 
 describe("schema — connection labelPosition", () => {
-  it("survives the connection whitelist re-builder (along + offset)", () => {
-    const result = loadConnection({ along: 0.25, offset: -18 });
-    expect(result.document.connections[0]?.labelPosition).toEqual({ along: 0.25, offset: -18 });
+  it.each([
+    ["along + offset", { along: 0.25, offset: -18 }, { along: 0.25, offset: -18 }],
+    // A bare `along` round-trips without an invented offset.
+    ["bare along", { along: 0.75 }, { along: 0.75 }],
+    // Both endpoints of the range are accepted.
+    ["along 0", { along: 0 }, { along: 0 }],
+    ["along 1", { along: 1 }, { along: 1 }],
+    // Absent stays absent: the midpoint default is not materialized.
+    ["absent", undefined, undefined],
+  ])("survives the connection whitelist re-builder (%s)", (_label, input, expected) => {
+    const result = loadConnection(input);
+    expect(result.document.connections[0]?.labelPosition).toEqual(expected);
     expect(result.warnings).toBeUndefined();
-  });
-
-  it("round-trips a bare `along` without inventing an offset", () => {
-    const result = loadConnection({ along: 0.75 });
-    expect(result.document.connections[0]?.labelPosition).toEqual({ along: 0.75 });
-    expect(result.document.connections[0]?.labelPosition?.offset).toBeUndefined();
-  });
-
-  it("accepts both endpoints of the range", () => {
-    expect(loadConnection({ along: 0 }).document.connections[0]?.labelPosition).toEqual({ along: 0 });
-    expect(loadConnection({ along: 1 }).document.connections[0]?.labelPosition).toEqual({ along: 1 });
-  });
-
-  it("stays absent when absent — the midpoint default is not materialized", () => {
-    const result = loadConnection(undefined);
-    expect(result.document.connections[0]?.labelPosition).toBeUndefined();
   });
 
   it("survives a full re-validate (idempotent load)", () => {
@@ -74,19 +67,20 @@ describe("schema — connection labelPosition", () => {
     expect(twice.document.connections[0]?.labelPosition).toEqual({ along: 0.4, offset: 12 });
   });
 
-  it("warns and drops an out-of-range `along` rather than clamping it", () => {
-    for (const along of [-0.1, 1.5, 42]) {
-      const result = loadConnection({ along });
-      expect(result.document.connections[0]?.labelPosition).toBeUndefined();
-      expect(result.warnings?.some((w) => w.path.endsWith("labelPosition.along"))).toBe(true);
-    }
-  });
-
-  it("warns and drops a non-numeric or missing `along`", () => {
-    for (const value of [{ along: "0.5" }, { along: Number.NaN }, { offset: 12 }, {}]) {
+  it("warns and drops an out-of-range, non-numeric or missing `along` rather than clamping it", () => {
+    const values = [
+      { along: -0.1 },
+      { along: 1.5 },
+      { along: 42 },
+      { along: "0.5" },
+      { along: Number.NaN },
+      { offset: 12 },
+      {},
+    ];
+    for (const value of values) {
       const result = loadConnection(value);
       expect(result.document.connections[0]?.labelPosition).toBeUndefined();
-      expect(result.warnings?.length).toBeGreaterThan(0);
+      expect(result.warnings?.some((w) => w.path.endsWith("labelPosition.along"))).toBe(true);
     }
   });
 

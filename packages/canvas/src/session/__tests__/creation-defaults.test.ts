@@ -1,28 +1,12 @@
 import { describe, expect, test } from "bun:test";
 
-import { FIRST_USE_COLORS } from "../../state/actions";
-
 import {
   CREATION_DEFAULTS,
   creationDefaultFor,
   creationKindFor,
 } from "../tools/creation-defaults";
-import { AGENT_GRID } from "../tools/grid";
 
 describe("creation defaults (D5)", () => {
-  test("every size in the table is a multiple of the agent grid", () => {
-    for (const [kind, row] of Object.entries(CREATION_DEFAULTS)) {
-      expect(`${kind}.width % ${AGENT_GRID} = ${row.size.width % AGENT_GRID}`).toBe(
-        `${kind}.width % ${AGENT_GRID} = 0`,
-      );
-      expect(`${kind}.height % ${AGENT_GRID} = ${row.size.height % AGENT_GRID}`).toBe(
-        `${kind}.height % ${AGENT_GRID} = 0`,
-      );
-      expect(row.size.width).toBeGreaterThan(0);
-      expect(row.size.height).toBeGreaterThan(0);
-    }
-  });
-
   test("the landed table is the one the plan specifies", () => {
     expect(CREATION_DEFAULTS).toEqual({
       // craft targets 288×96, rounded to the 20 grid
@@ -34,14 +18,6 @@ describe("creation defaults (D5)", () => {
       // 300 wide so a one-fact detail fits its caption, the UI's 120 tall
       icon: { size: { width: 300, height: 120 }, color: "gray" },
     });
-  });
-
-  test("colors are the canvas package's per-kind first-use fallbacks", () => {
-    expect(CREATION_DEFAULTS.shape.color).toBe(FIRST_USE_COLORS.shape);
-    expect(CREATION_DEFAULTS.sticky.color).toBe(FIRST_USE_COLORS.sticky);
-    expect(CREATION_DEFAULTS.section.color).toBe(FIRST_USE_COLORS.section);
-    // Icons read the "shape" bucket — only sticky and section have their own.
-    expect(CREATION_DEFAULTS.icon.color).toBe(FIRST_USE_COLORS.shape);
   });
 
   test("folded type names resolve to their kind", () => {

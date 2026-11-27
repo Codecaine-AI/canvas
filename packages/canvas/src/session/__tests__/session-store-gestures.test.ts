@@ -41,21 +41,17 @@ describe("place gestures", () => {
     expect(placed.text).toBe("Flow");
     expect(placed.geometry).toEqual({ x: 240, y: 480, width: 480, height: 360 });
     expect(placed.color).toBe(CREATION_DEFAULTS.section.color);
-  });
 
-  test("place_section snaps a drawn size too, and clamps nothing else", () => {
-    const session = makeTestSession(boardWith(), ["page"]);
-
-    const result = runOp(session, "place_section", {
-      id: "flow",
-      text: "Flow",
+    // A drawn size snaps too, and nothing else is clamped.
+    const sized = runOp(session, "place_section", {
+      id: "drawn",
+      text: "Drawn",
       at: [100, 100],
       size: { width: 313, height: 187 },
     });
-
-    expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · place_section flow 100,100 320×180");
-    expect(session.draft.objects.find((object) => object.id === "flow")?.geometry)
+    expect(sized.isError).toBeUndefined();
+    expect(sized.text).toContain("APPLIED · place_section drawn 100,100 320×180");
+    expect(session.draft.objects.find((object) => object.id === "drawn")?.geometry)
       .toEqual({ x: 100, y: 100, width: 320, height: 180 });
   });
 
@@ -165,6 +161,12 @@ describe("clone", () => {
       style: { shape: "arrow-shape", strokeWidth: 6 },
       geometry: { x: 120, y: 120, width: 240, height: 160 },
     });
+
+    // `by` is a delta from the source's corner and snaps as one: 313 → 320, -7 → 0.
+    const offset = makeTestSession(boardWith(source), ["page"]);
+    const moved = runOp(offset, "clone", { sourceId: "source", id: "copy", by: [313, -7] });
+    expect(moved.isError).toBeUndefined();
+    expect(moved.text).toContain("APPLIED · clone copy from source 420,100 240×160");
   });
 
   test("carries a glyph, and `text` relabels the copy without touching the source", () => {
@@ -190,16 +192,6 @@ describe("clone", () => {
       text: "Cache",
     });
     expect(session.draft.objects.find((object) => object.id === "db")?.text).toBe("Store");
-  });
-
-  test("`by` is a delta and snaps as one", () => {
-    const session = makeTestSession(boardWith(source), ["page"]);
-
-    const result = runOp(session, "clone", { sourceId: "source", id: "copy", by: [313, -7] });
-
-    expect(result.isError).toBeUndefined();
-    // 313 → 320, -7 → 0, applied to the source's own corner.
-    expect(result.text).toContain("APPLIED · clone copy from source 420,100 240×160");
   });
 
   test("a cloned section arrives as the frame alone, and says so", () => {

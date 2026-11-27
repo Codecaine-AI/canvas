@@ -32,9 +32,7 @@ describe("the registry-driven roster", () => {
     expect(([...PLACEABLE_TYPES] as string[]).sort()).toEqual(
       OBJECT_PREFERENCES.map((entry) => entry.name).sort(),
     );
-  });
-
-  test("covers every glyph and every placeable shape type", () => {
+    // It covers every glyph and every placeable shape type.
     expect(([...PLACEABLE_GLYPH_TYPES] as string[]).sort()).toEqual([...GLYPHS].sort());
     expect(([...PLACEABLE_SHAPE_TYPES] as string[]).sort()).toEqual(
       [...SHAPE_OBJECT_TYPES].filter((type) => type !== "icon").sort(),
@@ -93,12 +91,9 @@ describe("bidirectional mapping", () => {
     expect(() => toDocumentFields("cylinder" as never)).toThrow(/Unknown placeable type/);
   });
 
-  test("kinds with their own gestures pass through outbound", () => {
+  test("own-gesture kinds pass through outbound, and a malformed icon object degrades instead of throwing", () => {
     expect(fromDocumentFields({ type: "sticky" })).toBe("sticky");
     expect(fromDocumentFields({ type: "section" })).toBe("section");
-  });
-
-  test("a malformed icon object degrades instead of throwing", () => {
     expect(fromDocumentFields({ type: "icon" })).toBe("icon");
     expect(fromDocumentFields({ type: "icon", icon: "unicorn" })).toBe("icon");
   });

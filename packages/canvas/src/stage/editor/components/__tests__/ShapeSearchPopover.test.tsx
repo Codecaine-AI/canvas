@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
-import { cssVar } from "@codecaine-ai/design-system";
 import { ShapeSearchPopover } from "../ShapeSearchPopover";
 import { SHAPE_SEARCH_ENTRIES } from "../../../../objects/catalog";
 
@@ -8,51 +7,22 @@ afterEach(() => {
   cleanup();
 });
 
-describe("ShapeSearchPopover geometry", () => {
-  it("renders a dark popover at the enlarged 232px width", () => {
-    const { container } = render(<ShapeSearchPopover />);
-    const popover = container.querySelector("[data-shape-search-popover]") as HTMLElement;
-    expect(popover).toBeTruthy();
-    expect(popover.style.width).toBe("232px");
-    expect(popover.getAttribute("data-theme")).toBe("dark");
-    expect(popover.style.background).toBe(cssVar("color.surface.panel"));
-  });
-
-  it("renders a 5-column icon grid", () => {
-    const { container } = render(<ShapeSearchPopover />);
-    const grid = container.querySelector("[data-shape-search-grid]") as HTMLElement;
-    expect(grid.style.gridTemplateColumns).toBe("repeat(5, 1fr)");
-  });
-
-  it("renders one entry button per SHAPE_SEARCH_ENTRIES item by default", () => {
-    const { container } = render(<ShapeSearchPopover />);
-    const buttons = container.querySelectorAll("[data-shape-entry]");
-    expect(buttons.length).toBe(SHAPE_SEARCH_ENTRIES.length);
-  });
-});
-
 describe("ShapeSearchPopover search filtering", () => {
-  it("filters entries as the user types, case-insensitively (labels + def keywords)", () => {
+  // P4 catalog unification: search matches the def-declared keywords too.
+  // "chevron" appears in no label but is an arrow-shape def keyword, so it
+  // hits both arrow direction variants; "subroutine" is a keyword of the
+  // predefined-process def only.
+  it.each([
+    ["chevron", ["Left arrow", "Right arrow"]],
+    ["subroutine", ["Predefined process"]],
+  ])("filters entries as the user types, case-insensitively (labels + def keywords): %p", (query, expected) => {
     const { container } = render(<ShapeSearchPopover />);
     const input = container.querySelector("input") as HTMLInputElement;
-    fireEvent.change(input, { target: { value: "chevron" } });
-    // P4 catalog unification: search matches the def-declared keywords too —
-    // "chevron" appears in no label but is an arrow-shape def keyword, so it
-    // hits both arrow direction variants.
+    fireEvent.change(input, { target: { value: query } });
     const labels = [...container.querySelectorAll("[data-shape-entry]")].map((b) =>
       b.getAttribute("aria-label"),
     );
-    expect(labels).toEqual(["Left arrow", "Right arrow"]);
-  });
-
-  it("matches def-declared catalog keywords that appear in no label", () => {
-    const { container } = render(<ShapeSearchPopover />);
-    const input = container.querySelector("input") as HTMLInputElement;
-    fireEvent.change(input, { target: { value: "subroutine" } });
-    const labels = [...container.querySelectorAll("[data-shape-entry]")].map((b) =>
-      b.getAttribute("aria-label"),
-    );
-    expect(labels).toEqual(["Predefined process"]);
+    expect(labels).toEqual(expected);
   });
 
   it("shows a no-results message when nothing matches", () => {

@@ -66,14 +66,10 @@ describe("labelPointFor", () => {
     expectPointClose(labelPointFor(routed, connection({ along: 0 })), { x: 100, y: 30 });
     expectPointClose(labelPointFor(routed, connection({ along: 0.5 })), { x: 200, y: 30 });
     expectPointClose(labelPointFor(routed, connection({ along: 1 })), { x: 300, y: 30 });
-  });
 
-  it("along=0.5 with no offset lands exactly on the unpinned midpoint", () => {
-    const from = object("from", 0, 0);
-    const to = object("to", 260, 120);
-    const routed = routeConnection(from, to, connection());
-
-    expectPointClose(labelPointFor(routed, connection({ along: 0.5 })), routed.labelPoint);
+    // On an elbowed route, along=0.5 with no offset is the unpinned midpoint.
+    const elbow = routeConnection(object("from", 0, 0), object("to", 260, 120), connection());
+    expectPointClose(labelPointFor(elbow, connection({ along: 0.5 })), elbow.labelPoint);
   });
 
   it("offsets perpendicular to travel — positive is LEFT of the from→to direction", () => {
@@ -84,20 +80,6 @@ describe("labelPointFor", () => {
     expectPointClose(labelPointFor(routed, connection({ along: 0.5, offset: -24 })), { x: 200, y: 54 });
     // A zero offset is the bare `along` point.
     expectPointClose(labelPointFor(routed, connection({ along: 0.5, offset: 0 })), { x: 200, y: 30 });
-  });
-
-  it("offsets a downward run to its own left, not the board's", () => {
-    // `from` above `to`: the route runs +y, whose left-hand side is +x.
-    const routed = routeConnection(
-      object("from", 0, 0),
-      object("to", 0, 300),
-      { ...connection({ along: 0.5, offset: 20 }), from: { objectId: "from", anchor: "bottom" }, to: { objectId: "to", anchor: "top" } },
-    );
-    const pinned = labelPointFor(routed, { labelPosition: { along: 0.5, offset: 20 } });
-    const bare = labelPointFor(routed, { labelPosition: { along: 0.5 } });
-
-    expect(pinned.x - bare.x).toBeCloseTo(20, 6);
-    expect(pinned.y).toBeCloseTo(bare.y, 6);
   });
 
   it("clamps an out-of-range `along` rather than walking off the path", () => {
@@ -151,5 +133,16 @@ describe("labelPointFor", () => {
     // Right-travelling last leg → offset lands on -y, x untouched.
     expect(nearEnd.y - nearEndBare.y).toBeCloseTo(-10, 6);
     expect(nearEnd.x).toBeCloseTo(nearEndBare.x, 6);
+
+    // A straight downward run (bottom → top anchors) offsets to its own left, +x.
+    const down = routeConnection(object("from", 0, 0), object("to", 0, 300), {
+      ...connection({ along: 0.5, offset: 20 }),
+      from: { objectId: "from", anchor: "bottom" },
+      to: { objectId: "to", anchor: "top" },
+    });
+    const downPinned = labelPointFor(down, { labelPosition: { along: 0.5, offset: 20 } });
+    const downBare = labelPointFor(down, { labelPosition: { along: 0.5 } });
+    expect(downPinned.x - downBare.x).toBeCloseTo(20, 6);
+    expect(downPinned.y).toBeCloseTo(downBare.y, 6);
   });
 });

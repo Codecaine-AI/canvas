@@ -1,9 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import {
-  ANCHOR_SNAP_VIEW_PX,
-  OUTLINE_SNAP_WORLD_PX,
-  resolveConnectionCascade,
-} from "../connection-cascade";
+import { resolveConnectionCascade } from "../connection-cascade";
 import { connectionBoundsForObject } from "../../objects/geometry";
 import type { InteractiveCanvasObject } from "../../state/schema";
 
@@ -34,18 +30,6 @@ describe("resolveConnectionCascade", () => {
     }
   });
 
-  it("does not snap to an anchor when just outside the screen-px anchor radius but still snaps to outline", () => {
-    const object = rectObject();
-    // 6px away from the top anchor (50,0), zoom=1 -> world threshold is 8px so
-    // this is actually within range; use a distance clearly beyond 8 instead.
-    const point = { x: 50, y: 20 }; // 20px from anchor -> beyond ANCHOR_SNAP_VIEW_PX
-    const result = resolveConnectionCascade(point, [object], 1);
-    // 20px from the top edge is also beyond OUTLINE_SNAP_WORLD_PX (8), and the
-    // point is inside the rect's hover-expanded bound and inside the polygon,
-    // so this should resolve to "inside".
-    expect(result.kind).toBe("inside");
-  });
-
   it("scales the anchor snap radius by zoom (screen px / zoom = world px)", () => {
     const object = rectObject();
     // 6 world px away from top anchor. At zoom=1, world threshold=8 -> snaps.
@@ -58,7 +42,7 @@ describe("resolveConnectionCascade", () => {
     expect(atHighZoom.kind).not.toBe("anchor");
   });
 
-  it("snaps to the nearest outline point when close to the border but beyond anchor radius and away from the 4 cardinal points", () => {
+  it("snaps to the nearest outline point of a shape or section when close to the border but beyond anchor radius and away from the 4 cardinal points", () => {
     const object = rectObject();
     // A point near the top-right corner region, away from the N and E anchors,
     // close to the top edge (within OUTLINE_SNAP_WORLD_PX of y=0).
@@ -68,6 +52,19 @@ describe("resolveConnectionCascade", () => {
     if (result.kind === "outline") {
       expect(result.point.y).toBeCloseTo(0, 5);
     }
+
+    const section = rectObject({
+      id: "section-1",
+      type: "section",
+      text: "Section",
+      geometry: { x: 0, y: 0, width: 400, height: 300 },
+    });
+    const sectionResult = resolveConnectionCascade(point, [section], 1);
+    expect(sectionResult.kind).toBe("outline");
+    if (sectionResult.kind === "outline") {
+      expect(sectionResult.objectId).toBe("section-1");
+      expect(sectionResult.point).toEqual({ x: 80, y: 0 });
+    }
   });
 
   it("resolves to 'inside' when the pointer is inside the shape but far from any anchor or edge", () => {
@@ -75,6 +72,11 @@ describe("resolveConnectionCascade", () => {
     const point = { x: 50, y: 50 }; // dead center
     const result = resolveConnectionCascade(point, [object], 1);
     expect(result).toEqual({ kind: "inside", objectId: "rect-1" });
+    // 20px below the top anchor and edge: beyond both snap radii at zoom 1.
+    expect(resolveConnectionCascade({ x: 50, y: 20 }, [object], 1)).toEqual({
+      kind: "inside",
+      objectId: "rect-1",
+    });
   });
 
   it("treats empty section interiors as free canvas instead of inside candidates", () => {
@@ -88,22 +90,6 @@ describe("resolveConnectionCascade", () => {
     const result = resolveConnectionCascade(point, [section], 1);
 
     expect(result).toEqual({ kind: "free", point });
-  });
-
-  it("still snaps to a section outline within the outline radius", () => {
-    const section = rectObject({
-      id: "section-1",
-      type: "section",
-      text: "Section",
-      geometry: { x: 0, y: 0, width: 400, height: 300 },
-    });
-    const result = resolveConnectionCascade({ x: 80, y: 4 }, [section], 1);
-
-    expect(result.kind).toBe("outline");
-    if (result.kind === "outline") {
-      expect(result.objectId).toBe("section-1");
-      expect(result.point).toEqual({ x: 80, y: 0 });
-    }
   });
 
   it("resolves to 'free' with the raw point when no candidate's hover-expanded bound contains the pointer", () => {
@@ -149,10 +135,5 @@ describe("resolveConnectionCascade", () => {
     if (result.kind === "inside") {
       expect(result.objectId).toBe("front");
     }
-  });
-
-  it("exposes the anchor/outline snap constants used by the cascade", () => {
-    expect(ANCHOR_SNAP_VIEW_PX).toBe(8);
-    expect(OUTLINE_SNAP_WORLD_PX).toBe(8);
   });
 });

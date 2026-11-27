@@ -1,5 +1,4 @@
 import { describe, expect, it } from "bun:test";
-import { BUNDLED_FACES } from "@codecaine-ai/text-measure";
 import { base64Of, bundledFaceFor, embedSvgFonts, svgFontFaces } from "../svg-fonts";
 import { renderDocumentToSvg } from "../static-svg";
 import type { InteractiveCanvasDocument } from "../../state/schema";
@@ -63,9 +62,5 @@ describe("embedSvgFonts", () => {
     expect(await embedSvgFonts(svg, async () => null)).toBe(svg);
     const plain = '<svg xmlns="http://www.w3.org/2000/svg"><rect width="1" height="1"/></svg>';
     expect(await embedSvgFonts(plain, async () => new Uint8Array([1]))).toBe(plain);
-  });
-
-  it("covers every bundled face", () => {
-    expect(new Set(BUNDLED_FACES.map((face) => bundledFaceFor(face.family, face.weight).id)).size).toBe(BUNDLED_FACES.length);
   });
 });

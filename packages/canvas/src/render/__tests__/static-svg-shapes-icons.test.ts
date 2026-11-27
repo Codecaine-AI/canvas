@@ -191,9 +191,8 @@ describe("static icons: tile vs glyph, packs, brands", () => {
     expect(bare).toContain(`fill="#1F93EA" stroke="none"`);
     expect(bare).not.toContain(`fill="${resolveIconPaint("violet", FIGJAM_CANVAS_STYLE).glyph}" stroke="none"`);
     expect(bare).not.toContain(`<g fill=`);
-  });
 
-  it("paints Claude Code's logo Claude orange on the default theme", () => {
+    // Claude Code's logo paints Claude orange on the default theme.
     expect(render([icon({ icon: "brand-claude", text: "Claude Code" })], "schematic-light"))
       .toContain(`fill="#D97757" stroke="none"`);
   });
@@ -203,11 +202,6 @@ describe("static icons: tile vs glyph, packs, brands", () => {
     const svg = render([icon({ icon: "brand-github" })], "schematic-dark");
     expect(svg).not.toContain(`fill="#181717" stroke="none"`);
     expect(svg).toContain(`fill="${dark.textColor}" stroke="none"`);
-  });
-
-  it("keeps tiling a generic glyph in its color pick", () => {
-    const light = canvasThemePreset("schematic-light");
-    expect(render([icon({ icon: "database" })], "schematic-light")).toContain(`fill="${light.palette.violet}"/>`);
   });
 
   it("the icon pack swaps a generic glyph's geometry", () => {

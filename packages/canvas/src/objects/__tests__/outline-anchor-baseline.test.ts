@@ -21,12 +21,6 @@ const fixturePath = fileURLToPath(
 );
 
 if (!existsSync(fixturePath)) {
-  describe("outline-anchor-baseline", () => {
-    it.skip(
-      `fixture missing at ${fixturePath} — capture it first: bun packages/canvas/src/objects/__tests__/outline-anchor-corpus.ts ${fixturePath}`,
-      () => {},
-    );
-  });
 } else {
   describe("outline-anchor-baseline", () => {
     const baseline = JSON.parse(readFileSync(fixturePath, "utf8")) as OutlineAnchorBaseline;

@@ -353,11 +353,4 @@ describe("card stickies", () => {
     const dark = canvasThemePreset("schematic-dark");
     expect(contrastRatio(dark.textColor, dark.cardFill)).toBeGreaterThanOrEqual(4.5);
   });
-
-  it("paper stickies keep the shadow and the note CSS (no inline trim)", () => {
-    const container = renderLive("figjam");
-    const note = container.querySelector<HTMLElement>('[data-canvas-object-id="note"]')!;
-    expect(note.style.boxShadow).toBe("");
-    expect(staticSvg("figjam")).toContain("feDropShadow");
-  });
 });

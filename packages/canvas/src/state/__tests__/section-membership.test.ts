@@ -179,9 +179,8 @@ describe("section membership reconciliation", () => {
 
     expect(objectById(reconciled, "moved-away").parentId).toBeNull();
     expect(objectById(reconciled, "too-large").parentId).toBeNull();
-  });
 
-  it("reassigns stale stored parents to a qualifying ancestor or null", () => {
+    // A stale nested parent hands the child to a qualifying ancestor, or to null.
     const outer = makeSection({
       id: "outer",
       geometry: { x: 0, y: 0, width: 500, height: 500 },
@@ -201,12 +200,9 @@ describe("section membership reconciliation", () => {
       parentId: "inner",
       geometry: { x: 700, y: 80, width: 80, height: 80 },
     });
-    const document = makeDocument([outer, inner, ancestorRelease, nullRelease]);
-
-    const reconciled = reconcileSectionMembership(document);
-
-    expect(objectById(reconciled, "ancestor-release").parentId).toBe("outer");
-    expect(objectById(reconciled, "null-release").parentId).toBeNull();
+    const nested = reconcileSectionMembership(makeDocument([outer, inner, ancestorRelease, nullRelease]));
+    expect(objectById(nested, "ancestor-release").parentId).toBe("outer");
+    expect(objectById(nested, "null-release").parentId).toBeNull();
   });
 
   it("returns the same document reference when membership is already correct", () => {

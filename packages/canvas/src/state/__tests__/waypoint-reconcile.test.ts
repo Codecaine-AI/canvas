@@ -75,25 +75,17 @@ describe("stale-waypoint reconciliation (W4)", () => {
     ]);
   });
 
-  it("drops waypoints when only one endpoint owner moves (asymmetric drag -> auto-route)", () => {
+  it.each([
+    ["only one endpoint owner moves", { a: { x: 500, y: 500, width: 100, height: 60 } }],
+    ["both owners move by different deltas", {
+      a: { x: 10, y: 170, width: 100, height: 60 },
+      b: { x: 340, y: 80, width: 100, height: 60 },
+    }],
+  ])("drops waypoints when %s (asymmetric drag -> auto-route)", (_label, geometries) => {
     const state = makeState();
     const next = reduceInteractiveCanvasState(state, {
       type: "canvas.updateObjectGeometries",
-      geometries: { a: { x: 500, y: 500, width: 100, height: 60 } },
-      snap: false,
-      summary: "Dragged selection",
-    });
-    expect(connectionOf(next).waypoints).toBeUndefined();
-  });
-
-  it("drops waypoints when both owners move but by different deltas", () => {
-    const state = makeState();
-    const next = reduceInteractiveCanvasState(state, {
-      type: "canvas.updateObjectGeometries",
-      geometries: {
-        a: { x: 10, y: 170, width: 100, height: 60 },
-        b: { x: 340, y: 80, width: 100, height: 60 },
-      },
+      geometries,
       snap: false,
       summary: "Dragged selection",
     });

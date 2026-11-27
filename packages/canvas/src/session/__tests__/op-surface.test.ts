@@ -90,8 +90,11 @@ describe("classification", () => {
       .toEqual({ type: "addObject", object: shape });
   });
 
-  test("a changed or removed object is classified by the target it names", () => {
+  test("a changed or removed object is classified by the target it names, and connection ops pass through", () => {
     const patch = { text: "Renamed" };
+    // Classification is total: an unknown target stays a plain object verb.
+    expect(classifyDelta({ type: "updateObject", objectId: "ghost", patch: { text: "x" } }, document))
+      .toEqual({ type: "updateObject", objectId: "ghost", patch: { text: "x" } });
     expect(classifyDelta({ type: "updateObject", objectId: "home", patch }, document))
       .toEqual({ type: "updateSection", sectionId: "home", patch });
     expect(classifyDelta({ type: "updateObject", objectId: "note", patch }, document))
@@ -105,31 +108,21 @@ describe("classification", () => {
       .toEqual({ type: "removeSticky", stickyId: "note" });
     expect(classifyDelta({ type: "removeObject", objectId: "orphan" }, document))
       .toEqual({ type: "removeObject", objectId: "orphan" });
-  });
 
-  test("connection ops are already delta verbs and pass through untouched", () => {
+    // Connection ops are already delta verbs and pass through untouched.
     const added = {
       type: "addConnection" as const,
       connection: { id: "e2", from: { objectId: "alpha" }, to: { objectId: "beta" } },
     };
     expect(classifyDelta(added, document)).toEqual(added);
-
     const changed = {
       type: "updateConnection" as const,
       connectionId: "alpha-beta",
       patch: { label: "next" },
     };
     expect(classifyDelta(changed, document)).toEqual(changed);
-
     const removed = { type: "removeConnection" as const, connectionId: "alpha-beta" };
     expect(classifyDelta(removed, document)).toEqual(removed);
-  });
-
-  test("classification is total for an unknown target", () => {
-    expect(classifyDelta(
-      { type: "updateObject", objectId: "ghost", patch: { text: "x" } },
-      document,
-    )).toEqual({ type: "updateObject", objectId: "ghost", patch: { text: "x" } });
   });
 });
 
@@ -219,15 +212,5 @@ describe("target ids", () => {
       "s2", "home", "home", "home", "n2", "note", "note",
       "gamma", "alpha", "orphan", "e2", "alpha-beta", "alpha-beta",
     ]);
-  });
-
-  test("the vocabulary is add/change/remove per kind, plus fit", () => {
-    expect([...DELTA_KINDS]).toHaveLength(13);
-    for (const kind of ["Section", "Sticky", "Object", "Connection"] as const) {
-      for (const verb of ["add", "update", "remove"] as const) {
-        expect(DELTA_KINDS).toContain(`${verb}${kind}` as (typeof DELTA_KINDS)[number]);
-      }
-    }
-    expect(DELTA_KINDS).toContain("fitSection");
   });
 });

@@ -284,6 +284,7 @@ describe("StyleRail", () => {
     expect($('section[data-group="board"] > button')!.getAttribute("aria-expanded")).toBe("false");
   });
 
+  // regression: b3aa26b
   it("ships without the color controls: renders the kept size, font and style controls only", () => {
     // No colorControls prop: the shipped default. The expected rows are listed
     // here, not derived from the rail's own predicate. Schematic dark is

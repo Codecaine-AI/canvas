@@ -114,6 +114,22 @@ describe("text-fit / renderer parity — shape labels", () => {
     // One pixel shorter is no longer a sure fit — "smallest" means smallest.
     const shy = shape(LONG_LABEL, needed.width, needed.height - 1);
     expect(textFitReport(shy, shy.geometry, shy.text).fits).toBe(false);
+
+    // The schematic themes: a clipping label renders an ellipsis; the reported
+    // needed size does not, and one pixel shorter is no longer a sure fit.
+    for (const theme of ["schematic-light", "schematic-dark"] as const) {
+      const style = canvasThemePreset(theme);
+      const styledSvg = (probe: InteractiveCanvasObject) =>
+        renderDocumentToSvg(makeDocument([probe]), { canvasStyle: style }).svg;
+      const report = textFitReport(object, object.geometry, object.text, style);
+      expect(report.verdict).toBe("overflows");
+      expect(styledSvg(object)).toContain("…");
+      const themedGrown = shape(LONG_LABEL, report.neededSize!.width, report.neededSize!.height);
+      expect(textFitReport(themedGrown, themedGrown.geometry, themedGrown.text, style).verdict).toBe("fits");
+      expect(styledSvg(themedGrown)).not.toContain("…");
+      const themedShy = shape(LONG_LABEL, report.neededSize!.width, report.neededSize!.height - 1);
+      expect(textFitReport(themedShy, themedShy.geometry, themedShy.text, style).fits).toBe(false);
+    }
   });
 });
 
@@ -170,18 +186,6 @@ describe("text-fit / renderer parity — the schematic themes", () => {
     const style = canvasThemePreset(theme);
     const styledSvg = (object: InteractiveCanvasObject) =>
       renderDocumentToSvg(makeDocument([object]), { canvasStyle: style }).svg;
-
-    test(`${theme}: a clipping label renders an ellipsis; the reported needed size does not`, () => {
-      const tight = shape(LONG_LABEL, 160, 96);
-      const report = textFitReport(tight, tight.geometry, tight.text, style);
-      expect(report.verdict).toBe("overflows");
-      expect(styledSvg(tight)).toContain("…");
-      const grown = shape(LONG_LABEL, report.neededSize!.width, report.neededSize!.height);
-      expect(textFitReport(grown, grown.geometry, grown.text, style).verdict).toBe("fits");
-      expect(styledSvg(grown)).not.toContain("…");
-      const shy = shape(LONG_LABEL, report.neededSize!.width, report.neededSize!.height - 1);
-      expect(textFitReport(shy, shy.geometry, shy.text, style).fits).toBe(false);
-    });
 
     test(`${theme}: a stored detail changes neither the verdict nor the render`, () => {
       const plain = shape(LONG_LABEL, 200, 96);

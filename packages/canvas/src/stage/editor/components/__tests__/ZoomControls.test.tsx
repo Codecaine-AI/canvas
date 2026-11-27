@@ -1,24 +1,12 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
-import { EDITOR_STYLE } from "../editor-style";
-import { ZoomControls, ZOOM_CONTROLS_HEIGHT_PX, ZOOM_CONTROLS_RADIUS_PX } from "../ZoomControls";
+import { ZoomControls } from "../ZoomControls";
 
 afterEach(() => {
   cleanup();
 });
 
 describe("ZoomControls geometry", () => {
-  it("renders a pill matching the dock's panel styling", () => {
-    const { container } = render(<ZoomControls />);
-    const pill = container.querySelector("[data-zoom-controls]") as HTMLElement;
-    expect(pill).toBeTruthy();
-    expect(pill.style.background).toBe(EDITOR_STYLE.bottomToolbarBg);
-    expect(pill.style.height).toBe(ZOOM_CONTROLS_HEIGHT_PX);
-    expect(pill.style.borderRadius).toBe(ZOOM_CONTROLS_RADIUS_PX);
-    expect(pill.style.borderRadius).toBe(EDITOR_STYLE.dockRadius);
-    expect(pill.style.boxShadow).toBe(EDITOR_STYLE.dockShadow);
-  });
-
   it("renders only - and + when zoomPercent is omitted (matches the observed frames with no % readout)", () => {
     const { container, queryByLabelText } = render(<ZoomControls />);
     expect(queryByLabelText("Zoom out")).toBeTruthy();

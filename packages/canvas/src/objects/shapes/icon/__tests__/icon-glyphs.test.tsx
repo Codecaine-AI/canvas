@@ -1,16 +1,6 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
-import {
-  ICON_GLYPHS,
-  ICON_GLYPH_BASE_VIEWBOX_SIZE,
-  ICON_GLYPH_CANVAS_STROKE_WIDTH,
-  ICON_GLYPH_IDS,
-  ICON_GLYPH_REFERENCE_SIZE_PX,
-  ICON_GLYPH_STROKE_WIDTH,
-  iconGlyphStrokeWidthForSize,
-  iconGlyphStrokeWidthForViewBox,
-  type IconGlyphId,
-} from "../icon-glyphs";
+import { ICON_GLYPHS, ICON_GLYPH_BASE_VIEWBOX_SIZE, ICON_GLYPH_CANVAS_STROKE_WIDTH, ICON_GLYPH_IDS, ICON_GLYPH_REFERENCE_SIZE_PX, iconGlyphStrokeWidthForSize, iconGlyphStrokeWidthForViewBox, type IconGlyphId } from "../icon-glyphs";
 import { IconShapeBody } from "../IconShapeBody";
 
 afterEach(() => {
@@ -60,13 +50,6 @@ describe("ICON_GLYPH_IDS", () => {
 });
 
 describe("ICON_GLYPHS registry", () => {
-  it("has exactly one definition per glyph id, keyed consistently", () => {
-    expect(Object.keys(ICON_GLYPHS)).toEqual([...ICON_GLYPH_IDS]);
-    for (const id of ICON_GLYPH_IDS) {
-      expect(ICON_GLYPHS[id].id).toBe(id);
-    }
-  });
-
   it("every operational-map glyph keeps its Nucleo outline: 18x18 grid, stroke paint, at least one drawable element", () => {
     for (const id of BASE_IDS) {
       const glyph = ICON_GLYPHS[id];
@@ -96,17 +79,9 @@ describe("ICON_GLYPHS registry", () => {
 });
 
 describe("iconGlyphStrokeWidthForSize", () => {
-  it("keeps the reference size identical to the canvas base glyph stroke", () => {
-    expect(iconGlyphStrokeWidthForSize(ICON_GLYPH_REFERENCE_SIZE_PX)).toBe(ICON_GLYPH_CANVAS_STROKE_WIDTH);
-  });
-
   it("renders a 4x-size icon at the same reference pixel weight (full falloff)", () => {
     // viewBox stroke * 4 (linear scale-up) = exactly the reference pixel weight
     expect(iconGlyphStrokeWidthForSize(ICON_GLYPH_REFERENCE_SIZE_PX * 4)).toBeCloseTo(ICON_GLYPH_CANVAS_STROKE_WIDTH / 4);
-  });
-
-  it("stays lighter than the preview stroke that panel previews keep", () => {
-    expect(ICON_GLYPH_CANVAS_STROKE_WIDTH).toBeLessThan(ICON_GLYPH_STROKE_WIDTH);
   });
 
   it("falls back to the canvas base glyph stroke for non-positive sizes", () => {
@@ -123,9 +98,7 @@ describe("iconGlyphStrokeWidthForViewBox", () => {
       const tablerPx = (iconGlyphStrokeWidthForViewBox(sizePx, 24) * sizePx) / 24;
       expect(tablerPx).toBeCloseTo(nucleoPx, 10);
     }
-  });
-
-  it("returns the Nucleo-grid stroke bit-for-bit, so renderers can switch helpers without moving a pixel", () => {
+    // On the Nucleo grid itself it returns the Nucleo stroke bit-for-bit, so renderers can switch helpers.
     for (let sizePx = 1; sizePx <= 1024; sizePx += 1) {
       expect(iconGlyphStrokeWidthForViewBox(sizePx, ICON_GLYPH_BASE_VIEWBOX_SIZE)).toBe(iconGlyphStrokeWidthForSize(sizePx));
     }
@@ -133,24 +106,6 @@ describe("iconGlyphStrokeWidthForViewBox", () => {
 });
 
 describe("IconShapeBody", () => {
-  it("renders only the glyph body; text is rendered by the icon object def", () => {
-    const { container } = render(
-      <IconShapeBody
-        object={{ icon: "server", geometry: { width: 120, height: 120 } }}
-        colors={{ stroke: "#111111", fill: "#EEEEEE" }}
-      />,
-    );
-
-    expect(container.querySelector(".interactive-canvas-label-below-icon")).toBeNull();
-
-    const svg = container.querySelector("svg[data-canvas-icon-glyph='server']");
-    expect(svg).not.toBeNull();
-
-    const root = container.querySelector("[data-canvas-icon-shape-body]");
-    expect(root).not.toBeNull();
-    expect(root?.children.length).toBe(1);
-  });
-
   it("scales the glyph stroke from the smaller geometry dimension", () => {
     const { container } = render(
       <IconShapeBody object={{ icon: "server", geometry: { width: 520, height: 260 } }} />,

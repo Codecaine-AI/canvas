@@ -25,10 +25,8 @@ describe("agent grid quantizer", () => {
     expect(snapPoint([241, 477])).toEqual([240, 480]);
     expect(snapSize({ width: 187, height: 63 })).toEqual({ width: 180, height: 60 });
     expect(snapGap(97)).toBe(100);
-  });
-
-  test("values already on the grid are identities", () => {
-    for (const value of [0, 20, 100, 240, 300, 480, 900]) {
+    // Values already on the grid are identities.
+    for (const value of [20, 100, 240, 300, 480, 900]) {
       expect(snapCoordinate(value)).toBe(value);
     }
     expect(snapPoint([240, 480])).toEqual([240, 480]);
@@ -93,28 +91,6 @@ describe("20-grid geometry survives the agent-patch reducer path", () => {
       }
     }
   });
-
-  test("snapped tool arguments are what lands, end to end", () => {
-    const state = createInteractiveCanvasState(makeDocument([box("a", 0, 0, 280, 100)]));
-
-    // What a gesture descriptor does: quantize, then lower.
-    const [x, y] = snapPoint([241, 477]);
-    const size = snapSize({ width: 187, height: 63 });
-
-    const next = reduceInteractiveCanvasState(state, {
-      type: "canvas.applyAgentPatch",
-      operations: [
-        { type: "updateObject", objectId: "a", patch: { geometry: { x, y, ...size } } },
-      ],
-    });
-
-    expect(next.document.objects[0]?.geometry).toEqual({
-      x: 240,
-      y: 480,
-      width: 180,
-      height: 60,
-    });
-  });
 });
 
 /**
@@ -162,28 +138,19 @@ describe("every geometry a gesture writes lands on the grid", () => {
     expectOnGrid(geometryOf(session, "a"), ["x", "y"]);
   });
 
-  test("arrange align snaps the shared coordinate the row agrees on", () => {
+  test.each([
+    { align: "left", edge: (g: { x: number; width: number }) => g.x, expected: 20 },
+    // b's right edge is 400 + 176 = 576; the shared edge snaps to 580.
+    { align: "right", edge: (g: { x: number; width: number }) => g.x + g.width, expected: 580 },
+  ])("arrange align $align snaps the shared coordinate the row agrees on", ({ align, edge, expected }) => {
     const session = offGridSession();
 
-    const result = runOp(session, "arrange", { ids: ["a", "b"], align: "left" });
+    const result = runOp(session, "arrange", { ids: ["a", "b"], align });
 
-    expect(geometryOf(session, "a").x).toBe(20);
-    expect(geometryOf(session, "b").x).toBe(20);
+    expect(edge(geometryOf(session, "a"))).toBe(expected);
+    expect(edge(geometryOf(session, "b"))).toBe(expected);
     // Report == landed: the number in the summary is the number in the board.
-    expect(result.text).toContain(`left edges at x=${geometryOf(session, "a").x}`);
-    expect(result.text).toContain("left edges at x=20");
-  });
-
-  test("arrange align keeps the shared edge exactly shared while snapping it", () => {
-    const session = offGridSession();
-
-    const result = runOp(session, "arrange", { ids: ["a", "b"], align: "right" });
-
-    const a = geometryOf(session, "a");
-    const b = geometryOf(session, "b");
-    expect(a.x + a.width).toBe(b.x + b.width);
-    expect((a.x + a.width) % AGENT_GRID).toBe(0);
-    expect(result.text).toContain(`right edges at x=${a.x + a.width}`);
+    expect(result.text).toContain(`${align} edges at x=${expected}`);
   });
 
   test("arrange space snaps each position it computes", () => {

@@ -88,16 +88,18 @@ describe("useTextEditing object targets (single unified text field, D3/D11)", ()
     expect(action.patch).toEqual({ text: "new body\n- item", geometry: { x: 80, y: 100, width: 240, height: 80 } });
   });
 
-  it("keeps plain shapes editing and committing their text", () => {
+  it.each([
+    ["below-slot icon", "human-a", "Hello text", "a\nb\nc"],
+    ["plain shape", "shape-a", "Shape label", "Renamed shape"],
+  ])("commits %s text as a text-only object patch", (_label, objectId, initialText, nextText) => {
     const { result, dispatch } = setup();
 
     act(() => {
-      result.current.openObjectTextEditor("shape-a");
+      result.current.openObjectTextEditor(objectId);
     });
-    expect(result.current.objectTextEditValue).toBe("Shape label");
-
+    expect(result.current.objectTextEditValue).toBe(initialText);
     act(() => {
-      result.current.setObjectTextEditValue("Renamed shape");
+      result.current.setObjectTextEditValue(nextText);
     });
     act(() => {
       result.current.commitObjectText();
@@ -106,31 +108,8 @@ describe("useTextEditing object targets (single unified text field, D3/D11)", ()
     expect(dispatch).toHaveBeenCalledTimes(1);
     expect(dispatch).toHaveBeenCalledWith({
       type: "canvas.updateObject",
-      objectId: "shape-a",
-      patch: { text: "Renamed shape" },
-    });
-    const action = dispatch.mock.calls[0][0] as Extract<CanvasAction, { type: "canvas.updateObject" }>;
-    expect("geometry" in action.patch).toBe(false);
-  });
-
-  it("commits below-slot text as a text-only object patch", () => {
-    const { result, dispatch } = setup();
-
-    act(() => {
-      result.current.openObjectTextEditor("human-a");
-    });
-    act(() => {
-      result.current.setObjectTextEditValue("a\nb\nc");
-    });
-    act(() => {
-      result.current.commitObjectText();
-    });
-
-    expect(dispatch).toHaveBeenCalledTimes(1);
-    expect(dispatch).toHaveBeenCalledWith({
-      type: "canvas.updateObject",
-      objectId: "human-a",
-      patch: { text: "a\nb\nc" },
+      objectId,
+      patch: { text: nextText },
     });
     const action = dispatch.mock.calls[0][0] as Extract<CanvasAction, { type: "canvas.updateObject" }>;
     expect("geometry" in action.patch).toBe(false);

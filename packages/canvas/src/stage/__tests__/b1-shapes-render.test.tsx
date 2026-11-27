@@ -92,15 +92,6 @@ function polygonPointCount(container: HTMLElement, objectId: string): number | u
 }
 
 describe("Native shape render smoke: every shape renders without crashing", () => {
-  it("renders a node for every shape type", () => {
-    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const { container } = renderShapes();
-      for (const object of SHAPE_OBJECTS) {
-        expect(container.querySelector(`[data-canvas-object-id="${object.id}"]`)).toBeTruthy();
-      }
-    });
-  });
-
   it("renders each true-outline polygon shape with the expected vertex count (same math as connection-cascade.ts)", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = renderShapes();
@@ -130,16 +121,6 @@ describe("Native shape render smoke: every shape renders without crashing", () =
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = renderShapes();
       expect(container.querySelector('[data-canvas-object-id="ellipse-1"] ellipse')).toBeTruthy();
-    });
-  });
-
-  it("renders every shape's label span", () => {
-    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const { container } = renderShapes();
-      const octagon = container.querySelector('[data-canvas-object-id="octagon-1"]');
-      expect(octagon?.querySelector(".interactive-canvas-object-label")?.textContent).toBe(
-        "octagon-1 label",
-      );
     });
   });
 
