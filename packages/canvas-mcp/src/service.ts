@@ -78,6 +78,8 @@ export interface CanvasServiceOptions {
   project?: string;
   /** The standalone boards folder that ids, canvas_list, and canvas_create use. Default `<project>/canvases`. */
   canvasesDir?: string;
+  /** Folders inside which no board opens or is created, even inside the workspace. Default none. */
+  exclude?: string[];
 }
 
 /** The id grammar the layout session store accepts for a canvas file. */
@@ -86,6 +88,11 @@ const CANVAS_SUFFIX = ".canvas.json";
 
 const NO_ACTIVE_CANVAS =
   "No canvas is open. Call canvas_open { \"canvas\": \"<id>\" } first — canvas_list shows the ids — or canvas_create for a new board.";
+
+/** True when `path` is the folder `root` or lies inside it (both absolute). */
+function isAtOrInside(root: string, path: string): boolean {
+  return relative(root, path) === "" || isInside(root, path);
+}
 
 /** True when `path` lies strictly inside the folder `root` (both absolute). */
 function isInside(root: string, path: string): boolean {
@@ -330,6 +337,15 @@ export function createCanvasService(options: CanvasServiceOptions) {
     return realRoot(options.workspace);
   }
 
+  /** The `exclude` folder that holds `path` (given or real form), or undefined. */
+  function excludedBy(path: string): string | undefined {
+    return (options.exclude ?? []).find((dir) => isAtOrInside(resolve(dir), path) || isAtOrInside(realRoot(dir), path));
+  }
+
+  function excludedText(tool: string, raw: string, dir: string): string {
+    return `${tool} rejected: ${JSON.stringify(raw)} is inside the excluded folder ${dir}. Edit a board there with the docs canvas tools.`;
+  }
+
   /**
    * The file a `canvas` argument names: a bare id is canvases/<id>.canvas.json;
    * anything with a path separator is a .canvas.json file in any folder of the
@@ -348,12 +364,16 @@ export function createCanvasService(options: CanvasServiceOptions) {
       if (!path.endsWith(CANVAS_SUFFIX)) {
         return { error: `${tool} rejected: ${JSON.stringify(raw)} is not a ${CANVAS_SUFFIX} file.` };
       }
+      const dir = excludedBy(path);
+      if (dir) return { error: excludedText(tool, raw, dir) };
       return { id: basename(path, CANVAS_SUFFIX), path };
     }
     const id = raw.endsWith(CANVAS_SUFFIX) ? raw.slice(0, -CANVAS_SUFFIX.length) : raw;
     if (!CANVAS_ID_PATTERN.test(id)) {
       return { error: `${tool} rejected: ${JSON.stringify(raw)} is not a canvas id. Call canvas_list for the ids.` };
     }
+    const dir = excludedBy(canvasPath(id));
+    if (dir) return { error: excludedText(tool, raw, dir) };
     return { id, path: canvasPath(id) };
   }
 
@@ -371,6 +391,8 @@ export function createCanvasService(options: CanvasServiceOptions) {
     const real = realpathSync(path);
     const roots = byId ? [workspaceRoot(), realRoot(canvasesDir)] : [workspaceRoot()];
     if (!roots.some((root) => isInside(root, real))) return outsideWorkspace(tool, raw);
+    const dir = excludedBy(real);
+    if (dir) return excludedText(tool, raw, dir);
     if (!real.endsWith(CANVAS_SUFFIX)) {
       return `${tool} rejected: ${JSON.stringify(raw)} is not a ${CANVAS_SUFFIX} file.`;
     }

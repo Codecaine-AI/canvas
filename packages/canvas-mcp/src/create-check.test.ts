@@ -279,6 +279,44 @@ describe("canvas_create and canvas_check", () => {
     expect(textOf(opened)).toContain(" · some/page/assets/canvases/x.canvas.json · sha256:");
   });
 
+  test("an --exclude folder inside the workspace opens and creates no board, by path, link, or id", async () => {
+    const workspace = tempDir();
+    const kb = join(workspace, "knowledge-base");
+    const kbBoards = join(kb, "canvases");
+    const page = join(kb, "pages", "assets", "canvases");
+    mkdirSync(kbBoards, { recursive: true });
+    mkdirSync(page, { recursive: true });
+    mkdirSync(join(workspace, "canvases"));
+    const board = readFileSync(join(REPO_CANVASES, "v2-flow.canvas.json"));
+    const sidecar = join(page, "x.canvas.json");
+    writeFileSync(sidecar, board);
+    writeFileSync(join(kbBoards, "kb-board.canvas.json"), board);
+    symlinkSync(sidecar, join(workspace, "canvases", "link.canvas.json"));
+    writeFileSync(join(workspace, "canvases", "free.canvas.json"), board);
+
+    // The boards folder of a knowledge-base thread lies inside the excluded folder.
+    const inKb = await workflowService({ workspace, project: kb, canvasesDir: kbBoards, exclude: [kb] });
+    for (const canvas of [sidecar, "knowledge-base/pages/assets/canvases/x.canvas.json", "kb-board"]) {
+      const refused = await inKb.call("canvas_open", { canvas });
+      expect(refused.isError).toBe(true);
+      expect(textOf(refused)).toContain(`is inside the excluded folder ${kb}`);
+    }
+    const created = await inKb.call("canvas_create", { canvas: "new-board", title: "New" });
+    expect(created.isError).toBe(true);
+    expect(existsSync(join(kbBoards, "new-board.canvas.json"))).toBe(false);
+    expect(inKb.activeCanvas()).toBeNull();
+
+    // A link from outside into the excluded folder is refused by its real path. The rest of the workspace opens.
+    const outside = await workflowService({ workspace, exclude: [kb] });
+    expect(textOf(await outside.call("canvas_open", { canvas: "link" }))).toContain("is inside the excluded folder");
+    expect(textOf(await call(outside, "canvas_open", { canvas: "free" }))).toContain(" · canvases/free.canvas.json · sha256:");
+    expect(readFileSync(sidecar)).toEqual(board);
+
+    // Without --exclude the same board opens, as before.
+    const plain = await workflowService({ workspace });
+    expect(textOf(await call(plain, "canvas_open", { canvas: sidecar }))).toContain("OPENED · x");
+  });
+
   test("canvas_check refuses a conflicted board until canvas_open reloads it", async () => {
     const service = await workflowService({ workspace: tempDir() });
     await call(service, "canvas_create", { canvas: "conflict", title: "Conflict" });
