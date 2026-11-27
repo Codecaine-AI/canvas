@@ -168,11 +168,11 @@ describe("canvas MCP server", () => {
     }
     for (const path of [sidecar, projectBoard, join(boards, "standalone.canvas.json"), stray]) copyFileSync(board, path);
 
-    const session = async (cwd: string) => {
+    const session = async (cwd: string, extra: string[] = []) => {
       const client = new Client({ name: "canvas-mcp-stdio-test", version: "1.0.0" });
       await client.connect(new StdioClientTransport({
         command: process.execPath,
-        args: [CLI, "mcp", "--workspace", workspace, "--canvases", boards],
+        args: [CLI, "mcp", "--workspace", workspace, "--canvases", boards, ...extra],
         cwd,
         stderr: "pipe",
         env: STDIO_ENV,
@@ -207,6 +207,14 @@ describe("canvas MCP server", () => {
     const byId = await (await session(bare))("standalone");
     expect(byId.isError).toBe(false);
     expect(byId.text).toContain(` · ${join(boards, "standalone.canvas.json")} · sha256:`);
+
+    // Each --exclude folder refuses its boards, and the project's canvases/ inside it is not the boards folder.
+    const excluded = await session(project, ["--exclude", project, "--exclude", elsewhere]);
+    const inExcluded = await excluded("canvases/v2.canvas.json");
+    expect(inExcluded.isError).toBe(true);
+    expect(inExcluded.text).toContain("is inside the excluded folder");
+    expect((await excluded("standalone")).isError).toBe(false);
+    expect((await excluded("pages/x/assets/canvases/a.canvas.json")).isError).toBe(false);
   });
 
   test("stdio: an edit's APPLIED line, lint delta, and fix guidance reach what Claude Code and Codex show", async () => {

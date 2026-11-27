@@ -2,7 +2,7 @@
 /**
  * `canvas` — command-line entry for the canvas MCP.
  *
- *   canvas mcp [--workspace <dir>] [--canvases <dir>]   serve the canvas tools over stdio
+ *   canvas mcp [--workspace <dir>] [--canvases <dir>] [--exclude <dir>]...   serve the canvas tools over stdio
  *   canvas instructions                    print the prompt block (MCP instructions)
  *   canvas manifest                        print the rule-unit manifest as JSON
  *
@@ -13,6 +13,8 @@
  *   directory. A relative board path resolves against it first.
  * - Boards folder: the standalone boards that ids, canvas_list and
  *   canvas_create use.
+ * - Excluded folders: each `--exclude` (repeatable, default none). No board
+ *   inside one opens or is created, even inside the containment root.
  * stdout carries the MCP protocol, so diagnostics go to stderr only.
  */
 import { existsSync, realpathSync } from "node:fs";
@@ -37,21 +39,28 @@ function root(path: string): string {
   return existsSync(path) ? realpathSync(path) : resolve(path);
 }
 
+/** Every value of a repeatable option, in order. */
+function options(name: string): string[] {
+  return args.flatMap((arg, index) => (arg === name && index + 1 < args.length ? [args[index + 1]!] : []));
+}
+
 const project = root(process.env.CLAUDE_PROJECT_DIR || process.cwd());
 const workspace = root(option("--workspace") ?? project);
+const exclude = options("--exclude").map(root);
 
 /**
  * The boards folder: `<project>/canvases`, else `<workspace>/canvases`, the
- * first that exists. Else `--canvases`, else the canvas repo this package
+ * first that exists outside every `--exclude`. Else `--canvases`, else the canvas repo this package
  * lives in, so a user-scoped install always has a board set to edit.
  */
-const canvasesDir = [join(project, "canvases"), join(workspace, "canvases")].find((dir) => existsSync(dir))
+const notExcluded = (dir: string) => !exclude.some((root) => dir === root || dir.startsWith(`${root}/`));
+const canvasesDir = [join(project, "canvases"), join(workspace, "canvases")].find((dir) => existsSync(dir) && notExcluded(dir))
   ?? resolve(option("--canvases") ?? resolve(import.meta.dir, "../../../canvases"));
 
 try {
   switch (command) {
     case "mcp":
-      await startMcp({ workspace, project, canvasesDir });
+      await startMcp({ workspace, project, canvasesDir, exclude });
       break;
     case "instructions":
       console.log(INSTRUCTIONS);
@@ -60,7 +69,7 @@ try {
       console.log(JSON.stringify(await guidanceManifest(), null, 2));
       break;
     default:
-      console.error("Codecaine Canvas\n\n  mcp [--workspace PATH] [--canvases DIR]   Serve the canvas editing tools over stdio (boards in the project's canvases/, else PATH/canvases, else DIR)\n  instructions   Print the prompt block (MCP instructions)\n  manifest   Print the rule-unit manifest as JSON");
+      console.error("Codecaine Canvas\n\n  mcp [--workspace PATH] [--canvases DIR] [--exclude DIR]...   Serve the canvas editing tools over stdio (boards in the project's canvases/, else PATH/canvases, else DIR)\n  instructions   Print the prompt block (MCP instructions)\n  manifest   Print the rule-unit manifest as JSON");
       if (command !== "help") process.exitCode = 1;
   }
 } catch (error) {
