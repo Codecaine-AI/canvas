@@ -8,11 +8,17 @@ beforeAll(async () => {
 });
 
 describe("uncoveredChars", () => {
-  test("Latin, Greek, Cyrillic, punctuation and arrows are covered by Inter", () => {
+  test("Latin, Greek, Cyrillic, punctuation and arrows are covered by Inter; CJK, Hangul, Arabic, Hebrew and Thai are uncovered, one entry per character", () => {
     expect(uncoveredChars("Ünïcödé àccénts naïve café résumé")).toEqual([]);
     expect(uncoveredChars("Ελληνικά κείμενο για μέτρηση")).toEqual([]);
     expect(uncoveredChars("Кириллица текст для измерения")).toEqual([]);
     expect(uncoveredChars("“Smart quotes” — dashes… → ⇒ ↔")).toEqual([]);
+
+    expect(uncoveredChars("春天到了")).toEqual(["春", "天", "到", "了"]);
+    expect(uncoveredChars("한국어")).toEqual(["한", "국", "어"]);
+    expect(uncoveredChars("Arabic مرحبا")).toEqual(["م", "ر", "ح", "ب", "ا"]);
+    expect(uncoveredChars("שלום")).toEqual(["ש", "ל", "ו", "ם"]);
+    expect(uncoveredChars("ภาษาไทย").length).toBeGreaterThan(0);
   });
 
   test("lists each distinct grapheme once, in order of appearance", () => {

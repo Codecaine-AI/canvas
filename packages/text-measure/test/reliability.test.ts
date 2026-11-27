@@ -94,7 +94,10 @@ describe("tabs", () => {
 });
 
 describe("soft hyphens", () => {
-  test("a soft hyphen at a break is flagged: Chromium splits without the hyphen when char + hyphen does not fit", () => {
+  test("a soft hyphen at a break is flagged (Chromium splits without the hyphen when char + hyphen does not fit); one away from every break stays reliable", () => {
+    // Chromium, Inter 16px: "co­operate with the whole team today" is 3 lines at 120px and 2 at 200px, as the library.
+    expect(fitAt("co­operate with the whole team today", inter16, 120, 3)).toMatchObject({ reliable: true, lineCount: 3 });
+    expect(fitAt("co­operate with the whole team today", inter16, 200, 2)).toMatchObject({ reliable: true, lineCount: 2 });
     // Chromium, Inter 16px: "ab­cd" is 3 lines at 20px (a | b- | cd), 5 at 10px (a | b | - | c | d), 1 at 100px.
     expect(wrapText("ab­cd", inter16, { maxWidth: 20, lineHeight: 24 }).lines.map((l) => l.text)).toEqual(["ab-", "cd"]);
     expect(fitAt("ab­cd", inter16, 20, 3)).toMatchObject({ reliable: false, reasons: ["soft-hyphen"] });

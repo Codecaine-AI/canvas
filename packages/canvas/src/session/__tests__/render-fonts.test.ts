@@ -61,23 +61,51 @@ function plexOnlyPng(svg: string): Buffer {
   return Buffer.from(plexOnly(svg).render().asPng());
 }
 
-describe("bundled IBM Plex Mono (agent camera)", () => {
-  test("the rasterizer sets IBM Plex Mono text in the bundled face at each weight", () => {
-    expect(PLEX_MONO_FILES).toHaveLength(WEIGHTS.length);
+/** The static Inter 3.19 instances. */
+const INTER_STATIC_FILES = TTF_FILES
+  .filter((file) => /^Inter-(Regular|Medium|SemiBold|Bold)\.ttf$/.test(file))
+  .map((file) => join(FONTS_DIR, file));
+/** Detail/body (400), 500, schematic names (600), figjam names (700). */
+const INTER_WEIGHTS = [400, 500, 600, 700] as const;
 
-    const pngs = WEIGHTS.map((weight) => rasterizeSvgToPng(monoSvg(weight, DETAIL)).png);
+function interSvg(weight: number, text: string): string {
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="40">` +
+    `<text x="0" y="28" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-weight="${weight}" ` +
+    `font-size="17.5">${text}</text></svg>`
+  );
+}
+
+function interOnlyPng(svg: string): Buffer {
+  const resvg = new Resvg(svg, { font: { fontFiles: INTER_STATIC_FILES, loadSystemFonts: false } });
+  return Buffer.from(resvg.render().asPng());
+}
+
+describe("bundled faces (agent camera)", () => {
+  test.each<{ family: string; files: string[]; weights: readonly number[]; svg: (weight: number, text: string) => string; onlyPng: (svg: string) => Buffer; text: string }>([
+    { family: "IBM Plex Mono", files: PLEX_MONO_FILES, weights: WEIGHTS, svg: monoSvg, onlyPng: plexOnlyPng, text: DETAIL },
+    // Inter is named first in a fallback stack: the camera must still pick the static face per weight, never all at 400.
+    { family: "Inter", files: INTER_STATIC_FILES, weights: INTER_WEIGHTS, svg: interSvg, onlyPng: interOnlyPng, text: "Worker pool" },
+  ])("the rasterizer sets $family text in the bundled face at each weight", ({ files, weights, svg, onlyPng, text }) => {
+    expect(files).toHaveLength(weights.length);
+
+    const pngs = weights.map((weight) => rasterizeSvgToPng(svg(weight, text)).png);
     // Byte-identical to a renderer that can see only the bundled faces: the
     // camera discovered them, and no system font shadows them.
-    for (const [index, weight] of WEIGHTS.entries()) {
-      expect(pngs[index]).toEqual(plexOnlyPng(monoSvg(weight, DETAIL)));
+    for (const [index, weight] of weights.entries()) {
+      expect(pngs[index]).toEqual(onlyPng(svg(weight, text)));
     }
     // Non-blank, and one face per weight: a face missing from the family (or
-    // filed under another family name) collapses its weight onto a
-    // neighbour's, and text that paints nothing equals the empty render.
-    const blank = plexOnlyPng(monoSvg(400, ""));
+    // filed under another family name), or a variable font resvg does not
+    // instance, collapses its weight onto a neighbour's, and text that paints
+    // nothing equals the empty render.
+    const blank = onlyPng(svg(400, ""));
     const distinct = new Set([blank, ...pngs].map((png) => png.toString("base64")));
-    expect(distinct.size).toBe(1 + WEIGHTS.length);
+    expect(distinct.size).toBe(1 + weights.length);
   });
+});
+
+describe("bundled IBM Plex Mono (agent camera)", () => {
 
   test("the bundled faces advance exactly what text-measure measures, letter spacing included", () => {
     const rightEdge = (weight: number, text: string, letterSpacingEm: number): number => {

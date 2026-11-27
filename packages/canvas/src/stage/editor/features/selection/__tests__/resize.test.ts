@@ -80,18 +80,29 @@ function reconcileSectionActions(actions: CanvasAction[]) {
 describe("interaction: applyResizeHandle", () => {
   const start = { x: 100, y: 100, width: 200, height: 150 };
 
-  it("se: grows width/height, anchors nw corner", () => {
-    const result = applyResizeHandle(start, "se", 50, 30);
-    expect(result).toEqual({ x: 100, y: 100, width: 250, height: 180 });
+  it.each([
+    ["se", 50, 30, { x: 100, y: 100, width: 250, height: 180 }],
+    ["nw", -50, -30, { x: 50, y: 70, width: 250, height: 180 }],
+    ["ne", 50, -30, { x: 100, y: 70, width: 250, height: 180 }],
+    ["sw", -50, 30, { x: 50, y: 100, width: 250, height: 180 }],
+    ["n", 0, 30, { x: 100, y: 130, width: 200, height: 120 }],
+    ["s", 0, 30, { x: 100, y: 100, width: 200, height: 180 }],
+    ["e", 40, 0, { x: 100, y: 100, width: 240, height: 150 }],
+    ["w", -40, 0, { x: 60, y: 100, width: 240, height: 150 }],
+  ] as const)("%s handle moves its own edges and anchors the opposite side (dx %d, dy %d)", (handle, dx, dy, expected) => {
+    expect(applyResizeHandle(start, handle, dx, dy)).toEqual(expected);
   });
 
-  it("clamps to MIN_DIRECT_RESIZE_SIZE when dragging past the opposite edge", () => {
+  it("clamps to MIN_DIRECT_RESIZE_SIZE when dragging past the opposite edge, keeping the anchored corner", () => {
     const result = applyResizeHandle(start, "se", -1000, -1000);
     expect(result.width).toBe(MIN_DIRECT_RESIZE_SIZE);
     expect(result.height).toBe(MIN_DIRECT_RESIZE_SIZE);
     // Anchored corner (nw, i.e. x/y) must not move.
     expect(result.x).toBe(100);
     expect(result.y).toBe(100);
+
+    // nw past the se corner: 48x48 with right/bottom held at (300, 250).
+    expect(applyResizeHandle(start, "nw", 1000, 1000)).toEqual({ x: 252, y: 202, width: 48, height: 48 });
   });
 
   it("covers all 8 documented resize handles", () => {

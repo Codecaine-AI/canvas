@@ -96,7 +96,7 @@ describe("interaction: live snap guides during move", () => {
     expect(result.overlay.guides!.some((guide) => guide.axis === "x" && guide.position === 204)).toBe(true);
   });
 
-  it("scales the snap threshold by viewport zoom (6 screen px / zoom)", () => {
+  it("scales the snap threshold by viewport zoom (6 screen px / zoom), and does not snap with no candidate in range", () => {
     // At zoom=2, the 6 screen-px threshold is 3 world units, so an 8-unit-away
     // sibling should NOT snap even though it would at zoom=1. Vertical extents
     // are offset (anchor at y=900) so no axis aligns "for free".
@@ -112,6 +112,17 @@ describe("interaction: live snap guides during move", () => {
     const geometryActions = updateGeometriesActions(result.dispatch);
     expect(geometryActions[0]!.geometries.a!.x).toBe(100);
     expect(result.overlay.guides ?? []).toHaveLength(0);
+
+    // At zoom=1 with the only sibling far away, nothing is in range: the raw move lands, no guides.
+    const farDocument = makeDocument([
+      makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
+      makeObject({ id: "far", geometry: { x: 5000, y: 5000, width: 100, height: 100 } }),
+    ]);
+    const farCtx = makeContext(farDocument);
+    let farResult = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 10, y: 10 }, hit), farCtx);
+    farResult = stepInteraction(farResult.state, move({ x: 30, y: 30 }, hit), farCtx);
+    expect(updateGeometriesActions(farResult.dispatch)[0]!.geometries.a).toEqual({ x: 20, y: 20, width: 100, height: 100 });
+    expect(farResult.overlay.guides ?? []).toHaveLength(0);
   });
 
   it("clears guides once the gesture ends (release)", () => {

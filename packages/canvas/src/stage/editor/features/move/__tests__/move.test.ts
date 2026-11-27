@@ -114,7 +114,7 @@ describe("interaction: drag/move gesture", () => {
     ]);
   });
 
-  it("moves a dragged section and its recorded parentId descendants exactly once", () => {
+  it("moves a dragged section and its recorded parentId descendants exactly once, and a plain rectangle alone", () => {
     // Membership is the persisted parentId chain (sections nest via parentId);
     // no geometric recapture happens at drag start, so "outside" stays put even
     // though it isn't far from the section.
@@ -156,6 +156,20 @@ describe("interaction: drag/move gesture", () => {
       leaf: { x: 180, y: 160, width: 60, height: 30 },
     });
     expect(geometryActions[0]!.geometries.outside).toBeUndefined();
+
+    // A plain rectangle has no descendants: an object it overlaps stays put.
+    const rectDocument = makeDocument([
+      makeObject({ id: "rect", type: "rectangle", geometry: { x: 80, y: 80, width: 320, height: 220 } }),
+      makeObject({ id: "overlapping", geometry: { x: 120, y: 120, width: 80, height: 40 } }),
+    ]);
+    const rectCtx = makeContext(rectDocument);
+    const rectHit = { kind: "object" as const, objectId: "rect" };
+    let rectResult = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 90, y: 90 }, rectHit), rectCtx);
+    rectResult = stepInteraction(rectResult.state, move({ x: 130, y: 110 }, rectHit), rectCtx);
+    expect(rectResult.state.kind).toBe("move");
+    const rectGeometryActions = updateGeometriesActions(rectResult.dispatch);
+    expect(rectGeometryActions).toHaveLength(1);
+    expect(Object.keys(rectGeometryActions[0]!.geometries)).toEqual(["rect"]);
   });
 
   it("does not start a move gesture until the 3px world threshold is crossed", () => {
@@ -316,19 +330,34 @@ describe("interaction: section drop-in/out during move", () => {
     expect(result.overlay.dropTargetId).toBe("section");
   });
 
-  it("dispatches a no-history section reconcile on release", () => {
+  it.each([
+    {
+      name: "dropped into a new section",
+      section: { x: 300, y: 0, width: 300, height: 300 },
+      object: { parentId: undefined, geometry: { x: 0, y: 0, width: 50, height: 50 } },
+      from: { x: 10, y: 10 },
+      to: { x: 460, y: 150 },
+    },
+    {
+      name: "dropped back into its current parent section",
+      section: { x: 0, y: 0, width: 300, height: 300 },
+      object: { parentId: "section", geometry: { x: 20, y: 20, width: 50, height: 50 } },
+      from: { x: 45, y: 45 },
+      to: { x: 60, y: 60 },
+    },
+  ])("dispatches a no-history section reconcile on release ($name)", ({ section, object, from, to }) => {
     const document = makeDocument([
-      makeSection({ id: "section", geometry: { x: 300, y: 0, width: 300, height: 300 } }),
-      makeObject({ id: "a", geometry: { x: 0, y: 0, width: 50, height: 50 } }),
+      makeSection({ id: "section", geometry: section }),
+      makeObject({ id: "a", ...object }),
     ]);
     const ctx = makeContext(document);
     const hit = { kind: "object" as const, objectId: "a" };
 
-    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 10, y: 10 }, hit), ctx);
-    result = stepInteraction(result.state, move({ x: 460, y: 150 }, hit), ctx);
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down(from, hit), ctx);
+    result = stepInteraction(result.state, move(to, hit), ctx);
     expect(result.overlay.dropTargetId).toBe("section");
 
-    result = stepInteraction(result.state, up({ x: 460, y: 150 }, hit), ctx);
+    result = stepInteraction(result.state, up(to, hit), ctx);
     expect(result.dispatch).toEqual([
       { type: "canvas.reconcileSectionMembership", recordHistory: false },
     ]);
