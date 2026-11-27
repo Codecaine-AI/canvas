@@ -108,18 +108,24 @@ describe("interaction: snapResolver injection (T1.2.2)", () => {
     expect(result.overlay.guides).toEqual(snapCorrection.guides);
   });
 
-  it("applies the closest-wins snap correction to committed geometry with NO resolver in the context (the live editor path)", () => {
-    // InteractiveCanvasEditor.runInteraction builds its InteractionContext
-    // without a snapResolver — this asserts that in that exact shape, the
-    // local computeSnapGuides fallback still applies its correction to the
-    // COMMITTED geometry (not just the overlay guides), i.e. snapping is live
-    // in the editor today without any extra wiring.
+  // InteractiveCanvasEditor.runInteraction builds its InteractionContext
+  // without a snapResolver — the first row asserts that in that exact shape,
+  // the local computeSnapGuides fallback still applies its correction to the
+  // COMMITTED geometry (not just the overlay guides), i.e. snapping is live
+  // in the editor today without any extra wiring. A host resolver that
+  // returns null must fall back to the same local snap.
+  it.each([
+    ["NO resolver in the context (the live editor path)", {}],
+    ["a snapResolver that returns null", { snapResolver: () => null }],
+  ] as [string, Partial<InteractionContext>][])(
+    "applies the closest-wins snap correction to committed geometry with %s",
+    (_label, contextOverrides) => {
     const document = makeDocument([
       makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
       makeObject({ id: "b", geometry: { x: 0, y: 500, width: 100, height: 100 } }),
     ]);
     const hit = { kind: "object" as const, objectId: "a" };
-    const ctx = makeContext(document); // no snapResolver — exactly what the editor passes
+    const ctx = makeContext(document, contextOverrides);
 
     let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 10, y: 10 }, hit), ctx);
     // Raw drag would land "a" at x=2 — within the 6px/zoom threshold of b's

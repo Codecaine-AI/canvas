@@ -102,6 +102,16 @@ describe("ShapesPanel search", () => {
     expect(renderedIconGroups(container)).toEqual([
       { category: "status", glyphs: glyphsIn("status") },
     ]);
+
+    // "brand" lists every brand and nothing else, still grouped under icons.
+    fireEvent.change(search, { target: { value: "brand" } });
+    const categories = Array.from(container.querySelectorAll("[data-shape-category]")).map((c) =>
+      c.getAttribute("data-shape-category"),
+    );
+    expect(categories).toEqual(["icons"]);
+    expect(renderedIconGroups(container)).toEqual([
+      { category: "brands", glyphs: glyphsIn("brands") },
+    ]);
   });
 });
 
@@ -139,14 +149,22 @@ describe("ShapesPanel interaction", () => {
     expect(caret.style.top).toBe("-6px");
   });
 
-  it("both onPick and onPickEntry fire together on the same click", () => {
-    const onPick = mock((_type: string) => {});
-    const onPickEntry = mock((_entry: ShapeCatalogEntry) => {});
-    const { container } = render(<ShapesPanel onPick={onPick} onPickEntry={onPickEntry} />);
-    fireEvent.click(container.querySelector('[data-shape-entry="shape-square"]')!);
-    expect(onPick).toHaveBeenCalledWith("rectangle");
-    expect(onPickEntry).toHaveBeenCalledTimes(1);
-  });
+  it.each([
+    ['[data-shape-entry="shape-square"]', "rectangle", { objectType: "rectangle" }],
+    ['[data-shape-entry="shape-triangle-down"]', "triangle", { objectType: "triangle", direction: "down" }],
+    ['[data-shape-entry][data-icon="model"]', "icon", { objectType: "icon", icon: "model" }],
+  ])(
+    "both onPick and onPickEntry fire together on the same click, with the entry's insert fields (%s)",
+    (selector, expectedType, expectedEntry) => {
+      const onPick = mock((_type: string) => {});
+      const onPickEntry = mock((_entry: ShapeCatalogEntry) => {});
+      const { container } = render(<ShapesPanel onPick={onPick} onPickEntry={onPickEntry} />);
+      fireEvent.click(container.querySelector(selector)!);
+      expect(onPick).toHaveBeenCalledWith(expectedType);
+      expect(onPickEntry).toHaveBeenCalledTimes(1);
+      expect(onPickEntry.mock.calls[0][0]).toEqual(expect.objectContaining(expectedEntry));
+    },
+  );
 
   it("clicking a shape entry never fires onClose — the panel stays open in placement mode", () => {
     const onClose = mock(() => {});

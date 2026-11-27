@@ -18,17 +18,24 @@ function expectPointClose(actual: { x: number; y: number }, expected: { x: numbe
 }
 
 describe("cursor-anchored zoom invariance (T1.1.2)", () => {
-  it("keeps the world point under the cursor fixed on screen across a single zoom-in step", () => {
-    const viewport: ViewportState = { x: 100, y: 50, zoom: 1 };
-    const cursorScreen = { x: 320, y: 180 };
-    const cursorWorld = screenToWorld(viewport, cursorScreen);
+  // The last row requests an absurdly small zoom, which zoomAtPoint clamps to
+  // MIN_ZOOM; the invariant must still hold against the clamped result.
+  it.each([
+    ["zoom-in", { x: 100, y: 50, zoom: 1 }, { x: 320, y: 180 }, 1 * 1.2],
+    ["zoom-out", { x: -40, y: 200, zoom: 2 }, { x: 12, y: 640 }, 2 / 1.2],
+    ["min-zoom clamp", { x: 30, y: -10, zoom: 0.15 }, { x: 100, y: 100 }, 0.0001],
+  ] as [string, ViewportState, { x: number; y: number }, number][])(
+    "keeps the world point under the cursor fixed on screen across a single %s step",
+    (_label, viewport, cursorScreen, requestedZoom) => {
+      const cursorWorld = screenToWorld(viewport, cursorScreen);
 
-    const zoomed = zoomAtPoint(viewport, cursorScreen, viewport.zoom * 1.2);
+      const zoomed = zoomAtPoint(viewport, cursorScreen, requestedZoom);
 
-    // The same world point, reprojected through the new viewport, must land
-    // back at the same screen coordinates the cursor was at.
-    expectPointClose(worldToScreen(zoomed, cursorWorld), cursorScreen);
-  });
+      // The same world point, reprojected through the new viewport, must land
+      // back at the same screen coordinates the cursor was at.
+      expectPointClose(worldToScreen(zoomed, cursorWorld), cursorScreen);
+    },
+  );
 
   it("holds across a compounded sequence of zoom steps at a fixed cursor point (simulating several coalesced wheel events)", () => {
     let viewport: ViewportState = { x: 0, y: 0, zoom: 1 };

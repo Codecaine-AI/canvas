@@ -15,20 +15,23 @@ describe("CanvasDock state rules", () => {
     expect(activeButtons.length).toBe(0);
   });
 
-  it("highlights exactly the button matching activeTool with the solid accent tile", () => {
-    const { container } = render(<CanvasDock activeTool="hand" />);
-    const active = container.querySelector('[data-dock-tool="hand"]') as HTMLElement;
-    expect(active.getAttribute("data-active")).toBe("true");
-    expect(active.style.background).toBe(cssVar("color.accent"));
-    // The glyph on the accent tile is the on-solid glyph; resting glyphs stay body text.
-    expect(active.style.color).toBe(cssVar("color.text.on-solid"));
+  it.each(["hand", "connector"] as const)(
+    "highlights exactly the button matching activeTool %p with the solid accent tile",
+    (tool) => {
+      const { container } = render(<CanvasDock activeTool={tool} />);
+      const active = container.querySelector(`[data-dock-tool="${tool}"]`) as HTMLElement;
+      expect(active.getAttribute("data-active")).toBe("true");
+      expect(active.style.background).toBe(cssVar("color.accent"));
+      // The glyph on the accent tile is the on-solid glyph; resting glyphs stay body text.
+      expect(active.style.color).toBe(cssVar("color.text.on-solid"));
 
-    const others = container.querySelectorAll('[data-active="true"]');
-    expect(others.length).toBe(1);
-    for (const button of container.querySelectorAll<HTMLElement>('[data-dock-tool]:not([data-dock-tool="hand"])')) {
-      expect(button.style.background).not.toBe(cssVar("color.accent"));
-    }
-  });
+      const others = container.querySelectorAll('[data-active="true"]');
+      expect(others.length).toBe(1);
+      for (const button of container.querySelectorAll<HTMLElement>(`[data-dock-tool]:not([data-dock-tool="${tool}"])`)) {
+        expect(button.style.background).not.toBe(cssVar("color.accent"));
+      }
+    },
+  );
 
   // regression: 3c5f8ac
   it("shows a hover fill distinct from the solid accent tile", () => {

@@ -137,14 +137,22 @@ function connectorToolbarApi(overrides: Partial<SelectionToolbarApi> = {}): Sele
 }
 
 describe("SelectionToolbar registry-driven control sets", () => {
-  it("shape controls render exactly the 3 measured controls in order", () => {
-    const { container } = render(<SelectionToolbar controls={SHAPE_CONTROLS} variantLabel="shape" />);
-    const actions = Array.from(container.querySelectorAll("[data-toolbar-action]")).map((el) =>
-      el.getAttribute("data-toolbar-action"),
-    );
-    expect(actions).toEqual(["color", "text", "shape-swap"]);
-    expect(container.querySelectorAll("[data-divider]").length).toBe(1);
-  });
+  it.each([
+    ["shape", SHAPE_CONTROLS, ["color", "text", "shape-swap"], 1],
+    ["sticky", STICKY_CONTROLS, ["color", "text"], 0],
+    ["section", SECTION_CONTROLS, ["color", "rename", "fit-children", "section-border-style", "lock"], 2],
+    ["connector", CONNECTOR_CONTROLS, ["color", "text", "dash", "arrowhead"], 1],
+  ] as const)(
+    "%s controls render exactly their registry controls in order, with their dividers",
+    (variantLabel, controls, expectedActions, expectedDividers) => {
+      const { container } = render(<SelectionToolbar controls={controls} variantLabel={variantLabel} />);
+      const actions = Array.from(container.querySelectorAll("[data-toolbar-action]")).map((el) =>
+        el.getAttribute("data-toolbar-action"),
+      );
+      expect(actions).toEqual([...expectedActions]);
+      expect(container.querySelectorAll("[data-divider]").length).toBe(expectedDividers);
+    },
+  );
 
   it("every selection kind resolves a non-empty control list (incl. the multi intersection)", () => {
     const kinds: Record<string, readonly unknown[]> = {

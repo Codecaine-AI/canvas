@@ -7,17 +7,21 @@ afterEach(() => {
 });
 
 describe("ShapeSearchPopover search filtering", () => {
-  it("filters entries as the user types, case-insensitively (labels + def keywords)", () => {
+  // P4 catalog unification: search matches the def-declared keywords too.
+  // "chevron" appears in no label but is an arrow-shape def keyword, so it
+  // hits both arrow direction variants; "subroutine" is a keyword of the
+  // predefined-process def only.
+  it.each([
+    ["chevron", ["Left arrow", "Right arrow"]],
+    ["subroutine", ["Predefined process"]],
+  ])("filters entries as the user types, case-insensitively (labels + def keywords): %p", (query, expected) => {
     const { container } = render(<ShapeSearchPopover />);
     const input = container.querySelector("input") as HTMLInputElement;
-    fireEvent.change(input, { target: { value: "chevron" } });
-    // P4 catalog unification: search matches the def-declared keywords too —
-    // "chevron" appears in no label but is an arrow-shape def keyword, so it
-    // hits both arrow direction variants.
+    fireEvent.change(input, { target: { value: query } });
     const labels = [...container.querySelectorAll("[data-shape-entry]")].map((b) =>
       b.getAttribute("aria-label"),
     );
-    expect(labels).toEqual(["Left arrow", "Right arrow"]);
+    expect(labels).toEqual(expected);
   });
 
   it("shows a no-results message when nothing matches", () => {

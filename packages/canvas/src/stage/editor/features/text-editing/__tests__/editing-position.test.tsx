@@ -386,19 +386,23 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
     expectAtRestMatchesEditor(object);
   });
 
-  it("human icon: below-glyph band grows downward from a pinned glyph area", () => {
+  it.each([
+    ["human", "pe1", { x: 10, y: 20, width: 120, height: 140 }],
+    ["message", "ch1", { x: 10, y: 20, width: 180, height: 110 }],
+    ["config", "i1", { x: 0, y: 0, width: 120, height: 120 }],
+  ] as const)("%s icon: below-glyph band grows downward from a pinned glyph area", (icon, id, geometry) => {
     const object = makeObject({
-      id: "pe1",
+      id,
       type: "icon",
-      icon: "human",
-      geometry: { x: 10, y: 20, width: 120, height: 140 },
+      icon,
+      geometry: { ...geometry },
       style: { shape: "icon" },
     });
     const { editor, resolved } = expectEditorOnSlot(object);
     const expectedWidth = measureWidth("Hello text", FIGJAM_NAME_FONT);
     expect(resolved.rect).toEqual({
-      x: (120 - expectedWidth) / 2,
-      y: 140 + BELOW_BAND_GAP_PX,
+      x: (geometry.width - expectedWidth) / 2,
+      y: geometry.height + BELOW_BAND_GAP_PX,
       width: expectedWidth,
       height: 18,
     });
