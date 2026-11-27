@@ -128,4 +128,9 @@ describe("resize like lookup", () => {
     expect(resolveSizeLike(document, "peer")).toEqual({ width: 180, height: 40 });
     expect(resolveSizeLike(document, "connection-1")).toBeNull();
   });
+
+  test("returns the raw size — the descriptor is what quantizes it", () => {
+    const document = makeDocument([box("hand-drawn", 0, 0, 187, 63)]);
+    expect(resolveSizeLike(document, "hand-drawn")).toEqual({ width: 187, height: 63 });
+  });
 });

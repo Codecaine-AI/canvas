@@ -1,11 +1,15 @@
 import { describe, expect, it } from "bun:test";
 import { base64Of, bundledFaceFor, embedSvgFonts, svgFontFaces } from "../svg-fonts";
+import { renderDocumentToSvg } from "../static-svg";
+import type { InteractiveCanvasDocument } from "../../state/schema";
 
 /**
  * A standalone SVG (an <img> preview, a PNG export's Image decode, a saved
  * file) cannot see the page's @font-face rules: it paints the bundled faces
  * its text was measured with only when it embeds them.
  */
+
+const faceIds = (svg: string) => svgFontFaces(svg).map((face) => face.id);
 
 describe("bundledFaceFor (CSS font matching)", () => {
   it("picks the exact weight, else looks up within 400-500, else away from 400", () => {
@@ -26,6 +30,17 @@ describe("svgFontFaces", () => {
       '<text font-weight="700">   </text>' +
       '<text font-family="Georgia">serif</text></svg>';
     expect(svgFontFaces(svg).map((face) => face.file)).toEqual(["Inter-SemiBold", "IBMPlexMono-Regular"]);
+  });
+
+  it("finds the faces a rendered board paints", () => {
+    const document: InteractiveCanvasDocument = {
+      schemaVersion: 1,
+      id: "fonts",
+      mode: "diagram",
+      objects: [{ id: "a", type: "rectangle", text: "MMMMMMMMMM", geometry: { x: 0, y: 0, width: 200, height: 70 } }],
+      connections: [],
+    } as InteractiveCanvasDocument;
+    expect(faceIds(renderDocumentToSvg(document).svg).length).toBeGreaterThan(0);
   });
 });
 

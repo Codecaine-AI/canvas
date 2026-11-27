@@ -9,6 +9,7 @@ import {
   selectionBounds,
   type CanvasPointerEvent,
 } from "../interaction";
+import { SELECTION_DRAG_KINDS } from "../../stage/editor/pipeline/use-interaction-pipeline";
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
@@ -120,6 +121,33 @@ function expectOrthogonalPolyline(points: ReadonlyArray<{ x: number; y: number }
     expect(dx <= 0.01 || dy <= 0.01).toBe(true);
   }
 }
+
+describe("interaction pipeline: selection drag activity", () => {
+  it("flags only gestures that manipulate the current selection's geometry", () => {
+    expect([...SELECTION_DRAG_KINDS].sort()).toEqual(
+      [
+        "connector-bend-drag",
+        "connector-create",
+        "connector-endpoint-drag",
+        "move",
+        "resize",
+      ].sort(),
+    );
+
+    for (const kind of [
+      "move",
+      "resize",
+      "connector-endpoint-drag",
+      "connector-bend-drag",
+      "connector-create",
+    ]) {
+      expect(SELECTION_DRAG_KINDS.has(kind)).toBe(true);
+    }
+    for (const kind of ["idle", "pressing", "drag-select", "place"]) {
+      expect(SELECTION_DRAG_KINDS.has(kind)).toBe(false);
+    }
+  });
+});
 
 describe("interaction: hitTestObjects", () => {
   it.each([

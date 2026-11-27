@@ -285,20 +285,6 @@ describe("section auto-grow", () => {
       dx: -60,
       expected: { x: 40, y: 100, width: 961.5, height: 600 },
     },
-    {
-      // An off-grid frame with no locked parent: what matters is that it grew
-      // and that the accept replays to the same document, not the exact frame.
-      name: "a grow on an off-grid frame with no locked parent",
-      objects: [
-        section("page", 0, 0, 2000, 1400),
-        section("hand", 101.3, 97.7, 401.9, 303.2, "page"),
-        child("kid", 140, 160, "hand"),
-      ],
-      frame: "hand",
-      mover: "kid",
-      dx: 220,
-      expected: expect.any(Object),
-    },
   ])("$name, and replays the same after accept", ({ objects, frame, mover, dx, expected }) => {
     const baseline = makeDocument(objects);
     const session = makeTestSession(baseline, [frame]);
@@ -313,6 +299,25 @@ describe("section auto-grow", () => {
     expect(geometryOf(session.draft, frame)).not.toEqual(geometryOf(baseline, frame));
     expect(geometryOf(replayed, frame)).toEqual(expected);
     expect(escapes(replayed)).toEqual([]);
+    expect(diffDocuments(replayed, session.draft)).toEqual([]);
+  });
+
+  test("a grow on an off-grid frame replays through the reducer to the same document", () => {
+    const baseline = makeDocument([
+      section("page", 0, 0, 2000, 1400),
+      section("hand", 101.3, 97.7, 401.9, 303.2, "page"),
+      child("kid", 140, 160, "hand"),
+    ]);
+    const session = makeTestSession(baseline, ["hand"]);
+
+    runOp(session, "move", { id: "kid", by: { dx: 220, dy: 0 } });
+    const replayed = reduceInteractiveCanvasState(createInteractiveCanvasState(baseline), {
+      type: "canvas.applyAgentPatch",
+      operations: diffDocuments(baseline, session.draft),
+      summary: "accept",
+    }).document;
+
+    expect(geometryOf(session.draft, "hand")).not.toEqual(geometryOf(baseline, "hand"));
     expect(diffDocuments(replayed, session.draft)).toEqual([]);
   });
 

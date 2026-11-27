@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "bun:test";
+import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { ZoomControls } from "../ZoomControls";
 
@@ -21,6 +21,23 @@ describe("ZoomControls geometry", () => {
 });
 
 describe("ZoomControls interaction", () => {
+  it("fires onZoomIn / onZoomOut on click", () => {
+    const onZoomIn = mock(() => {});
+    const onZoomOut = mock(() => {});
+    const { getByLabelText } = render(<ZoomControls onZoomIn={onZoomIn} onZoomOut={onZoomOut} />);
+    fireEvent.click(getByLabelText("Zoom in"));
+    fireEvent.click(getByLabelText("Zoom out"));
+    expect(onZoomIn).toHaveBeenCalledTimes(1);
+    expect(onZoomOut).toHaveBeenCalledTimes(1);
+  });
+
+  it("fires onZoomPercentClick when the percentage label is clicked", () => {
+    const onZoomPercentClick = mock(() => {});
+    const { getByText } = render(<ZoomControls zoomPercent={1} onZoomPercentClick={onZoomPercentClick} />);
+    fireEvent.click(getByText("100%"));
+    expect(onZoomPercentClick).toHaveBeenCalledTimes(1);
+  });
+
   it("disables all controls when disabled", () => {
     const { getByLabelText } = render(<ZoomControls disabled zoomPercent={1} />);
     expect((getByLabelText("Zoom in") as HTMLButtonElement).disabled).toBe(true);

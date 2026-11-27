@@ -98,6 +98,27 @@ describe("a stored detail never paints live: a node shows its name only", () => 
 });
 
 describe("live shape paint", () => {
+  it("card shapes: card fill + ink border; figjam keeps the tint", () => {
+    const dark = canvasThemePreset("schematic-dark");
+    const card = objectNode(stage([shape()], "schematic-dark"), "s1");
+    expect(card.style.background).toBe(dark.cardFill);
+    expect(card.style.color).toBe(dark.textColor);
+    // A whole-px border stays a CSS border; the process radius equals
+    // shapeCornerRadiusPx (2px), so the rounded rect takes no inline radius.
+    expect(card.style.borderWidth).toBe("2px");
+    expect(dark.processCornerRadiusPx).toBe(dark.shapeCornerRadiusPx);
+    expect(card.style.borderRadius).toBe("");
+    expect(card.querySelector("[data-canvas-shape-silhouette]")).toBeNull();
+    cleanup();
+    const tint = objectNode(stage([shape()]), "s1");
+    expect(tint.style.background).toBe("#CDDFFF");
+    expect(tint.style.borderColor).toBe("#1A5CDF");
+    expect(tint.style.borderWidth).toBe("2px");
+    // figjam's process radius equals shapeCornerRadiusPx: no inline radius.
+    expect(tint.style.borderRadius).toBe("");
+    expect(tint.querySelector("[data-canvas-shape-silhouette]")).toBeNull();
+  });
+
   // The schematic presets' shape border is a whole 2px; a 1.5px override is
   // the fractional case.
   const FRACTIONAL_BORDER: CanvasStyle = { ...canvasThemePreset("schematic-light"), shapeBorderWidthPx: 1.5 };

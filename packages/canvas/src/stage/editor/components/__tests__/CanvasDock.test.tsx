@@ -30,6 +30,25 @@ describe("CanvasDock button inventory", () => {
       "connector",
     ]);
   });
+
+  it("groups buttons into 2 clusters separated by 1 vertical divider", () => {
+    const { container } = render(<CanvasDock />);
+    const groups = container.querySelectorAll("[data-dock-group]");
+    expect(groups.length).toBe(2);
+    for (const group of groups) {
+      expect(group.querySelectorAll("[data-dock-tool]").length).toBe(3);
+    }
+    const dividers = container.querySelectorAll("[data-divider]");
+    expect(dividers.length).toBe(1);
+    for (const divider of dividers) {
+      const dividerEl = divider as HTMLElement;
+      expect(dividerEl.style.width).toBe("1.5px");
+      expect(dividerEl.style.height).toBe(cssVar("space.8"));
+      expect(dividerEl.style.margin).toBe("0px 10px");
+      expect(dividerEl.style.background).toBe(cssVar("color.border.default"));
+    }
+    expect(container.textContent).not.toContain("|");
+  });
 });
 
 describe("CanvasDock state rules", () => {

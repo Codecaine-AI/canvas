@@ -6,7 +6,7 @@ import type { TextEditingApi } from "../editor/features/text-editing/use-text-ed
 import { connectorDashArray } from "../../connectors/def";
 import { renderDocumentToSvg } from "../../render/static-svg";
 import { canvasThemePreset, type CanvasThemeId } from "../../theme/canvas-style";
-import { contrastRatio } from "../../theme/color-math";
+import { contrastRatio, parseColor } from "../../theme/color-math";
 import { resolveStickyPaint } from "../../theme/palette";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 import { measureWidth } from "../../theme/text-measure";
@@ -299,6 +299,34 @@ describe("connector label chip per theme", () => {
 });
 
 describe("card stickies", () => {
+  it("live: light boards paint a tinted callout with its hue's rule, a tinted edge and a two-layer lift", () => {
+    const note = renderLive("schematic-light").querySelector<HTMLElement>('[data-canvas-object-id="note"]')!;
+    const paint = resolveStickyPaint("yellow", canvasThemePreset("schematic-light"));
+    expect(note.style.background).toBe(
+      `linear-gradient(to right, transparent 1px, ${paint.rule} 1px, ${paint.rule} 5px, transparent 5px) ${paint.fill}`,
+    );
+    expect(note.style.boxShadow).toBe(
+      `inset 0 0 0 1px ${paint.border}, 0 1px 2px ${paint.cardShadow}, 0 2px 6px ${paint.cardShadow}`,
+    );
+  });
+
+  it("static: the same callout with 2px corners, the rule, the edge and the two-layer lift filter", () => {
+    const svg = staticSvg("schematic-light");
+    const style = canvasThemePreset("schematic-light");
+    const paint = resolveStickyPaint("yellow", style);
+    const opacity = parseColor(paint.cardShadow!)!.a;
+    expect(svg).toContain(
+      `<feOffset in="b0" dy="1" result="o0"/><feFlood flood-color="${style.textColor}" flood-opacity="${opacity}" result="f0"/>`,
+    );
+    expect(svg).toContain('<feGaussianBlur in="SourceAlpha" stdDeviation="3" result="b1"/><feOffset in="b1" dy="2" result="o1"/>');
+    expect(svg).toContain(
+      `<rect x="900" y="80" width="240" height="160" rx="2" fill="${paint.fill}" filter="url(#theme-board-card-sticky-shadow)"/>`,
+    );
+    expect(svg).toContain(
+      `<path d="M901 80.27A2 2 0 0 1 902 80H905V240H902A2 2 0 0 1 901 239.73Z" fill="${paint.rule}"/><rect x="900.5" y="80.5" width="239" height="159" rx="1.5" fill="none" stroke="${paint.border}" stroke-width="1"/>`,
+    );
+  });
+
   it("dark boards: a straight 4px neutral rule inside the hairline, live and static", () => {
     const note = renderLive("schematic-dark").querySelector<HTMLElement>('[data-canvas-object-id="note"]')!;
     // The rule is a background strip the corner radius clips, so its inner edge never curls into a hook.
