@@ -253,25 +253,65 @@ describe("section auto-grow", () => {
     expect(escapes(grown)).toEqual([]);
   });
 
-  test("a grow that keeps an off-grid edge at a locked parent's edge keeps it after accept", () => {
-    // lane's bottom sits on held's off-grid bottom (701.5) and tall ends 1px
-    // above it. Moving the other child grows lane's right side only.
-    const baseline = makeDocument([
-      { ...section("held", 0, 0, 1000, 701.5), locked: "background" },
-      section("lane", 100, 100, 400, 601.5, "held"),
-      child("tall", 140, 200, "lane", 160, 501),
-      child("moving", 300, 160, "lane", 160, 60),
-    ]);
-    const session = makeTestSession(baseline, ["lane"]);
+  test.each([
+    {
+      // lane's bottom sits on held's off-grid bottom (701.5) and tall ends 1px
+      // above it. Moving the other child grows lane's right side only.
+      name: "a right grow keeps an off-grid bottom at a locked parent's edge",
+      objects: [
+        { ...section("held", 0, 0, 1000, 701.5), locked: "background" as const },
+        section("lane", 100, 100, 400, 601.5, "held"),
+        child("tall", 140, 200, "lane", 160, 501),
+        child("moving", 300, 160, "lane", 160, 60),
+      ],
+      frame: "lane",
+      mover: "moving",
+      dx: 60,
+      expected: { x: 100, y: 100, width: 460, height: 601.5 },
+    },
+    {
+      // lane's right side sits on held's off-grid right (1001.5) and tall ends
+      // 0.5px inside it. Moving the other child left grows lane's left side,
+      // which changes its width; the accept must keep its right edge.
+      name: "a left grow keeps an off-grid right edge at a locked parent's edge",
+      objects: [
+        { ...section("held", 0, 0, 1001.5, 800), locked: "background" as const },
+        section("lane", 100, 100, 901.5, 600, "held"),
+        child("tall", 840, 300, "lane", 161, 100),
+        child("moving", 140, 200, "lane", 160, 60),
+      ],
+      frame: "lane",
+      mover: "moving",
+      dx: -60,
+      expected: { x: 40, y: 100, width: 961.5, height: 600 },
+    },
+    {
+      // An off-grid frame with no locked parent: what matters is that it grew
+      // and that the accept replays to the same document, not the exact frame.
+      name: "a grow on an off-grid frame with no locked parent",
+      objects: [
+        section("page", 0, 0, 2000, 1400),
+        section("hand", 101.3, 97.7, 401.9, 303.2, "page"),
+        child("kid", 140, 160, "hand"),
+      ],
+      frame: "hand",
+      mover: "kid",
+      dx: 220,
+      expected: expect.any(Object),
+    },
+  ])("$name, and replays the same after accept", ({ objects, frame, mover, dx, expected }) => {
+    const baseline = makeDocument(objects);
+    const session = makeTestSession(baseline, [frame]);
 
-    runOp(session, "move", { id: "moving", by: { dx: 60, dy: 0 } });
+    runOp(session, "move", { id: mover, by: { dx, dy: 0 } });
     const replayed = reduceInteractiveCanvasState(createInteractiveCanvasState(baseline), {
       type: "canvas.applyAgentPatch",
       operations: diffDocuments(baseline, session.draft),
       summary: "accept",
     }).document;
 
-    expect(geometryOf(replayed, "lane")).toEqual({ x: 100, y: 100, width: 460, height: 601.5 });
+    expect(geometryOf(session.draft, frame)).not.toEqual(geometryOf(baseline, frame));
+    expect(geometryOf(replayed, frame)).toEqual(expected);
     expect(escapes(replayed)).toEqual([]);
     expect(diffDocuments(replayed, session.draft)).toEqual([]);
   });

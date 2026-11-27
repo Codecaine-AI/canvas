@@ -18,7 +18,7 @@ describe("description patch operations", () => {
     })).toBe("updateDescription (cleared)");
   });
 
-  test("applies replacement text without touching entity ids", () => {
+  test("applies replacement text, and clears on a whitespace-only one, without touching entity ids", () => {
     const baseline = makeDocument([box("kept", 0, 0)]);
 
     const applied = applyOperationToDraft(
@@ -35,5 +35,14 @@ describe("description patch operations", () => {
       summary: "description replacement",
       touched: [],
     });
+
+    const cleared = applyOperationToDraft(
+      { ...baseline, description: "Before" },
+      { type: "updateDescription", description: "\n  " },
+    );
+
+    expect(cleared.document.description).toBeUndefined();
+    expect(cleared.summary).toBe("updateDescription");
+    expect(cleared.touched).toEqual([]);
   });
 });

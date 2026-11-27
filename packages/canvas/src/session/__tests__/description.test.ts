@@ -163,6 +163,10 @@ describe("board description perception", () => {
     const snapshot = boardStateSnapshot(session);
 
     expect(formatBoardDescription(markdown)).toBe(block);
+    // Absence is named without delimiters.
+    expect(formatBoardDescription()).toBe(
+      "DESCRIPTION · none — this board has no description yet",
+    );
     expect(snapshot).toContain(`${block}\n\nBOARD ·`);
     // look no longer restates the board; the description rides section ③.
     expect(lookPerception(session).text).not.toContain("DESCRIPTION ·");

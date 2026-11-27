@@ -95,6 +95,11 @@ describe("S2.1 translateWithDescendants", () => {
     expect(objects.find((object) => object.id === "loose")).toBe(
       document.objects.find((object) => object.id === "loose")!,
     );
+
+    // A plain object moves alone; its frame stays put.
+    const plain = translateWithDescendants(document, ["child-a"], { dx: 20, dy: 20 });
+    expect(geometryOf(plain, "child-a")).toEqual({ x: 260, y: 280, width: 100, height: 80 });
+    expect(geometryOf(plain, "outer")).toEqual({ x: 200, y: 200, width: 400, height: 300 });
   });
 
   it("moves a child listed alongside its own section exactly once", () => {
@@ -181,6 +186,38 @@ describe("S2.2 spaceOutObjects", () => {
     // The clear gaps, read back off the result.
     expect(geometryOf(spaced.objects, "b").x - 100).toBe(40);
     expect(geometryOf(spaced.objects, "c").x - (140 + 60)).toBe(40);
+
+    // Order comes from position, not from the order the ids arrive in.
+    const shuffled = spaceOutObjects(makeDocument([
+      box("a", 0, 0, 100, 80),
+      box("b", 500, 0, 100, 80),
+      box("c", 250, 0, 100, 80),
+    ]), ["b", "c", "a"], "horizontal", 20);
+    expect(geometryOf(shuffled.objects, "a").x).toBe(0);
+    expect(geometryOf(shuffled.objects, "c").x).toBe(120);
+    expect(geometryOf(shuffled.objects, "b").x).toBe(240);
+
+    // A bigger gap grows the span; a smaller one shrinks it.
+    const row = makeDocument([
+      box("a", 0, 0, 100, 80),
+      box("b", 120, 0, 100, 80),
+      box("c", 240, 0, 100, 80),
+    ]);
+    const opened = spaceOutObjects(row, ["a", "b", "c"], "horizontal", 200);
+    expect(geometryOf(opened.objects, "b").x).toBe(300);
+    expect(geometryOf(opened.objects, "c").x).toBe(600);
+    const closed = spaceOutObjects(row, ["a", "b", "c"], "horizontal", 0);
+    expect(geometryOf(closed.objects, "b").x).toBe(100);
+    expect(geometryOf(closed.objects, "c").x).toBe(200);
+
+    // Cross-axis positions are left untouched.
+    const staggered = spaceOutObjects(makeDocument([
+      box("a", 0, 17, 100, 80),
+      box("b", 200, 333, 100, 80),
+    ]), ["a", "b"], "horizontal", 40);
+    expect(geometryOf(staggered.objects, "a").y).toBe(17);
+    expect(geometryOf(staggered.objects, "b").y).toBe(333);
+    expect(geometryOf(staggered.objects, "b").x).toBe(140);
   });
 
   it("re-pitches vertically off heights", () => {
@@ -311,6 +348,13 @@ describe("S2.3 alignWithDescendants", () => {
     expect(parents.get("inner")).toBe("outer");
     expect(parents.get("child-b")).toBe("inner");
     expect(parents.get("loose")).toBe("outer");
+
+    // Centring moves the frame as one unit too.
+    const centred = alignWithDescendants(document, ["outer", "loose"], "center_v");
+    const outer = geometryOf(centred.objects, "outer");
+    const loose = geometryOf(centred.objects, "loose");
+    expect(outer.y + outer.height / 2).toBe(loose.y + loose.height / 2);
+    expect(geometryOf(centred.objects, "child-a").y - outer.y).toBe(60);
   });
 
   it("drops a child listed alongside the section that carries it", () => {
@@ -354,6 +398,17 @@ describe("S2.4 sectionFitGeometry padding config", () => {
       SECTION_FIT_PADDING_PX + SECTION_TITLE_CLEARANCE_PX - 2,
     );
     expect(fitted).toEqual(sectionFitGeometry(document, "frame", SECTION_FIT_PADDING_PX)!);
+
+    // A bare number is body padding, the same as { padding } with the default title clearance.
+    const numeric = sectionFitGeometry(document, "frame", 48)!;
+    expect(200 - numeric.x).toBe(48);
+    expect(numeric).toEqual(sectionFitGeometry(document, "frame", { padding: 48 })!);
+    expect(numeric).toEqual(
+      sectionFitGeometry(document, "frame", {
+        padding: 48,
+        titleClearance: SECTION_TITLE_CLEARANCE_PX,
+      })!,
+    );
   });
 
   it("lands entirely on the 20 grid for on-grid children with the agent's 40/40 config", () => {

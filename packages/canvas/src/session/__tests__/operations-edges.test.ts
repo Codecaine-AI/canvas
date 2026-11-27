@@ -169,6 +169,16 @@ describe("change_connection", () => {
     expect(result.isError).toBeUndefined();
     expect(edgeOf(session).waypoints).toBeUndefined();
     expect(result.text).toContain("manual waypoints dropped");
+
+    // Moving only the anchor on the same object is an endpoint change too.
+    const anchored = edgeSession();
+    runOp(anchored, "route", { id: "e1", points: [[420, 160], [420, 400]] });
+    const repoint = runOp(anchored, "change_connection", {
+      id: "e1",
+      patch: { to: { objectId: "b", anchor: "top" } },
+    });
+    expect(repoint.isError).toBeUndefined();
+    expect(edgeOf(anchored).waypoints).toBeUndefined();
   });
 
   test("distinctness is judged against the edge as it will stand", () => {
@@ -288,13 +298,14 @@ describe("route points", () => {
 // ---------------------------------------------------------------------------
 
 describe("route shift", () => {
-  test("slides one segment perpendicular to itself and prints the new route", () => {
+  // 517 is off the grid; the target coordinate snaps to 520.
+  test.each([520, 517])("slides one segment perpendicular to itself and prints the new route (to %p)", (to) => {
     const session = edgeSession();
     expect(routeOf(session)).toBe(
       "a ─(s0 h y=150)→ ─(s1 h y=150)→ (s2 v x=450) ─(s3 h y=390)→ ─(s4 h y=390)→ b",
     );
 
-    const result = runOp(session, "route", { id: "e1", shift: { segment: 2, to: 520 } });
+    const result = runOp(session, "route", { id: "e1", shift: { segment: 2, to } });
 
     expect(result.isError).toBeUndefined();
     expect(result.text).toContain("APPLIED · route e1");
@@ -368,6 +379,13 @@ describe("route shift", () => {
     expect(result.text).toContain("NO-OP · route e1");
     expect(result.text).toContain("already sits at x=520");
     expect(edgeOf(session).waypoints).toEqual([[520, 150], [520, 390]]);
+
+    // The no-op names the edge from id, whatever key comes first in the call.
+    const reordered = edgeSession();
+    runOp(reordered, "route", { id: "e1", shift: { segment: 2, to: 520 } });
+    const repeat = runOp(reordered, "route", { shift: { segment: 1, to: 520 }, id: "e1" });
+    expect(repeat.isError).toBeUndefined();
+    expect(repeat.text.split("\n")[0]).toBe("NO-OP · route e1 — segment s1 already sits at x=520.");
   });
 });
 

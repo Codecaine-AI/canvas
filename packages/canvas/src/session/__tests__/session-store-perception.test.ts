@@ -236,6 +236,26 @@ describe("BOARD DIFF block", () => {
     expect(diff).toContain("addObject note");
     expect(diff).toContain("removeObject gamma");
     expect(diff).not.toContain("updateObject beta");
+
+    // Section and sticky changes use their entity-kind verbs, not object verbs.
+    const section = { ...box("home", 0, 0, 480, 320, "section"), text: "Home" };
+    const sticky = { ...box("note", 600, 0, 176, 128, "sticky"), text: "Remember" };
+    const kinds = makeTestSession(makeDocument([section, sticky]), ["home", "note"]);
+    runOp(kinds, "update_text", { id: "home", text: "Renamed home" });
+    runOp(kinds, "delete", { id: "note" });
+    runOp(kinds, "place_section", {
+      id: "annex",
+      text: "Annex",
+      at: [0, 400],
+      size: { width: 480, height: 320 },
+    });
+    const kindDiff = boardDiffBlock(kinds);
+    expect(kindDiff).toContain("BOARD DIFF · base → draft · 3 ops");
+    expect(kindDiff).toContain("addSection annex");
+    expect(kindDiff).toContain("updateSection home  retexted");
+    expect(kindDiff).toContain("removeSticky note");
+    expect(kindDiff).not.toContain("updateObject home");
+    expect(kindDiff).not.toContain("removeObject note");
   });
 
   test("matches the operations a committed finalize proposes", () => {
@@ -307,6 +327,13 @@ describe("LINTS delta", () => {
     expect(clean.isError).toBeUndefined();
     expect(clean.text).toContain("LINTS · no new errors (1 open)");
     expect(clean.text).not.toContain("E1 covered-content");
+
+    // From a clean lint state, the first new finding is listed in full with +.
+    const fresh = makeTestSession(makeDocument([box("alpha", 0, 0), box("beta", 480, 0)]), ["alpha", "beta"]);
+    runOp(fresh, "change_color", { id: "alpha", color: "teal" });
+    const first = runOp(fresh, "move", { id: "beta", to: { x: 40, y: 0 } });
+    expect(first.text).toContain("LINTS · +1 error (1 open)");
+    expect(first.text).toContain("  + E1 covered-content:");
   });
 
   test("added findings carry prose suggestions without structured fixes", () => {
@@ -500,6 +527,14 @@ describe("look view: — an object close-up", () => {
     });
     // …while the numbers are the object's own bounds.
     expect(result.text).toContain("MEASURES · object beta 204,0 160×96");
+
+    // A lone box at the origin frames and measures the same way.
+    const lone = makeTestSession(makeDocument([box("alpha", 0, 0)]), ["alpha"]);
+    const single = look(lone, "alpha");
+    expect(single.isError).toBeUndefined();
+    expect(single.pngs).toHaveLength(1);
+    expect(single.text).toContain("LOOK · 1 render · framed alpha");
+    expect(single.text).toContain("MEASURES · object alpha 0,0 160×96");
   });
 
   test("an unknown view id costs the render, not the look", () => {
@@ -534,10 +569,13 @@ describe("look view: — the section close-up is a framed region too", () => {
     ].join("\n"));
   });
 
-  test("a look that names nothing is refused, pointing at the state block's board", () => {
+  test.each([
+    ["no view at all", undefined],
+    ["only blank ids", { view: ["", "  "] }],
+  ])("a look that names nothing (%s) is refused, pointing at the state block's board", (_label, request) => {
     const session = gridSession();
 
-    const result = look(session);
+    const result = look(session, request);
 
     expect(result.isError).toBe(true);
     expect(result.pngs).toBeUndefined();

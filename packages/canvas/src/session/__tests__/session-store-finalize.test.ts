@@ -101,9 +101,23 @@ describe("finalize committed — request gate", () => {
 
     expectBlocked(result, session, 'R1 open  object:task  human — "Split this into two steps"');
     expect(result.text).toContain("dispose with resolve_request");
+
+    // Lint blockers and open requests are reported together.
+    const section = { ...box("section", 0, 0, 640, 320, "section"), text: "Section" };
+    const one = { ...box("one", 40, 96, 184, 96, "process"), parentId: "section" };
+    const two = { ...box("two", 400, 96, 184, 96, "process"), parentId: "section" };
+    const both = makeTestSession(makeDocument([section, one, two]), ["section"], {
+      annotations: [requestAnnotation("req-1", "section", "Tighten the layout")],
+    });
+    syncSessionRequests(both);
+    both.draft = makeDocument([section, one, { ...two, geometry: { ...two.geometry, x: 80 } }]);
+    const twice = toolFinalize(both, "committed", "Should fail twice over", emitSessionEvent);
+    expect(twice.isError).toBe(true);
+    expect(twice.text).toContain("E1 covered-content:");
+    expect(twice.text).toContain("R1 open");
   });
 
-  test("commits once every request reaches a terminal state", () => {
+  test("commits once every request reaches a terminal state, and an open agent-authored thread never blocks", () => {
     const baseline = makeDocument([box("task", 0, 0, 184, 96, "process")]);
     const session = makeTestSession(baseline, ["task"], {
       annotations: [
@@ -123,6 +137,20 @@ describe("finalize committed — request gate", () => {
     expect(result.isError).toBeUndefined();
     expect(session.status).toBe("proposal-ready");
     expect(session.events.map((event) => event.type)).toEqual(["proposal-ready"]);
+
+    const task = box("task", 0, 0, 184, 96, "process");
+    const asked = makeTestSession(makeDocument([task]), ["task"], {
+      annotations: [{
+        ...requestAnnotation("agent-question", "task", "Should this be split further?"),
+        createdBy: "agent",
+      }],
+    });
+    syncSessionRequests(asked);
+    asked.draft = { ...asked.draft, objects: [{ ...task, text: "edited" }] };
+    const committed = toolFinalize(asked, "committed", "Edited the task", emitSessionEvent);
+    expect(committed.isError).toBeUndefined();
+    expect(asked.status).toBe("proposal-ready");
+    expect(asked.events.map((event) => event.type)).toEqual(["proposal-ready"]);
   });
 });
 
@@ -235,5 +263,17 @@ describe("finalize none", () => {
       sessionId: session.id,
       reason: "The request needs objects outside my scope.",
     }]);
+
+    // Outcome none is valid even with a dirty draft, an open request and error lints.
+    const section = { ...box("section", 0, 0, 480, 320, "section"), text: "Section" };
+    const child = { ...box("child", 80, 96, 184, 96, "process"), parentId: "section" };
+    const blocked = makeTestSession(makeDocument([section, child]), ["section"], {
+      annotations: [requestAnnotation("req-1", "section", "Tighten the layout")],
+    });
+    syncSessionRequests(blocked);
+    blocked.draft = makeDocument([section, { ...child, geometry: { ...child.geometry, x: 400 } }]);
+    const abandoned = toolFinalize(blocked, "none", "Cannot do this safely.", emitSessionEvent);
+    expect(abandoned.isError).toBeUndefined();
+    expect(blocked.status).toBe("abandoned");
   });
 });

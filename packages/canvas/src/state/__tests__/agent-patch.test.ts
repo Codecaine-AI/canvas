@@ -679,6 +679,12 @@ describe("mergeObjectPatch geometry normalization (D1)", () => {
     for (const value of Object.values(merged.geometry)) {
       expect(value % GEOMETRY_NORMALIZATION_GRID).toBe(0);
     }
+    // Geometry already on the 20 grid (not a 16-grid value) or on the 16 grid
+    // passes through unchanged.
+    expect(mergeObjectPatch(object, { geometry: { x: 240, y: 480, width: 300, height: 100 } }).geometry)
+      .toEqual({ x: 240, y: 480, width: 300, height: 100 });
+    expect(mergeObjectPatch(object, { geometry: { x: 192, y: 48, width: 176, height: 96 } }).geometry)
+      .toEqual({ x: 192, y: 48, width: 176, height: 96 });
   });
 
   it("keeps a whole 20-grid board intact across a full applyAgentPatch replay", () => {

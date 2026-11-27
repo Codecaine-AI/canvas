@@ -25,6 +25,13 @@ describe("agent grid quantizer", () => {
     expect(snapPoint([241, 477])).toEqual([240, 480]);
     expect(snapSize({ width: 187, height: 63 })).toEqual({ width: 180, height: 60 });
     expect(snapGap(97)).toBe(100);
+    // Values already on the grid are identities.
+    for (const value of [20, 100, 240, 300, 480, 900]) {
+      expect(snapCoordinate(value)).toBe(value);
+    }
+    expect(snapPoint([240, 480])).toEqual([240, 480]);
+    expect(snapSize({ width: 300, height: 100 })).toEqual({ width: 300, height: 100 });
+    expect(snapGap(120)).toBe(120);
   });
 
   test("snaps rather than rejects: no input throws, and degenerate input resolves", () => {
@@ -131,16 +138,19 @@ describe("every geometry a gesture writes lands on the grid", () => {
     expectOnGrid(geometryOf(session, "a"), ["x", "y"]);
   });
 
-  test("arrange align snaps the shared coordinate the row agrees on", () => {
+  test.each([
+    { align: "left", edge: (g: { x: number; width: number }) => g.x, expected: 20 },
+    // b's right edge is 400 + 176 = 576; the shared edge snaps to 580.
+    { align: "right", edge: (g: { x: number; width: number }) => g.x + g.width, expected: 580 },
+  ])("arrange align $align snaps the shared coordinate the row agrees on", ({ align, edge, expected }) => {
     const session = offGridSession();
 
-    const result = runOp(session, "arrange", { ids: ["a", "b"], align: "left" });
+    const result = runOp(session, "arrange", { ids: ["a", "b"], align });
 
-    expect(geometryOf(session, "a").x).toBe(20);
-    expect(geometryOf(session, "b").x).toBe(20);
+    expect(edge(geometryOf(session, "a"))).toBe(expected);
+    expect(edge(geometryOf(session, "b"))).toBe(expected);
     // Report == landed: the number in the summary is the number in the board.
-    expect(result.text).toContain(`left edges at x=${geometryOf(session, "a").x}`);
-    expect(result.text).toContain("left edges at x=20");
+    expect(result.text).toContain(`${align} edges at x=${expected}`);
   });
 
   test("arrange space snaps each position it computes", () => {

@@ -18,7 +18,7 @@ import { describe, expect, test } from "bun:test";
 import { formatBoardDigest } from "../../board/digest";
 import { pageFrameOf } from "../../board/helpers";
 import { draftWithPageFrame, wreckedDocumentError } from "..";
-import { look, makeTestSession, runOp } from "./helpers";
+import { FIGJAM_CANVAS_STYLE, look, makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
 
 describe("session operations", () => {
@@ -48,6 +48,34 @@ describe("session operations", () => {
     // Perception does not create an edit event.
     expect(session.events).toEqual([]);
     expect(session.draft).toBe(baseline);
+
+    // An edit renders nothing; a look after it still frames only the close-up.
+    const edited = runOp(session, "move", { id: "child", to: { x: 100, y: 120 } });
+    expect(edited.isError).toBeUndefined();
+    expect(edited.pngs).toBeUndefined();
+    const afterEdit = look(session, "home");
+    expect(afterEdit.isError).toBeUndefined();
+    expect(afterEdit.pngs).toHaveLength(1);
+    expect(afterEdit.pngs![0]!.length).toBeGreaterThan(0);
+    expect(afterEdit.text).toContain("LOOK · 1 render · close-up home");
+
+    // A section placed during the run is lookable too.
+    const placing = makeTestSession(makeDocument([box("alpha", 0, 0)]), ["alpha"]);
+    const placed = runOp(placing, "place_section", {
+      id: "new-section",
+      text: "New",
+      at: [320, 0],
+      size: { width: 480, height: 320 },
+    });
+    expect(placed.isError).toBeUndefined();
+    expect(placed.text).toContain("APPLIED · place_section new-section 320,0 480×320");
+    const placedLook = look(placing, "new-section");
+    expect(placedLook.isError).toBeUndefined();
+    expect(placedLook.text).toContain("LOOK · 1 render · close-up new-section");
+    expect(placedLook.pngs).toHaveLength(1);
+    expect(placedLook.pngs![0]).toBeInstanceOf(Buffer);
+    expect(placing.draft.objects.find((object) => object.id === "new-section")?.type)
+      .toBe("section");
   });
 
   test("a mutator returns text only — pictures come from look", () => {
@@ -314,5 +342,21 @@ describe("session operations", () => {
     expect(session.draft.objects.find((object) => object.id === "beta")?.geometry)
       .toEqual({ x: 80, y: 0, width: 160, height: 96 });
     expect(session.events.map((event) => event.type)).toEqual(["proposal", "delta"]);
+
+    // The same holds on a FigJam board of process shapes: the edit lands, the
+    // run keeps going, and no proposal is made.
+    const figjam = makeTestSession(makeDocument([
+      box("a", 0, 0, 160, 96, "process"),
+      box("b", 320, 0, 160, 96, "process"),
+    ]), ["a", "b"], { canvasStyle: FIGJAM_CANVAS_STYLE });
+    const moved = runOp(figjam, "move", { id: "b", to: { x: 40, y: 0 } });
+    expect(moved.isError).not.toBe(true);
+    expect(moved.text).toContain("APPLIED · move b");
+    expect(moved.text).toContain("DELTA");
+    expect(moved.text).toContain("LINTS · +1 error (1 open)");
+    expect(moved.text).toContain("a and b overlap by");
+    expect(figjam.draft.objects.find((object) => object.id === "b")?.geometry.x).toBe(40);
+    expect(figjam.status).toBe("running");
+    expect(figjam.proposal).toBeNull();
   });
 });

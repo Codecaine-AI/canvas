@@ -383,6 +383,16 @@ describe("arrange · align", () => {
     for (const id of ["a", "b", "c"]) {
       expect(objectOf(session.draft, id).geometry.x).toBe(40);
     }
+
+    // center_h puts boxes of different widths on one horizontal center.
+    const centered = makeTestSession(
+      makeDocument([box("a", 0, 0, 100, 100), box("b", 0, 200, 300, 100)]),
+      ["a"],
+    );
+    runOp(centered, "arrange", { ids: ["a", "b"], align: "center_h" });
+    const a = objectOf(centered.draft, "a").geometry;
+    const b = objectOf(centered.draft, "b").geometry;
+    expect(a.x + a.width / 2).toBe(b.x + b.width / 2);
   });
 
   test("a listed section aligns by its own frame and carries its contents", () => {
@@ -410,6 +420,10 @@ describe("arrange · align", () => {
     const edge = runOp(session, "arrange", { ids: ["a", "a-b"], align: "left" });
     expect(edge.isError).toBe(true);
     expect(edge.text).toContain('ids "a-b" is an edge');
+    // The space mode refuses an edge id the same way.
+    const spaced = runOp(session, "arrange", { ids: ["a", "a-b"], space: { axis: "horizontal", gap: 40 } });
+    expect(spaced.isError).toBe(true);
+    expect(spaced.text).toContain('ids "a-b" is an edge');
 
     // Schema-level: the model never gets to send one id.
     const ids = (findOperationTool("arrange")!.parameters as {

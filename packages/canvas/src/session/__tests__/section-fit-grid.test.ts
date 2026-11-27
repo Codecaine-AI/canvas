@@ -100,6 +100,9 @@ describe("snapRectOutward", () => {
     expect(snapped.y).toBeLessThanOrEqual(rect.y);
     expect(snapped.x + snapped.width).toBeGreaterThanOrEqual(rect.x + rect.width);
     expect(snapped.y + snapped.height).toBeGreaterThanOrEqual(rect.y + rect.height);
+    // A rect already on grid multiples snaps to itself.
+    expect(snapRectOutward({ x: 160, y: 120, width: 620, height: 340 }))
+      .toEqual({ x: 160, y: 120, width: 620, height: 340 });
   });
 
   test("handles negative coordinates and degenerate input", () => {
