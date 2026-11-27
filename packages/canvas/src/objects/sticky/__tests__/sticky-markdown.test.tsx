@@ -48,6 +48,15 @@ describe("sticky markdown", () => {
     expect(headings.map((heading) => heading.style.lineHeight)).toEqual(["", "", ""]);
   });
 
+  it("steps headings by the style's heading scale", () => {
+    const { container } = render(<StickyMarkdown text={"# One\n### Three"} headingScale={0} />);
+    const headings = Array.from(
+      container.querySelectorAll<HTMLElement>(".interactive-canvas-sticky-line[data-heading]"),
+    );
+    expect(headings.map((heading) => heading.style.fontSize)).toEqual(["1em", "1em"]);
+    expect(headings.map((heading) => heading.style.fontWeight)).toEqual(["700", "700"]);
+  });
+
   it("renders indented bullets with clamped depth and glyph attributes", () => {
     const { container } = render(
       <StickyMarkdown text={"- a\n  - b\n    - c\n          - deep\n            - deeper\n - x"} />,

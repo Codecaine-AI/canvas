@@ -111,6 +111,15 @@ describe("Wave C render smoke: the `icon` object type", () => {
     });
   });
 
+  it("renders the default (gray) pick as glyph-interior fill + saturated stroke (P1/D13 — no fixed colors)", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const { container } = renderFigjam(<InteractiveCanvasViewer document={iconDocument(ICON_OBJECTS)} />);
+      const svg = container.querySelector('[data-canvas-object-id="icon-model"] [data-canvas-icon-glyph="model"]');
+      // gray shape cells: ink #757575 strokes the glyph, fill #E6E6E6 paints glyph interiors.
+      expectGlyphFillAndInk(svg, "#E6E6E6", "#757575");
+    });
+  });
+
   it("renders every pick as glyph-interior fill + ink stroke", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const softObject: InteractiveCanvasObject = {

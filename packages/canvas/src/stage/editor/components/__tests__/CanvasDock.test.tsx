@@ -8,6 +8,30 @@ afterEach(() => {
   cleanup();
 });
 
+describe("CanvasDock button inventory", () => {
+  it("renders exactly 6 tool buttons and no overflow button", () => {
+    const { container } = render(<CanvasDock />);
+    const buttons = container.querySelectorAll("[data-dock-tool]");
+    expect(buttons.length).toBe(6);
+    expect(container.querySelector('[data-dock-tool="overflow"]')).toBeNull();
+  });
+
+  it("renders the buttons in the documented left-to-right order", () => {
+    const { container } = render(<CanvasDock />);
+    const buttons = Array.from(container.querySelectorAll("[data-dock-tool]")).map((el) =>
+      el.getAttribute("data-dock-tool"),
+    );
+    expect(buttons).toEqual([
+      "sticky",
+      "section",
+      "shapes",
+      "select",
+      "hand",
+      "connector",
+    ]);
+  });
+});
+
 describe("CanvasDock state rules", () => {
   it("shows no active button when activeTool is null", () => {
     const { container } = render(<CanvasDock activeTool={null} />);
@@ -75,6 +99,14 @@ describe("CanvasDock callbacks", () => {
     fireEvent.click(container.querySelector('[data-dock-tool="sticky"]')!);
     expect(onSelectTool).toHaveBeenCalledTimes(1);
     expect(onSelectTool.mock.calls[0][0]).toBe("sticky");
+  });
+
+  it("fires onSelectTool with section when the Section button is clicked", () => {
+    const onSelectTool = mock((_tool: string) => {});
+    const { container } = render(<CanvasDock onSelectTool={onSelectTool} />);
+    fireEvent.click(container.querySelector('[data-dock-tool="section"]')!);
+    expect(onSelectTool).toHaveBeenCalledTimes(1);
+    expect(onSelectTool.mock.calls[0][0]).toBe("section");
   });
 
   it("fires onOpenShapes (in addition to onSelectTool) when the shapes button is clicked", () => {

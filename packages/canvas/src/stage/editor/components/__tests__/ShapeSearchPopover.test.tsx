@@ -1,6 +1,7 @@
-import { afterEach, describe, expect, it } from "bun:test";
+import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { ShapeSearchPopover } from "../ShapeSearchPopover";
+import { SHAPE_SEARCH_ENTRIES } from "../../../../objects/catalog";
 
 afterEach(() => {
   cleanup();
@@ -29,5 +30,15 @@ describe("ShapeSearchPopover search filtering", () => {
     const input = container.querySelector("input") as HTMLInputElement;
     fireEvent.change(input, { target: { value: "zzz-nonexistent" } });
     expect(getByText("No shapes found")).toBeTruthy();
+  });
+});
+
+describe("ShapeSearchPopover interaction", () => {
+  it("fires onPick with the entry's objectType when an entry is clicked", () => {
+    const onPick = mock((_type: string) => {});
+    const { container } = render(<ShapeSearchPopover onPick={onPick} />);
+    const entry = SHAPE_SEARCH_ENTRIES[0];
+    fireEvent.click(container.querySelector(`[data-shape-entry="${entry.id}"]`)!);
+    expect(onPick).toHaveBeenCalledWith(entry.objectType);
   });
 });

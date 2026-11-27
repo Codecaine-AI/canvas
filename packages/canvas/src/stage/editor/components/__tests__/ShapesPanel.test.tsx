@@ -166,6 +166,13 @@ describe("ShapesPanel interaction", () => {
     },
   );
 
+  it("fires onClose when the close button is clicked", () => {
+    const onClose = mock(() => {});
+    const { getByLabelText } = render(<ShapesPanel onClose={onClose} />);
+    fireEvent.click(getByLabelText("Close shapes panel"));
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it("clicking a shape entry never fires onClose — the panel stays open in placement mode", () => {
     const onClose = mock(() => {});
     const onPick = mock((_type: string) => {});
