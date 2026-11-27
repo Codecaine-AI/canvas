@@ -69,14 +69,18 @@ function shapeObject(
 }
 
 describe("outlinePolygon", () => {
-  it("returns the axis-aligned bounds rect for a plain rect-shaped object", () => {
-    const object = rectObject();
-    const polygon = outlinePolygon(object);
-    expect(polygon).toEqual([
+  it("returns the axis-aligned bounds rect for a plain rect-shaped object and a 4-point diamond for a diamond-styled one", () => {
+    expect(outlinePolygon(rectObject())).toEqual([
       { x: 0, y: 0 },
       { x: 100, y: 0 },
       { x: 100, y: 100 },
       { x: 0, y: 100 },
+    ]);
+    expect(outlinePolygon(diamondObject())).toEqual([
+      { x: 50, y: 0 },
+      { x: 100, y: 50 },
+      { x: 50, y: 100 },
+      { x: 0, y: 50 },
     ]);
   });
 
@@ -108,28 +112,45 @@ describe("inscribedTextRect", () => {
     expect(inscribedTextRect(rectObject())).toBeNull();
   });
 
-  it("returns closed-form per-shape center rects", () => {
-    const width = 200;
-    const height = 120;
+  it("returns closed-form per-shape center rects: ellipse, diamond, direction-aware triangle bands, predefined process", () => {
+    const box = (width: number, height: number) => ({ x: 0, y: 0, width, height });
     const cases: Array<{
-      type: InteractiveCanvasObject["type"];
-      x1: number;
-      x2: number;
-      y1: number;
-      y2: number;
+      object: InteractiveCanvasObject;
+      expected: { x: number; y: number; width: number; height: number };
     }> = [
-      { type: "predefined-process", x1: width * 0.047 + 10, x2: width - (width * 0.047 + 10), y1: 12, y2: height - 12 },
+      // Ellipse: a centered 0.68 bbox-fraction rect.
+      {
+        object: shapeObject("ellipse", { geometry: box(160, 120), style: { shape: "ellipse" } }),
+        expected: { x: (160 - 160 * 0.68) / 2, y: (120 - 120 * 0.68) / 2, width: 160 * 0.68, height: 120 * 0.68 },
+      },
+      // Decision diamond: a centered half-bbox-minus-12 rect.
+      {
+        object: diamondObject({ geometry: box(160, 112) }),
+        expected: { x: 46, y: 34, width: 68, height: 44 },
+      },
+      // Triangle pointing up (default): the band sits in the wide lower part.
+      {
+        object: shapeObject("triangle", { geometry: box(140, 120) }),
+        expected: { x: 140 * 0.25, y: 120 * 0.52, width: 140 * 0.5, height: 120 * 0.9 - 120 * 0.52 },
+      },
+      // Triangle pointing down: the band sits in the wide upper part.
+      {
+        object: shapeObject("triangle", { direction: "down", geometry: box(140, 120) }),
+        expected: { x: 140 * 0.25, y: 120 * 0.1, width: 140 * 0.5, height: 120 * 0.48 - 120 * 0.1 },
+      },
+      {
+        object: shapeObject("predefined-process", { geometry: box(200, 120) }),
+        expected: {
+          x: 200 * 0.047 + 10,
+          y: 12,
+          width: 200 - (200 * 0.047 + 10) - (200 * 0.047 + 10),
+          height: 120 - 12 - 12,
+        },
+      },
     ];
 
-    for (const testCase of cases) {
-      expect(inscribedTextRect(shapeObject(testCase.type, {
-        geometry: { x: 0, y: 0, width, height },
-      }))).toEqual({
-        x: testCase.x1,
-        y: testCase.y1,
-        width: Math.max(0, testCase.x2 - testCase.x1),
-        height: Math.max(0, testCase.y2 - testCase.y1),
-      });
+    for (const { object, expected } of cases) {
+      expect(inscribedTextRect(object)).toEqual(expected);
     }
   });
 });
@@ -210,13 +231,38 @@ describe("outlinePolygon: the universal shape core", () => {
 });
 
 describe("getConnectionAnchors: the universal shape core", () => {
-  it("produces a top anchor exactly at the apex for an up-pointing triangle (x = 0.5 fraction of width)", () => {
-    const object = shapeObject("triangle");
-    const anchors = getConnectionAnchors(object);
-    const top = anchors.find((a) => a.coord[1] === 0);
+  it("produces anchors on each shape's true outline: triangle apexes, ellipse, rect and diamond cardinal points", () => {
+    // Up-pointing triangle: the top anchor sits exactly at the apex (x = 0.5 fraction of width).
+    const top = getConnectionAnchors(shapeObject("triangle")).find((a) => a.coord[1] === 0);
     expect(top).toBeDefined();
     expect(top?.point).toEqual({ x: 50, y: 0 });
     expect(top?.coord).toEqual([0.5, 0]);
+
+    // Down-pointing triangle: the bottom anchor sits exactly at the apex.
+    const bottom = getConnectionAnchors(shapeObject("triangle", { direction: "down" })).find(
+      (a) => a.coord[1] === 1,
+    );
+    expect(bottom).toBeDefined();
+    expect(bottom?.point).toEqual({ x: 50, y: 100 });
+
+    // Ellipse: cardinal points touch the bbox edge midpoints (a circle inscribed in a square).
+    const ellipsePoints = getConnectionAnchors(shapeObject("ellipse")).map((a) => a.point);
+    expect(ellipsePoints.some((p) => Math.abs(p.x - 50) < 1e-6 && Math.abs(p.y - 0) < 1e-6)).toBe(true);
+    expect(ellipsePoints.some((p) => Math.abs(p.x - 100) < 1e-6 && Math.abs(p.y - 50) < 1e-6)).toBe(true);
+
+    // Rect: exactly 4 cardinal anchors at the bbox edge midpoints.
+    const rectAnchors = getConnectionAnchors(rectObject());
+    expect(rectAnchors).toHaveLength(4);
+    const rectPoints = rectAnchors.map((a) => a.point);
+    for (const point of [{ x: 50, y: 0 }, { x: 50, y: 100 }, { x: 0, y: 50 }, { x: 100, y: 50 }]) {
+      expect(rectPoints).toContainEqual(point);
+    }
+
+    // Diamond: the axis-aligned rays through the center land on its 4 vertices, not the bbox edges.
+    const diamondPoints = getConnectionAnchors(diamondObject()).map((a) => a.point);
+    for (const point of [{ x: 50, y: 0 }, { x: 50, y: 100 }, { x: 0, y: 50 }, { x: 100, y: 50 }]) {
+      expect(diamondPoints).toContainEqual(point);
+    }
   });
 });
 

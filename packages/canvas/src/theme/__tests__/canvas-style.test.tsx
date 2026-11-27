@@ -183,9 +183,13 @@ describe("CanvasStyleProvider / CanvasStage canvasStyle", () => {
     return <span data-probe={`${style.shapeCornerRadiusPx}/${style.shapeBorderWidthPx}`} />;
   }
 
-  it("returns the defaults without a provider and merges nested partial overrides", () => {
+  it("returns the defaults (theme schematic-light) without a provider and merges nested partial overrides", () => {
+    function ThemeProbe() {
+      return <span data-theme-probe={useCanvasStyle().theme} />;
+    }
     const { container } = render(
       <>
+        <ThemeProbe />
         <StyleProbe />
         <CanvasStyleProvider value={{ shapeCornerRadiusPx: 9 }}>
           <StyleProbe />
@@ -204,6 +208,7 @@ describe("CanvasStyleProvider / CanvasStage canvasStyle", () => {
     // Default (schematic-light: radius 2, border 2); override; inherited radius + clamped
     // border (max 8); inherit-only provider.
     expect(probes).toEqual(["2/2", "9/2", "9/8", "9/2"]);
+    expect(container.querySelector("[data-theme-probe]")!.getAttribute("data-theme-probe")).toBe("schematic-light");
   });
 
   it("a value naming another theme starts from that theme's preset, not the parent's tokens", () => {

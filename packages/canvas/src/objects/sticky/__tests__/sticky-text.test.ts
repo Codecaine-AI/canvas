@@ -72,9 +72,15 @@ describe("layoutStickyText", () => {
     // Plain paragraphs nest 0.125em under headings.
     expect(rows[6]!.indentPx).toBeCloseTo(3, 10);
     expect(rows[6]!.segments[0]!.text).toBe("paragraph");
+
+    // An indented heading keeps its indentation on its own em grid: depth 1 is 1em of the 36px heading.
+    expect(layoutStickyText("  # Nested", SLOT_WIDTH_PX, BODY_FONT_SIZE_PX)[0]).toMatchObject({
+      fontSizePx: 36,
+      indentPx: 36,
+    });
   });
 
-  it("wraps long lines on measured Inter advances within the indented width", () => {
+  it("wraps long lines on measured Inter advances within the indented width, breaking an over-wide word intra-word", () => {
     const text = "Some longer paragraph text that should wrap across the sticky width naturally";
     const rows = layoutStickyText(text, SLOT_WIDTH_PX, BODY_FONT_SIZE_PX);
     expect(rows.length).toBeGreaterThan(1);
@@ -89,6 +95,12 @@ describe("layoutStickyText", () => {
       // Content fits the box: hanging trailing spaces advance nothing.
       expect(last.xPx + last.widthPx).toBeLessThanOrEqual(SLOT_WIDTH_PX);
     }
+
+    // A single word wider than the slot splits across rows with no character lost or added.
+    const word = "Onomatopoeticmegaword".repeat(3);
+    const wordRows = layoutStickyText(word, 200, BODY_FONT_SIZE_PX);
+    expect(wordRows.length).toBeGreaterThan(1);
+    expect(wordRows.flatMap((row) => row.segments.map((segment) => segment.text)).join("")).toBe(word);
   });
 
   it("measures bold runs in Inter Bold and inline code in IBM Plex Mono 500 with its padding", () => {

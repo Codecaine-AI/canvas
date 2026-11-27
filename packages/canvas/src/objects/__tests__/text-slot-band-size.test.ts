@@ -88,7 +88,7 @@ describe("text slot below band sizing", () => {
     });
   });
 
-  it("wraps below text against at least the 200px band width, wider than a narrow glyph", () => {
+  it("wraps below text against at least the 200px band width, or the object width when the glyph is wider", () => {
     const object = makeObject({
       id: "chat-long",
       type: "icon",
@@ -115,9 +115,23 @@ describe("text slot below band sizing", () => {
     expect(size.heightPx).toBe(2 * NAME_LINE_PX);
     expect(size.widthPx).toBeGreaterThan(object.geometry.width);
     expect(size.widthPx).toBeLessThanOrEqual(BELOW_BAND_MIN_WIDTH_PX);
+
+    // A glyph wider than 200px widens the wrap budget to the object width.
+    const wide = makeObject({
+      id: "icon-wide",
+      type: "icon",
+      text: "Supercalifragilisticexpialidocious ".repeat(4).trim(),
+      geometry: { x: 0, y: 0, width: 260, height: 120 },
+      style: { shape: "icon" },
+    });
+    const wideSize = belowBandSize(wide.text, wide);
+    expect(belowBandMaxWidthPx(wide)).toBe(260);
+    expect(wideSize.widthPx).toBeLessThanOrEqual(260);
+    expect(wideSize.widthPx).toBeGreaterThan(200);
+    expect(wideSize.lines).toBeGreaterThan(1);
   });
 
-  it("re-wraps every caption into the same lines inside its own band (the stage wraps at the band width)", () => {
+  it("re-wraps every caption into the same lines inside its own band, a short word of wide glyphs on one intact line", () => {
     const texts = [
       "Adapt Question Based on Interview History",
       "Orders DB",
@@ -135,6 +149,17 @@ describe("text slot below band sizing", () => {
         expect(wrapTextLines(text, resolved.rect.width, resolved.typography)).toEqual(atMax);
         expect(belowBandSize(text, object, style).lines).toBe(atMax.length);
         expect(resolved.rect.height).toBe(atMax.length * slotLineHeightPx(resolved.typography));
+      }
+      // 0.62em per character ran narrow for these: 4 × 9.3 = 37.2px, but "Code"
+      // measures ~39px in Inter Bold — the band used to split it "Cod / e".
+      // The band is exactly the measured name, centered, and holds it on one line.
+      for (const text of ["Code", "Bun", "Web App"]) {
+        const object = makeObject({ id: "short", type: "icon", icon: "code", text, geometry: { x: 0, y: 0, width: 64, height: 64 } });
+        const resolved = resolveTextSlot(textSlotFor(object), object, 1, { canvasStyle: style });
+        expect(resolved.rect.width).toBe(measureWidth(text, nameFont(style)));
+        expect(resolved.rect.x).toBeCloseTo((64 - resolved.rect.width) / 2, 10);
+        expect(wrapTextLines(text, resolved.rect.width, resolved.typography)).toEqual([text]);
+        expect(belowBandSize(text, object, style).lines).toBe(1);
       }
     }
   });

@@ -15,10 +15,15 @@ import { resolveSectionColors, resolveShapeColors, resolveStickyFill } from "../
  */
 
 describe("resolveObjectRoleColors: shape role", () => {
-  it("pick = fill + ink border", () => {
+  it("pick = fill + ink border, and white keeps a visible ink border", () => {
     expect(resolveObjectRoleColors({ color: "red" }, "shape", FIGJAM_CANVAS_STYLE)).toEqual({
       fill: "#FFD2CC",
       border: "#D5322F",
+      text: OBJECT_TEXT_COLOR,
+    });
+    expect(resolveObjectRoleColors({ color: "white" }, "shape", FIGJAM_CANVAS_STYLE)).toEqual({
+      fill: "#FFFFFF",
+      border: "#757980",
       text: OBJECT_TEXT_COLOR,
     });
   });

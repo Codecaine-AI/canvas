@@ -191,6 +191,10 @@ describe("static icons: tile vs glyph, packs, brands", () => {
     expect(bare).toContain(`fill="#1F93EA" stroke="none"`);
     expect(bare).not.toContain(`fill="${resolveIconPaint("violet", FIGJAM_CANVAS_STYLE).glyph}" stroke="none"`);
     expect(bare).not.toContain(`<g fill=`);
+
+    // Claude Code's logo paints Claude orange on the default theme.
+    expect(render([icon({ icon: "brand-claude", text: "Claude Code" })], "schematic-light"))
+      .toContain(`fill="#D97757" stroke="none"`);
   });
 
   it("falls back to the ink where a brand color would vanish: a black logo on the dark card", () => {

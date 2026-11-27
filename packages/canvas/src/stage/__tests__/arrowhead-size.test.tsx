@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
 import { CanvasStageWithInteraction as CanvasStage } from "./canvas-stage-test-utils";
 import { renderDocumentToSvg } from "../../render/static-svg";
-import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../../theme/canvas-style";
+import { DEFAULT_CANVAS_STYLE, FIGJAM_CANVAS_STYLE, type CanvasStyle } from "../../theme/canvas-style";
 import { CanvasStyleProvider } from "../../theme/canvas-style-context";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 
@@ -68,12 +68,25 @@ function staticHead(style: CanvasStyle): { length: number; width: number } {
 }
 
 describe("arrowhead size", () => {
-  it("schematic-light's 2.5px stroke gets a 16px head in the stage and the PNG renderer alike", () => {
+  it("floors the head at 16px (5x stroke above that) in the stage and the PNG renderer alike", () => {
+    // schematic-light's 2.5px stroke: 5x is 12.5px, floored to 16px.
     expect(DEFAULT_CANVAS_STYLE.connectorStrokeWidthPx).toBe(2.5);
     const stage = stageHead(DEFAULT_CANVAS_STYLE);
     const png = staticHead(DEFAULT_CANVAS_STYLE);
     expect(stage).toEqual({ length: 16, width: 16 });
     expect(png.length).toBeCloseTo(16, 1);
     expect(png.width).toBeCloseTo(16, 1);
+
+    // figjam's 4px stroke: 5x already clears 16px, so it keeps 20px.
+    const figjamStage = stageHead(FIGJAM_CANVAS_STYLE);
+    const figjamPng = staticHead(FIGJAM_CANVAS_STYLE);
+    expect(figjamStage).toEqual({ length: 20, width: 20 });
+    expect(figjamPng.length).toBeCloseTo(20, 1);
+    expect(figjamPng.width).toBeCloseTo(20, 1);
+
+    // A thin 1px custom stroke is floored at 16px too.
+    const thin = { ...DEFAULT_CANVAS_STYLE, connectorStrokeWidthPx: 1 };
+    expect(stageHead(thin)).toEqual({ length: 16, width: 16 });
+    expect(staticHead(thin).width).toBeCloseTo(16, 1);
   });
 });

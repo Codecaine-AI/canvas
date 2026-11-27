@@ -98,6 +98,10 @@ describe("iconGlyphStrokeWidthForViewBox", () => {
       const tablerPx = (iconGlyphStrokeWidthForViewBox(sizePx, 24) * sizePx) / 24;
       expect(tablerPx).toBeCloseTo(nucleoPx, 10);
     }
+    // On the Nucleo grid itself it returns the Nucleo stroke bit-for-bit, so renderers can switch helpers.
+    for (let sizePx = 1; sizePx <= 1024; sizePx += 1) {
+      expect(iconGlyphStrokeWidthForViewBox(sizePx, ICON_GLYPH_BASE_VIEWBOX_SIZE)).toBe(iconGlyphStrokeWidthForSize(sizePx));
+    }
   });
 });
 

@@ -38,7 +38,7 @@ function fixtureDocument(): InteractiveCanvasDocument {
 }
 
 describe("renderDocumentToSvg cropRect", () => {
-  it("sets the viewBox to the rect expanded by padding on all sides", () => {
+  it("sets the viewBox to the rect expanded by padding on all sides, zero padding when omitted", () => {
     const { svg, width, height } = renderDocumentToSvg(fixtureDocument(), {
       cropRect: { x: 100, y: 50, width: 300, height: 200 },
       padding: 10,
@@ -47,6 +47,12 @@ describe("renderDocumentToSvg cropRect", () => {
     // Natural size: one px per world unit of the padded rect.
     expect(width).toBe(320);
     expect(height).toBe(220);
+
+    // No padding given: the rect is authoritative.
+    const unpadded = renderDocumentToSvg(fixtureDocument(), {
+      cropRect: { x: 16, y: 32, width: 240, height: 120 },
+    });
+    expect(unpadded.svg).toContain('viewBox="16 32 240 120"');
   });
 
   it("wins over sectionId when both are given", () => {
