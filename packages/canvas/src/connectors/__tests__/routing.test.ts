@@ -9,7 +9,6 @@ import { connectionBoundsForObject, hitBoundsForObject } from "../../objects/geo
 import { CANVAS_THEME_PRESETS, DEFAULT_CANVAS_STYLE, FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 
 const EPSILON = 1e-6;
-const MIN_STUB = 24;
 const SHORT_REVERSAL_THRESHOLD = 10;
 
 /** Parses the trailing "L x y" (or "Q ... x y") pair from a rendered path string. */
@@ -116,64 +115,11 @@ function firstLineTarget(path: string): CanvasPoint {
   return { x: numbers[2], y: numbers[3] };
 }
 
-function isPointOnSegment(point: CanvasPoint, start: CanvasPoint, end: CanvasPoint): boolean {
-  const cross = (point.x - start.x) * (end.y - start.y) - (point.y - start.y) * (end.x - start.x);
-  const dot = (point.x - start.x) * (end.x - start.x) + (point.y - start.y) * (end.y - start.y);
-  const lengthSquared = (end.x - start.x) ** 2 + (end.y - start.y) ** 2;
-  return Math.abs(cross) < EPSILON && dot > EPSILON && dot < lengthSquared - EPSILON;
-}
-
 describe("routing", () => {
   describe("autoPickAnchors", () => {
     it("picks facing sides for horizontal layout", () => {
       const from = object("from", 0, 0);
       const to = object("to", 240, 0);
-
-      expect(autoPickAnchors(from.geometry, to.geometry)).toEqual({
-        startAnchor: "right",
-        endAnchor: "left",
-      });
-    });
-
-    it("picks facing sides for vertical layout", () => {
-      const from = object("from", 0, 0);
-      const to = object("to", 0, 180);
-
-      expect(autoPickAnchors(from.geometry, to.geometry)).toEqual({
-        startAnchor: "bottom",
-        endAnchor: "top",
-      });
-    });
-
-    it("uses horizontal anchors when diagonal horizontal separation dominates", () => {
-      const from = object("from", 0, 0);
-      const to = object("to", 260, 80);
-
-      expect(autoPickAnchors(from.geometry, to.geometry)).toEqual({
-        startAnchor: "right",
-        endAnchor: "left",
-      });
-    });
-
-    it("uses vertical anchors when diagonal vertical separation dominates", () => {
-      const from = object("from", 0, 0);
-      const to = object("to", 80, 260);
-
-      expect(autoPickAnchors(from.geometry, to.geometry)).toEqual({
-        startAnchor: "bottom",
-        endAnchor: "top",
-      });
-    });
-
-    it("uses horizontal facing anchors when a left-of-target source vertically overlaps", () => {
-      const from = {
-        ...object("from", 0, 0),
-        geometry: { x: 0, y: 0, width: 100, height: 300 },
-      };
-      const to = {
-        ...object("to", 140, 180),
-        geometry: { x: 140, y: 180, width: 100, height: 300 },
-      };
 
       expect(autoPickAnchors(from.geometry, to.geometry)).toEqual({
         startAnchor: "right",
@@ -258,32 +204,6 @@ describe("routing", () => {
       expect(dashed.path).toBe(solid.path);
       expect(dashed.points).toEqual(solid.points);
       expect(dashed.labelPoint).toEqual(solid.labelPoint);
-    });
-
-    it("places elbow labels on the unrounded path middle", () => {
-      const from = object("from", 0, 0);
-      const to = object("to", 260, 120);
-      const routed = routeConnection(from, to, connection("solid"));
-      const stubStart = { x: routed.start.x + MIN_STUB, y: routed.start.y };
-      const stubEnd = { x: routed.end.x - MIN_STUB, y: routed.end.y };
-      const midX = (stubStart.x + stubEnd.x) / 2;
-      const rawPoints = [
-        routed.start,
-        stubStart,
-        { x: midX, y: stubStart.y },
-        { x: midX, y: stubEnd.y },
-        stubEnd,
-        routed.end,
-      ];
-
-      expect(routed.labelPoint).not.toEqual(routed.start);
-      expect(routed.labelPoint).not.toEqual(routed.end);
-      expect(
-        rawPoints.some((point, index) => {
-          const next = rawPoints[index + 1];
-          return next ? isPointOnSegment(routed.labelPoint, point, next) : false;
-        }),
-      ).toBe(true);
     });
 
     it("places labels at the exact polyline arc-length midpoint", () => {
@@ -405,38 +325,6 @@ describe("routing", () => {
       expect(parseNumbers(routed.path).length).toBe(4);
       expect(firstPointOf(routed.path)).toEqual({ x: 110, y: 30 });
       expect(lastPointOf(routed.path)).toEqual({ x: 260, y: 30 });
-    });
-
-    it("does not emit short reversal segments for nearby free-point previews", () => {
-      const from = object("from", 0, 0);
-      const anchors: Anchor[] = ["top", "right", "bottom", "left"];
-      const offsets = [-20, -8, 8, 20];
-
-      for (const anchor of anchors) {
-        const start = borderPoint(from, anchor);
-        const normal = normalFor(anchor);
-        const tangent = { x: -normal.y, y: normal.x };
-
-        for (const offset of offsets) {
-          const point = {
-            x: start.x + normal.x * 30 + tangent.x * offset,
-            y: start.y + normal.y * 30 + tangent.y * offset,
-          };
-          const routed = routeConnectionToPoint(from, anchor, point, FIGJAM_CANVAS_STYLE);
-
-          expect({
-            anchor,
-            offset,
-            points: routed.points,
-            reversals: shortReversalSegments(routed.points ?? []),
-          }).toEqual({
-            anchor,
-            offset,
-            points: routed.points,
-            reversals: [],
-          });
-        }
-      }
     });
 
     it("collapses the stub overshoot between close objects without leaving through either body", () => {

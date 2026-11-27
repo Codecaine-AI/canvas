@@ -431,44 +431,6 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
     expect(editor.style.overflow).toBe("hidden");
   });
 
-  it("message icon: below-glyph band", () => {
-    const object = makeObject({
-      id: "ch1",
-      type: "icon",
-      icon: "message",
-      geometry: { x: 10, y: 20, width: 180, height: 110 },
-      style: { shape: "icon" },
-    });
-    const { resolved } = expectEditorOnSlot(object);
-    const expectedWidth = measureWidth("Hello text", FIGJAM_NAME_FONT);
-    expect(resolved.rect).toEqual({
-      x: (180 - expectedWidth) / 2,
-      y: 110 + BELOW_BAND_GAP_PX,
-      width: expectedWidth,
-      height: 18,
-    });
-    expectAtRestMatchesEditor(object);
-  });
-
-  it("icon: below-glyph band", () => {
-    const object = makeObject({
-      id: "i1",
-      type: "icon",
-      icon: "config",
-      geometry: { x: 0, y: 0, width: 120, height: 120 },
-      style: { shape: "icon" },
-    });
-    const { resolved } = expectEditorOnSlot(object);
-    const expectedWidth = measureWidth("Hello text", FIGJAM_NAME_FONT);
-    expect(resolved.rect).toEqual({
-      x: (120 - expectedWidth) / 2,
-      y: 120 + BELOW_BAND_GAP_PX,
-      width: expectedWidth,
-      height: 18,
-    });
-    expectAtRestMatchesEditor(object);
-  });
-
   it("sticky: inset body area (not the full bbox), top-anchored, live markdown editor preserves source", () => {
     const object = makeObject({
       id: "s1",

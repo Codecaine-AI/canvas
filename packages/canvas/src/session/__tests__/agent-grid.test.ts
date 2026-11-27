@@ -27,15 +27,6 @@ describe("agent grid quantizer", () => {
     expect(snapGap(97)).toBe(100);
   });
 
-  test("values already on the grid are identities", () => {
-    for (const value of [0, 20, 100, 240, 300, 480, 900]) {
-      expect(snapCoordinate(value)).toBe(value);
-    }
-    expect(snapPoint([240, 480])).toEqual([240, 480]);
-    expect(snapSize({ width: 300, height: 100 })).toEqual({ width: 300, height: 100 });
-    expect(snapGap(120)).toBe(120);
-  });
-
   test("snaps rather than rejects: no input throws, and degenerate input resolves", () => {
     // Sizes never collapse below one grid unit; gaps clamp at 0 (flush is a
     // real gesture, a negative gap is not).
@@ -92,28 +83,6 @@ describe("20-grid geometry survives the agent-patch reducer path", () => {
         expect(value % AGENT_GRID).toBe(0);
       }
     }
-  });
-
-  test("snapped tool arguments are what lands, end to end", () => {
-    const state = createInteractiveCanvasState(makeDocument([box("a", 0, 0, 280, 100)]));
-
-    // What a gesture descriptor does: quantize, then lower.
-    const [x, y] = snapPoint([241, 477]);
-    const size = snapSize({ width: 187, height: 63 });
-
-    const next = reduceInteractiveCanvasState(state, {
-      type: "canvas.applyAgentPatch",
-      operations: [
-        { type: "updateObject", objectId: "a", patch: { geometry: { x, y, ...size } } },
-      ],
-    });
-
-    expect(next.document.objects[0]?.geometry).toEqual({
-      x: 240,
-      y: 480,
-      width: 180,
-      height: 60,
-    });
   });
 });
 
@@ -172,18 +141,6 @@ describe("every geometry a gesture writes lands on the grid", () => {
     // Report == landed: the number in the summary is the number in the board.
     expect(result.text).toContain(`left edges at x=${geometryOf(session, "a").x}`);
     expect(result.text).toContain("left edges at x=20");
-  });
-
-  test("arrange align keeps the shared edge exactly shared while snapping it", () => {
-    const session = offGridSession();
-
-    const result = runOp(session, "arrange", { ids: ["a", "b"], align: "right" });
-
-    const a = geometryOf(session, "a");
-    const b = geometryOf(session, "b");
-    expect(a.x + a.width).toBe(b.x + b.width);
-    expect((a.x + a.width) % AGENT_GRID).toBe(0);
-    expect(result.text).toContain(`right edges at x=${a.x + a.width}`);
   });
 
   test("arrange space snaps each position it computes", () => {

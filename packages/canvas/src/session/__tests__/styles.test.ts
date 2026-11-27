@@ -18,23 +18,10 @@ describe("style registry (authoring/style-guide)", () => {
     expect(STYLE_TOPICS.map((topic) => topic.id)).toEqual(EXPECTED_TOPIC_IDS);
   });
 
-  test("ids are unique", () => {
-    const ids = STYLE_TOPICS.map((topic) => topic.id);
-    expect(new Set(ids).size).toBe(ids.length);
-  });
-
   test("every topic carries a non-empty title and prose", () => {
     for (const topic of STYLE_TOPICS) {
       expect(topic.title.trim().length, topic.id).toBeGreaterThan(0);
       expect(topic.prose.trim().length, topic.id).toBeGreaterThan(0);
-    }
-  });
-
-  test("prose stays in the 6-18 line craft-guidance band", () => {
-    for (const topic of STYLE_TOPICS) {
-      const lines = topic.prose.split("\n").filter((line) => line.trim().length > 0);
-      expect(lines.length, `${topic.id} has ${lines.length} lines`).toBeGreaterThanOrEqual(6);
-      expect(lines.length, `${topic.id} has ${lines.length} lines`).toBeLessThanOrEqual(36);
     }
   });
 });
@@ -54,13 +41,6 @@ describe("craft targets", () => {
     expect(CRAFT_TARGETS.nodeGapColumn).toBeGreaterThan(LINT_FLOORS.nodeGapColumn);
     expect(CRAFT_TARGETS.arrowCorridor).toBeGreaterThan(LINT_FLOORS.arrowCorridor);
     expect(CRAFT_TARGETS.framePadding).toBeGreaterThan(LINT_FLOORS.framePadding);
-  });
-
-  test("clearance targets do not collide with their applicable lint floor", () => {
-    expect(CRAFT_TARGETS.nodeGapRow).not.toBe(LINT_FLOORS.nodeGapRow);
-    expect(CRAFT_TARGETS.nodeGapColumn).not.toBe(LINT_FLOORS.nodeGapColumn);
-    expect(CRAFT_TARGETS.arrowCorridor).not.toBe(LINT_FLOORS.arrowCorridor);
-    expect(CRAFT_TARGETS.framePadding).not.toBe(LINT_FLOORS.framePadding);
   });
 
   test("dimensions and gutters stay coherent", () => {

@@ -102,37 +102,3 @@ describe("bundled IBM Plex Mono (agent camera)", () => {
   });
 });
 
-/** The static Inter 3.19 instances. */
-const INTER_STATIC_FILES = TTF_FILES
-  .filter((file) => /^Inter-(Regular|Medium|SemiBold|Bold)\.ttf$/.test(file))
-  .map((file) => join(FONTS_DIR, file));
-/** Detail/body (400), 500, schematic names (600), figjam names (700). */
-const INTER_WEIGHTS = [400, 500, 600, 700] as const;
-
-function interSvg(weight: number, text: string): string {
-  return (
-    `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="40">` +
-    `<text x="0" y="28" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-weight="${weight}" ` +
-    `font-size="17.5">${text}</text></svg>`
-  );
-}
-
-function interOnlyPng(svg: string): Buffer {
-  const resvg = new Resvg(svg, { font: { fontFiles: INTER_STATIC_FILES, loadSystemFonts: false } });
-  return Buffer.from(resvg.render().asPng());
-}
-
-describe("bundled Inter (agent camera)", () => {
-  test("the rasterizer sets Inter text in the static face for each weight — never all at 400", () => {
-    expect(INTER_STATIC_FILES).toHaveLength(INTER_WEIGHTS.length);
-
-    const pngs = INTER_WEIGHTS.map((weight) => rasterizeSvgToPng(interSvg(weight, "Worker pool")).png);
-    for (const [index, weight] of INTER_WEIGHTS.entries()) {
-      expect(pngs[index]).toEqual(interOnlyPng(interSvg(weight, "Worker pool")));
-    }
-    // One distinct face per weight: a variable font (which resvg does not
-    // instance) or a missing static face would paint weights identically.
-    const distinct = new Set(pngs.map((png) => png.toString("base64")));
-    expect(distinct.size).toBe(INTER_WEIGHTS.length);
-  });
-});

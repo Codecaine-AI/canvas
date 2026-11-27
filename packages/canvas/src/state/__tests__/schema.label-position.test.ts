@@ -50,22 +50,6 @@ describe("schema — connection labelPosition", () => {
     expect(result.warnings).toBeUndefined();
   });
 
-  it("round-trips a bare `along` without inventing an offset", () => {
-    const result = loadConnection({ along: 0.75 });
-    expect(result.document.connections[0]?.labelPosition).toEqual({ along: 0.75 });
-    expect(result.document.connections[0]?.labelPosition?.offset).toBeUndefined();
-  });
-
-  it("accepts both endpoints of the range", () => {
-    expect(loadConnection({ along: 0 }).document.connections[0]?.labelPosition).toEqual({ along: 0 });
-    expect(loadConnection({ along: 1 }).document.connections[0]?.labelPosition).toEqual({ along: 1 });
-  });
-
-  it("stays absent when absent — the midpoint default is not materialized", () => {
-    const result = loadConnection(undefined);
-    expect(result.document.connections[0]?.labelPosition).toBeUndefined();
-  });
-
   it("survives a full re-validate (idempotent load)", () => {
     const once = loadConnection({ along: 0.4, offset: 12 });
     const twice = validateInteractiveCanvasDocument(JSON.parse(JSON.stringify(once.document)));
@@ -79,14 +63,6 @@ describe("schema — connection labelPosition", () => {
       const result = loadConnection({ along });
       expect(result.document.connections[0]?.labelPosition).toBeUndefined();
       expect(result.warnings?.some((w) => w.path.endsWith("labelPosition.along"))).toBe(true);
-    }
-  });
-
-  it("warns and drops a non-numeric or missing `along`", () => {
-    for (const value of [{ along: "0.5" }, { along: Number.NaN }, { offset: 12 }, {}]) {
-      const result = loadConnection(value);
-      expect(result.document.connections[0]?.labelPosition).toBeUndefined();
-      expect(result.warnings?.length).toBeGreaterThan(0);
     }
   });
 

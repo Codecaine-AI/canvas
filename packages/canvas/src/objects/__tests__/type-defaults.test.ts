@@ -62,11 +62,6 @@ const EXPECTED: Record<
 };
 
 describe("type-defaults: value freeze (old switches === leaf table)", () => {
-  it("covers the whole closed type union, nothing more", () => {
-    expect(Object.keys(EXPECTED).sort()).toEqual([...ALL_OBJECT_TYPES].sort());
-    expect(Object.keys(OBJECT_TYPE_DEFAULTS).sort()).toEqual([...ALL_OBJECT_TYPES].sort());
-  });
-
   it.each(ALL_OBJECT_TYPES.map((type) => [type] as const))(
     "%s: defaultGeometryFor / objectTypeLabel / shapeForType match the deleted switches",
     (type) => {

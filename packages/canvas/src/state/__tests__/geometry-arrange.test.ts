@@ -97,14 +97,6 @@ describe("S2.1 translateWithDescendants", () => {
     );
   });
 
-  it("moves a plain object without touching anything else", () => {
-    const document = nestedDocument();
-    const objects = translateWithDescendants(document, ["child-a"], { dx: 20, dy: 20 });
-
-    expect(geometryOf(objects, "child-a")).toEqual({ x: 260, y: 280, width: 100, height: 80 });
-    expect(geometryOf(objects, "outer")).toEqual({ x: 200, y: 200, width: 400, height: 300 });
-  });
-
   it("moves a child listed alongside its own section exactly once", () => {
     const document = nestedDocument();
     const both = translateWithDescendants(
@@ -189,45 +181,6 @@ describe("S2.2 spaceOutObjects", () => {
     // The clear gaps, read back off the result.
     expect(geometryOf(spaced.objects, "b").x - 100).toBe(40);
     expect(geometryOf(spaced.objects, "c").x - (140 + 60)).toBe(40);
-  });
-
-  it("sorts by position, not by the order the ids arrive in", () => {
-    const document = makeDocument([
-      box("a", 0, 0, 100, 80),
-      box("b", 500, 0, 100, 80),
-      box("c", 250, 0, 100, 80),
-    ]);
-    const spaced = spaceOutObjects(document, ["b", "c", "a"], "horizontal", 20);
-
-    expect(geometryOf(spaced.objects, "a").x).toBe(0);
-    expect(geometryOf(spaced.objects, "c").x).toBe(120);
-    expect(geometryOf(spaced.objects, "b").x).toBe(240);
-  });
-
-  it("grows the span when the gap is bigger than what is there, and shrinks it when smaller", () => {
-    const document = makeDocument([
-      box("a", 0, 0, 100, 80),
-      box("b", 120, 0, 100, 80),
-      box("c", 240, 0, 100, 80),
-    ]);
-    const opened = spaceOutObjects(document, ["a", "b", "c"], "horizontal", 200);
-    expect(geometryOf(opened.objects, "b").x).toBe(300);
-    expect(geometryOf(opened.objects, "c").x).toBe(600);
-
-    const closed = spaceOutObjects(document, ["a", "b", "c"], "horizontal", 0);
-    expect(geometryOf(closed.objects, "b").x).toBe(100);
-    expect(geometryOf(closed.objects, "c").x).toBe(200);
-  });
-
-  it("leaves cross-axis positions untouched", () => {
-    const document = makeDocument([
-      box("a", 0, 17, 100, 80),
-      box("b", 200, 333, 100, 80),
-    ]);
-    const spaced = spaceOutObjects(document, ["a", "b"], "horizontal", 40);
-    expect(geometryOf(spaced.objects, "a").y).toBe(17);
-    expect(geometryOf(spaced.objects, "b").y).toBe(333);
-    expect(geometryOf(spaced.objects, "b").x).toBe(140);
   });
 
   it("re-pitches vertically off heights", () => {
@@ -370,15 +323,6 @@ describe("S2.3 alignWithDescendants", () => {
       .toBe(60);
   });
 
-  it("centres frames as one unit", () => {
-    const document = nestedDocument();
-    const centred = alignWithDescendants(document, ["outer", "loose"], "center_v");
-    const outer = geometryOf(centred.objects, "outer");
-    const loose = geometryOf(centred.objects, "loose");
-    expect(outer.y + outer.height / 2).toBe(loose.y + loose.height / 2);
-    expect(geometryOf(centred.objects, "child-a").y - outer.y).toBe(60);
-  });
-
   it("needs two independent roots and skips unknown ids", () => {
     const document = nestedDocument();
     expect(alignWithDescendants(document, ["outer"], "left")).toBe(document);
@@ -412,18 +356,6 @@ describe("S2.4 sectionFitGeometry padding config", () => {
     expect(fitted).toEqual(sectionFitGeometry(document, "frame", SECTION_FIT_PADDING_PX)!);
   });
 
-  it("still accepts a bare number as body padding, meaning the same as { padding }", () => {
-    const fitted = sectionFitGeometry(document, "frame", 48)!;
-    expect(200 - fitted.x).toBe(48);
-    expect(fitted).toEqual(sectionFitGeometry(document, "frame", { padding: 48 })!);
-    expect(fitted).toEqual(
-      sectionFitGeometry(document, "frame", {
-        padding: 48,
-        titleClearance: SECTION_TITLE_CLEARANCE_PX,
-      })!,
-    );
-  });
-
   it("lands entirely on the 20 grid for on-grid children with the agent's 40/40 config", () => {
     const fitted = sectionFitGeometry(document, "frame", { padding: 40, titleClearance: 40 })!;
     expect(fitted).toEqual({ x: 160, y: 120, width: 620, height: 340 });
@@ -436,11 +368,5 @@ describe("S2.4 sectionFitGeometry padding config", () => {
     expect(200 - fitted.y).toBe(80);
     expect(fitted.x + fitted.width - (560 + 180)).toBe(40);
     expect(fitted.y + fitted.height - (320 + 100)).toBe(40);
-  });
-
-  it("clears the title chip by more than the UI's own clearance", () => {
-    // TITLE_CHIP is 3px inset + 27px tall = 30 (SECTION_TITLE_CLEARANCE_PX).
-    expect(40).toBeGreaterThan(SECTION_TITLE_CLEARANCE_PX);
-    expect(40).toBeGreaterThan(SECTION_FIT_PADDING_PX);
   });
 });

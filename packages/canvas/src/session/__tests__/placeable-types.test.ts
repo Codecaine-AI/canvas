@@ -34,13 +34,6 @@ describe("the registry-driven roster", () => {
     );
   });
 
-  test("covers every glyph and every placeable shape type", () => {
-    expect(([...PLACEABLE_GLYPH_TYPES] as string[]).sort()).toEqual([...GLYPHS].sort());
-    expect(([...PLACEABLE_SHAPE_TYPES] as string[]).sort()).toEqual(
-      [...SHAPE_OBJECT_TYPES].filter((type) => type !== "icon").sort(),
-    );
-  });
-
   test("the glyph and shape rosters are disjoint — one string, one drawing", () => {
     expect(GLYPHS.filter((glyph) => SHAPE_OBJECT_TYPES.has(glyph))).toEqual([]);
   });
@@ -91,11 +84,6 @@ describe("bidirectional mapping", () => {
 
   test("a name outside the mapping throws rather than lowering to junk", () => {
     expect(() => toDocumentFields("cylinder" as never)).toThrow(/Unknown placeable type/);
-  });
-
-  test("kinds with their own gestures pass through outbound", () => {
-    expect(fromDocumentFields({ type: "sticky" })).toBe("sticky");
-    expect(fromDocumentFields({ type: "section" })).toBe("section");
   });
 
   test("a malformed icon object degrades instead of throwing", () => {

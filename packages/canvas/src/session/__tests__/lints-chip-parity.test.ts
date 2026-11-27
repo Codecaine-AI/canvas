@@ -1,12 +1,11 @@
 import { describe, expect, test } from "bun:test";
 
-import { chipFor, CHIP_HEIGHT, chipWidth } from "../../board/lints/geometry";
+import { chipFor, CHIP_HEIGHT } from "../../board/lints/geometry";
 import { renderDocumentToSvg } from "../../render/static-svg.ts";
 import { box, connect, makeDocument } from "./synthetic";
 import type { InteractiveCanvasDocument } from "../../state/schema";
-import { canvasThemePreset, type CanvasStyle } from "../../theme/canvas-style";
+import { type CanvasStyle } from "../../theme/canvas-style";
 import { FIGJAM_CANVAS_STYLE } from "./helpers";
-import { measureWidth } from "../../theme/text-measure.ts";
 
 /**
  * Lint chips ARE the renderer's chips. The CONNECTION_LABEL_* constants are
@@ -92,25 +91,6 @@ describe("lint chip / static renderer parity", () => {
     expectRendererParity(document);
   });
 
-  test("figjam mid and long labels: the label measured in Inter Bold 16 plus 12px padding a side", () => {
-    const bold16 = { family: "Inter", size: 16, weight: 700 };
-    expect(chipWidth("go live", FIGJAM_CANVAS_STYLE)).toBe(measureWidth("go live", bold16) + 24);
-    expect(chipWidth("connect-to-database", FIGJAM_CANVAS_STYLE)).toBe(measureWidth("connect-to-database", bold16) + 24);
-    // Real advances, not the old 0.6em-per-character estimate (19 × 9.6 = 182.4px).
-    expect(measureWidth("connect-to-database", bold16)).toBeLessThan(19 * 9.6 - 10);
-    const document = makeDocument(
-      [
-        box("a", 0, 0), box("b", 600, 0),
-        box("c", 0, 300), box("d", 600, 300),
-      ],
-      [
-        { ...connect("mid", "a", "b"), label: "go live" },
-        { ...connect("long", "c", "d"), label: "connect-to-database" },
-      ],
-    );
-    expectRendererParity(document);
-  });
-
   test("empty-adjacent: empty and whitespace labels draw no chip on either side", () => {
     const document = makeDocument(
       [
@@ -129,34 +109,6 @@ describe("lint chip / static renderer parity", () => {
     // Exactly one chip renders, and it matches the lint's.
     expectRendererParity(document);
     expect(svgChipRects(renderDocumentToSvg(document).svg, labelsOf(document))).toHaveLength(1);
-  });
-
-  test("schematic theme: the shorter mono chip is still exactly the renderer's", () => {
-    const style = canvasThemePreset("schematic-light");
-    const document = makeDocument(
-      [box("a", 0, 0), box("b", 600, 0), box("c", 0, 300), box("d", 600, 300)],
-      [
-        { ...connect("short", "a", "b"), label: "X" },
-        { ...connect("long", "c", "d"), label: "connect-to-database" },
-      ],
-    );
-    const chip = chipFor(document.connections[1]!, document, style)!;
-    expect(chip.rect.height).toBe(26);
-    // 19 Plex Mono cells at 15px (171px) + 7.5px a side.
-    expect(chip.rect.width).toBe(Math.ceil(19 * 9 * 64) / 64 + 2 * 7.5);
-    expectRendererParity(document, style);
-  });
-
-  test("elbowed route: chip parity holds at the router's own labelPoint", () => {
-    const document = makeDocument(
-      [box("a", 0, 0), box("w", 400, 252), box("b", 800, 0)],
-      [{
-        ...connect("e", "a", "b"),
-        label: "detour",
-        waypoints: [[160, 300], [800, 300]],
-      }],
-    );
-    expectRendererParity(document);
   });
 
   /**

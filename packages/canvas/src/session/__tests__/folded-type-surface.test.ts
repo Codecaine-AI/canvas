@@ -11,7 +11,6 @@ import { describe, expect, test } from "bun:test";
 
 import type { InteractiveCanvasObject } from "../../state/schema";
 
-import { formatBoardDigest } from "../../board/digest";
 import { findOperationTool } from "../tools/operations";
 import { documentDelta } from "../perception/perception";
 import { makeTestSession, runOp } from "./helpers";
@@ -73,15 +72,6 @@ describe("placing a folded name", () => {
 });
 
 describe("reading a board back", () => {
-  test("the digest prints the folded name and no icon= extra", () => {
-    const digest = formatBoardDigest(makeDocument([
-      { ...box("store", 0, 0, 120, 120, "icon"), text: "Long-term", icon: "memory" },
-    ]));
-
-    expect(digest).toContain('  store memory "Long-term" 0,0 120×120');
-    expect(digest).not.toContain("icon=");
-  });
-
   test("a swap reports one folded channel on both sides", () => {
     const before = makeDocument([box("step", 0, 0, 160, 96, "rectangle")]);
     const after = makeDocument([

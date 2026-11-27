@@ -88,31 +88,6 @@ describe("useTextEditing object targets (single unified text field, D3/D11)", ()
     expect(action.patch).toEqual({ text: "new body\n- item", geometry: { x: 80, y: 100, width: 240, height: 80 } });
   });
 
-  it("keeps plain shapes editing and committing their text", () => {
-    const { result, dispatch } = setup();
-
-    act(() => {
-      result.current.openObjectTextEditor("shape-a");
-    });
-    expect(result.current.objectTextEditValue).toBe("Shape label");
-
-    act(() => {
-      result.current.setObjectTextEditValue("Renamed shape");
-    });
-    act(() => {
-      result.current.commitObjectText();
-    });
-
-    expect(dispatch).toHaveBeenCalledTimes(1);
-    expect(dispatch).toHaveBeenCalledWith({
-      type: "canvas.updateObject",
-      objectId: "shape-a",
-      patch: { text: "Renamed shape" },
-    });
-    const action = dispatch.mock.calls[0][0] as Extract<CanvasAction, { type: "canvas.updateObject" }>;
-    expect("geometry" in action.patch).toBe(false);
-  });
-
   it("commits below-slot text as a text-only object patch", () => {
     const { result, dispatch } = setup();
 

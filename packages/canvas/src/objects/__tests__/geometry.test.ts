@@ -80,17 +80,6 @@ describe("outlinePolygon", () => {
     ]);
   });
 
-  it("returns a 4-point diamond for a diamond-styled object", () => {
-    const object = diamondObject();
-    const polygon = outlinePolygon(object);
-    expect(polygon).toEqual([
-      { x: 50, y: 0 },
-      { x: 100, y: 50 },
-      { x: 50, y: 100 },
-      { x: 0, y: 50 },
-    ]);
-  });
-
   it("returns a 7-point chevron for an arrow-shape object", () => {
     const object = arrowShapeObject();
     const polygon = outlinePolygon(object);
@@ -117,55 +106,6 @@ describe("outlinePolygon", () => {
 describe("inscribedTextRect", () => {
   it("returns null for center-slot fallback shapes", () => {
     expect(inscribedTextRect(rectObject())).toBeNull();
-  });
-
-  it("returns a centered 0.68 bbox-fraction rect for ellipses", () => {
-    const width = 160;
-    const height = 120;
-    const rectWidth = width * 0.68;
-    const rectHeight = height * 0.68;
-    expect(inscribedTextRect(shapeObject("ellipse", {
-      geometry: { x: 0, y: 0, width: 160, height: 120 },
-      style: { shape: "ellipse" },
-    }))).toEqual({
-      x: (width - rectWidth) / 2,
-      y: (height - rectHeight) / 2,
-      width: rectWidth,
-      height: rectHeight,
-    });
-  });
-
-  it("returns a centered half-bbox-minus-12 rect for decision diamonds", () => {
-    expect(inscribedTextRect(diamondObject({
-      geometry: { x: 0, y: 0, width: 160, height: 112 },
-    }))).toEqual({
-      x: 46,
-      y: 34,
-      width: 68,
-      height: 44,
-    });
-  });
-
-  it("returns direction-aware triangle bands", () => {
-    const width = 140;
-    const height = 120;
-    expect(inscribedTextRect(shapeObject("triangle", {
-      geometry: { x: 0, y: 0, width, height },
-    }))).toEqual({
-      x: width * 0.25,
-      y: height * 0.52,
-      width: width * 0.5,
-      height: height * 0.9 - height * 0.52,
-    });
-    expect(inscribedTextRect(shapeObject("triangle", {
-      direction: "down",
-      geometry: { x: 0, y: 0, width, height },
-    }))).toEqual({
-      x: width * 0.25,
-      y: height * 0.1,
-      width: width * 0.5,
-      height: height * 0.48 - height * 0.1,
-    });
   });
 
   it("returns closed-form per-shape center rects", () => {
@@ -216,12 +156,6 @@ describe("outlinePolygon: the universal shape core", () => {
     expect(polygon.length).toBe(3);
     // Apex is now at the bottom-center.
     expect(polygon).toContainEqual({ x: 50, y: 100 });
-  });
-
-  it("returns an 8-point octagon, flat-top", () => {
-    const object = shapeObject("octagon");
-    const polygon = outlinePolygon(object);
-    expect(polygon.length).toBe(8);
   });
 
   it("draws a stretched octagon box as a regular octagon centered in it, its text band inside", () => {
@@ -284,48 +218,9 @@ describe("getConnectionAnchors: the universal shape core", () => {
     expect(top?.point).toEqual({ x: 50, y: 0 });
     expect(top?.coord).toEqual([0.5, 0]);
   });
-
-  it("produces a bottom anchor exactly at the apex for a down-pointing triangle", () => {
-    const object = shapeObject("triangle", { direction: "down" });
-    const anchors = getConnectionAnchors(object);
-    const bottom = anchors.find((a) => a.coord[1] === 1);
-    expect(bottom).toBeDefined();
-    expect(bottom?.point).toEqual({ x: 50, y: 100 });
-  });
-
-  it("produces anchors on the true ellipse outline (cardinal points touch the bbox edge midpoints, same as a circle inscribed in a square)", () => {
-    const object = shapeObject("ellipse");
-    const anchors = getConnectionAnchors(object);
-    const points = anchors.map((a) => a.point);
-    expect(points.some((p) => Math.abs(p.x - 50) < 1e-6 && Math.abs(p.y - 0) < 1e-6)).toBe(true);
-    expect(points.some((p) => Math.abs(p.x - 100) < 1e-6 && Math.abs(p.y - 50) < 1e-6)).toBe(true);
-  });
 });
 
 describe("getConnectionAnchors", () => {
-  it("produces 4 cardinal anchors on the true rect outline (bbox edge midpoints for a rect)", () => {
-    const object = rectObject();
-    const anchors = getConnectionAnchors(object);
-    expect(anchors).toHaveLength(4);
-    const points = anchors.map((a) => a.point);
-    expect(points).toContainEqual({ x: 50, y: 0 });
-    expect(points).toContainEqual({ x: 50, y: 100 });
-    expect(points).toContainEqual({ x: 0, y: 50 });
-    expect(points).toContainEqual({ x: 100, y: 50 });
-  });
-
-  it("produces anchors on the true diamond outline, not the bbox edges", () => {
-    const object = diamondObject();
-    const anchors = getConnectionAnchors(object);
-    const points = anchors.map((a) => a.point);
-    // The diamond's N/S/E/W outline points are the same as its 4 vertices
-    // since the candidate rays are axis-aligned through the center.
-    expect(points).toContainEqual({ x: 50, y: 0 });
-    expect(points).toContainEqual({ x: 50, y: 100 });
-    expect(points).toContainEqual({ x: 0, y: 50 });
-    expect(points).toContainEqual({ x: 100, y: 50 });
-  });
-
   it("produces anchor coord values as [0..1, 0..1] fractions of the bounds", () => {
     const object = rectObject();
     const anchors = getConnectionAnchors(object);

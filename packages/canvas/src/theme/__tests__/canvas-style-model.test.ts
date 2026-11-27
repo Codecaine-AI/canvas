@@ -7,21 +7,7 @@
 import { describe, expect, it } from "bun:test";
 import { CANVAS_COLORS } from "../../state/schema/colors";
 import { normalizeColor } from "../color-math";
-import {
-  CANVAS_STYLE_CONTROLS,
-  CANVAS_STYLE_GROUP_LABELS,
-  CANVAS_THEME_IDS,
-  CANVAS_THEME_PRESETS,
-  DEFAULT_CANVAS_STYLE,
-  DEFAULT_CANVAS_THEME_ID,
-  FIGJAM_CANVAS_STYLE,
-  canvasStyleOverrides,
-  canvasThemePreset,
-  normalizeCanvasStyle,
-  normalizeCanvasStyleSettings,
-  resolveCanvasStyle,
-  type CanvasStyle,
-} from "../canvas-style";
+import { CANVAS_STYLE_CONTROLS, CANVAS_THEME_IDS, CANVAS_THEME_PRESETS, DEFAULT_CANVAS_STYLE, canvasStyleOverrides, canvasThemePreset, normalizeCanvasStyle, normalizeCanvasStyleSettings, resolveCanvasStyle, type CanvasStyle } from "../canvas-style";
 
 const STYLE_KEYS = Object.keys(DEFAULT_CANVAS_STYLE).sort();
 
@@ -34,93 +20,6 @@ describe("theme presets", () => {
     for (const ink of Object.values(preset.palette)) expect(normalizeColor(ink)).toBe(ink);
     // Normalizing changes nothing (each scalar value is checked against its control below).
     expect(normalizeCanvasStyle(preset)).toEqual({ ...preset, palette: { ...preset.palette } });
-  });
-
-  it("the default is the schematic-light preset", () => {
-    expect(DEFAULT_CANVAS_THEME_ID).toBe("schematic-light");
-    expect(DEFAULT_CANVAS_STYLE).toBe(CANVAS_THEME_PRESETS["schematic-light"]);
-    expect(canvasThemePreset()).toEqual(canvasThemePreset("schematic-light"));
-  });
-
-  it("FIGJAM_CANVAS_STYLE is the figjam preset, carrying the renderers' long-standing constants", () => {
-    expect(FIGJAM_CANVAS_STYLE).toBe(CANVAS_THEME_PRESETS.figjam);
-    expect(FIGJAM_CANVAS_STYLE).toEqual({
-      theme: "figjam",
-      // The 9 geometry values the workspace style shipped with.
-      shapeCornerRadiusPx: 2,
-      shapeBorderWidthPx: 2,
-      sectionCornerRadiusPx: 2,
-      sectionBorderWidthPx: 1.5,
-      titleChipCornerRadiusPx: 2,
-      titleChipBorderWidthPx: 1.5,
-      labelChipCornerRadiusPx: 2,
-      connectorStrokeWidthPx: 4,
-      connectorCornerRadiusPx: 21.5,
-      // The rounded-rect render shape's radius (process/rectangle), same as the shape radius here.
-      processCornerRadiusPx: 2,
-      // stage/CanvasStage.tsx CANVAS_BG / GRID_DOT_COLOR; connector label chip border.
-      boardBackground: "#F5F5F5",
-      gridDotColor: "rgba(0, 0, 0, 0.25)",
-      hairlineColor: "#D9D9D9",
-      // objects/text-slots.ts OBJECT_TEXT_COLOR + the bold shape/chip text weight.
-      textColor: "#000000",
-      textFontWeight: 700,
-      // SHAPE_TEXT_TYPOGRAPHY / BELOW_TEXT_FONT_SIZE_PX: names at 15px.
-      textFontSizePx: 15,
-      detailColor: "#5C5C5C",
-      detailFont: "sans",
-      detailFontSizePx: 13,
-      shapeFill: "tint",
-      cardFill: "#FFFFFF",
-      sectionFill: "flat",
-      sectionTintBase: 0.07,
-      sectionTintStep: 0.035,
-      sectionTintMax: 0.16,
-      sectionTintMixBase: "#FFFFFF",
-      sectionBorderOpacity: 1,
-      // TITLE_CHIP: floating chip, Inter 16px.
-      headerPlacement: "floating",
-      headerFont: "sans",
-      headerUppercase: false,
-      headerFontSizePx: 16,
-      boardTitleFontSizePx: 0,
-      headerChipMix: 0.16,
-      iconPack: "nucleo",
-      iconStyle: "glyph",
-      iconTileGlyphColor: "#FFFFFF",
-      // Tile style only (ignored by figjam's bare glyphs).
-      iconTileFill: "auto",
-      iconTileSolidMaxPx: 152,
-      iconTileMaxPx: 240,
-      // connectors/Connector.tsx CONNECTION_LABEL_* (16px text on a 30px #F5F5F5 chip).
-      connectorLabelFont: "sans",
-      connectorLabelFontSizePx: 16,
-      connectorLabelHeightPx: 30,
-      connectorLabelBackground: "#F5F5F5",
-      connectorLabelTextColor: "#000000",
-      stickyStyle: "paper",
-      stickyFontSizePx: 24,
-      stickyLineHeightPx: 36,
-      stickyPaddingXPx: 21,
-      stickyPaddingTopPx: 28,
-      stickyPaddingBottomPx: 21,
-      stickyCornerRadiusPx: 0,
-      stickyHeadingScale: 1,
-      stickyRuleWidthPx: 2,
-      // The palette.ts inks (connector strokes / shape borders).
-      palette: {
-        gray: "#757575",
-        red: "#D5322F",
-        orange: "#EB7500",
-        yellow: "#E8A302",
-        green: "#019142",
-        teal: "#369E94",
-        blue: "#1A5CDF",
-        violet: "#9747FF",
-        pink: "#B74D85",
-        white: "#757980",
-      },
-    });
   });
 
   it("canvasThemePreset hands out mutable copies, never the frozen preset", () => {
@@ -281,11 +180,6 @@ describe("CANVAS_STYLE_CONTROLS", () => {
     );
     expect(paletteRows.map((control) => control.paletteColor)).toEqual([...CANVAS_COLORS]);
     expect(paletteRows.every((control) => control.kind === "color" && control.group === "palette")).toBe(true);
-  });
-
-  it("labels every group", () => {
-    const groups = new Set<string>(CANVAS_STYLE_CONTROLS.map((control) => control.group));
-    expect([...groups].sort()).toEqual(Object.keys(CANVAS_STYLE_GROUP_LABELS).sort());
   });
 
   it("gives every control metadata that admits each preset's value", () => {

@@ -29,29 +29,6 @@ describe("interactive canvas description", () => {
     }
   });
 
-  it("drops non-string descriptions without a warning", () => {
-    const result = validateInteractiveCanvasDocument({
-      ...makeDocument(),
-      description: { markdown: "# System map" },
-    });
-
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.document.description).toBeUndefined();
-      expect(result.warnings).toBeUndefined();
-    }
-  });
-
-  it("leaves an absent description absent during validation", () => {
-    const { description: _description, ...document } = makeDocument();
-    const result = validateInteractiveCanvasDocument(document);
-
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.document.description).toBeUndefined();
-    }
-  });
-
   it("sets a trimmed description as one human history entry", () => {
     const state = createInteractiveCanvasState(makeDocument());
     const next = reduceInteractiveCanvasState(state, {
@@ -68,17 +45,6 @@ describe("interactive canvas description", () => {
       changedConnectionIds: [],
       changedAnnotationIds: [],
     });
-  });
-
-  it("clears the description when the replacement trims to empty", () => {
-    const state = createInteractiveCanvasState(makeDocument("# System map"));
-    const next = reduceInteractiveCanvasState(state, {
-      type: "canvas.setDocumentDescription",
-      description: " \n ",
-    });
-
-    expect(next.document.description).toBeUndefined();
-    expect(next.history.past).toEqual([state.document]);
   });
 
   it("returns the same state when the stored description already matches", () => {

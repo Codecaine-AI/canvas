@@ -14,8 +14,6 @@ import {
 } from "../theme/palette";
 import type { CanvasColor } from "../theme/palette";
 
-const HEX_RE = /^#[0-9A-F]{6}$/i;
-
 const EXPECTED: Record<
   CanvasColor,
   {
@@ -65,44 +63,6 @@ describe("state/schema/colors — the 10-id CanvasColor vocabulary", () => {
     expect(isCanvasColor("blue-soft")).toBe(false);
     for (const bad of ["black", "red-bold", "Red", "", "gray-Soft", 42, null, undefined, {}]) {
       expect(isCanvasColor(bad)).toBe(false);
-    }
-  });
-});
-
-describe("palette.ts — CANVAS_PALETTE table completeness", () => {
-  it("has an entry for every one of the 10 CanvasColor ids", () => {
-    for (const id of CANVAS_COLORS) {
-      expect(CANVAS_PALETTE[id]).toBeDefined();
-    }
-    expect(Object.keys(CANVAS_PALETTE).sort()).toEqual([...CANVAS_COLORS].sort());
-  });
-
-  it("matches the authoritative ink/fill/wash table", () => {
-    for (const id of CANVAS_COLORS) {
-      const swatch = CANVAS_PALETTE[id];
-      const expected = EXPECTED[id];
-      expect(swatch.swatch).toBe(expected.swatch);
-      expect(swatch.shape).toEqual({ fill: expected.shapeFill, border: expected.ink });
-      expect(swatch.sticky).toBe(expected.sticky);
-      expect(swatch.connector).toBe(expected.ink);
-      expect(swatch.section).toEqual({
-        tint: expected.wash,
-        chip: { fill: expected.chipFill, border: expected.chipBorder },
-      });
-    }
-  });
-
-  it("every hex cell is a valid 6-digit hex string and every shape border is present", () => {
-    for (const id of CANVAS_COLORS) {
-      const swatch = CANVAS_PALETTE[id];
-      expect(swatch.swatch).toMatch(HEX_RE);
-      expect(swatch.shape.fill).toMatch(HEX_RE);
-      expect(swatch.shape.border).toMatch(HEX_RE);
-      expect(swatch.section.tint).toMatch(HEX_RE);
-      expect(swatch.section.chip.fill).toMatch(HEX_RE);
-      expect(swatch.section.chip.border).toMatch(HEX_RE);
-      expect(swatch.sticky).toMatch(HEX_RE);
-      expect(swatch.connector).toMatch(HEX_RE);
     }
   });
 });

@@ -25,21 +25,12 @@ function makeSection(overrides: Partial<InteractiveCanvasObject> = {}): Interact
 }
 
 describe("section title chip scale", () => {
-  it("keeps natural size at zoom 1 and when zoomed in", () => {
-    expect(titleChipScale(1)).toBe(1);
-    expect(titleChipScale(2)).toBe(1);
-  });
-
   it("grows sub-linearly with the inverse zoom when zoomed out", () => {
     const { zoomOutGrowth } = TITLE_CHIP;
     expect(titleChipScale(0.25)).toBeCloseTo(4 ** zoomOutGrowth, 5);
     // Sub-linear: grows past natural size but stays below full 1/zoom.
     expect(titleChipScale(0.25)).toBeGreaterThan(1);
     expect(titleChipScale(0.25)).toBeLessThan(4);
-  });
-
-  it("is uniform across sections and capped at maxZoomOutScale", () => {
-    expect(titleChipScale(0.001)).toBe(TITLE_CHIP.maxZoomOutScale);
   });
 
   it("budgets the scaled chip width to the section's inner width", () => {

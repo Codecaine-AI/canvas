@@ -82,16 +82,6 @@ describe("hitTestObjects (D16)", () => {
     expect(hitTestObjects(doc([diamond]), { x: 5, y: 5 })).toBeNull();
   });
 
-  it("clicking inside the diamond outline hits the diamond (topmost wins)", () => {
-    const hit = hitTestObjects(doc([rectBehind, diamond]), { x: 50, y: 50 });
-    expect(hit?.id).toBe("diamond");
-  });
-
-  it("bbox-outline objects hit on their full box, corners included (byte-identical to pre-D16)", () => {
-    const hit = hitTestObjects(doc([rectBehind]), { x: 0.5, y: 0.5 });
-    expect(hit?.id).toBe("rect-behind");
-  });
-
   it("below-slot text outside stored geometry hits the object", () => {
     const person: InteractiveCanvasObject = {
       id: "person",

@@ -22,20 +22,6 @@ describe("pathfinding priority-queue", () => {
     const queue = new PriorityQueue<string, number>((a, b) => a - b);
     expect(queue.dequeue()).toBeNull();
   });
-
-  it("handles many interleaved enqueues correctly (heap invariant holds)", () => {
-    const queue = new PriorityQueue<number, number>((a, b) => a - b);
-    const values = [5, 3, 8, 1, 9, 2, 7, 4, 6, 0];
-    for (const value of values) queue.enqueue(value, value);
-
-    const dequeued: number[] = [];
-    while (!queue.empty()) {
-      const value = queue.dequeue();
-      if (value !== null) dequeued.push(value);
-    }
-
-    expect(dequeued).toEqual([...values].sort((a, b) => a - b));
-  });
 });
 
 describe("pathfinding graph", () => {

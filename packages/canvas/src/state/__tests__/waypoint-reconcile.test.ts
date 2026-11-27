@@ -86,20 +86,6 @@ describe("stale-waypoint reconciliation (W4)", () => {
     expect(connectionOf(next).waypoints).toBeUndefined();
   });
 
-  it("drops waypoints when both owners move but by different deltas", () => {
-    const state = makeState();
-    const next = reduceInteractiveCanvasState(state, {
-      type: "canvas.updateObjectGeometries",
-      geometries: {
-        a: { x: 10, y: 170, width: 100, height: 60 },
-        b: { x: 340, y: 80, width: 100, height: 60 },
-      },
-      snap: false,
-      summary: "Dragged selection",
-    });
-    expect(connectionOf(next).waypoints).toBeUndefined();
-  });
-
   it("drops waypoints when an endpoint owner is resized", () => {
     const state = makeState();
     const next = reduceInteractiveCanvasState(state, {

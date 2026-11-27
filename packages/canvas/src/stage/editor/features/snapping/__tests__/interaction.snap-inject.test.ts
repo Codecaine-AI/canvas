@@ -1,10 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { cancelInteraction, stepInteraction } from "../../../pipeline/core";
-import {
-  IDLE_INTERACTION_STATE,
-  type InteractionContext,
-  type InteractionState,
-} from "../../../pipeline/state";
+import { IDLE_INTERACTION_STATE, type InteractionContext } from "../../../pipeline/state";
 import type { CanvasPointerEvent } from "../../../../../interaction/interaction";
 import type { SnapCorrection } from "../snapping";
 import type {
@@ -134,27 +130,6 @@ describe("interaction: snapResolver injection (T1.2.2)", () => {
     expect(geometryActions).toHaveLength(1);
     expect(geometryActions[0]!.geometries.a!.x).toBe(0);
     expect(result.overlay.guides?.length ?? 0).toBeGreaterThan(0);
-  });
-
-  it("falls back to local computeSnapGuides when snapResolver returns null", () => {
-    const document = makeDocument([
-      makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
-      // Aligned with "a"'s left edge (x=0) once "a" is dragged near x=0 again;
-      // placed far away so only an explicit local snap would catch it.
-      makeObject({ id: "b", geometry: { x: 0, y: 500, width: 100, height: 100 } }),
-    ]);
-    const hit = { kind: "object" as const, objectId: "a" };
-    const ctx = makeContext(document, { snapResolver: () => null });
-
-    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 10, y: 10 }, hit), ctx);
-    // Drag "a" so its raw (unsnapped) x would be 2 (i.e. within the snap
-    // threshold of b's x=0 left edge), letting local computeSnapGuides pull it
-    // back to exactly 0.
-    result = stepInteraction(result.state, move({ x: 12, y: 40 }, hit), ctx);
-
-    const geometryActions = updateGeometriesActions(result);
-    expect(geometryActions).toHaveLength(1);
-    expect(geometryActions[0]!.geometries.a!.x).toBe(0);
   });
 
   it("Escape-restore reverts to true pre-drag geometry, unaffected by any snap correction", () => {

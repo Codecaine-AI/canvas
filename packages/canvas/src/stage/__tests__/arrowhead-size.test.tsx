@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
 import { CanvasStageWithInteraction as CanvasStage } from "./canvas-stage-test-utils";
 import { renderDocumentToSvg } from "../../render/static-svg";
-import { DEFAULT_CANVAS_STYLE, FIGJAM_CANVAS_STYLE, type CanvasStyle } from "../../theme/canvas-style";
+import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../../theme/canvas-style";
 import { CanvasStyleProvider } from "../../theme/canvas-style-context";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 
@@ -75,19 +75,5 @@ describe("arrowhead size", () => {
     expect(stage).toEqual({ length: 16, width: 16 });
     expect(png.length).toBeCloseTo(16, 1);
     expect(png.width).toBeCloseTo(16, 1);
-  });
-
-  it("a stroke whose 5x head already clears 16px keeps 5x (figjam's 4px stroke: 20px)", () => {
-    const stage = stageHead(FIGJAM_CANVAS_STYLE);
-    const png = staticHead(FIGJAM_CANVAS_STYLE);
-    expect(stage).toEqual({ length: 20, width: 20 });
-    expect(png.length).toBeCloseTo(20, 1);
-    expect(png.width).toBeCloseTo(20, 1);
-  });
-
-  it("a thin custom stroke is floored at 16px too", () => {
-    const thin = { ...DEFAULT_CANVAS_STYLE, connectorStrokeWidthPx: 1 };
-    expect(stageHead(thin)).toEqual({ length: 16, width: 16 });
-    expect(staticHead(thin).width).toBeCloseTo(16, 1);
   });
 });

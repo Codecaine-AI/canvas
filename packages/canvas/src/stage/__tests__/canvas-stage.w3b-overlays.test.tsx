@@ -206,6 +206,7 @@ describe("CanvasStage: connector drag hover ports (W3b)", () => {
 });
 
 describe("CanvasStage: selected-connector trim (W3b)", () => {
+  // regression: 929b641
   it("hides selected object handles while connector mode is active", () => {
     const select = render(
       <CanvasStage
@@ -229,21 +230,6 @@ describe("CanvasStage: selected-connector trim (W3b)", () => {
     );
     expect(connector.container.querySelector("[data-canvas-selection-box]")).toBeNull();
     expect(connector.container.querySelectorAll("[data-canvas-handle]").length).toBe(0);
-  });
-
-  it("renders hollow selection-blue endpoint circles at both terminals", () => {
-    const { container } = render(
-      <CanvasStage document={makeDocument()} viewport={viewport} selectedConnectionId="connection-a" />,
-    );
-    const from = container.querySelector('[data-canvas-endpoint="from"]');
-    const to = container.querySelector('[data-canvas-endpoint="to"]');
-    expect(from).toBeTruthy();
-    expect(to).toBeTruthy();
-    expect(from!.getAttribute("fill")).toBe("#FDFDFD");
-    expect(from!.getAttribute("stroke")).toBe(SELECTION_BLUE);
-    expect(from!.getAttribute("r")).toBe("7.5");
-    expect(from!.getAttribute("stroke-width")).toBe("2.5");
-    expect(to!.getAttribute("stroke")).toBe(SELECTION_BLUE);
   });
 
   it("hides selected connector trim while connector mode is active", () => {

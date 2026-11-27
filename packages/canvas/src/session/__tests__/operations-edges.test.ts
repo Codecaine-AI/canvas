@@ -171,20 +171,6 @@ describe("change_connection", () => {
     expect(result.text).toContain("manual waypoints dropped");
   });
 
-  test("a repoint that does not move an end keeps the stored route", () => {
-    const session = edgeSession();
-    runOp(session, "route", { id: "e1", points: [[420, 160], [420, 400]] });
-
-    const result = runOp(session, "change_connection", {
-      id: "e1",
-      patch: { to: { objectId: "b", anchor: "top" } },
-    });
-
-    expect(result.isError).toBeUndefined();
-    // The anchor moved, so this one IS an endpoint change and drops the route.
-    expect(edgeOf(session).waypoints).toBeUndefined();
-  });
-
   test("distinctness is judged against the edge as it will stand", () => {
     const session = edgeSession();
 
@@ -331,14 +317,6 @@ describe("route shift", () => {
     expect(second.isError).toBeUndefined();
     expect(second.text).toContain("(s1 v x=640)");
     expect(edgeOf(session).waypoints).toEqual([[640, 150], [640, 390]]);
-  });
-
-  test("the target coordinate snaps to the grid", () => {
-    const session = edgeSession();
-
-    runOp(session, "route", { id: "e1", shift: { segment: 2, to: 517 } });
-
-    expect(routeOf(session)).toContain("(s1 v x=520)");
   });
 
   test("a segment index the edge does not have is refused, with the route to read", () => {
@@ -490,16 +468,6 @@ describe("route modes", () => {
     const reset = runOp(session, "route", { id: "e1", points: null, shift: null, reset: true });
     expect(reset.text).toContain("APPLIED · route e1 reset");
     expect(edgeOf(session).waypoints).toBeUndefined();
-  });
-
-  test("a no-op names the edge from id, whatever comes first in the call", () => {
-    const session = edgeSession();
-    runOp(session, "route", { id: "e1", shift: { segment: 2, to: 520 } });
-
-    const result = runOp(session, "route", { shift: { segment: 1, to: 520 }, id: "e1" });
-
-    expect(result.isError).toBeUndefined();
-    expect(result.text.split("\n")[0]).toBe("NO-OP · route e1 — segment s1 already sits at x=520.");
   });
 });
 

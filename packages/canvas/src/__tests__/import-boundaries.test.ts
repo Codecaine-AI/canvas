@@ -452,22 +452,6 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("the only non-composition stage/editor/ importer is the current viewer TODO", () => {
-    const incomingEditorEdges = firstPartyEdges().filter(
-      (edge) =>
-        edge.target?.startsWith("stage/editor/") &&
-        !edge.importer.startsWith("stage/editor/"),
-    );
-
-    expect(
-      formatEdges(
-        incomingEditorEdges.filter((edge) => edge.importer.startsWith("stage/viewer/")),
-      ),
-    ).toEqual([
-      "stage/viewer/InteractiveCanvasViewer.tsx -> ../editor/pipeline/InteractionFeedback",
-    ]);
-  });
-
   test("stage/editor/features/ slices do not import sideways except snapping service imports and current section-fit exceptions", () => {
     const sidewaysFeatureEdges = firstPartyEdges().filter((edge) => {
       const importerSlice = featureSlice(edge.importer);

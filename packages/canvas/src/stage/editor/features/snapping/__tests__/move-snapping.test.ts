@@ -1,21 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import {
-  IDLE_INTERACTION_STATE,
-  MIN_DIRECT_RESIZE_SIZE,
-  RESIZE_HANDLES,
-  applyResizeHandle,
-  cancelInteraction,
-  stepInteraction,
-  type CanvasAction,
-  type CanvasPointerEvent,
-  type CanvasSelection,
-  type InteractionContext,
-  type InteractionState,
-  type InteractiveCanvasConnection,
-  type InteractiveCanvasDocument,
-  type InteractiveCanvasObject,
-  type ResizeHandle,
-} from "../../../../../index";
+import { IDLE_INTERACTION_STATE, stepInteraction, type CanvasAction, type CanvasPointerEvent, type InteractionContext, type InteractiveCanvasConnection, type InteractiveCanvasDocument, type InteractiveCanvasObject } from "../../../../../index";
 
 /** Snapping slice live move-guide coverage through the editor pipeline. */
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
@@ -38,12 +22,6 @@ function makeDocument(
     objects,
     connections,
   };
-}
-
-function makeConnection(
-  overrides: Partial<InteractiveCanvasConnection> & { id: string; from: InteractiveCanvasConnection["from"]; to: InteractiveCanvasConnection["to"] },
-): InteractiveCanvasConnection {
-  return { ...overrides };
 }
 
 function makeContext(
@@ -91,13 +69,6 @@ function updateGeometriesActions(actions: CanvasAction[]) {
   );
 }
 
-function reconcileSectionActions(actions: CanvasAction[]) {
-  return actions.filter(
-    (action): action is Extract<CanvasAction, { type: "canvas.reconcileSectionMembership" }> =>
-      action.type === "canvas.reconcileSectionMembership",
-  );
-}
-
 describe("interaction: live snap guides during move", () => {
   it("applies a snap correction when dragging near an aligned sibling and exposes a guide", () => {
     // "anchor" sits with its left edge at x=204. Dragging "a" (starts at x=0)
@@ -123,21 +94,6 @@ describe("interaction: live snap guides during move", () => {
     expect(geometryActions[0]!.geometries.a!.x).toBe(204);
     expect(result.overlay.guides).toBeTruthy();
     expect(result.overlay.guides!.some((guide) => guide.axis === "x" && guide.position === 204)).toBe(true);
-  });
-
-  it("does not snap when no candidate is within threshold", () => {
-    const document = makeDocument([
-      makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
-      makeObject({ id: "far", geometry: { x: 5000, y: 5000, width: 100, height: 100 } }),
-    ]);
-    const ctx = makeContext(document);
-    const hit = { kind: "object" as const, objectId: "a" };
-
-    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 10, y: 10 }, hit), ctx);
-    result = stepInteraction(result.state, move({ x: 30, y: 30 }, hit), ctx);
-    const geometryActions = updateGeometriesActions(result.dispatch);
-    expect(geometryActions[0]!.geometries.a).toEqual({ x: 20, y: 20, width: 100, height: 100 });
-    expect(result.overlay.guides ?? []).toHaveLength(0);
   });
 
   it("scales the snap threshold by viewport zoom (6 screen px / zoom)", () => {

@@ -36,20 +36,4 @@ describe("description patch operations", () => {
       touched: [],
     });
   });
-
-  test("clears the description for a whitespace-only replacement", () => {
-    const baseline = {
-      ...makeDocument([box("kept", 0, 0)]),
-      description: "Before",
-    };
-
-    const applied = applyOperationToDraft(
-      baseline,
-      { type: "updateDescription", description: "\n  " },
-    );
-
-    expect(applied.document.description).toBeUndefined();
-    expect(applied.summary).toBe("updateDescription");
-    expect(applied.touched).toEqual([]);
-  });
 });

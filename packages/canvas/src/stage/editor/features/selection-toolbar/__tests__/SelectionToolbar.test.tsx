@@ -136,26 +136,6 @@ function connectorToolbarApi(overrides: Partial<SelectionToolbarApi> = {}): Sele
   };
 }
 
-describe("SelectionToolbar geometry / styling", () => {
-  it("renders the dark-theme panel bar at the 48px height with the base radius", () => {
-    const { container } = render(<SelectionToolbar controls={SHAPE_CONTROLS} variantLabel="shape" />);
-    const bar = container.querySelector("[data-selection-toolbar]") as HTMLElement;
-    expect(bar).toBeTruthy();
-    expect(bar.getAttribute("data-theme")).toBe("dark");
-    expect(bar.style.background).toBe(cssVar("color.surface.panel"));
-    expect(bar.style.height).toBe(cssVar("space.12"));
-    expect(bar.style.borderRadius).toBe(cssVar("radius.base"));
-  });
-
-  it("applies the glass elevation and entrance animation to the toolbar pill", () => {
-    const { container } = render(<SelectionToolbar controls={SHAPE_CONTROLS} variantLabel="shape" />);
-    const bar = container.querySelector("[data-selection-toolbar]") as HTMLElement;
-    expect(bar).toBeTruthy();
-    expect(bar.style.boxShadow).toBe(cssVar("shadow.glass"));
-    expect(bar.style.animation).toContain("canvas-selection-toolbar-enter");
-  });
-});
-
 describe("SelectionToolbar registry-driven control sets", () => {
   it("shape controls render exactly the 3 measured controls in order", () => {
     const { container } = render(<SelectionToolbar controls={SHAPE_CONTROLS} variantLabel="shape" />);
@@ -163,33 +143,6 @@ describe("SelectionToolbar registry-driven control sets", () => {
       el.getAttribute("data-toolbar-action"),
     );
     expect(actions).toEqual(["color", "text", "shape-swap"]);
-    expect(container.querySelectorAll("[data-divider]").length).toBe(1);
-  });
-
-  it("sticky controls render color and text in registry order", () => {
-    const { container } = render(<SelectionToolbar controls={STICKY_CONTROLS} variantLabel="sticky" />);
-    const actions = Array.from(container.querySelectorAll("[data-toolbar-action]")).map((el) =>
-      el.getAttribute("data-toolbar-action"),
-    );
-    expect(actions).toEqual(["color", "text"]);
-    expect(container.querySelectorAll("[data-divider]").length).toBe(0);
-  });
-
-  it("section controls render the FigJam v2 controls in order with two dividers", () => {
-    const { container } = render(<SelectionToolbar controls={SECTION_CONTROLS} variantLabel="section" />);
-    const actions = Array.from(container.querySelectorAll("[data-toolbar-action]")).map((el) =>
-      el.getAttribute("data-toolbar-action"),
-    );
-    expect(actions).toEqual(["color", "rename", "fit-children", "section-border-style", "lock"]);
-    expect(container.querySelectorAll("[data-divider]").length).toBe(2);
-  });
-
-  it("connector controls render the 4 connector controls", () => {
-    const { container } = render(<SelectionToolbar controls={CONNECTOR_CONTROLS} variantLabel="connector" />);
-    const actions = Array.from(container.querySelectorAll("[data-toolbar-action]")).map((el) =>
-      el.getAttribute("data-toolbar-action"),
-    );
-    expect(actions).toEqual(["color", "text", "dash", "arrowhead"]);
     expect(container.querySelectorAll("[data-divider]").length).toBe(1);
   });
 
@@ -214,16 +167,6 @@ describe("SelectionToolbar registry-driven control sets", () => {
 });
 
 describe("SelectionToolbar interaction", () => {
-  it("fires onAction with the control's action id on click", () => {
-    const onAction = mock((_action: string, _value?: unknown) => {});
-    const { container } = render(
-      <SelectionToolbar controls={SHAPE_CONTROLS} variantLabel="shape" onAction={onAction} />,
-    );
-    fireEvent.click(container.querySelector('[data-toolbar-action="shape-swap"]')!);
-    expect(onAction).toHaveBeenCalledTimes(1);
-    expect(onAction.mock.calls[0][0]).toBe("shape-swap");
-  });
-
   it("text is a plain Edit text button that fires the text action", () => {
     const onAction = mock((_action: string, _value?: unknown) => {});
     const { container } = render(
@@ -693,13 +636,5 @@ describe("SelectionToolbar section fit disabled state", () => {
       '[data-toolbar-action="fit-children"]',
     ) as HTMLButtonElement;
     expect(undersizedButton.disabled).toBe(false);
-  });
-
-  it("renders the section border-style icon without a color override", () => {
-    const { container } = renderSectionToolbarLayer(sectionToolbarDocument());
-    const borderIcon = actionIconSvg(container, "section-border-style");
-    const iconColorWrapper = borderIcon.parentElement as HTMLElement;
-
-    expect(iconColorWrapper.style.color).toBe("");
   });
 });

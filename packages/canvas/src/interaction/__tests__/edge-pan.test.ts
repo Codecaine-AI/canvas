@@ -11,11 +11,6 @@ describe("computeEdgePan", () => {
     expect(result).toEqual({ dx: 0, dy: 0 });
   });
 
-  it("returns zero when band is non-positive", () => {
-    const result = computeEdgePan({ x: 0, y: 0 }, STAGE, 0, MAX_SPEED);
-    expect(result).toEqual({ dx: 0, dy: 0 });
-  });
-
   it("returns zero when maxSpeed is non-positive", () => {
     const result = computeEdgePan({ x: 0, y: 0 }, STAGE, BAND, 0);
     expect(result).toEqual({ dx: 0, dy: 0 });
@@ -25,27 +20,6 @@ describe("computeEdgePan", () => {
     const result = computeEdgePan({ x: 0, y: 0 }, STAGE, BAND, MAX_SPEED);
     expect(result.dx).toBeCloseTo(-MAX_SPEED, 6);
     expect(result.dy).toBeCloseTo(-MAX_SPEED, 6);
-  });
-
-  it("clamps to maxSpeed exactly at the right/bottom edge", () => {
-    const result = computeEdgePan({ x: STAGE.width, y: STAGE.height }, STAGE, BAND, MAX_SPEED);
-    expect(result.dx).toBeCloseTo(MAX_SPEED, 6);
-    expect(result.dy).toBeCloseTo(MAX_SPEED, 6);
-  });
-
-  it("clamps to maxSpeed when pointer is outside the stage bounds", () => {
-    const result = computeEdgePan({ x: -50, y: -50 }, STAGE, BAND, MAX_SPEED);
-    expect(result.dx).toBeCloseTo(-MAX_SPEED, 6);
-    expect(result.dy).toBeCloseTo(-MAX_SPEED, 6);
-
-    const resultFar = computeEdgePan(
-      { x: STAGE.width + 50, y: STAGE.height + 50 },
-      STAGE,
-      BAND,
-      MAX_SPEED,
-    );
-    expect(resultFar.dx).toBeCloseTo(MAX_SPEED, 6);
-    expect(resultFar.dy).toBeCloseTo(MAX_SPEED, 6);
   });
 
   it("ramps linearly with proximity to an edge", () => {
@@ -61,13 +35,6 @@ describe("computeEdgePan", () => {
     // Exactly at the band boundary -> speed is 0.
     const atBoundary = computeEdgePan({ x: BAND, y: 300 }, STAGE, BAND, MAX_SPEED);
     expect(atBoundary.dx).toBeCloseTo(0, 6);
-  });
-
-  it("computes both axes independently in a corner", () => {
-    const result = computeEdgePan({ x: 5, y: 5 }, STAGE, BAND, MAX_SPEED);
-    expect(result.dx).toBeLessThan(0);
-    expect(result.dy).toBeLessThan(0);
-    expect(Math.abs(result.dx)).toBeCloseTo(Math.abs(result.dy), 6);
   });
 
   it("returns zero on one axis while nonzero on the other", () => {

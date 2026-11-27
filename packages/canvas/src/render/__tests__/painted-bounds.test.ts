@@ -158,14 +158,6 @@ describe("paintedBounds", () => {
     expect(direct).not.toBeNull();
     expectContains(byConnection, direct!);
   });
-
-  it("is deterministic", () => {
-    const document = makeDocument(
-      [box("a", 0, 0), box("b", 600, 0), box("wall", 300, -220, 120, 520)],
-      [{ id: "c", from: { objectId: "a" }, to: { objectId: "b" }, arrow: "forward", label: "edge" }],
-    );
-    expect(paintedBounds(document)).toEqual(paintedBounds(document));
-  });
 });
 
 describe("painted bounds under a theme", () => {

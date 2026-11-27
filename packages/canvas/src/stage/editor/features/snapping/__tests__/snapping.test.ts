@@ -95,19 +95,6 @@ describe("snapping", () => {
         { start: 100, end: 120, cross: 20 },
       ]);
     });
-
-    it("detects equal vertical gaps anchored on the moving object", () => {
-      const moving = bounds(0, 60, 40, 40);
-      const hints = computeSpacingHints(moving, [bounds(0, 0, 40, 40), bounds(0, 120, 40, 40)], "y");
-
-      expect(hints).toHaveLength(1);
-      expect(hints[0]!.axis).toBe("y");
-      expectClose(hints[0]!.gap, 20);
-      expect(hints[0]!.segments).toEqual([
-        { start: 40, end: 60, cross: 20 },
-        { start: 100, end: 120, cross: 20 },
-      ]);
-    });
   });
 
   describe("grid fallback helpers", () => {

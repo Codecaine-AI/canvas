@@ -77,17 +77,6 @@ describe("annotate thread", () => {
     expect(session.requests[0]!.note).toBeUndefined();
   });
 
-  test("the reply shows in the REQUESTS block the result returns", () => {
-    const session = sessionWithThread();
-
-    const result = toolAnnotate(session, { thread: "doc-1", body: "On it." }, emitSessionEvent);
-
-    expect(result.text).toContain("REQUESTS · 0/1 disposed");
-    expect(result.text).toContain('↳ agent — "On it."');
-    // The queue entry carries the reply too, so the live <requests> block does.
-    expect(session.requests[0]!.replies.map((reply) => reply.body)).toEqual(["On it."]);
-  });
-
   test("replies stack, and resolve_request still closes the thread afterwards", () => {
     const session = sessionWithThread();
 

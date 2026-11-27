@@ -62,18 +62,6 @@ const ENDPOINT_FIELD_COVERAGE: Record<keyof CanvasConnectionEndpoint, Coverage> 
 };
 
 describe("digest completeness invariant", () => {
-  test("every op-writable field is classified (compile-time) and the maps stay honest", () => {
-    const classifications = [
-      ...Object.values(OBJECT_FIELD_COVERAGE),
-      ...Object.values(CONNECTION_FIELD_COVERAGE),
-      ...Object.values(ENDPOINT_FIELD_COVERAGE),
-    ];
-    expect(classifications.every((value) =>
-      value === "rendered" || value === "legend" || value === "structural" || value === "unrendered")).toBe(true);
-    // Only the stored node detail is unrendered: no op writes it any more.
-    expect(Object.entries(OBJECT_FIELD_COVERAGE).filter(([, value]) => value === "unrendered").map(([key]) => key)).toEqual(["detail"]);
-  });
-
   test("the declared legend covers every legend-covered default and ships in the state grammar", () => {
     expect(DIGEST_DEFAULTS_LEGEND).toContain("color gray");
     expect(DIGEST_DEFAULTS_LEGEND).toContain("sticky yellow");

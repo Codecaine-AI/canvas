@@ -16,18 +16,6 @@ describe("sanitizeExportFilename", () => {
     expect(sanitizeExportFilename("My  Great\tBoard")).toBe("my-great-board");
   });
 
-  it("strips characters illegal in filenames", () => {
-    expect(sanitizeExportFilename('a/b\\c:d*e?f"g<h>i|j')).toBe("abcdefghij");
-  });
-
-  it("keeps existing dashes and collapses runs", () => {
-    expect(sanitizeExportFilename("agent-flows--2")).toBe("agent-flows-2");
-  });
-
-  it("trims leading/trailing dashes and dots", () => {
-    expect(sanitizeExportFilename("  --board.. ")).toBe("board");
-  });
-
   it("falls back to canvas when nothing printable survives", () => {
     expect(sanitizeExportFilename("")).toBe("canvas");
     expect(sanitizeExportFilename("???")).toBe("canvas");

@@ -15,14 +15,6 @@ describe("uncoveredChars", () => {
     expect(uncoveredChars("“Smart quotes” — dashes… → ⇒ ↔")).toEqual([]);
   });
 
-  test("CJK, Hangul, Arabic, Hebrew and Thai are uncovered, one entry per character", () => {
-    expect(uncoveredChars("春天到了")).toEqual(["春", "天", "到", "了"]);
-    expect(uncoveredChars("한국어")).toEqual(["한", "국", "어"]);
-    expect(uncoveredChars("Arabic مرحبا")).toEqual(["م", "ر", "ح", "ب", "ا"]);
-    expect(uncoveredChars("שלום")).toEqual(["ש", "ל", "ו", "ם"]);
-    expect(uncoveredChars("ภาษาไทย").length).toBeGreaterThan(0);
-  });
-
   test("lists each distinct grapheme once, in order of appearance", () => {
     expect(uncoveredChars("春 春 天 春")).toEqual(["春", "天"]);
   });

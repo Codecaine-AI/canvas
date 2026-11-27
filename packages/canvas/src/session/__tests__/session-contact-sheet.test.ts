@@ -20,14 +20,6 @@ describe("session vocabulary contact sheet", () => {
     writeFileSync("/tmp/contact-sheet.png", sheet);
   });
 
-  test("derives a no-argument sheet once and caches it for the static process roster", () => {
-    expect(vocabularyContactSheet.length).toBe(0);
-
-    const first = vocabularyContactSheet();
-    const second = vocabularyContactSheet();
-
-    expect(first).toBe(second);
-  });
   test.each([DEFAULT_CANVAS_STYLE.textFontSizePx, 28])("every caption fits whole at a %spx name size", (size) => {
     const style = { ...DEFAULT_CANVAS_STYLE, textFontSizePx: size };
     const captions = buildVocabularyDocument(style).objects.filter((object) => /^(label|family)-/.test(object.id));

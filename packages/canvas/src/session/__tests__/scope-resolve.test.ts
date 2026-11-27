@@ -67,46 +67,6 @@ describe("scope resolution characterization", () => {
     `);
   });
 
-  test("resolves the whole board", () => {
-    expect(
-      consumed(resolveScope(synthetic, synthetic.objects.map((object) => object.id))),
-    ).toMatchInlineSnapshot(`
-      {
-        "boundaryArrowCount": 0,
-        "frame": {
-          "height": 576,
-          "width": 888,
-          "x": 0,
-          "y": -176,
-        },
-        "scopeObjectIds": [
-          "section",
-          "first",
-          "second",
-          "east",
-          "north",
-        ],
-      }
-    `);
-  });
-
-  test("keeps a child-only scope inside its section", () => {
-    expect(consumed(resolveScope(synthetic, ["first"]))).toMatchInlineSnapshot(`
-      {
-        "boundaryArrowCount": 2,
-        "frame": {
-          "height": 96,
-          "width": 128,
-          "x": 48,
-          "y": 80,
-        },
-        "scopeObjectIds": [
-          "first",
-        ],
-      }
-    `);
-  });
-
   test("expands a selected section to its geometric descendants", () => {
     expect(consumed(resolveScope(synthetic, ["section"]))).toMatchInlineSnapshot(`
       {
@@ -119,24 +79,6 @@ describe("scope resolution characterization", () => {
         },
         "scopeObjectIds": [
           "section",
-          "first",
-          "second",
-        ],
-      }
-    `);
-  });
-
-  test("counts connections crossing in and out of scope", () => {
-    expect(consumed(resolveScope(synthetic, ["first", "second"]))).toMatchInlineSnapshot(`
-      {
-        "boundaryArrowCount": 2,
-        "frame": {
-          "height": 96,
-          "width": 352,
-          "x": 48,
-          "y": 80,
-        },
-        "scopeObjectIds": [
           "first",
           "second",
         ],

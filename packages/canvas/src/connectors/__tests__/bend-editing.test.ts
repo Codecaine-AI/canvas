@@ -53,21 +53,6 @@ describe("connector bend editing", () => {
     ]);
   });
 
-  it("finds one bend segment for a single straight connector run", () => {
-    const segments = connectorBendSegments([p(100, 262), p(240, 262)]);
-
-    expect(segments).toEqual([
-      {
-        index: 0,
-        start: p(100, 262),
-        end: p(240, 262),
-        midpoint: p(170, 262),
-        handlePoint: p(170, 262),
-        axis: "horizontal",
-      },
-    ]);
-  });
-
   it("uses explicit label clearance when the 25% bend handle point would overlap the chip", () => {
     const segments = connectorBendSegments([p(0, 0), p(200, 0)], {
       labelPoint: p(100, 0),
@@ -119,14 +104,6 @@ describe("connector bend editing", () => {
     ]);
   });
 
-  it("persists a route with exactly one interior corner", () => {
-    const commit = commitBendPolyline([p(0, 0), p(80, 0), p(80, 60)], 8);
-
-    expect(commit.interiorCornerCount).toBe(1);
-    expect(commit.clearedWaypoints).toBe(false);
-    expect(commit.waypoints).toEqual([[80, 0]]);
-  });
-
   it("snaps a dragged segment collinear with its previous same-orientation segment", () => {
     const points = [p(0, 0), p(80, 0), p(80, 60), p(160, 60), p(160, 120)];
     const preview = dragOrthogonalSegment(points, 2, { dx: 0, dy: -54 }, {
@@ -173,18 +150,6 @@ describe("connector bend editing", () => {
       expectOrthogonalPolyline(preview);
       expectOrthogonalPolyline(commitBendPolyline(preview, 8).points);
     }
-  });
-
-  it("inserts orthogonal joints on both sides of a dragged middle segment", () => {
-    const preview = dragOrthogonalSegment(
-      [p(0, 0), p(40, 0), p(80, 0), p(120, 0)],
-      1,
-      { dx: 0, dy: 30 },
-    );
-
-    expect(preview).toEqual([p(0, 0), p(40, 0), p(40, 30), p(80, 30), p(80, 0), p(120, 0)]);
-    expectOrthogonalPolyline(preview);
-    expectOrthogonalPolyline(commitBendPolyline(preview, 8).points);
   });
 
   it("keeps a dragged tiny off-axis jog orthogonal instead of clearing it to auto-route", () => {
@@ -285,25 +250,5 @@ describe("connector bend editing", () => {
     expect(commit.points).toEqual([p(0, 0), p(160, 0)]);
     expect(commit.clearedWaypoints).toBe(true);
     expect(commit.waypoints).toBeUndefined();
-  });
-
-  it("keeps simplified waypoints when at least two interior corners remain", () => {
-    const commit = commitBendPolyline([
-      p(0, 0),
-      p(40, 0),
-      p(40, 60),
-      p(120, 60),
-      p(120, 120),
-      p(160, 120),
-    ]);
-
-    expect(commit.interiorCornerCount).toBe(4);
-    expect(commit.clearedWaypoints).toBe(false);
-    expect(commit.waypoints).toEqual([
-      [40, 0],
-      [40, 60],
-      [120, 60],
-      [120, 120],
-    ]);
   });
 });

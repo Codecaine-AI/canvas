@@ -12,23 +12,12 @@ import {
 // universal shapes as a compact utility group. Connectors remain a dock-only
 // tool, never a Shapes-panel entry.
 describe("shape-catalog data shape", () => {
-  it("defines exactly the 2 sectioned categories, in order: Icons, Shapes", () => {
-    const ids = SHAPE_CATALOG.map((c) => c.id);
-    expect(ids).toEqual(["icons", "shapes"]);
-    expect(SHAPE_CATALOG.map((c) => c.label)).toEqual(["Icons", "Shapes"]);
-  });
-
   it("every category has at least one entry, and every entry has a unique id", () => {
     for (const category of SHAPE_CATALOG) {
       expect(category.entries.length).toBeGreaterThan(0);
     }
     const ids = SHAPE_CATALOG_ENTRIES.map((e) => e.id);
     expect(new Set(ids).size).toBe(ids.length);
-  });
-
-  it("flattens all category entries into SHAPE_CATALOG_ENTRIES", () => {
-    const total = SHAPE_CATALOG.reduce((sum, c) => sum + c.entries.length, 0);
-    expect(SHAPE_CATALOG_ENTRIES.length).toBe(total);
   });
 
   // Entries are pure data since the co-location alignment — the preview

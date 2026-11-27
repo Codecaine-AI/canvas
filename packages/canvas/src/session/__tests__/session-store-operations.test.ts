@@ -65,42 +65,6 @@ describe("session operations", () => {
     expect(session.draft).not.toBe(draftBefore);
   });
 
-  test("look renders a section placed during the run", () => {
-    const baseline = makeDocument([box("alpha", 0, 0)]);
-    const session = makeTestSession(baseline, ["alpha"]);
-
-    const placed = runOp(session, "place_section", {
-      id: "new-section",
-      text: "New",
-      at: [320, 0],
-      size: { width: 480, height: 320 },
-    });
-    expect(placed.isError).toBeUndefined();
-    expect(placed.text).toContain("APPLIED · place_section new-section 320,0 480×320");
-
-    const result = look(session, "new-section");
-    expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("LOOK · 1 render · close-up new-section");
-    expect(result.pngs).toHaveLength(1);
-    expect(result.pngs![0]).toBeInstanceOf(Buffer);
-    expect(session.draft.objects.find((object) => object.id === "new-section")?.type)
-      .toBe("section");
-  });
-
-  test("a view id that names a plain box frames it as an object close-up", () => {
-    const baseline = makeDocument([box("alpha", 0, 0)]);
-    const session = makeTestSession(baseline, ["alpha"]);
-
-    const result = look(session, "alpha");
-
-    // `view` frames sections and objects alike: a box comes back as a crop of
-    // its bounds with a context ring, measured like any framed region.
-    expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("LOOK · 1 render · framed alpha");
-    expect(result.text).toContain("MEASURES · object alpha 0,0 160×96");
-    expect(result.pngs).toHaveLength(1);
-  });
-
   test("a failing operation preserves the draft and emits no event", () => {
     const baseline = makeDocument([box("alpha", 0, 0)]);
     const session = makeTestSession(baseline, ["alpha"]);

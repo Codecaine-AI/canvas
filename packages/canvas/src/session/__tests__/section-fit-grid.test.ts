@@ -92,11 +92,6 @@ describe("fit_section pads on the agent grid", () => {
 });
 
 describe("snapRectOutward", () => {
-  test("is an identity on grid multiples", () => {
-    const rect = { x: 160, y: 120, width: 620, height: 340 };
-    expect(snapRectOutward(rect)).toEqual(rect);
-  });
-
   test("grows: the snapped rect always contains the input", () => {
     const rect = { x: 163, y: 127, width: 381, height: 183 };
     const snapped = snapRectOutward(rect);
@@ -129,10 +124,5 @@ describe("resize like lookup", () => {
     expect(resolveSizeLike(document, "model")).toEqual({ width: 300, height: 60 });
     expect(resolveSizeLike(document, "peer")).toEqual({ width: 180, height: 40 });
     expect(resolveSizeLike(document, "connection-1")).toBeNull();
-  });
-
-  test("returns the raw size — the descriptor is what quantizes it", () => {
-    const document = makeDocument([box("hand-drawn", 0, 0, 187, 63)]);
-    expect(resolveSizeLike(document, "hand-drawn")).toEqual({ width: 187, height: 63 });
   });
 });

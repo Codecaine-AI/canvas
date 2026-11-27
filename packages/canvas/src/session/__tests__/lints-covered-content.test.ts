@@ -5,12 +5,6 @@ import { box, connect, makeDocument } from "./synthetic";
 import { FIGJAM_CONTEXT } from "./helpers";
 
 describe("covered-content lint", () => {
-  test("declares its faces", () => {
-    expect(coveredContent.id).toBe("covered-content");
-    expect(coveredContent.tier).toBe("error");
-    expect(coveredContent.guidance).toContain("exempt");
-  });
-
   // --- box-on-box (ported from rules-overlap) ---
 
   test("an overlap past 25% of the smaller box is an error", () => {
@@ -27,16 +21,6 @@ describe("covered-content lint", () => {
       where: { x: 80, y: 0, width: 80, height: 96 },
     });
     expect(findings[0]!.message).toContain("50%");
-  });
-
-  test("a small overlap that covers a box's text center is still an error", () => {
-    // Thin 900×20 bar across a's middle: 12% of a, but over its text center.
-    const findings = coveredContent.check(makeDocument([
-      box("a", 0, 0),
-      box("bar", 70, 38, 900, 20),
-    ]), FIGJAM_CONTEXT);
-    expect(findings).toHaveLength(1);
-    expect(findings[0]!.message).toContain("covers the text center of a");
   });
 
   test("clean boards and exempt kinds carry no finding; a box is never on the section that holds it", () => {

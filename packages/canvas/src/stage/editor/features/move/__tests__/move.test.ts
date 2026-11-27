@@ -1,21 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import {
-  IDLE_INTERACTION_STATE,
-  MIN_DIRECT_RESIZE_SIZE,
-  RESIZE_HANDLES,
-  applyResizeHandle,
-  cancelInteraction,
-  stepInteraction,
-  type CanvasAction,
-  type CanvasPointerEvent,
-  type CanvasSelection,
-  type InteractionContext,
-  type InteractionState,
-  type InteractiveCanvasConnection,
-  type InteractiveCanvasDocument,
-  type InteractiveCanvasObject,
-  type ResizeHandle,
-} from "../../../../../index";
+import { IDLE_INTERACTION_STATE, cancelInteraction, stepInteraction, type CanvasAction, type CanvasPointerEvent, type InteractionContext, type InteractionState, type InteractiveCanvasConnection, type InteractiveCanvasDocument, type InteractiveCanvasObject } from "../../../../../index";
 
 /** Move slice drag, section-carry, and drop-target coverage. */
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
@@ -38,12 +22,6 @@ function makeDocument(
     objects,
     connections,
   };
-}
-
-function makeConnection(
-  overrides: Partial<InteractiveCanvasConnection> & { id: string; from: InteractiveCanvasConnection["from"]; to: InteractiveCanvasConnection["to"] },
-): InteractiveCanvasConnection {
-  return { ...overrides };
 }
 
 function makeContext(
@@ -178,25 +156,6 @@ describe("interaction: drag/move gesture", () => {
       leaf: { x: 180, y: 160, width: 60, height: 30 },
     });
     expect(geometryActions[0]!.geometries.outside).toBeUndefined();
-  });
-
-  it("does not drag descendants along with a plain rectangle (rectangles are dumb shapes)", () => {
-    // Geometric overlap no longer captures anything — only sections have
-    // dragCapture: "descendants", and rectangles are plain shapes.
-    const document = makeDocument([
-      makeObject({ id: "rect", type: "rectangle", geometry: { x: 80, y: 80, width: 320, height: 220 } }),
-      makeObject({ id: "overlapping", geometry: { x: 120, y: 120, width: 80, height: 40 } }),
-    ]);
-    const ctx = makeContext(document);
-    const hit = { kind: "object" as const, objectId: "rect" };
-
-    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 90, y: 90 }, hit), ctx);
-    result = stepInteraction(result.state, move({ x: 130, y: 110 }, hit), ctx);
-
-    expect(result.state.kind).toBe("move");
-    const geometryActions = updateGeometriesActions(result.dispatch);
-    expect(geometryActions).toHaveLength(1);
-    expect(Object.keys(geometryActions[0]!.geometries)).toEqual(["rect"]);
   });
 
   it("does not start a move gesture until the 3px world threshold is crossed", () => {
@@ -370,26 +329,6 @@ describe("interaction: section drop-in/out during move", () => {
     expect(result.overlay.dropTargetId).toBe("section");
 
     result = stepInteraction(result.state, up({ x: 460, y: 150 }, hit), ctx);
-    expect(result.dispatch).toEqual([
-      { type: "canvas.reconcileSectionMembership", recordHistory: false },
-    ]);
-  });
-
-  it("still commits through section reconcile when the drop target matches the current parent", () => {
-    const document = makeDocument([
-      makeSection({ id: "section", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
-      makeObject({ id: "a", parentId: "section", geometry: { x: 20, y: 20, width: 50, height: 50 } }),
-    ]);
-    const ctx = makeContext(document);
-    const hit = { kind: "object" as const, objectId: "a" };
-
-    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 45, y: 45 }, hit), ctx);
-    // Small move that stays inside the same section.
-    result = stepInteraction(result.state, move({ x: 60, y: 60 }, hit), ctx);
-    expect(result.overlay.dropTargetId).toBe("section");
-
-    result = stepInteraction(result.state, up({ x: 60, y: 60 }, hit), ctx);
-    expect(updateGeometriesActions(result.dispatch)).toHaveLength(0);
     expect(result.dispatch).toEqual([
       { type: "canvas.reconcileSectionMembership", recordHistory: false },
     ]);

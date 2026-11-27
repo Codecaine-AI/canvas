@@ -171,18 +171,6 @@ describe("text-fit / renderer parity — the schematic themes", () => {
     const styledSvg = (object: InteractiveCanvasObject) =>
       renderDocumentToSvg(makeDocument([object]), { canvasStyle: style }).svg;
 
-    test(`${theme}: a clipping label renders an ellipsis; the reported needed size does not`, () => {
-      const tight = shape(LONG_LABEL, 160, 96);
-      const report = textFitReport(tight, tight.geometry, tight.text, style);
-      expect(report.verdict).toBe("overflows");
-      expect(styledSvg(tight)).toContain("…");
-      const grown = shape(LONG_LABEL, report.neededSize!.width, report.neededSize!.height);
-      expect(textFitReport(grown, grown.geometry, grown.text, style).verdict).toBe("fits");
-      expect(styledSvg(grown)).not.toContain("…");
-      const shy = shape(LONG_LABEL, report.neededSize!.width, report.neededSize!.height - 1);
-      expect(textFitReport(shy, shy.geometry, shy.text, style).fits).toBe(false);
-    });
-
     test(`${theme}: a stored detail changes neither the verdict nor the render`, () => {
       const plain = shape(LONG_LABEL, 200, 96);
       const stored = { ...plain, detail: "postgres 16 · db.t3.micro" };

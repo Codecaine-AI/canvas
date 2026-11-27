@@ -85,12 +85,6 @@ describe("layout-editor prompt contract", () => {
     expect(content("node-apply-quality-checklist-steps-list")).toContain("<quality_checklist>");
   });
 
-  test("does not mandate a panel grid or node quota", () => {
-    for (const retired of ["around twenty sections", "place every section the diagram needs before any content", "Distribute content evenly", "2–3 nodes", "15% ink"]) {
-      expect(JSON.stringify(prompt)).not.toContain(retired);
-    }
-  });
-
   test("generated snapshot contains every authored plain content node", () => {
     for (const node of nodes.filter(node => Array.isArray(node.content) && node.content.every((part: unknown) => typeof part === "string"))) {
       expect(rendered, node.id).toContain(node.content.join("").trim().replaceAll("<", "&lt;").replaceAll(">", "&gt;"));

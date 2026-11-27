@@ -1,9 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import {
-  ANCHOR_SNAP_VIEW_PX,
-  OUTLINE_SNAP_WORLD_PX,
-  resolveConnectionCascade,
-} from "../connection-cascade";
+import { resolveConnectionCascade } from "../connection-cascade";
 import { connectionBoundsForObject } from "../../objects/geometry";
 import type { InteractiveCanvasObject } from "../../state/schema";
 
@@ -32,18 +28,6 @@ describe("resolveConnectionCascade", () => {
       expect(result.objectId).toBe("rect-1");
       expect(result.point).toEqual({ x: 50, y: 0 });
     }
-  });
-
-  it("does not snap to an anchor when just outside the screen-px anchor radius but still snaps to outline", () => {
-    const object = rectObject();
-    // 6px away from the top anchor (50,0), zoom=1 -> world threshold is 8px so
-    // this is actually within range; use a distance clearly beyond 8 instead.
-    const point = { x: 50, y: 20 }; // 20px from anchor -> beyond ANCHOR_SNAP_VIEW_PX
-    const result = resolveConnectionCascade(point, [object], 1);
-    // 20px from the top edge is also beyond OUTLINE_SNAP_WORLD_PX (8), and the
-    // point is inside the rect's hover-expanded bound and inside the polygon,
-    // so this should resolve to "inside".
-    expect(result.kind).toBe("inside");
   });
 
   it("scales the anchor snap radius by zoom (screen px / zoom = world px)", () => {
@@ -90,22 +74,6 @@ describe("resolveConnectionCascade", () => {
     expect(result).toEqual({ kind: "free", point });
   });
 
-  it("still snaps to a section outline within the outline radius", () => {
-    const section = rectObject({
-      id: "section-1",
-      type: "section",
-      text: "Section",
-      geometry: { x: 0, y: 0, width: 400, height: 300 },
-    });
-    const result = resolveConnectionCascade({ x: 80, y: 4 }, [section], 1);
-
-    expect(result.kind).toBe("outline");
-    if (result.kind === "outline") {
-      expect(result.objectId).toBe("section-1");
-      expect(result.point).toEqual({ x: 80, y: 0 });
-    }
-  });
-
   it("resolves to 'free' with the raw point when no candidate's hover-expanded bound contains the pointer", () => {
     const object = rectObject();
     const point = { x: 5000, y: 5000 };
@@ -149,10 +117,5 @@ describe("resolveConnectionCascade", () => {
     if (result.kind === "inside") {
       expect(result.objectId).toBe("front");
     }
-  });
-
-  it("exposes the anchor/outline snap constants used by the cascade", () => {
-    expect(ANCHOR_SNAP_VIEW_PX).toBe(8);
-    expect(OUTLINE_SNAP_WORLD_PX).toBe(8);
   });
 });

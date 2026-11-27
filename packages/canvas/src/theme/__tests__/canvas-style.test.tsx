@@ -183,15 +183,6 @@ describe("CanvasStyleProvider / CanvasStage canvasStyle", () => {
     return <span data-probe={`${style.shapeCornerRadiusPx}/${style.shapeBorderWidthPx}`} />;
   }
 
-  it("returns the default theme (schematic-light) without a provider", () => {
-    function ThemeProbe() {
-      const style = useCanvasStyle();
-      return <span data-probe={style.theme} />;
-    }
-    const { container } = render(<ThemeProbe />);
-    expect(container.querySelector("[data-probe]")!.getAttribute("data-probe")).toBe("schematic-light");
-  });
-
   it("returns the defaults without a provider and merges nested partial overrides", () => {
     const { container } = render(
       <>

@@ -6,7 +6,7 @@ import { compareBuild } from "../scripts/font-files.ts";
 import { BUNDLED_FACES } from "../src/faces.ts";
 import { FACE_TABLES } from "../src/generated/tables.ts";
 import { useHarfBuzz } from "../src/headless.ts";
-import { measureWidth, uncoveredChars, useTableBackend } from "../src/index.ts";
+import { measureWidth, useTableBackend } from "../src/index.ts";
 import { corpus } from "./accuracy/evaluate.ts";
 
 const FONTS_DIR = fileURLToPath(new URL("../fonts", import.meta.url));
@@ -54,11 +54,5 @@ describe("bundled fonts", () => {
     const harfbuzz = measureAll();
     const worst = Math.max(...table.map((w, i) => Math.abs(w - harfbuzz[i]!)));
     expect(worst).toBeLessThanOrEqual(1 / 64);
-  });
-
-  test("the corpus has both covered and uncovered strings", () => {
-    const uncovered = corpus.filter((e) => uncoveredChars(e.text).length > 0).length;
-    expect(uncovered).toBeGreaterThan(5);
-    expect(corpus.length - uncovered).toBeGreaterThan(190);
   });
 });

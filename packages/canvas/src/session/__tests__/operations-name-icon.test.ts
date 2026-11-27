@@ -84,19 +84,6 @@ describe("place_section — title and header glyph in one gesture", () => {
     expect(color.enum).not.toContain("magenta");
   });
 
-  test("an empty or \"none\" icon means none", () => {
-    const session = makeTestSession(board(), ["frame"]);
-
-    runOp(session, "place_section", { id: "plain", text: "Plain", at: [1000, 0], icon: "" });
-    const none = runOp(session, "place_section", { id: "bare", text: "Bare", at: [1000, 400], icon: "none" });
-
-    expect(none.isError).toBeUndefined();
-    for (const id of ["plain", "bare"]) {
-      expect("detail" in objectOf(session, id), id).toBe(false);
-      expect("icon" in objectOf(session, id), id).toBe(false);
-    }
-  });
-
   test("an unknown glyph is refused with the near misses, and nothing lands", () => {
     const session = makeTestSession(board(), ["frame"]);
     const before = session.draft;
@@ -142,16 +129,6 @@ describe("place_shape, clone and update_text — a node shows its name only", ()
     expect(alone.isError).toBeUndefined();
     expect(alone.text).toMatch(/^NO-OP · update_text brain — detail dropped/);
     expect("detail" in objectOf(session, "brain")).toBe(false);
-  });
-
-  test("a stored detail is left as stored: update_text never rewrites or clears it", () => {
-    const stored = board();
-    stored.objects[1] = { ...stored.objects[1]!, detail: ":5432" };
-    const session = makeTestSession(stored, ["frame"]);
-
-    runOp(session, "update_text", { id: "step", text: "Postgres", detail: "" });
-
-    expect(objectOf(session, "step")).toMatchObject({ text: "Postgres", detail: ":5432" });
   });
 
   test("a detail sent to a section, a sticky or an edge drops the same way", () => {

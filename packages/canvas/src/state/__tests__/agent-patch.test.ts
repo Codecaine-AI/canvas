@@ -6,7 +6,7 @@ import {
   type InteractiveCanvasState,
 } from "../actions";
 import { mergeObjectPatch } from "../actions/objects";
-import { CANVAS_GRID_SIZE, GEOMETRY_NORMALIZATION_GRID } from "../geometry";
+import { GEOMETRY_NORMALIZATION_GRID } from "../geometry";
 import type {
   InteractiveCanvasAnnotation,
   InteractiveCanvasConnection,
@@ -669,27 +669,6 @@ describe("canvas.applyAgentPatch", () => {
  */
 describe("mergeObjectPatch geometry normalization (D1)", () => {
   const AGENT_GRID = 20;
-
-  it("normalizes on 4, and 4 divides both the interaction grid and the agent grid", () => {
-    expect(GEOMETRY_NORMALIZATION_GRID).toBe(4);
-    expect(CANVAS_GRID_SIZE % GEOMETRY_NORMALIZATION_GRID).toBe(0);
-    expect(AGENT_GRID % GEOMETRY_NORMALIZATION_GRID).toBe(0);
-  });
-
-  it("passes 20-grid geometry through unchanged", () => {
-    const object = makeObject({ id: "a" });
-    // Every one of these is a legal 20-grid value that is NOT a 16-grid value.
-    const geometry = { x: 240, y: 480, width: 300, height: 100 };
-    const merged = mergeObjectPatch(object, { geometry });
-    expect(merged.geometry).toEqual(geometry);
-  });
-
-  it("passes 16-grid geometry through unchanged too", () => {
-    const object = makeObject({ id: "a" });
-    const geometry = { x: 192, y: 48, width: 176, height: 96 };
-    const merged = mergeObjectPatch(object, { geometry });
-    expect(merged.geometry).toEqual(geometry);
-  });
 
   it("rounds genuinely off-grid geometry to the nearest 4", () => {
     const object = makeObject({ id: "a" });

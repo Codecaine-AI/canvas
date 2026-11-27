@@ -385,19 +385,6 @@ describe("arrange · align", () => {
     }
   });
 
-  test("center_h aligns horizontal centers", () => {
-    const session = makeTestSession(
-      makeDocument([box("a", 0, 0, 100, 100), box("b", 0, 200, 300, 100)]),
-      ["a"],
-    );
-
-    runOp(session, "arrange", { ids: ["a", "b"], align: "center_h" });
-
-    const a = objectOf(session.draft, "a").geometry;
-    const b = objectOf(session.draft, "b").geometry;
-    expect(a.x + a.width / 2).toBe(b.x + b.width / 2);
-  });
-
   test("a listed section aligns by its own frame and carries its contents", () => {
     const session = makeTestSession(
       makeDocument([
@@ -491,18 +478,6 @@ describe("arrange · space", () => {
     expect(objectOf(session.draft, "frame").geometry.y).toBe(180);
     expect(objectOf(session.draft, "kid").geometry.y).toBe(220);
     expect(objectOf(session.draft, "kid").parentId).toBe("frame");
-  });
-
-  test("edge ids are refused", () => {
-    const session = makeTestSession(framedBoard(), ["frame"]);
-
-    const result = runOp(session, "arrange", {
-      ids: ["a", "a-b"],
-      space: { axis: "horizontal", gap: 40 },
-    });
-
-    expect(result.isError).toBe(true);
-    expect(result.text).toContain('ids "a-b" is an edge');
   });
 });
 

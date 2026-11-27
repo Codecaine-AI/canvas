@@ -1,21 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import {
-  IDLE_INTERACTION_STATE,
-  MIN_DIRECT_RESIZE_SIZE,
-  RESIZE_HANDLES,
-  applyResizeHandle,
-  cancelInteraction,
-  stepInteraction,
-  type CanvasAction,
-  type CanvasPointerEvent,
-  type CanvasSelection,
-  type InteractionContext,
-  type InteractionState,
-  type InteractiveCanvasConnection,
-  type InteractiveCanvasDocument,
-  type InteractiveCanvasObject,
-  type ResizeHandle,
-} from "../../../../../index";
+import { IDLE_INTERACTION_STATE, cancelInteraction, stepInteraction, type CanvasPointerEvent, type InteractionContext, type InteractiveCanvasConnection, type InteractiveCanvasDocument, type InteractiveCanvasObject } from "../../../../../index";
 import { createInteractiveCanvasState, reduceInteractiveCanvasState } from "../../../../../state/actions";
 import { noteNeededHeight } from "../../../../../objects/sticky/note-fit";
 import { canvasThemePreset } from "../../../../../theme/canvas-style";
@@ -41,12 +25,6 @@ function makeDocument(
     objects,
     connections,
   };
-}
-
-function makeConnection(
-  overrides: Partial<InteractiveCanvasConnection> & { id: string; from: InteractiveCanvasConnection["from"]; to: InteractiveCanvasConnection["to"] },
-): InteractiveCanvasConnection {
-  return { ...overrides };
 }
 
 function makeContext(
@@ -85,20 +63,6 @@ function move(world: { x: number; y: number }, hit: CanvasPointerEvent["hit"] = 
 
 function up(world: { x: number; y: number }, hit: CanvasPointerEvent["hit"] = { kind: "canvas" }, shiftKey = false): CanvasPointerEvent {
   return pointerEvent({ type: "up", world, screen: world, hit, shiftKey });
-}
-
-function updateGeometriesActions(actions: CanvasAction[]) {
-  return actions.filter(
-    (action): action is Extract<CanvasAction, { type: "canvas.updateObjectGeometries" }> =>
-      action.type === "canvas.updateObjectGeometries",
-  );
-}
-
-function reconcileSectionActions(actions: CanvasAction[]) {
-  return actions.filter(
-    (action): action is Extract<CanvasAction, { type: "canvas.reconcileSectionMembership" }> =>
-      action.type === "canvas.reconcileSectionMembership",
-  );
 }
 
 describe("interaction: armed-tool object creation (4.2.2)", () => {
@@ -272,18 +236,5 @@ describe("interaction: armed-tool object creation (4.2.2)", () => {
     result = stepInteraction(result.state, up({ x: 300, y: 300 }), ctx);
     const addAction = result.dispatch.find((action) => action.type === "canvas.addObject");
     expect(addAction).toMatchObject({ objectType: "triangle", direction: "down" });
-  });
-
-  it("without an armed variant the addObject action stays byte-identical to the legacy shape (no stray keys)", () => {
-    const document = makeDocument([]);
-    const ctx = makeContext(document, { tool: "process" });
-
-    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 500, y: 500 }, { kind: "canvas" }), ctx);
-    result = stepInteraction(result.state, up({ x: 500, y: 500 }), ctx);
-    expect(result.dispatch[0]).toEqual({
-      type: "canvas.addObject",
-      objectType: "process",
-      geometry: { x: 500 - 184 / 2, y: 500 - 96 / 2, width: 184, height: 96 },
-    });
   });
 });

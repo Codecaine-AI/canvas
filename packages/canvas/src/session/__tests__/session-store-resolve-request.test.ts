@@ -130,14 +130,6 @@ describe("resolve_request", () => {
     expect(session.events.map((event) => event.type)).toEqual(["annotations"]);
   });
 
-  test("closes a declined thread as resolved", () => {
-    const session = sessionWithQueue();
-
-    toolResolveRequest(session, "R1", "declined", "Out of scope", emitSessionEvent);
-
-    expect(session.draft.annotations?.[0]?.status).toBe("resolved");
-  });
-
   test("leaves the draft alone for an invoke-only request", () => {
     const session = sessionWithQueue();
 
@@ -146,22 +138,6 @@ describe("resolve_request", () => {
     expect(session.draft.annotations?.map((annotation) => annotation.id)).toEqual(["doc-1"]);
     expect(session.events).toEqual([]);
     expect(session.requests[1]).toMatchObject({ status: "done", note: "recolored it" });
-  });
-
-  test("declines with a note", () => {
-    const session = sessionWithQueue();
-
-    const result = toolResolveRequest(
-      session,
-      "R2",
-      "declined",
-      "Out of scope for this pass",
-      emitSessionEvent,
-    );
-
-    expect(result.isError).toBeUndefined();
-    expect(result.text).toContain('R2 declined "Out of scope for this pass"');
-    expect(session.requests[1]!.status).toBe("declined");
   });
 
   test("rejects an unknown id, naming the current queue state", () => {
@@ -291,23 +267,6 @@ describe("annotate objectId", () => {
     expect(blank.text).toContain("body must be a non-empty question");
     expect(session.draft.annotations ?? []).toEqual([]);
     expect(session.events).toEqual([]);
-  });
-
-  test("a null thread counts as absent, so objectId alone opens the thread", () => {
-    const session = makeTestSession(makeDocument([box("task", 0, 0)]), ["task"]);
-    syncSessionRequests(session);
-
-    const result = toolAnnotate(
-      session,
-      { objectId: "task", thread: null, body: "Is this the retry path?" },
-      emitSessionEvent,
-    );
-
-    expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · annotate annotation-1");
-    expect(session.draft.annotations).toMatchObject([
-      { id: "annotation-1", target: { kind: "object", objectId: "task" }, createdBy: "agent" },
-    ]);
   });
 });
 

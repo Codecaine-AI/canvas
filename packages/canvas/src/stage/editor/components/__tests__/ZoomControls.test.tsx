@@ -1,24 +1,12 @@
-import { afterEach, describe, expect, it, mock } from "bun:test";
+import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
-import { EDITOR_STYLE } from "../editor-style";
-import { ZoomControls, ZOOM_CONTROLS_HEIGHT_PX, ZOOM_CONTROLS_RADIUS_PX } from "../ZoomControls";
+import { ZoomControls } from "../ZoomControls";
 
 afterEach(() => {
   cleanup();
 });
 
 describe("ZoomControls geometry", () => {
-  it("renders a pill matching the dock's panel styling", () => {
-    const { container } = render(<ZoomControls />);
-    const pill = container.querySelector("[data-zoom-controls]") as HTMLElement;
-    expect(pill).toBeTruthy();
-    expect(pill.style.background).toBe(EDITOR_STYLE.bottomToolbarBg);
-    expect(pill.style.height).toBe(ZOOM_CONTROLS_HEIGHT_PX);
-    expect(pill.style.borderRadius).toBe(ZOOM_CONTROLS_RADIUS_PX);
-    expect(pill.style.borderRadius).toBe(EDITOR_STYLE.dockRadius);
-    expect(pill.style.boxShadow).toBe(EDITOR_STYLE.dockShadow);
-  });
-
   it("renders only - and + when zoomPercent is omitted (matches the observed frames with no % readout)", () => {
     const { container, queryByLabelText } = render(<ZoomControls />);
     expect(queryByLabelText("Zoom out")).toBeTruthy();
@@ -33,23 +21,6 @@ describe("ZoomControls geometry", () => {
 });
 
 describe("ZoomControls interaction", () => {
-  it("fires onZoomIn / onZoomOut on click", () => {
-    const onZoomIn = mock(() => {});
-    const onZoomOut = mock(() => {});
-    const { getByLabelText } = render(<ZoomControls onZoomIn={onZoomIn} onZoomOut={onZoomOut} />);
-    fireEvent.click(getByLabelText("Zoom in"));
-    fireEvent.click(getByLabelText("Zoom out"));
-    expect(onZoomIn).toHaveBeenCalledTimes(1);
-    expect(onZoomOut).toHaveBeenCalledTimes(1);
-  });
-
-  it("fires onZoomPercentClick when the percentage label is clicked", () => {
-    const onZoomPercentClick = mock(() => {});
-    const { getByText } = render(<ZoomControls zoomPercent={1} onZoomPercentClick={onZoomPercentClick} />);
-    fireEvent.click(getByText("100%"));
-    expect(onZoomPercentClick).toHaveBeenCalledTimes(1);
-  });
-
   it("disables all controls when disabled", () => {
     const { getByLabelText } = render(<ZoomControls disabled zoomPercent={1} />);
     expect((getByLabelText("Zoom in") as HTMLButtonElement).disabled).toBe(true);

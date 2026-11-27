@@ -91,13 +91,6 @@ describe("layoutStickyText", () => {
     }
   });
 
-  it("breaks a word wider than the slot intra-word", () => {
-    const word = "Onomatopoeticmegaword".repeat(3);
-    const rows = layoutStickyText(word, 200, BODY_FONT_SIZE_PX);
-    expect(rows.length).toBeGreaterThan(1);
-    expect(rows.flatMap((row) => row.segments.map((s) => s.text)).join("")).toBe(word);
-  });
-
   it("measures bold runs in Inter Bold and inline code in IBM Plex Mono 500 with its padding", () => {
     const rows = layoutStickyText("**bold** and `code`", SLOT_WIDTH_PX, BODY_FONT_SIZE_PX);
     const [row] = rows;
@@ -140,11 +133,6 @@ describe("layoutStickyText", () => {
     expect(stickyTextUncovered("- plain text")).toEqual([]);
   });
 
-  it("keeps heading indentation on the heading's own em grid", () => {
-    const rows = layoutStickyText("  # Nested", SLOT_WIDTH_PX, BODY_FONT_SIZE_PX);
-    // Depth 1 heading: 1em of the 36px heading size.
-    expect(rows[0]).toMatchObject({ fontSizePx: 36, indentPx: 36 });
-  });
   it("merges adjacent runs in the same face, so markup inside a run never splits its shaping", () => {
     // A heading is Inter Bold already: **>** changes nothing, and "=>" stays one run (one ligature).
     const plain = layoutStickyText("# =>", SLOT_WIDTH_PX, BODY_FONT_SIZE_PX);

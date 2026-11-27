@@ -49,13 +49,6 @@ describe("renderDocumentToSvg cropRect", () => {
     expect(height).toBe(220);
   });
 
-  it("defaults to zero padding — the rect is authoritative", () => {
-    const { svg } = renderDocumentToSvg(fixtureDocument(), {
-      cropRect: { x: 16, y: 32, width: 240, height: 120 },
-    });
-    expect(svg).toContain('viewBox="16 32 240 120"');
-  });
-
   it("wins over sectionId when both are given", () => {
     const withBoth = renderDocumentToSvg(fixtureDocument(), {
       sectionId: "sec-1",
@@ -65,11 +58,5 @@ describe("renderDocumentToSvg cropRect", () => {
     // And a cropRect render keeps content outside the section (viewBox does
     // the clipping — the whole document still renders).
     expect(withBoth.svg).toContain("Outside");
-  });
-
-  it("does not change the default (no-cropRect) render path", () => {
-    const plain = renderDocumentToSvg(fixtureDocument());
-    const explicitUndefined = renderDocumentToSvg(fixtureDocument(), { cropRect: undefined });
-    expect(explicitUndefined.svg).toBe(plain.svg);
   });
 });

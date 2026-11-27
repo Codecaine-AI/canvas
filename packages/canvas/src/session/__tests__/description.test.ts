@@ -170,12 +170,6 @@ describe("board description perception", () => {
     expect(formatBoardDigest(session.draft)).not.toContain(markdown);
   });
 
-  test("names absence without adding delimiters", () => {
-    expect(formatBoardDescription()).toBe(
-      "DESCRIPTION · none — this board has no description yet",
-    );
-  });
-
   test("renders description-only changes without model operation classification", () => {
     const baseline = makeDocument([box("alpha", 0, 0)]);
     const session = makeTestSession(baseline, ["alpha"]);

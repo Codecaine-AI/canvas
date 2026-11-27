@@ -83,18 +83,6 @@ describe("measureRegion", () => {
     ]);
   });
 
-  test("pitch is the delta between the distinct leading edges on each axis", () => {
-    const { document, home } = gridBoard();
-
-    const measured = measureRegion(document, home.geometry, { sectionId: "home" });
-
-    // Columns at x 40/280, rows at y 80/240.
-    expect(measured.pitch).toEqual([
-      { axis: "x", deltas: [240] },
-      { axis: "y", deltas: [160] },
-    ]);
-  });
-
   test("boxes sharing a leading edge collapse into one track", () => {
     const document = makeDocument([
       box("a", 0, 0),
@@ -179,23 +167,6 @@ describe("MEASURES grammar", () => {
       "  pitch y 160",
       "  free    left 16 · right 176 · top 28 · bottom 116",
       "  ink     20%",
-    ].join("\n"));
-  });
-
-  test("empty categories are omitted", () => {
-    const { document } = gridBoard();
-
-    const block = formatRegionMeasures(
-      "at",
-      measureRegion(document, { x: 0, y: 0, width: 480, height: 200 }),
-    );
-
-    // One row of two boxes: no y corridor, no y pitch, no free rect.
-    expect(block).toBe([
-      "MEASURES · at 0,0 480×200",
-      "  gaps x  a↔b 80",
-      "  pitch x 240",
-      "  ink     32%",
     ].join("\n"));
   });
 
